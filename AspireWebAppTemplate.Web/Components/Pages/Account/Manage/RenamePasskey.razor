@@ -1,0 +1,45 @@
+﻿@page "/Account/Manage/RenamePasskey/{Id}"
+@rendermode InteractiveServer
+
+<PageTitle>Rename Passkey</PageTitle>
+
+<PageHeader Title="@HeaderTitle" />
+
+@if (!string.IsNullOrEmpty(StatusMessage))
+{
+    <MudAlert Severity="Severity.Error" Class="mb-4 border-1">@StatusMessage</MudAlert>
+}
+
+<MudGrid>
+    <MudItem xs="12" md="6">
+        <EditForm EditContext="editContext"
+                  OnValidSubmit="OnRenameAsync"
+                  FormName="renamePasskeyForm">
+            <DataAnnotationsValidator />
+
+            <MudStack Spacing="2">
+                <MudTextField T="string"
+                              @bind-Value="Input.Name"
+                              Label="Passkey name"
+                              Placeholder="My passkey"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Typo="Typo.body2"
+                              For="@(() => Input.Name)" />
+
+                <MudButton ButtonType="ButtonType.Submit"
+                           Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           Disabled="@IsBusy"
+                           DropShadow="false"
+                           Style="text-transform: none;">
+                    @if (IsBusy)
+                    {
+                        <MudProgressCircular Size="Size.Small" Indeterminate Class="me-2" />
+                    }
+                    Continue
+                </MudButton>
+            </MudStack>
+        </EditForm>
+    </MudItem>
+</MudGrid>

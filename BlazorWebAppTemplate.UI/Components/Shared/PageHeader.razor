@@ -1,0 +1,24 @@
+<div class="@Class">
+    <MudStack Justify="Justify.SpaceBetween" Wrap="Wrap.Wrap" Spacing="0" Row>
+        <!-- Header Title -->
+        <div class="flex-grow-1">
+            <MudText Class="fw-bold" Typo="@TitleTypo">@Title</MudText>
+        </div>
+
+        <!-- Header Right Content -->
+        @if (RightHeaderContent != null)
+        {
+            @RightHeaderContent
+        }
+    </MudStack>
+
+    <!-- Header Subtitle -->
+    @if (SubtitleContent != null)
+    {
+        @SubtitleContent
+    }
+    else if (!string.IsNullOrEmpty(Subtitle))
+    {
+        <MudText Typo="Typo.body2" Class="text-muted">@Subtitle</MudText>
+    }
+</div>

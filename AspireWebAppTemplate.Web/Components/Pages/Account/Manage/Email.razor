@@ -1,0 +1,77 @@
+﻿@page "/Account/Manage/Email"
+@rendermode InteractiveServer
+
+<PageTitle>Manage Email</PageTitle>
+
+<PageHeader Title="Manage Email" Subtitle="Change your email address or verify your current one." />
+
+@if (!string.IsNullOrEmpty(StatusMessage))
+{
+    <MudAlert Severity="@(StatusMessage.StartsWith("Error") ? Severity.Error : Severity.Success)"
+              Class="mb-4 border-1"
+              ShowCloseIcon
+              CloseIconClicked="() => StatusMessage = null">
+        @StatusMessage
+    </MudAlert>
+}
+
+<MudGrid>
+    <MudItem xs="12" md="6">
+        <MudStack Spacing="2">
+            <!-- Current Email -->
+            <MudTextField T="string"
+                          Value="@CurrentEmail"
+                          Label="Current email"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Typo="Typo.body2"
+                          Disabled
+                          Adornment="@(IsEmailConfirmed ? Adornment.End : Adornment.None)"
+                          AdornmentIcon="@Icons.Material.Rounded.CheckCircle"
+                          AdornmentColor="Color.Success" />
+
+            @if (!IsEmailConfirmed)
+            {
+                <MudButton Variant="Variant.Text"
+                           Color="Color.Primary"
+                           Disabled="@IsBusy"
+                           OnClick="OnSendEmailVerificationAsync"
+                           Style="text-transform: none;">
+                    Send verification email
+                </MudButton>
+            }
+
+            <!-- Change Email Form -->
+            <EditForm EditContext="editContext"
+                      OnValidSubmit="OnValidSubmitAsync"
+                      FormName="changeEmailForm">
+                <DataAnnotationsValidator />
+
+                <MudStack Spacing="2">
+                    <MudTextField T="string"
+                                  @bind-Value="Input.NewEmail"
+                                  Label="New email"
+                                  Placeholder="Enter a new email"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  Typo="Typo.body2"
+                                  For="@(() => Input.NewEmail)"
+                                  autocomplete="email" />
+
+                    <MudButton ButtonType="ButtonType.Submit"
+                               Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               Disabled="@IsBusy"
+                               DropShadow="false"
+                               Style="text-transform: none;">
+                        @if (IsBusy)
+                        {
+                            <MudProgressCircular Size="Size.Small" Indeterminate Class="me-2" />
+                        }
+                        Change email
+                    </MudButton>
+                </MudStack>
+            </EditForm>
+        </MudStack>
+    </MudItem>
+</MudGrid>

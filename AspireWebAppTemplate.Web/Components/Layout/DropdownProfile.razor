@@ -1,0 +1,43 @@
+﻿﻿@using System.Security.Claims
+@inject NavigationManager NavManager
+
+<AuthorizeView>
+    <MudMenu PopoverClass="mud-elevation-25 p-2 action-menu"
+             ListClass="p-1"
+             Icon="@Icons.Material.Rounded.AccountCircle"
+             Color="Color.Inherit"
+             RelativeWidth="DropdownWidth.Adaptive"
+             TransformOrigin="Origin.TopRight"
+             AnchorOrigin="Origin.BottomRight"
+             Style="margin-right: -12px"
+             Dense>
+        <MudStack Spacing="2" Row AlignItems="AlignItems.Center" Style="width: 250px">
+            <MudIcon Icon="@Icons.Material.Rounded.AccountCircle" Style="font-size: 40px" />
+
+            <MudStack Spacing="0" Class="overflow-hidden">
+                <MudText Typo="Typo.body2" Class="d-inline-block text-truncate">
+                    @(context.User?.FindFirst("DisplayName")?.Value ?? "Unknown")
+                </MudText>
+                <MudText Typo="Typo.caption" Class="text-muted d-inline-block text-truncate">
+                    @(context.User?.FindFirst(ClaimTypes.Email)?.Value ?? "Unknown")
+                </MudText>
+            </MudStack>
+        </MudStack>
+
+        <MudDivider Class="my-1" />
+
+        <MudMenuItem Class=""
+                     Icon="@Icons.Material.Rounded.Person"
+                     Label="Profile"
+                     Href="/profile" />
+        <MudMenuItem Class=""
+                     Icon="@Icons.Material.Rounded.Settings"
+                     Label="Settings"
+                     Href="/settings" />
+        <MudDivider Class="my-1" />
+        <MudMenuItem Class=""
+                     Icon="material-symbols-rounded/logout"
+                     Label="Log Out"
+                     Href="Account/Logout" />
+    </MudMenu>
+</AuthorizeView>

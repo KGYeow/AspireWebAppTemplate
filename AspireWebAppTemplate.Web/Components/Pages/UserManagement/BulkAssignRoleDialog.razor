@@ -1,0 +1,62 @@
+<MudDialog TitleClass="px-4 pt-5 pb-2" ContentClass="px-4" ActionsClass="px-4 pb-5">
+    <TitleContent>
+        <MudText Typo="Typo.h6" Class="pb-2 fw-bold">Assign Role</MudText>
+        <MudDivider />
+    </TitleContent>
+
+    <DialogContent>
+        <MudStack Spacing="2">
+            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                Assigning role to @UserCount user(s).
+            </MudText>
+
+            <MudText Typo="Typo.body2">
+                Select a role to assign to the selected users.
+            </MudText>
+
+            <MudSelect T="string"
+                       @bind-Value="SelectedRole"
+                       Label="Role"
+                       Variant="Variant.Outlined"
+                       Margin="Margin.Dense"
+                       Dense>
+                @foreach (var role in AllRoleNames)
+                {
+                    <MudSelectItem Value="@role">@role</MudSelectItem>
+                }
+            </MudSelect>
+
+            <!-- Replace existing roles toggle -->
+            <MudCheckBox T="bool"
+                         @bind-Value="ReplaceExisting"
+                         Label="Replace existing roles"
+                         Size="Size.Small"
+                         Dense />
+
+            @if (ReplaceExisting)
+            {
+                <MudAlert Severity="Severity.Warning" Dense>
+                    All existing roles will be <b>removed</b> and replaced with the selected role.
+                </MudAlert>
+            }
+            else
+            {
+                <MudAlert Severity="Severity.Info" Dense>
+                    The selected role will be <b>added</b> to each user's existing roles.
+                    Users who already have this role will be skipped.
+                </MudAlert>
+            }
+        </MudStack>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">Cancel</MudButton>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   Disabled="@(string.IsNullOrWhiteSpace(SelectedRole))"
+                   OnClick="Confirm"
+                   DropShadow="false">
+            Assign
+        </MudButton>
+    </DialogActions>
+</MudDialog>

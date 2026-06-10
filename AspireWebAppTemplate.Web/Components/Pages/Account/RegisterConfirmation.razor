@@ -1,0 +1,55 @@
+﻿@page "/Account/RegisterConfirmation"
+
+<PageTitle>Register Confirmation</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="vh-100">
+    <MudStack Class="h-75" Justify="Justify.Center">
+        <MudCard Elevation="0" Class="p-4">
+            <MudCardContent>
+                <MudStack Class="align-content-center" AlignItems="AlignItems.Center">
+                    <MudAvatar Size="Size.Large" Color="Color.Success" Variant="Variant.Filled" Class="mb-2">
+                        <MudIcon Icon="@Icons.Material.Rounded.MarkEmailRead" Size="Size.Large" />
+                    </MudAvatar>
+                    <MudSpacer />
+                    <MudText Typo="Typo.h3" Color="Color.Success" Class="fw-bold">
+                        Check your email
+                    </MudText>
+
+                    @if (!string.IsNullOrEmpty(StatusMessage))
+                    {
+                        <MudAlert Severity="Severity.Error" Class="mt-2 border-1">
+                            @StatusMessage
+                        </MudAlert>
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.body1" Class="mt-1 text-muted">
+                            We've sent a confirmation link to <strong>@Email</strong>.
+                            Please check your inbox.
+                        </MudText>
+                    }
+
+                    @if (EmailConfirmationLink is not null)
+                    {
+                        <MudAlert Severity="Severity.Info" Class="mt-3 border-1">
+                            <MudText Typo="Typo.body2">
+                                No real email sender is configured.
+                                <MudLink Href="@EmailConfirmationLink" Typo="Typo.body2">
+                                    Click here to confirm your account
+                                </MudLink>
+                            </MudText>
+                        </MudAlert>
+                    }
+
+                    <MudButton Href="Account/Login"
+                               Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               Class="mt-4"
+                               DropShadow="false">
+                        Back to Login
+                    </MudButton>
+                </MudStack>
+            </MudCardContent>
+        </MudCard>
+    </MudStack>
+</MudContainer>

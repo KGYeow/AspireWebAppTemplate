@@ -1,0 +1,10 @@
+@typeparam T
+
+<MudToggleItem T="T"
+               Value="Value"
+               Class="@(Rounded ? "rounded-lg" : "rounded-circle")"
+               Style="@($"height: 36px; {(Rounded ? "flex: 1;" : "width: 36px;")}")"
+               title="@Title"
+               aria-label="@Title">
+    @ChildContent
+</MudToggleItem>

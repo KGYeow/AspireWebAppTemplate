@@ -1,0 +1,33 @@
+﻿@page "/Account/Manage/Disable2fa"
+@rendermode InteractiveServer
+
+<PageTitle>Disable 2FA</PageTitle>
+
+<PageHeader Title="Disable Two-Factor Authentication" />
+
+<MudAlert Severity="Severity.Warning" Class="mb-4 border-1">
+    <strong>This action only disables 2FA.</strong>
+    <MudText Typo="Typo.body2" Class="mt-1">
+        Disabling 2FA does not change the keys used in authenticator apps. If you wish to change the key
+        used in an authenticator app you should
+        <MudLink Href="Account/Manage/ResetAuthenticator" Typo="Typo.body2">reset your authenticator keys.</MudLink>
+    </MudText>
+</MudAlert>
+
+@if (!string.IsNullOrEmpty(StatusMessage))
+{
+    <MudAlert Severity="Severity.Error" Class="mb-4 border-1">@StatusMessage</MudAlert>
+}
+
+<MudButton Variant="Variant.Filled"
+           Color="Color.Error"
+           Disabled="@IsBusy"
+           DropShadow="false"
+           OnClick="OnSubmitAsync"
+           Style="text-transform: none;">
+    @if (IsBusy)
+    {
+        <MudProgressCircular Size="Size.Small" Indeterminate Class="me-2" />
+    }
+    Disable 2FA
+</MudButton>

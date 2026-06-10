@@ -1,0 +1,90 @@
+﻿@page "/Account/Manage/TwoFactorAuthentication"
+@rendermode InteractiveServer
+
+<PageTitle>Two-Factor Authentication</PageTitle>
+
+<PageHeader Title="Two-Factor Authentication (2FA)" />
+
+@if (!string.IsNullOrEmpty(StatusMessage))
+{
+    <MudAlert Severity="Severity.Info" Class="mb-4 border-1">@StatusMessage</MudAlert>
+}
+
+@if (Is2faEnabled)
+{
+    @if (RecoveryCodesLeft == 0)
+    {
+        <MudAlert Severity="Severity.Error" Class="mb-4 border-1">
+            <strong>You have no recovery codes left.</strong>
+            <MudText Typo="Typo.body2">
+                You must <MudLink Href="Account/Manage/GenerateRecoveryCodes" Typo="Typo.body2">generate a new set of recovery codes</MudLink> before you can log in with a recovery code.
+            </MudText>
+        </MudAlert>
+    }
+    else if (RecoveryCodesLeft == 1)
+    {
+        <MudAlert Severity="Severity.Error" Class="mb-4 border-1">
+            <strong>You have 1 recovery code left.</strong>
+            <MudText Typo="Typo.body2">
+                You can <MudLink Href="Account/Manage/GenerateRecoveryCodes" Typo="Typo.body2">generate a new set of recovery codes</MudLink>.
+            </MudText>
+        </MudAlert>
+    }
+    else if (RecoveryCodesLeft <= 3)
+    {
+        <MudAlert Severity="Severity.Warning" Class="mb-4 border-1">
+            <strong>You have @RecoveryCodesLeft recovery codes left.</strong>
+            <MudText Typo="Typo.body2">
+                You should <MudLink Href="Account/Manage/GenerateRecoveryCodes" Typo="Typo.body2">generate a new set of recovery codes</MudLink>.
+            </MudText>
+        </MudAlert>
+    }
+
+    <MudStack Row Spacing="2" Class="mb-4">
+        <MudButton Variant="Variant.Outlined"
+                   Color="Color.Primary"
+                   Href="Account/Manage/Disable2fa"
+                   DropShadow="false"
+                   Style="text-transform: none;">
+            Disable 2FA
+        </MudButton>
+        <MudButton Variant="Variant.Outlined"
+                   Color="Color.Primary"
+                   Href="Account/Manage/GenerateRecoveryCodes"
+                   DropShadow="false"
+                   Style="text-transform: none;">
+            Reset recovery codes
+        </MudButton>
+    </MudStack>
+}
+
+<MudText Typo="Typo.h6" Class="fw-bold mb-2">Authenticator app</MudText>
+@if (!HasAuthenticator)
+{
+    <MudButton Variant="Variant.Filled"
+               Color="Color.Primary"
+               Href="Account/Manage/EnableAuthenticator"
+               DropShadow="false"
+               Style="text-transform: none;">
+        Add authenticator app
+    </MudButton>
+}
+else
+{
+    <MudStack Row Spacing="2">
+        <MudButton Variant="Variant.Outlined"
+                   Color="Color.Primary"
+                   Href="Account/Manage/EnableAuthenticator"
+                   DropShadow="false"
+                   Style="text-transform: none;">
+            Set up authenticator app
+        </MudButton>
+        <MudButton Variant="Variant.Outlined"
+                   Color="Color.Primary"
+                   Href="Account/Manage/ResetAuthenticator"
+                   DropShadow="false"
+                   Style="text-transform: none;">
+            Reset authenticator app
+        </MudButton>
+    </MudStack>
+}

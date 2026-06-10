@@ -1,0 +1,124 @@
+@page "/Account/Register"
+@layout AuthLayout
+@rendermode InteractiveServer
+
+<PageTitle>Register</PageTitle>
+
+<MudContainer Class="h-100 m-0 p-0">
+    <MudImage Class="vw-100 vh-100"
+              Src="images/backgrounds/finance-data.jpg"
+              ObjectFit="ObjectFit.Cover"
+              ObjectPosition="ObjectPosition.Center"
+              Style="filter: brightness(0.6)" />
+
+    <MudOverlay Modal Visible>
+        <EditForm EditContext="editContext"
+                  OnValidSubmit="RegisterUser"
+                  FormName="registerForm">
+            <DataAnnotationsValidator />
+
+            <MudCard Elevation="25" Style="width: 450px">
+                <MudCardContent Class="d-flex flex-column align-items-center"
+                                Style="padding: 30px">
+
+                    <!-- Logo -->
+                    <MudImage Src="images/logos/jabil-blue.svg" Width="200" />
+                    <MudText Typo="Typo.caption" Class="pt-3 pb-4">
+                        Create a new account
+                    </MudText>
+
+                    <MudGrid Spacing="1">
+
+                        <!-- Email -->
+                        <MudItem xs="12">
+                            <MudTextField Placeholder="Email"
+                                          T="string"
+                                          @bind-Value="Input.Email"
+                                          Variant="Variant.Outlined"
+                                          Margin="Margin.Dense"
+                                          Typo="Typo.body2"
+                                          For="@(() => Input.Email)"
+                                          autocomplete="username" />
+                        </MudItem>
+
+                        <!-- Password -->
+                        <MudItem xs="12">
+                            <MudTextField Placeholder="Password"
+                                          T="string"
+                                          @bind-Value="Input.Password"
+                                          Variant="Variant.Outlined"
+                                          Margin="Margin.Dense"
+                                          Typo="Typo.body2"
+                                          For="@(() => Input.Password)"
+                                          InputType="@(IsPasswordVisible ? InputType.Text : InputType.Password)"
+                                          Adornment="Adornment.End"
+                                          AdornmentIcon="@(IsPasswordVisible ? Icons.Material.Outlined.Visibility : Icons.Material.Outlined.VisibilityOff)"
+                                          IconSize="Size.Small"
+                                          OnAdornmentClick="TogglePasswordVisibility"
+                                          autocomplete="new-password" />
+                        </MudItem>
+
+                        <!-- Confirm Password -->
+                        <MudItem xs="12">
+                            <MudTextField Placeholder="Confirm Password"
+                                          T="string"
+                                          @bind-Value="Input.ConfirmPassword"
+                                          Variant="Variant.Outlined"
+                                          Margin="Margin.Dense"
+                                          Typo="Typo.body2"
+                                          For="@(() => Input.ConfirmPassword)"
+                                          InputType="@(IsConfirmPasswordVisible ? InputType.Text : InputType.Password)"
+                                          Adornment="Adornment.End"
+                                          AdornmentIcon="@(IsConfirmPasswordVisible ? Icons.Material.Outlined.Visibility : Icons.Material.Outlined.VisibilityOff)"
+                                          IconSize="Size.Small"
+                                          OnAdornmentClick="ToggleConfirmPasswordVisibility"
+                                          autocomplete="new-password" />
+                        </MudItem>
+
+                        <!-- Error Alert -->
+                        @if (!string.IsNullOrEmpty(ErrorMessage))
+                        {
+                            <MudItem xs="12">
+                                <MudAlert Severity="Severity.Error"
+                                          Class="border-1"
+                                          ShowCloseIcon
+                                          CloseIconClicked="ClearError">
+                                    @ErrorMessage
+                                </MudAlert>
+                            </MudItem>
+                        }
+
+                        <!-- Register Button -->
+                        <MudItem xs="12" Class="pt-4">
+                            <MudButton ButtonType="ButtonType.Submit"
+                                       Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       Disabled="@IsBusy"
+                                       DropShadow="false"
+                                       FullWidth
+                                       Style="text-transform: none;">
+                                @if (IsBusy)
+                                {
+                                    <MudProgressCircular Size="Size.Small" Indeterminate Class="me-2" />
+                                }
+                                Register
+                            </MudButton>
+                        </MudItem>
+
+                        <MudItem xs="12">
+                            <MudDivider Class="my-1" />
+                        </MudItem>
+
+                        <!-- Links -->
+                        <MudItem xs="12" Class="d-flex flex-column gap-1">
+                            <MudLink Href="Account/Login" Typo="Typo.body2">
+                                Already have an account? Log in
+                            </MudLink>
+                        </MudItem>
+
+                    </MudGrid>
+                </MudCardContent>
+            </MudCard>
+        </EditForm>
+    </MudOverlay>
+</MudContainer>

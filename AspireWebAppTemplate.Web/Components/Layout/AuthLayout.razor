@@ -1,0 +1,14 @@
+﻿@inherits LayoutComponentBase
+
+<MudThemeProvider Theme="AppTheme" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <!-- Main Content -->
+    <MudMainContent Class="min-vh-100 p-0">
+        <!-- Page Content -->
+        @Body
+    </MudMainContent>
+</MudLayout>

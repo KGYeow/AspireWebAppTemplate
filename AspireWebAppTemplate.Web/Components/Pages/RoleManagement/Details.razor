@@ -1,0 +1,192 @@
+@page "/role-management/{RoleId}"
+@using BlazorWebAppTemplate.Data
+@using BlazorWebAppTemplate.Data.Entities
+@using static BlazorWebAppTemplate.Components.Pages.UserManagement.Index
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>Role Details</PageTitle>
+
+<!-- Back Button -->
+<MudButton Href="role-management"
+           Variant="Variant.Text"
+           StartIcon="@Icons.Material.Rounded.ArrowBack"
+           Class="mb-2"
+           Style="text-transform: none;">
+    Back to Role Management
+</MudButton>
+
+@if (IsLoading)
+{
+    <MudProgressCircular Color="Color.Primary" Indeterminate Class="mt-4" />
+}
+else if (Role is null)
+{
+    <MudAlert Severity="Severity.Error" Class="mt-4">Role not found.</MudAlert>
+}
+else
+{
+    <!-- Summary Header -->
+    <MudPaper Class="pa-4 mb-4" Elevation="0">
+        <MudStack Row AlignItems="AlignItems.Center" Spacing="3">
+            <!-- Role Icon -->
+            <MudAvatar Color="Color.Primary" Size="Size.Large">
+                <MudIcon Icon="@Icons.Material.Rounded.Shield" />
+            </MudAvatar>
+
+            <!-- Name & Display Name -->
+            <MudStack Spacing="0">
+                <MudText Typo="Typo.h5" Class="fw-bold">
+                    @(Role.DisplayName ?? Role.Name)
+                </MudText>
+                <MudText Typo="Typo.body2" Class="text-muted">
+                    @Role.Name
+                </MudText>
+            </MudStack>
+
+            <MudSpacer />
+
+            <MudStack Row Spacing="1" Wrap="Wrap.Wrap" AlignItems="AlignItems.Center">
+                <!-- System Role Badge -->
+                @if (Role.IsSystem)
+                {
+                    <MudChip T="string" Color="Color.Dark" Size="Size.Small" Variant="Variant.Outlined">System Role</MudChip>
+                }
+
+                <!-- Default Role Badge -->
+                @if (Role.IsDefault)
+                {
+                    <MudChip T="string" Color="Color.Info" Size="Size.Small">Default Role</MudChip>
+                }
+
+                <!-- Status Chip -->
+                @if (Role.IsActive)
+                {
+                    <MudChip T="string" Color="Color.Success" Size="Size.Small">Active</MudChip>
+                }
+                else
+                {
+                    <MudChip T="string" Color="Color.Error" Size="Size.Small">Inactive</MudChip>
+                }
+            </MudStack>
+        </MudStack>
+    </MudPaper>
+
+    <!-- Information Table -->
+    <MudPaper Class="pa-4 mb-4" Elevation="0">
+        <MudText Typo="Typo.h6" Class="mb-3">Information</MudText>
+        <MudSimpleTable Elevation="0">
+            <tbody>
+                <MudTr>
+                    <MudTd Style="width: 200px;"><b>Description</b></MudTd>
+                    <MudTd>@(Role.Description ?? "-")</MudTd>
+                </MudTr>
+                <MudTr>
+                    <MudTd><b>Created Date</b></MudTd>
+                    <MudTd>@FormatDateTime(Role.CreatedUtc)</MudTd>
+                </MudTr>
+                <MudTr>
+                    <MudTd><b>Last Updated Date</b></MudTd>
+                    <MudTd>@FormatDateTime(Role.UpdatedUtc)</MudTd>
+                </MudTr>
+                <MudTr>
+                    <MudTd><b>Position</b></MudTd>
+                    <MudTd>@Role.Position</MudTd>
+                </MudTr>
+            </tbody>
+        </MudSimpleTable>
+    </MudPaper>
+
+    <!-- Users Section -->
+    <MudPaper Class="pt-4 px-4 pb-2" Elevation="0">
+        <!-- Section title + Assign Users button on same row -->
+        <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-3">
+            <MudText Typo="Typo.h6">Assigned Users (@UsersInRoleCount)</MudText>
+            <MudButton Color="Color.Primary"
+                       Variant="Variant.Filled"
+                       StartIcon="@Icons.Material.Rounded.PersonAdd"
+                       OnClick="OpenAssignUsersDialog"
+                       DropShadow="false"
+                       Style="text-transform: none;">
+                Assign Users
+            </MudButton>
+        </MudStack>
+
+        <MudDataGrid T="UserViewModel"
+                     @ref="usersDataGrid"
+                     ServerData="ServerReloadUsers"
+                     MultiSelection="true"
+                     @bind-SelectedItems="selectedUsers"
+                     SelectOnRowClick="false"
+                     Loading="@IsLoading"
+                     Elevation="0"
+                     Hover
+                     Dense
+                     Bordered>
+            <ToolBarContent>
+                <MudTextField T="string"
+                              ValueChanged="@(s => OnUsersSearch(s))"
+                              Placeholder="Search users..."
+                              Variant="Variant.Outlined"
+                              Typo="Typo.body2"
+                              Margin="Margin.Dense"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Rounded.Search"
+                              IconSize="Size.Small"
+                              DebounceInterval="500" />
+                <MudSpacer />
+
+                @if (selectedUsers.Count > 0)
+                {
+                    <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                        <MudTooltip Text="Clear selection">
+                            <MudButton StartIcon="@Icons.Material.Rounded.Close"
+                                       OnClick="ClearUserSelection"
+                                       Size="Size.Small"
+                                       Style="text-transform: none;">
+                                @selectedUsers.Count selected
+                            </MudButton>
+                        </MudTooltip>
+
+                        <MudTooltip Text="Remove selected from role">
+                            <MudIconButton Icon="@Icons.Material.Outlined.PersonRemove"
+                                           Color="Color.Error"
+                                           OnClick="BulkRemoveUsersAsync"
+                                           Size="Size.Small" />
+                        </MudTooltip>
+                    </MudStack>
+                }
+            </ToolBarContent>
+            <NoRecordsContent>
+                <MudText Typo="Typo.body2">No users are assigned to this role.</MudText>
+            </NoRecordsContent>
+            <LoadingContent>
+                <MudText Typo="Typo.body2">Loading users...</MudText>
+            </LoadingContent>
+            <Columns>
+                <SelectColumn T="UserViewModel" />
+                <TemplateColumn Title="#" Sortable="false" Filterable="false">
+                    <CellTemplate>
+                        @context.Item.LineNumber
+                    </CellTemplate>
+                </TemplateColumn>
+                <PropertyColumn Property="u => u.UserName" Title="Username" />
+                <PropertyColumn Property="u => u.DisplayName" Title="Display Name" />
+                <PropertyColumn Property="u => u.Email" Title="Email" />
+                <TemplateColumn Title="" Sortable="false" Filterable="false">
+                    <CellTemplate>
+                        <MudTooltip Text="Remove from role">
+                            <MudIconButton Size="Size.Small"
+                                           Icon="@Icons.Material.Outlined.PersonRemove"
+                                           Color="Color.Error"
+                                           OnClick="() => RemoveUserFromRoleAsync(context.Item)"
+                                           title="Remove from role" />
+                        </MudTooltip>
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+            <PagerContent>
+                <MudDataGridPager T="UserViewModel" />
+            </PagerContent>
+        </MudDataGrid>
+    </MudPaper>
+}

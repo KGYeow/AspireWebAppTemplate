@@ -1,0 +1,207 @@
+@page "/user-management/{UserId}"
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>User Details</PageTitle>
+
+<!-- Back Button -->
+<MudButton Href="user-management"
+           Variant="Variant.Text"
+           StartIcon="@Icons.Material.Rounded.ArrowBack"
+           Class="mb-2"
+           Style="text-transform: none;">
+    Back to User Management
+</MudButton>
+
+@if (IsLoading)
+{
+    <MudProgressCircular Color="Color.Primary" Indeterminate Class="mt-4" />
+}
+else if (User is null)
+{
+    <MudAlert Severity="Severity.Error" Class="mt-4">User not found.</MudAlert>
+}
+else
+{
+    <!-- Summary Header -->
+    <MudPaper Class="pa-4 mb-4" Elevation="0">
+        <MudStack Row AlignItems="AlignItems.Center" Spacing="3">
+            <!-- Avatar -->
+            @if (!string.IsNullOrEmpty(User.AvatarUrl))
+            {
+                <MudAvatar Size="Size.Large">
+                    <MudImage Src="@User.AvatarUrl" />
+                </MudAvatar>
+            }
+            else
+            {
+                <MudAvatar Color="Color.Primary" Size="Size.Large">
+                    @((User.DisplayName ?? User.UserName ?? "?")[0])
+                </MudAvatar>
+            }
+
+            <!-- Name & Username -->
+            <MudStack Spacing="0">
+                <MudText Typo="Typo.h5" Class="fw-bold">
+                    @(User.DisplayName ?? User.UserName)
+                </MudText>
+                <MudText Typo="Typo.body2" Class="text-muted">
+                    @@@User.UserName
+                </MudText>
+            </MudStack>
+
+            <MudSpacer />
+
+            <!-- Status & Auth Chips -->
+            <MudStack Row Spacing="1" Wrap="Wrap.Wrap" AlignItems="AlignItems.Center">
+                @if (User.IsActive)
+                {
+                    <MudChip T="string" Color="Color.Success" Size="Size.Small">Active</MudChip>
+                }
+                else
+                {
+                    <MudChip T="string" Color="Color.Error" Size="Size.Small">Inactive</MudChip>
+                }
+
+                <MudChip T="string" Color="Color.Default" Variant="Variant.Outlined" Size="Size.Small">
+                    @User.AuthSource
+                </MudChip>
+
+                @foreach (var role in UserRoles)
+                {
+                    <MudChip T="string" Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small">
+                        @role
+                    </MudChip>
+                }
+            </MudStack>
+        </MudStack>
+    </MudPaper>
+
+    <!-- Tabs -->
+    <MudTabs Elevation="0" Rounded ApplyEffectsToContainer>
+        <!-- Profile Tab -->
+        <MudTabPanel Text="Profile" Icon="@Icons.Material.Rounded.Person">
+            <MudPaper Class="pa-4" Elevation="0">
+                <MudSimpleTable Elevation="0">
+                    <tbody>
+                        <MudTr>
+                            <MudTd Style="width: 200px;"><b>First Name</b></MudTd>
+                            <MudTd>@(User.FirstName ?? "-")</MudTd>
+                        </MudTr>
+                        <MudTr>
+                            <MudTd><b>Last Name</b></MudTd>
+                            <MudTd>@(User.LastName ?? "-")</MudTd>
+                        </MudTr>
+                        <MudTr>
+                            <MudTd><b>Email</b></MudTd>
+                            <MudTd>@(User.Email ?? "-")</MudTd>
+                        </MudTr>
+                        <MudTr>
+                            <MudTd><b>Phone</b></MudTd>
+                            <MudTd>@(User.PhoneNumber ?? "-")</MudTd>
+                        </MudTr>
+                    </tbody>
+                </MudSimpleTable>
+            </MudPaper>
+        </MudTabPanel>
+
+        <!-- Organization Tab -->
+        <MudTabPanel Text="Organization" Icon="@Icons.Material.Rounded.Business">
+            <MudPaper Class="pa-4" Elevation="0">
+                <MudSimpleTable Elevation="0">
+                    <tbody>
+                        <MudTr>
+                            <MudTd Style="width: 200px;"><b>Employee Number</b></MudTd>
+                            <MudTd>@(User.EmployeeNumber ?? "-")</MudTd>
+                        </MudTr>
+                        <MudTr>
+                            <MudTd><b>Job Title</b></MudTd>
+                            <MudTd>@(User.JobTitle ?? "-")</MudTd>
+                        </MudTr>
+                        <MudTr>
+                            <MudTd><b>Department</b></MudTd>
+                            <MudTd>@(User.Department ?? "-")</MudTd>
+                        </MudTr>
+                    </tbody>
+                </MudSimpleTable>
+            </MudPaper>
+        </MudTabPanel>
+
+        <!-- Account Tab -->
+        <MudTabPanel Text="Account" Icon="@Icons.Material.Rounded.Security">
+            <MudPaper Class="pa-4" Elevation="0">
+                <MudSimpleTable Elevation="0">
+                    <tbody>
+                        <MudTr>
+                            <MudTd Style="width: 200px;"><b>Email Confirmed</b></MudTd>
+                            <MudTd>@(User.EmailConfirmed ? "Yes" : "No")</MudTd>
+                        </MudTr>
+                        <MudTr>
+                            <MudTd><b>Two-Factor Enabled</b></MudTd>
+                            <MudTd>@(User.TwoFactorEnabled ? "Yes" : "No")</MudTd>
+                        </MudTr>
+                        <MudTr>
+                            <MudTd><b>Lockout Enabled</b></MudTd>
+                            <MudTd>@(User.LockoutEnabled ? "Yes" : "No")</MudTd>
+                        </MudTr>
+                        <MudTr>
+                            <MudTd><b>Lockout End</b></MudTd>
+                            <MudTd>@(FormatDateTime(User.LockoutEnd, "-"))</MudTd>
+                        </MudTr>
+                        <MudTr>
+                            <MudTd><b>Access Failed Count</b></MudTd>
+                            <MudTd>@User.AccessFailedCount</MudTd>
+                        </MudTr>
+                    </tbody>
+                </MudSimpleTable>
+            </MudPaper>
+        </MudTabPanel>
+
+        <!-- Dates Tab -->
+        <MudTabPanel Text="Dates" Icon="@Icons.Material.Rounded.CalendarMonth">
+            <MudPaper Class="pa-4" Elevation="0">
+                <MudSimpleTable Elevation="0">
+                    <tbody>
+                        <MudTr>
+                            <MudTd Style="width: 200px;"><b>Created</b></MudTd>
+                            <MudTd>@FormatDateTime(User.CreatedUtc)</MudTd>
+                        </MudTr>
+                        <MudTr>
+                            <MudTd><b>Last Updated</b></MudTd>
+                            <MudTd>@FormatDateTime(User.UpdatedUtc)</MudTd>
+                        </MudTr>
+                        <MudTr>
+                            <MudTd><b>Last Login</b></MudTd>
+                            <MudTd>@FormatDateTime(User.LastLoginUtc, "Never")</MudTd>
+                        </MudTr>
+                        <MudTr>
+                            <MudTd><b>Last Password Change</b></MudTd>
+                            <MudTd>@FormatDateTime(User.LastPasswordChangeUtc)</MudTd>
+                        </MudTr>
+                    </tbody>
+                </MudSimpleTable>
+            </MudPaper>
+        </MudTabPanel>
+
+        <!-- Settings Tab -->
+        <MudTabPanel Text="Settings" Icon="@Icons.Material.Rounded.Settings">
+            <MudPaper Class="pa-4" Elevation="0">
+                <MudSimpleTable Elevation="0">
+                    <tbody>
+                        <MudTr>
+                            <MudTd Style="width: 200px;"><b>Locale</b></MudTd>
+                            <MudTd>@(User.Locale ?? "-")</MudTd>
+                        </MudTr>
+                        <MudTr>
+                            <MudTd><b>Time Zone</b></MudTd>
+                            <MudTd>@(User.TimeZoneId ?? "-")</MudTd>
+                        </MudTr>
+                        <MudTr>
+                            <MudTd><b>Tenant ID</b></MudTd>
+                            <MudTd>@(User.TenantId?.ToString() ?? "-")</MudTd>
+                        </MudTr>
+                    </tbody>
+                </MudSimpleTable>
+            </MudPaper>
+        </MudTabPanel>
+    </MudTabs>
+}

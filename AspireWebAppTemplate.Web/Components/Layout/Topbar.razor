@@ -1,0 +1,28 @@
+﻿<MudAppBar Class="topbar" ToolBarClass="gap-4" Dense Elevation="0">
+    <!-- Left Content -->
+    @if (LeftContent != null)
+    {
+        @LeftContent
+    }
+
+    @if (!string.IsNullOrWhiteSpace(LogoSrc))
+    {
+        <MudLink Href="@LogoHref" Class="d-flex align-center">
+            <MudImage Src="@LogoSrc" Height="@LogoHeight" />
+        </MudLink>
+    }
+
+    <!-- Topbar Title -->
+    @if (!string.IsNullOrWhiteSpace(Title))
+    {
+        <MudText Class="fw-bold" Typo="Typo.subtitle1">@Title</MudText>
+    }
+
+    <MudSpacer />
+
+    <!-- Right Content -->
+    @if (RightContent != null)
+    {
+        @RightContent
+    }
+</MudAppBar>

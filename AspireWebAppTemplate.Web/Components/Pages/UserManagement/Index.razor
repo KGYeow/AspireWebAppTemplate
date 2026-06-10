@@ -1,0 +1,279 @@
+@page "/user-management"
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>User Management</PageTitle>
+
+<PageHeader Title="User Management" Subtitle="Manage user accounts, roles, and status." />
+
+<!-- Alert Messages -->
+@if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <MudAlert Severity="Severity.Error"
+              Class="mb-4 border-1"
+              ShowCloseIcon
+              CloseIconClicked="() => ErrorMessage = null">
+        @ErrorMessage
+    </MudAlert>
+}
+
+@if (!string.IsNullOrEmpty(SuccessMessage))
+{
+    <MudAlert Severity="Severity.Success"
+              Class="mb-4 border-1"
+              ShowCloseIcon
+              CloseIconClicked="() => SuccessMessage = null">
+        @SuccessMessage
+    </MudAlert>
+}
+
+<!-- [LDAP] Sync completion alert — remove if LDAP is not needed -->
+@if (!string.IsNullOrEmpty(SyncMessage))
+{
+    <MudAlert Severity="Severity.Success"
+              Class="mb-4 border-1"
+              ShowCloseIcon
+              CloseIconClicked="() => SyncMessage = null">
+        @SyncMessage
+    </MudAlert>
+}
+
+<!-- Action Buttons Row -->
+<MudStack Row Justify="Justify.FlexEnd" AlignItems="AlignItems.Center" Spacing="2" Class="mb-4">
+    @if (IsLdapEnabled)
+    {
+       <!-- [LDAP] Add LDAP User button — remove if LDAP is not needed -->
+        <MudButton Color="Color.Primary"
+                   Variant="Variant.Filled"
+                   StartIcon="@Icons.Material.Rounded.PersonSearch"
+                   Disabled="@(IsLoading || IsSyncing)"
+                   OnClick="OpenAddLdapUserDialog"
+                   DropShadow="false"
+                   Style="text-transform: none;">
+            Add LDAP User
+        </MudButton>
+        <!-- [LDAP] Sync Users button — remove if LDAP is not needed -->
+        <MudButton Color="Color.Primary"
+                   Variant="Variant.Filled"
+                   StartIcon="@Icons.Material.Rounded.Sync"
+                   Disabled="@(IsLoading || IsSyncing)"
+                   OnClick="OpenSyncConfirmDialog"
+                   DropShadow="false"
+                   Style="text-transform: none;">
+            Sync Users
+        </MudButton>
+    }
+    <MudButton Color="Color.Primary"
+               Variant="Variant.Filled"
+               StartIcon="@Icons.Material.Rounded.PersonAdd"
+               Disabled="@(IsLoading || IsSyncing)"
+               OnClick="OpenAddUserDialog"
+               DropShadow="false"
+               Style="text-transform: none;">
+        Add User
+    </MudButton>
+</MudStack>
+
+<!-- [LDAP] Sync Progress Panel — remove if LDAP is not needed -->
+<MudCollapse Expanded="@IsSyncing">
+    <MudPaper Class="p-3 mb-4" Elevation="0">
+        <MudStack Spacing="2">
+            <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                <MudIcon Color="Color.Info" Icon="@Icons.Material.Rounded.Sync" Size="Size.Large" />
+                <MudStack Spacing="0">
+                    <MudText Class="fw-bold" Typo="Typo.body2">
+                        @(TotalToSync == 0
+                            ? "Preparing sync from LDAP..."
+                            : $"Syncing from LDAP... {(int)(SyncedCount * 100.0 / Math.Max(TotalToSync, 1))}%")
+                    </MudText>
+                    <MudText Typo="Typo.caption">@SyncedCount / @TotalToSync</MudText>
+                </MudStack>
+                <MudSpacer />
+                <MudIconButton Icon="@Icons.Material.Rounded.Close"
+                               Disabled="@(!IsSyncing)"
+                               OnClick="CancelSync"
+                               Size="Size.Small"
+                               title="Cancel Sync" />
+            </MudStack>
+            <MudProgressLinear Color="Color.Info"
+                               Indeterminate="@(SyncedCount == 0)"
+                               Value="@(TotalToSync == 0 ? 0 : SyncedCount * 100.0 / TotalToSync)"
+                               Style="height: 6px;"
+                               Rounded />
+        </MudStack>
+    </MudPaper>
+</MudCollapse>
+
+<!-- Users Data Grid — Server-Side Filtering, Sorting & Pagination -->
+<MudPaper Elevation="0" Class="pa-4">
+    <!-- Search Filter -->
+    <MudStack Row Spacing="2" AlignItems="AlignItems.Center" Class="mb-4">
+        <MudTextField T="string"
+                      ValueChanged="@(s => OnSearch(s))"
+                      Placeholder="Search users..."
+                      Variant="Variant.Outlined"
+                      Typo="Typo.body2"
+                      Margin="Margin.Dense"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Rounded.Search"
+                      IconSize="Size.Small"
+                      DebounceInterval="500" />
+    </MudStack>
+
+    <!-- Bulk actions — visible only when users are selected -->
+    @if (selectedUsers.Count > 0)
+    {
+        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-2">
+            <MudButton StartIcon="@Icons.Material.Rounded.Close"
+                       OnClick="ClearSelection"
+                       Size="Size.Small"
+                       Style="text-transform: none;">
+                @selectedUsers.Count selected
+            </MudButton>
+
+            <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                <MudTooltip Text="Activate selected">
+                    <MudIconButton Icon="material-symbols-rounded/person_check"
+                                   OnClick="BulkActivateAsync"
+                                   Size="Size.Small" />
+                </MudTooltip>
+
+                <MudTooltip Text="Deactivate selected">
+                    <MudIconButton Icon="material-symbols-rounded/person_cancel"
+                                   OnClick="BulkDeactivateAsync"
+                                   Size="Size.Small" />
+                </MudTooltip>
+
+                <MudTooltip Text="Assign role to selected">
+                    <MudIconButton Icon="@Icons.Material.Outlined.AssignmentInd"
+                                   OnClick="OpenBulkAssignRoleDialog"
+                                   Size="Size.Small" />
+                </MudTooltip>
+
+                <MudTooltip Text="Delete selected">
+                    <MudIconButton Icon="@Icons.Material.Outlined.DeleteOutline"
+                                   Color="Color.Error"
+                                   OnClick="BulkDeleteAsync"
+                                   Size="Size.Small" />
+                </MudTooltip>
+            </MudStack>
+        </MudStack>
+    }
+
+    <MudDataGrid T="UserViewModel"
+                 @ref="dataGrid"
+                 ServerData="ServerReload"
+                 MultiSelection="true"
+                 @bind-SelectedItems="selectedUsers"
+                 SelectOnRowClick="false"
+                 Loading="@IsLoading"
+                 Elevation="0"
+                 Filterable
+                 Hover
+                 Dense
+                 Bordered>
+    <NoRecordsContent>
+        <MudText Typo="Typo.body2">No users found.</MudText>
+    </NoRecordsContent>
+    <LoadingContent>
+        <MudText Typo="Typo.body2">Loading users...</MudText>
+    </LoadingContent>
+    <Columns>
+        <SelectColumn T="UserViewModel" />
+        <TemplateColumn Title="#" Sortable="false" Filterable="false">
+            <CellTemplate>
+                @context.Item.LineNumber
+            </CellTemplate>
+        </TemplateColumn>
+        <PropertyColumn Property="u => u.UserName" Title="Username" />
+        <PropertyColumn Property="u => u.DisplayName" Title="Display Name" />
+        <PropertyColumn Property="u => u.JobTitle" Title="Job Title" />
+        <PropertyColumn Property="u => u.Department" Title="Department" />
+        <PropertyColumn Property="u => u.IsActive" Title="Status" Filterable="true">
+            <FilterTemplate>
+                <BoolFilterSelect T="UserViewModel"
+                                  FilterContext="context"
+                                  DataGrid="dataGrid"
+                                  TrueLabel="Active"
+                                  FalseLabel="Inactive" />
+            </FilterTemplate>
+            <CellTemplate>
+                @if (context.Item.IsActive)
+                {
+                    <MudChip T="string" Color="Color.Success" Size="Size.Small">Active</MudChip>
+                }
+                else
+                {
+                    <MudChip T="string" Color="Color.Error" Size="Size.Small">Inactive</MudChip>
+                }
+            </CellTemplate>
+        </PropertyColumn>
+        <TemplateColumn Title="Roles">
+            <CellTemplate>
+                @if (context.Item.Roles.Count > 0)
+                {
+                    <MudStack Row Spacing="1" Wrap="Wrap.Wrap">
+                        @foreach (var role in context.Item.Roles)
+                        {
+                            <MudChip T="string"
+                                     Color="Color.Primary"
+                                     Variant="Variant.Outlined"
+                                     Size="Size.Small">
+                                @role
+                            </MudChip>
+                        }
+                    </MudStack>
+                }
+                else
+                {
+                    <MudText Typo="Typo.body2" Class="text-muted">-</MudText>
+                }
+            </CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn Title="" Sortable="false" Filterable="false">
+            <CellTemplate>
+                <MudStack Row Spacing="1">
+                    <!-- Primary action — View Details (direct) -->
+                    <MudIconButton Size="Size.Small"
+                                   Icon="@Icons.Material.Outlined.Visibility"
+                                   Href="@($"user-management/{context.Item.Id}")"
+                                   title="View Details" />
+
+                    <!-- Overflow menu for remaining actions -->
+                    <MudMenu Icon="@Icons.Material.Rounded.MoreVert"
+                             Size="Size.Small"
+                             Dense
+                             AnchorOrigin="Origin.BottomRight"
+                             TransformOrigin="Origin.TopRight"
+                             PopoverClass="action-menu">
+                        <MudMenuItem Icon="@Icons.Material.Outlined.Edit"
+                                     Disabled="@(context.Item.IsSelf)"
+                                     OnClick="() => OpenEditUserDialog(context.Item)">
+                            Edit
+                        </MudMenuItem>
+                        <MudMenuItem Icon="@Icons.Material.Outlined.AssignmentInd"
+                                     Disabled="@(context.Item.IsSelf)"
+                                     OnClick="() => OpenManageRolesDialog(context.Item)">
+                            Manage Roles
+                        </MudMenuItem>
+                        <MudMenuItem Icon="@(context.Item.IsActive ? "material-symbols-rounded/person_cancel" : "material-symbols-rounded/person_check")"
+                                     Disabled="@(context.Item.IsSelf)"
+                                     OnClick="() => ToggleActivationAsync(context.Item)">
+                            @(context.Item.IsActive ? "Deactivate" : "Activate")
+                        </MudMenuItem>
+                        <MudDivider />
+                        <MudMenuItem Icon="@Icons.Material.Outlined.DeleteOutline"
+                                     Disabled="@(context.Item.IsSelf)"
+                                     OnClick="() => DeleteUserAsync(context.Item)"
+                                     IconColor="Color.Error">
+                            Delete
+                        </MudMenuItem>
+                    </MudMenu>
+                </MudStack>
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="UserViewModel" />
+    </PagerContent>
+    </MudDataGrid>
+</MudPaper>

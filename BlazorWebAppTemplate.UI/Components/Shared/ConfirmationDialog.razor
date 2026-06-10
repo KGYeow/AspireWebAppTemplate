@@ -1,0 +1,37 @@
+<MudDialog TitleClass="px-4 pt-5 pb-0" ContentClass="px-4" ActionsClass="px-4 pb-5">
+    <TitleContent></TitleContent>
+
+    <!-- Dialog Content Area -->
+    <DialogContent>
+        <MudStack Spacing="1" AlignItems="AlignItems.Center">
+            <!-- Confirmation Dialog Icon -->
+            <div
+                class="pa-2 rounded-circle"
+                style="@($"background:{Colors.Gray.Lighten4}")"
+            >
+                <MudIcon Icon="@DialogIcon" Color="@DialogIconColor" Size="Size.Large" />
+            </div>
+
+            <!-- Confirmation Dialog Title -->
+            <MudText Typo="Typo.h6">@MudDialog.Title</MudText>
+
+            <!-- Confirmation Dialog Content Text -->
+            <MudText Typo="Typo.body1" Align="Align.Center">@ContentText</MudText>
+        </MudStack>
+    </DialogContent>
+
+    <!-- Dialog Actions/Footer -->
+    <DialogActions>
+        <MudButton OnClick="Cancel">
+            Cancel
+        </MudButton>
+        <MudButton
+            Color="@DialogIconColor"
+            Variant="Variant.Filled"
+            DropShadow="false"
+            OnClick="Submit"
+        >
+            @SubmitBtnText
+        </MudButton>
+    </DialogActions>
+</MudDialog>

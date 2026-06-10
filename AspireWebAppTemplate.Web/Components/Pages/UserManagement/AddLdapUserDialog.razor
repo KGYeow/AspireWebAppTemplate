@@ -1,0 +1,111 @@
+@* [LDAP] This dialog is part of the LDAP integration. Remove it if LDAP is not needed. *@
+
+<ModalDialog Title="Add LDAP User">
+    <ContentArea>
+        <MudGrid Spacing="4">
+            <!-- Instructions -->
+            <MudItem xs="12">
+                <MudText Typo="Typo.body2">
+                    Enter the corporate <b>NTID</b> or <b>Email</b>. We'll verify in LDAP and
+                    create the local user if not exists.
+                </MudText>
+            </MudItem>
+
+            <!-- NTID / Email Input -->
+            <MudItem xs="12">
+                <MudInputLabel>NTID or Email *</MudInputLabel>
+                <MudTextField T="string"
+                              @bind-Value="Identifier"
+                              Placeholder="e.g. 4093094 or john@company.com"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Typo="Typo.body2"
+                              Disabled="@IsBusy"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Rounded.PersonSearch"
+                              OnKeyDown="HandleKeyDown"
+                              Immediate />
+            </MudItem>
+
+            <!-- Error Alert -->
+            @if (!string.IsNullOrEmpty(ErrorMessage))
+            {
+                <MudItem xs="12">
+                    <MudAlert Severity="Severity.Error"
+                              Class="border-1"
+                              ShowCloseIcon
+                              CloseIconClicked="() => ErrorMessage = null">
+                        @ErrorMessage
+                    </MudAlert>
+                </MudItem>
+            }
+
+            <!-- Success Info -->
+            @if (!string.IsNullOrEmpty(InfoMessage))
+            {
+                <MudItem xs="12">
+                    <MudAlert Severity="Severity.Info" Class="border-1">@InfoMessage</MudAlert>
+                </MudItem>
+            }
+        </MudGrid>
+
+        <!-- LDAP User Preview -->
+        <MudCollapse Expanded="@(PreviewAttributes is not null)" Class="mt-2">
+            @if (PreviewAttributes is not null)
+            {
+                <MudText Typo="Typo.subtitle2" Class="mb-1">User Preview</MudText>
+                <MudPaper Elevation="0" Outlined>
+                    <MudSimpleTable Elevation="0" Bordered Dense>
+                        <tbody>
+                            <MudTr>
+                                <MudTd><b>NTID</b></MudTd>
+                                <MudTd>@PreviewAttributes.Ntid</MudTd>
+                            </MudTr>
+                            <MudTr>
+                                <MudTd><b>Display Name</b></MudTd>
+                                <MudTd>@PreviewAttributes.DisplayName</MudTd>
+                            </MudTr>
+                            <MudTr>
+                                <MudTd><b>Email</b></MudTd>
+                                <MudTd>@PreviewAttributes.Email</MudTd>
+                            </MudTr>
+                            <MudTr>
+                                <MudTd><b>Job Title</b></MudTd>
+                                <MudTd>@PreviewAttributes.JobTitle</MudTd>
+                            </MudTr>
+                            <MudTr>
+                                <MudTd><b>Department</b></MudTd>
+                                <MudTd>@PreviewAttributes.Department</MudTd>
+                            </MudTr>
+                        </tbody>
+                    </MudSimpleTable>
+                </MudPaper>
+            }
+        </MudCollapse>
+    </ContentArea>
+
+    <ActionsTemplate>
+        <MudButton Disabled="@IsBusy"
+                   OnClick="() => MudDialog.Cancel()">
+            Cancel
+        </MudButton>
+        <MudButton Color="Color.Secondary"
+                   Variant="Variant.Outlined"
+                   Disabled="@(IsBusy || string.IsNullOrWhiteSpace(Identifier))"
+                   OnClick="LookupAsync"
+                   DropShadow="false">
+            Preview
+        </MudButton>
+        <MudButton Color="Color.Primary"
+                   Variant="Variant.Filled"
+                   Disabled="@(IsBusy || PreviewAttributes is null)"
+                   OnClick="AddUserAsync"
+                   DropShadow="false">
+            @if (IsBusy)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate Class="me-2" />
+            }
+            Add
+        </MudButton>
+    </ActionsTemplate>
+</ModalDialog>

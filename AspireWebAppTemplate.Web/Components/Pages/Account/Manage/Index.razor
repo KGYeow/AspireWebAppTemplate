@@ -1,0 +1,63 @@
+﻿@page "/Account/Manage"
+@rendermode InteractiveServer
+
+<PageTitle>Profile</PageTitle>
+
+<PageHeader Title="Profile" Subtitle="Update your account profile information." />
+
+@if (!string.IsNullOrEmpty(StatusMessage))
+{
+    <MudAlert Severity="@(StatusMessage.StartsWith("Error") ? Severity.Error : Severity.Success)"
+              Class="mb-4 border-1"
+              ShowCloseIcon
+              CloseIconClicked="() => StatusMessage = null">
+        @StatusMessage
+    </MudAlert>
+}
+
+<MudGrid>
+    <MudItem xs="12" md="6">
+        <EditForm EditContext="editContext"
+                  OnValidSubmit="OnValidSubmitAsync"
+                  FormName="profileForm">
+            <DataAnnotationsValidator />
+
+            <MudStack Spacing="2">
+                <!-- Username (read-only) -->
+                <MudTextField T="string"
+                              Value="@Username"
+                              Label="Username"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Typo="Typo.body2"
+                              Disabled />
+
+                <!-- Phone Number -->
+                <MudTextField T="string"
+                              @bind-Value="Input.PhoneNumber"
+                              Label="Phone number"
+                              Placeholder="Enter your phone number"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Typo="Typo.body2"
+                              For="@(() => Input.PhoneNumber)" />
+
+                <!-- Save Button -->
+                <MudButton ButtonType="ButtonType.Submit"
+                           Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           Disabled="@IsBusy"
+                           DropShadow="false"
+                           Style="text-transform: none;">
+                    @if (IsBusy)
+                    {
+                        <MudProgressCircular Size="Size.Small"
+                                             Indeterminate
+                                             Class="me-2" />
+                    }
+                    Save
+                </MudButton>
+            </MudStack>
+        </EditForm>
+    </MudItem>
+</MudGrid>

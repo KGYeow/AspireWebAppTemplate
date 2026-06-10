@@ -1,0 +1,13 @@
+@typeparam T
+
+<MudSelect T="string"
+           Label="Value"
+           Value="@GetValue()"
+           ValueChanged="@SetValue"
+           Placeholder="@Placeholder"
+           Margin="Margin.Dense"
+           Dense
+           Clearable>
+    <MudSelectItem T="string" Value="@TrueLabel">@TrueLabel</MudSelectItem>
+    <MudSelectItem T="string" Value="@FalseLabel">@FalseLabel</MudSelectItem>
+</MudSelect>

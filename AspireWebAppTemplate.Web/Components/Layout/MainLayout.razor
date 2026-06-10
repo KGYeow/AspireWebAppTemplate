@@ -1,23 +1,43 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<MudThemeProvider Theme="AppTheme" IsDarkMode="_isDarkMode" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+<MudBreakpointProvider OnBreakpointChanged="HandleBreakpointChanged" />
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
+<MudLayout>
+        <!-- Topbar -->
+        <Topbar Title="Blazor Web App Template" LogoSrc="images/logos/jabil-white-skyblue.svg">
+            <LeftContent>
+                <MudToggleIconButton
+                    Icon="@Icons.Material.Rounded.Menu"
+                    ToggledIcon="@Icons.Material.Rounded.MenuOpen"
+                    Color="Color.Inherit"
+                    Edge="Edge.Start"
+                    @bind-Toggled="DrawerOpen"
+                />
+            </LeftContent>
+            <RightContent>
+                <DropdownProfile />
+            </RightContent>
+        </Topbar>
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+        <!-- Sidebar -->
+        <MudDrawer Variant="CurrentBreakpoint >= Breakpoint.Md ? DrawerVariant.Mini : DrawerVariant.Responsive" @bind-Open="@DrawerOpen" ClipMode="DrawerClipMode.Docked">
+            <NavMenu Items="NavItems" DrawerOpen="DrawerOpen" />
+        </MudDrawer>
 
-<div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
-</div>
+        <!-- Main Content -->
+        <MudMainContent Class="min-vh-100">
+            <!-- Page Content -->
+            <MudContainer Class="py-6" MaxWidth="MaxWidth.Large">
+                <CascadingValue Value="CurrentBreakpoint">
+                    @Body
+                </CascadingValue>
+            </MudContainer>
+        </MudMainContent>
+
+        <!-- Footer -->
+        <Footer />
+    </MudLayout>

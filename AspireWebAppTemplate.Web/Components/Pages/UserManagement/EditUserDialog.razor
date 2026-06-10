@@ -1,0 +1,119 @@
+<ModalDialog Title="Edit User">
+    <ContentArea>
+        @if (IsLoadingUser)
+        {
+            <MudProgressCircular Color="Color.Primary" Indeterminate />
+        }
+        else
+        {
+            <EditForm EditContext="editContext" OnValidSubmit="OnSubmitAsync">
+                <DataAnnotationsValidator />
+
+                <MudGrid Spacing="4">
+                    <!-- Display Name -->
+                    <MudItem xs="12">
+                        <MudInputLabel>Display Name *</MudInputLabel>
+                        <MudTextField T="string"
+                                      @bind-Value="Input.DisplayName"
+                                      Variant="Variant.Outlined"
+                                      Margin="Margin.Dense"
+                                      Typo="Typo.body2"
+                                      For="@(() => Input.DisplayName)" />
+                    </MudItem>
+
+                    <!-- First Name / Last Name -->
+                    <MudItem xs="12" sm="6">
+                        <MudInputLabel>First Name</MudInputLabel>
+                        <MudTextField T="string"
+                                      @bind-Value="Input.FirstName"
+                                      Variant="Variant.Outlined"
+                                      Margin="Margin.Dense"
+                                      Typo="Typo.body2" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudInputLabel>Last Name</MudInputLabel>
+                        <MudTextField T="string"
+                                      @bind-Value="Input.LastName"
+                                      Variant="Variant.Outlined"
+                                      Margin="Margin.Dense"
+                                      Typo="Typo.body2" />
+                    </MudItem>
+
+                    <!-- Email -->
+                    <MudItem xs="12">
+                        <MudInputLabel>Email *</MudInputLabel>
+                        <MudTextField T="string"
+                                      @bind-Value="Input.Email"
+                                      Variant="Variant.Outlined"
+                                      Margin="Margin.Dense"
+                                      Typo="Typo.body2"
+                                      For="@(() => Input.Email)" />
+                    </MudItem>
+
+                    <!-- Phone -->
+                    <MudItem xs="12" sm="6">
+                        <MudInputLabel>Phone</MudInputLabel>
+                        <MudTextField T="string"
+                                      @bind-Value="Input.Phone"
+                                      Variant="Variant.Outlined"
+                                      Margin="Margin.Dense"
+                                      Typo="Typo.body2" />
+                    </MudItem>
+
+                    <!-- Employee Number -->
+                    <MudItem xs="12" sm="6">
+                        <MudInputLabel>Employee Number</MudInputLabel>
+                        <MudTextField T="string"
+                                      @bind-Value="Input.EmployeeNumber"
+                                      Variant="Variant.Outlined"
+                                      Margin="Margin.Dense"
+                                      Typo="Typo.body2" />
+                    </MudItem>
+
+                    <!-- Job Title -->
+                    <MudItem xs="12" sm="6">
+                        <MudInputLabel>Job Title</MudInputLabel>
+                        <MudTextField T="string"
+                                      @bind-Value="Input.JobTitle"
+                                      Variant="Variant.Outlined"
+                                      Margin="Margin.Dense"
+                                      Typo="Typo.body2" />
+                    </MudItem>
+
+                    <!-- Department -->
+                    <MudItem xs="12" sm="6">
+                        <MudInputLabel>Department</MudInputLabel>
+                        <MudTextField T="string"
+                                      @bind-Value="Input.Department"
+                                      Variant="Variant.Outlined"
+                                      Margin="Margin.Dense"
+                                      Typo="Typo.body2" />
+                    </MudItem>
+
+                    <!-- Error -->
+                    @if (!string.IsNullOrEmpty(StatusMessage))
+                    {
+                        <MudItem xs="12">
+                            <MudAlert Severity="Severity.Error" Class="border-1">@StatusMessage</MudAlert>
+                        </MudItem>
+                    }
+                </MudGrid>
+            </EditForm>
+        }
+    </ContentArea>
+
+    <ActionsTemplate>
+        <MudButton Disabled="@IsBusy" OnClick="() => MudDialog.Cancel()">Cancel</MudButton>
+        <MudButton Color="Color.Primary"
+                   Variant="Variant.Filled"
+                   Disabled="@(IsBusy || IsLoadingUser)"
+                   OnClick="OnSubmitAsync"
+                   DropShadow="false">
+            @if (IsBusy)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate Class="me-2" />
+            }
+            Save
+        </MudButton>
+    </ActionsTemplate>
+</ModalDialog>

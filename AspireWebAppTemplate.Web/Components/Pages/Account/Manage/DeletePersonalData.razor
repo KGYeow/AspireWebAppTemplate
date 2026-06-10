@@ -1,0 +1,59 @@
+﻿@page "/Account/Manage/DeletePersonalData"
+@rendermode InteractiveServer
+
+<PageTitle>Delete Personal Data</PageTitle>
+
+<PageHeader Title="Delete Personal Data" />
+
+<MudAlert Severity="Severity.Warning" Class="mb-4 border-1">
+    <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
+</MudAlert>
+
+@if (!string.IsNullOrEmpty(StatusMessage))
+{
+    <MudAlert Severity="Severity.Error"
+              Class="mb-4 border-1"
+              ShowCloseIcon
+              CloseIconClicked="() => StatusMessage = null">
+        @StatusMessage
+    </MudAlert>
+}
+
+<MudGrid>
+    <MudItem xs="12" md="6">
+        <EditForm EditContext="editContext"
+                  OnValidSubmit="OnValidSubmitAsync"
+                  FormName="deleteUserForm">
+            <DataAnnotationsValidator />
+
+            <MudStack Spacing="2">
+                @if (RequirePassword)
+                {
+                    <MudTextField T="string"
+                                  @bind-Value="Input.Password"
+                                  Label="Password"
+                                  Placeholder="Enter your password to confirm"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  Typo="Typo.body2"
+                                  For="@(() => Input.Password)"
+                                  InputType="InputType.Password"
+                                  autocomplete="current-password" />
+                }
+
+                <MudButton ButtonType="ButtonType.Submit"
+                           Variant="Variant.Filled"
+                           Color="Color.Error"
+                           Disabled="@IsBusy"
+                           DropShadow="false"
+                           Style="text-transform: none;">
+                    @if (IsBusy)
+                    {
+                        <MudProgressCircular Size="Size.Small" Indeterminate Class="me-2" />
+                    }
+                    Delete data and close my account
+                </MudButton>
+            </MudStack>
+        </EditForm>
+    </MudItem>
+</MudGrid>

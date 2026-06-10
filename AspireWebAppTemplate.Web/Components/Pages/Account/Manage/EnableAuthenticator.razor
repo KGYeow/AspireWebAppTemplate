@@ -1,0 +1,79 @@
+﻿@page "/Account/Manage/EnableAuthenticator"
+@rendermode InteractiveServer
+
+<PageTitle>Configure Authenticator App</PageTitle>
+
+@if (RecoveryCodes is not null)
+{
+    <PageHeader Title="Recovery Codes" Subtitle="Store these codes in a safe place." />
+
+    <ShowRecoveryCodes RecoveryCodes="RecoveryCodes" StatusMessage="Your authenticator app has been verified." />
+}
+else
+{
+    <PageHeader Title="Configure Authenticator App" />
+
+    @if (!string.IsNullOrEmpty(StatusMessage))
+    {
+        <MudAlert Severity="@(StatusMessage.StartsWith("Error") ? Severity.Error : Severity.Success)"
+                  Class="mb-4 border-1"
+                  ShowCloseIcon
+                  CloseIconClicked="() => StatusMessage = null">
+            @StatusMessage
+        </MudAlert>
+    }
+
+    <MudText Typo="Typo.body1" Class="mb-2">To use an authenticator app, follow these steps:</MudText>
+
+    <MudList T="string" Class="mb-4">
+        <MudListItem T="string" Icon="@Icons.Material.Rounded.LooksOne">
+            Download a two-factor authenticator app like Microsoft Authenticator or Google Authenticator.
+        </MudListItem>
+        <MudListItem T="string" Icon="@Icons.Material.Rounded.LooksTwo">
+            <MudText Typo="Typo.body2">
+                Scan the QR Code or enter this key into your authenticator app:
+            </MudText>
+            <MudText Typo="Typo.body2" Class="mt-1" Style="font-family: monospace; word-break: break-all;">
+                @SharedKey
+            </MudText>
+        </MudListItem>
+        <MudListItem T="string" Icon="@Icons.Material.Rounded.Looks3">
+            Enter the verification code from your authenticator app below.
+        </MudListItem>
+    </MudList>
+
+    <MudGrid>
+        <MudItem xs="12" md="6">
+            <EditForm EditContext="editContext"
+                      OnValidSubmit="OnValidSubmitAsync"
+                      FormName="enableAuthForm">
+                <DataAnnotationsValidator />
+
+                <MudStack Spacing="2">
+                    <MudTextField T="string"
+                                  @bind-Value="Input.Code"
+                                  Label="Verification Code"
+                                  Placeholder="Enter the code"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  Typo="Typo.body2"
+                                  For="@(() => Input.Code)"
+                                  autocomplete="off" />
+
+                    <MudButton ButtonType="ButtonType.Submit"
+                               Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               Disabled="@IsBusy"
+                               DropShadow="false"
+                               Style="text-transform: none;">
+                        @if (IsBusy)
+                        {
+                            <MudProgressCircular Size="Size.Small" Indeterminate Class="me-2" />
+                        }
+                        Verify
+                    </MudButton>
+                </MudStack>
+            </EditForm>
+        </MudItem>
+    </MudGrid>
+}

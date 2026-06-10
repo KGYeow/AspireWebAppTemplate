@@ -1,0 +1,30 @@
+﻿@page "/Account/Manage/PersonalData"
+@rendermode InteractiveServer
+
+<PageTitle>Personal Data</PageTitle>
+
+<PageHeader Title="Personal Data" />
+
+<MudText Typo="Typo.body1" Class="mb-2">
+    Your account contains personal data that you have given us. This page allows you to download or delete that data.
+</MudText>
+<MudText Typo="Typo.body1" Class="mb-4">
+    <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
+</MudText>
+
+<MudStack Row Spacing="2">
+    <MudButton Variant="Variant.Outlined"
+               Color="Color.Primary"
+               Href="Account/Manage/DownloadPersonalData"
+               DropShadow="false"
+               Style="text-transform: none;">
+        Download
+    </MudButton>
+    <MudButton Variant="Variant.Filled"
+               Color="Color.Error"
+               Href="Account/Manage/DeletePersonalData"
+               DropShadow="false"
+               Style="text-transform: none;">
+        Delete
+    </MudButton>
+</MudStack>

@@ -1,0 +1,28 @@
+﻿@page "/Account/AccessDenied"
+
+<PageTitle>Access Denied</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="vh-100">
+    <MudStack Class="h-75" Justify="Justify.Center">
+        <MudCard Elevation="0" Class="p-4">
+            <MudCardContent>
+                <MudStack Class="align-content-center" AlignItems="AlignItems.Center">
+                    <MudAvatar Size="Size.Large" Color="Color.Error" Variant="Variant.Filled" Class="mb-2">
+                        <MudIcon Icon="@Icons.Material.Rounded.Block" Size="Size.Large" />
+                    </MudAvatar>
+                    <MudSpacer />
+                    <MudText Typo="Typo.h3" Color="Color.Error" Class="fw-bold">Access denied</MudText>
+                    <MudText Typo="Typo.body1" Class="mt-1 text-muted">@Message</MudText>
+
+                    <MudButton Href="Account/Login"
+                               Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               Class="mt-4"
+                               DropShadow="false">
+                        Back to Login
+                    </MudButton>
+                </MudStack>
+            </MudCardContent>
+        </MudCard>
+    </MudStack>
+</MudContainer>

@@ -1,0 +1,76 @@
+﻿@page "/Account/Manage/Passkeys"
+@rendermode InteractiveServer
+
+<PageTitle>Manage Passkeys</PageTitle>
+
+<PageHeader Title="Manage Passkeys" />
+
+@if (!string.IsNullOrEmpty(StatusMessage))
+{
+    <MudAlert Severity="@(StatusMessage.StartsWith("Error") ? Severity.Error : Severity.Success)"
+              Class="mb-4 border-1"
+              ShowCloseIcon
+              CloseIconClicked="() => StatusMessage = null">
+        @StatusMessage
+    </MudAlert>
+}
+
+@if (CurrentPasskeys is { Count: > 0 })
+{
+    <MudTable Items="@CurrentPasskeys" Dense Hover Elevation="0" Class="border-1 mb-4">
+        <HeaderContent>
+            <MudTh>Name</MudTh>
+            <MudTh Style="width: 200px;">Actions</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Name">
+                <MudText Typo="Typo.body2">@(context.Name ?? "Unnamed passkey")</MudText>
+            </MudTd>
+            <MudTd DataLabel="Actions">
+                @{
+                    var credentialId = System.Buffers.Text.Base64Url.EncodeToString(context.CredentialId);
+                }
+                <MudStack Row Spacing="1">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               Size="Size.Small"
+                               Href="@($"Account/Manage/RenamePasskey/{credentialId}")"
+                               Style="text-transform: none;">
+                        Rename
+                    </MudButton>
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Error"
+                               Size="Size.Small"
+                               OnClick="@(() => DeletePasskeyAsync(credentialId))"
+                               Style="text-transform: none;">
+                        Delete
+                    </MudButton>
+                </MudStack>
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+}
+else
+{
+    <MudText Typo="Typo.body1" Class="mb-4 text-muted">No passkeys are registered.</MudText>
+}
+
+<MudAlert Severity="Severity.Info" Class="mb-4 border-1">
+    Adding passkeys requires a full page reload. Use the button below to navigate to the passkey registration page.
+</MudAlert>
+
+<MudButton Variant="Variant.Filled"
+           Color="Color.Primary"
+           Href="Account/Manage/Passkeys"
+           DropShadow="false"
+           Style="text-transform: none;"
+           Disabled="@(CurrentPasskeys is { Count: >= MaxPasskeyCount })">
+    Add a new passkey (reload page)
+</MudButton>
+
+@if (CurrentPasskeys is { Count: >= MaxPasskeyCount })
+{
+    <MudText Typo="Typo.body2" Color="Color.Error" Class="mt-2">
+        You have reached the maximum number of allowed passkeys. Please delete one before adding a new one.
+    </MudText>
+}

@@ -1,0 +1,61 @@
+﻿@page "/Account/Manage/ExternalLogins"
+@rendermode InteractiveServer
+
+<PageTitle>Manage External Logins</PageTitle>
+
+<PageHeader Title="External Logins" />
+
+@if (!string.IsNullOrEmpty(StatusMessage))
+{
+    <MudAlert Severity="@(StatusMessage.StartsWith("Error") ? Severity.Error : Severity.Success)"
+              Class="mb-4 border-1"
+              ShowCloseIcon
+              CloseIconClicked="() => StatusMessage = null">
+        @StatusMessage
+    </MudAlert>
+}
+
+@if (CurrentLogins is { Count: > 0 })
+{
+    <MudText Typo="Typo.h6" Class="fw-bold mb-2">Registered Logins</MudText>
+    <MudTable Items="@CurrentLogins" Dense Hover Elevation="0" Class="border-1 mb-4">
+        <HeaderContent>
+            <MudTh>Provider</MudTh>
+            <MudTh Style="width: 120px;">Actions</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Provider">
+                <MudText Typo="Typo.body2">@context.ProviderDisplayName</MudText>
+            </MudTd>
+            <MudTd DataLabel="Actions">
+                @if (ShowRemoveButton)
+                {
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Error"
+                               Size="Size.Small"
+                               OnClick="@(() => RemoveLoginAsync(context.LoginProvider, context.ProviderKey))"
+                               Style="text-transform: none;">
+                        Remove
+                    </MudButton>
+                }
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+}
+
+@if (OtherLogins is { Count: > 0 })
+{
+    <MudText Typo="Typo.h6" Class="fw-bold mb-2">Add another service to log in</MudText>
+    <MudStack Row Spacing="2">
+        @foreach (var provider in OtherLogins)
+        {
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Primary"
+                       Href="@($"Account/Manage/LinkExternalLogin?provider={provider.Name}")"
+                       DropShadow="false"
+                       Style="text-transform: none;">
+                @provider.DisplayName
+            </MudButton>
+        }
+    </MudStack>
+}
