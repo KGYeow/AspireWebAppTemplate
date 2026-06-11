@@ -65,7 +65,8 @@ public partial class Login : ComponentBase
             {
                 Email = Input.Email,
                 Password = Input.Password,
-                RememberMe = Input.RememberMe
+                RememberMe = Input.RememberMe,
+                ReturnUrl = ReturnUrl
             };
 
             var result = await AuthService.LoginAsync(request);

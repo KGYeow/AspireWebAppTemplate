@@ -84,10 +84,16 @@ public partial class Register : ComponentBase
                     $"Account/RegisterConfirmation?email={Uri.EscapeDataString(Input.Email)}&returnUrl={ReturnUrl}",
                     forceLoad: true);
             }
+            else if (!string.IsNullOrEmpty(result.Token))
+            {
+                // Auto-sign-in: navigate to PerformLogin with the token
+                NavigationManager.NavigateTo(
+                    $"Account/PerformLogin?token={result.Token}", forceLoad: true);
+            }
             else
             {
-                // Registration succeeded and no email confirmation needed — redirect to login
-                NavigationManager.NavigateTo(ReturnUrl ?? "/", forceLoad: true);
+                // Fallback: redirect to login
+                NavigationManager.NavigateTo("Account/Login", forceLoad: true);
             }
         }
         catch (Exception ex)

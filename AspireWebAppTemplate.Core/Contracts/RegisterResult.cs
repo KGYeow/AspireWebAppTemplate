@@ -24,4 +24,10 @@ public sealed class RegisterResult
     /// Combined error descriptions when registration fails.
     /// </summary>
     public string? ErrorMessage { get; init; }
+
+    /// <summary>
+    /// Login token for auto-sign-in when email confirmation is not required.
+    /// Use with the PerformLogin endpoint to set the auth cookie.
+    /// </summary>
+    public string? Token { get; init; }
 }

@@ -88,7 +88,7 @@ public sealed class LdapAuthService : ILdapAuthService
                 _settings.BaseDn,
                 filter,
                 System.DirectoryServices.Protocols.SearchScope.Subtree,
-                "displayName", "title", "department", "mail", "samaccountname");
+                "displayName", "givenName", "sn", "title", "department", "mail", "samaccountname", "employeeNumber");
 
             var response = (SearchResponse)connection.SendRequest(request);
 
@@ -98,10 +98,13 @@ public sealed class LdapAuthService : ILdapAuthService
                 var attributes = new LdapUserAttributes
                 {
                     DisplayName = GetAttribute(entry, "displayName"),
+                    FirstName = GetAttribute(entry, "givenName"),
+                    LastName = GetAttribute(entry, "sn"),
                     JobTitle = GetAttribute(entry, "title"),
                     Department = GetAttribute(entry, "department"),
                     Email = GetAttribute(entry, "mail"),
-                    Ntid = GetAttribute(entry, "samaccountname")
+                    Ntid = GetAttribute(entry, "samaccountname"),
+                    EmployeeNumber = GetAttribute(entry, "employeeNumber")
                 };
 
                 return Task.FromResult(new LdapAuthResult

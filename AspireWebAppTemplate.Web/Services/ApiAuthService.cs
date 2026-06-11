@@ -40,7 +40,8 @@ public class ApiAuthService(HttpClient http)
     }
 
     public async Task<UserDto?> GetCurrentUserAsync()
-        => await http.GetFromJsonAsync<UserDto>("/api/auth/me");
+        => 
+        await http.GetFromJsonAsync<UserDto>("/api/auth/me");
 
     public async Task<string?> UpdatePreferencesAsync(UpdatePreferencesRequest request)
     {

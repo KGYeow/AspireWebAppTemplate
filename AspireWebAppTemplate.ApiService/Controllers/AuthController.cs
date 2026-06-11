@@ -64,13 +64,21 @@ public class AuthController : ControllerBase
         LoginResult result;
         if (_ldapSettings.Enabled)
         {
+            // Try LDAP first
             result = await _ldapLoginService.ValidateAndGenerateTokenAsync(
-                request.Email, request.Password, request.RememberMe, "/");
+                request.Email, request.Password, request.RememberMe, request.ReturnUrl ?? "/");
+
+            // If LDAP fails (user not in directory), fall back to local Identity
+            if (!result.Succeeded && !result.IsDeactivated && !result.IsLockedOut)
+            {
+                result = await _loginService.ValidateAndGenerateTokenAsync(
+                    request.Email, request.Password, request.RememberMe, request.ReturnUrl ?? "/");
+            }
         }
         else
         {
             result = await _loginService.ValidateAndGenerateTokenAsync(
-                request.Email, request.Password, request.RememberMe, "/");
+                request.Email, request.Password, request.RememberMe, request.ReturnUrl ?? "/");
         }
 
         if (result.Succeeded)
@@ -110,6 +118,40 @@ public class AuthController : ControllerBase
         var baseUri = $"{Request.Scheme}://{Request.Host}/Account/ConfirmEmail";
         var result = await _registerService.RegisterUserAsync(
             request.Email, request.Password, baseUri, null);
+
+        // If registration succeeded and email confirmation is NOT required,
+        // generate a login token so the frontend can auto-sign-in
+        if (result.Succeeded && !result.RequiresEmailConfirmation)
+        {
+            var user = await _userManager.FindByEmailAsync(request.Email);
+            if (user is not null)
+            {
+                var token = Guid.NewGuid().ToString("N");
+                var loginData = new LoginTokenData
+                {
+                    UserId = user.Id,
+                    RememberMe = false,
+                    ReturnUrl = request.ReturnUrl ?? "/"
+                };
+
+                var memoryCache = HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Caching.Memory.IMemoryCache>();
+                memoryCache.Set(
+                    $"LoginToken:{token}",
+                    loginData,
+                    new Microsoft.Extensions.Caching.Memory.MemoryCacheEntryOptions
+                    {
+                        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2)
+                    });
+
+                return Ok(new RegisterResult
+                {
+                    Succeeded = true,
+                    RequiresEmailConfirmation = false,
+                    Email = request.Email,
+                    Token = token
+                });
+            }
+        }
 
         return Ok(result);
     }
