@@ -1,30 +1,29 @@
 using System.ComponentModel.DataAnnotations;
-using BlazorWebAppTemplate.Data;
-using BlazorWebAppTemplate.Data.Entities;
+using AspireWebAppTemplate.Core.Contracts;
+using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using MudBlazor;
 
-namespace BlazorWebAppTemplate.Components.Pages.RoleManagement;
+namespace AspireWebAppTemplate.Web.Components.Pages.RoleManagement;
 
 /// <summary>
 /// Dialog for editing an existing application role's name, display name,
 /// description, and active status.
-/// Loads the current role data on initialization and updates it on submission.
+/// Delegates all persistence to the API via <see cref="ApiRoleService"/>.
 /// </summary>
 public partial class EditRoleDialog : ComponentBase
 {
     #region Injected Services
 
     /// <summary>
-    /// Manages roles. Used to load and update the target role.
+    /// HTTP client service for role operations.
     /// </summary>
-    [Inject] private RoleManager<ApplicationRole> RoleManager { get; set; } = default!;
+    [Inject] private ApiRoleService RoleService { get; set; } = default!;
 
     /// <summary>
-    /// Structured logger for recording errors during role load and update.
+    /// Structured logger.
     /// </summary>
     [Inject] private ILogger<EditRoleDialog> Logger { get; set; } = default!;
 
@@ -44,7 +43,6 @@ public partial class EditRoleDialog : ComponentBase
 
     /// <summary>
     /// The Identity ID of the role to edit.
-    /// Used to load the existing role data on initialization.
     /// </summary>
     [Parameter]
     public string RoleId { get; set; } = "";
@@ -67,31 +65,21 @@ public partial class EditRoleDialog : ComponentBase
 
     /// <summary>
     /// Drives the <c>EditForm</c> validation context.
-    /// Initialized after the role is loaded in <see cref="OnInitializedAsync"/>.
     /// </summary>
     private EditContext editContext = default!;
 
     /// <summary>
-    /// The original role name loaded from Identity.
-    /// Used to detect name changes and check for conflicts on save.
-    /// </summary>
-    private string originalName = "";
-
-    /// <summary>
     /// Whether the role data is currently being loaded.
-    /// Hides the form and disables the save button while true.
     /// </summary>
     protected bool IsLoading { get; private set; } = true;
 
     /// <summary>
-    /// Controls the save button's disabled state and loading spinner
-    /// to prevent duplicate submissions.
+    /// Controls the save button's disabled state.
     /// </summary>
     protected bool IsBusy { get; private set; }
 
     /// <summary>
-    /// Status message displayed in the error alert on validation
-    /// or persistence failure.
+    /// Status message displayed on error.
     /// </summary>
     protected string? StatusMessage { get; private set; }
 
@@ -100,15 +88,13 @@ public partial class EditRoleDialog : ComponentBase
     #region Lifecycle
 
     /// <summary>
-    /// Loads the existing role data by <see cref="RoleId"/> and
-    /// pre-populates the <see cref="Input"/> model.
-    /// Closes the dialog immediately if the role is not found.
+    /// Loads the existing role data from the API and pre-populates the form.
     /// </summary>
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            var role = await RoleManager.FindByIdAsync(RoleId);
+            var role = await RoleService.GetRoleAsync(RoleId);
             if (role is null)
             {
                 Logger.LogWarning("EditRoleDialog: role '{RoleId}' not found.", RoleId);
@@ -116,11 +102,9 @@ public partial class EditRoleDialog : ComponentBase
                 return;
             }
 
-            // Pre-populate form with existing values
-            originalName = role.Name ?? "";
             Input = new InputModel
             {
-                Name = role.Name ?? "",
+                Name = role.Name,
                 DisplayName = role.DisplayName ?? "",
                 Description = role.Description ?? "",
                 IsActive = role.IsActive,
@@ -134,7 +118,6 @@ public partial class EditRoleDialog : ComponentBase
         }
         finally
         {
-            // Initialize edit context after Input is populated
             editContext = new EditContext(Input);
             IsLoading = false;
         }
@@ -145,10 +128,7 @@ public partial class EditRoleDialog : ComponentBase
     #region Event Handlers
 
     /// <summary>
-    /// Saves the updated role data on valid form submission.
-    /// Checks for name conflicts if the role name has changed.
-    /// Stamps <see cref="ApplicationRole.UpdatedUtc"/> on success.
-    /// Closes the dialog with <see cref="DialogResult.Ok{T}"/> on success.
+    /// Saves the updated role data via the API.
     /// </summary>
     protected async Task OnSubmitAsync()
     {
@@ -160,40 +140,18 @@ public partial class EditRoleDialog : ComponentBase
 
         try
         {
-            var role = await RoleManager.FindByIdAsync(RoleId);
-            if (role is null)
+            var request = new CreateRoleRequest
             {
-                StatusMessage = "Role no longer exists. It may have been deleted.";
-                return;
-            }
+                Name = Input.Name,
+                DisplayName = Input.DisplayName,
+                Description = Input.Description,
+                Position = Input.Position
+            };
 
-            // Guard: check for name conflict only if the name has changed
-            var nameChanged = !string.Equals(
-                Input.Name, originalName,
-                StringComparison.OrdinalIgnoreCase);
-
-            if (nameChanged)
+            var (success, error) = await RoleService.UpdateRoleAsync(RoleId, request);
+            if (!success)
             {
-                var existing = await RoleManager.FindByNameAsync(Input.Name);
-                if (existing is not null)
-                {
-                    StatusMessage = $"A role with the name '{Input.Name}' already exists.";
-                    return;
-                }
-            }
-
-            // Apply changes
-            role.Name = Input.Name;
-            role.DisplayName = Input.DisplayName;
-            role.Description = Input.Description;
-            role.IsActive = Input.IsActive;
-            role.Position = Input.Position;
-            role.UpdatedUtc = DateTime.UtcNow;
-
-            var updateResult = await RoleManager.UpdateAsync(role);
-            if (!updateResult.Succeeded)
-            {
-                StatusMessage = string.Join(" ", updateResult.Errors.Select(e => e.Description));
+                StatusMessage = error ?? "Failed to update role.";
                 return;
             }
 
@@ -216,13 +174,11 @@ public partial class EditRoleDialog : ComponentBase
 
     /// <summary>
     /// Form model for the edit role dialog.
-    /// Pre-populated from the existing <see cref="ApplicationRole"/> on load.
     /// </summary>
     private sealed class InputModel
     {
         /// <summary>
-        /// The technical role name used by Identity (e.g., "Admin").
-        /// Must be unique across all roles.
+        /// The technical role name.
         /// </summary>
         [Required]
         [StringLength(50, ErrorMessage = "Role name cannot exceed 50 characters.")]
@@ -230,8 +186,7 @@ public partial class EditRoleDialog : ComponentBase
         public string Name { get; set; } = "";
 
         /// <summary>
-        /// A human-readable label shown in the UI (e.g., "Administrator").
-        /// Falls back to <see cref="Name"/> if not set.
+        /// A human-readable label shown in the UI.
         /// </summary>
         [StringLength(100, ErrorMessage = "Display name cannot exceed 100 characters.")]
         [Display(Name = "Display Name")]
@@ -251,8 +206,7 @@ public partial class EditRoleDialog : ComponentBase
         public bool IsActive { get; set; } = true;
 
         /// <summary>
-        /// The authority hierarchy position of this role.
-        /// Higher values indicate higher authority.
+        /// The authority hierarchy position.
         /// </summary>
         [Display(Name = "Position")]
         public int Position { get; set; }

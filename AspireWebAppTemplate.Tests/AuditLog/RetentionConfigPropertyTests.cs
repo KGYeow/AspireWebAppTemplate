@@ -1,8 +1,8 @@
 // Feature: audit-log, Property 10: Retention configuration validation
-using BlazorWebAppTemplate.Core.Domain.Enums;
-using BlazorWebAppTemplate.Data;
-using BlazorWebAppTemplate.Data.Entities;
-using BlazorWebAppTemplate.Services;
+using AspireWebAppTemplate.ApiService.Data;
+using AspireWebAppTemplate.ApiService.Data.Entities;
+using AspireWebAppTemplate.Core.Domain.Enums;
+using AspireWebAppTemplate.Services;
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;
@@ -15,7 +15,7 @@ using Moq;
 using Gen = FsCheck.Fluent.Gen;
 using Property = FsCheck.Property;
 
-namespace BlazorWebAppTemplate.Tests.AuditLog;
+namespace AspireWebAppTemplate.Tests.AuditLog;
 
 /// <summary>
 /// Property-based tests verifying that the AuditLog:RetentionDays configuration value is

@@ -8,6 +8,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AspireWebAppTemplate.ServiceDefaults\AspireWebAppTemplate.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\AspireWebAppTemplate.Core\AspireWebAppTemplate.Core.csproj" />
+    <ProjectReference Include="..\AspireWebAppTemplate.UI\AspireWebAppTemplate.UI.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MudBlazor" Version="9.5.0" />
   </ItemGroup>
 
 </Project>

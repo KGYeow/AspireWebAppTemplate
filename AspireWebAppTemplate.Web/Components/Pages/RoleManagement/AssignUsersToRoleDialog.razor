@@ -1,5 +1,4 @@
-@using BlazorWebAppTemplate.Data
-@using BlazorWebAppTemplate.Data.Entities
+@using AspireWebAppTemplate.Core.Contracts
 
 <ModalDialog Title="Assign Users to Role">
     <ContentArea>
@@ -44,10 +43,10 @@
             }
             else if (SearchResults.Count > 0)
             {
-                <MudList T="ApplicationUser" Dense Class="border rounded mud-border-primary" Style="max-height: 250px; overflow-y: auto;">
+                <MudList T="UserDto" Dense Class="border rounded mud-border-primary" Style="max-height: 250px; overflow-y: auto;">
                     @foreach (var user in SearchResults)
                     {
-                        <MudListItem T="ApplicationUser"
+                        <MudListItem T="UserDto"
                                      OnClick="() => ToggleUserSelection(user)"
                                      Class="@(IsUserSelected(user) ? "mud-primary-text" : "")">
                             <MudStack Row Spacing="2" AlignItems="AlignItems.Center">

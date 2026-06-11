@@ -1,17 +1,16 @@
-﻿using BlazorWebAppTemplate.Abstractions;
-using BlazorWebAppTemplate.Core.Application.Abstractions;
-using BlazorWebAppTemplate.Core.Common;
-using BlazorWebAppTemplate.Core.Domain.Enums;
-using BlazorWebAppTemplate.Data;
-using BlazorWebAppTemplate.Data.Entities;
-using BlazorWebAppTemplate.UI.Theme;
+using AspireWebAppTemplate.Abstractions;
+using AspireWebAppTemplate.Core.Application.Abstractions;
+using AspireWebAppTemplate.Core.Common;
+using AspireWebAppTemplate.Core.Contracts;
+using AspireWebAppTemplate.Core.Domain.Enums;
+using AspireWebAppTemplate.UI.Theme;
+using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.JSInterop;
 using MudBlazor;
 
-namespace BlazorWebAppTemplate.Components.Layout;
+namespace AspireWebAppTemplate.Web.Components.Layout;
 
 public partial class MainLayout : LayoutComponentBase, IDisposable
 {
@@ -30,9 +29,9 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
     [Inject] private IJSRuntime JS { get; set; } = default!;
 
     /// <summary>
-    /// Identity user manager for loading and updating user profiles.
+    /// API auth service for loading and updating user profiles.
     /// </summary>
-    [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
+    [Inject] private ApiAuthService AuthService { get; set; } = default!;
 
     /// <summary>
     /// Scoped user time zone context, initialized once per circuit.
@@ -106,8 +105,7 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
     /// <summary>
     /// Runs after the component has rendered. On the first render, detects the browser
     /// timezone via JS interop and auto-saves it to the user's profile if their
-    /// <see cref="ApplicationUser.TimeZoneId"/> is null. Also initializes the theme state
-    /// based on the user's stored preference.
+    /// TimeZoneId is null. Also initializes the theme state based on the user's stored preference.
     /// </summary>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -118,7 +116,7 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
             var authState = await AuthStateTask;
             if (authState.User.Identity?.IsAuthenticated != true) return;
 
-            var user = await UserManager.GetUserAsync(authState.User);
+            var user = await AuthService.GetCurrentUserAsync();
             if (user is null) return;
 
             // Initialize the scoped user time zone context for this circuit
@@ -135,8 +133,11 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
 
             if (string.IsNullOrWhiteSpace(detectedTimeZone)) return;
 
-            user.TimeZoneId = detectedTimeZone;
-            await UserManager.UpdateAsync(user);
+            // Save the detected timezone via the API
+            await AuthService.UpdatePreferencesAsync(new UpdatePreferencesRequest
+            {
+                TimeZoneId = detectedTimeZone
+            });
 
             // Re-initialize after auto-detection so the context has the new value
             await UserTimeZone.InitializeAsync(user.Id);

@@ -1,32 +1,27 @@
-using BlazorWebAppTemplate.Data;
-using BlazorWebAppTemplate.Data.Entities;
-using BlazorWebAppTemplate.UI.Components.Shared;
-using BlazorWebAppTemplate.UI.Utilities;
+using AspireWebAppTemplate.Core.Contracts;
+using AspireWebAppTemplate.UI.Components.Shared;
+using AspireWebAppTemplate.UI.Utilities;
+using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using MudBlazor;
 
-namespace BlazorWebAppTemplate.Components.Pages.RoleManagement;
+namespace AspireWebAppTemplate.Web.Components.Pages.RoleManagement;
 
 /// <summary>
 /// Role management page. Lists all roles with multi-role management,
 /// add/edit/delete actions, and bulk operations. Admin role required.
 /// Uses server-side filtering, sorting, and pagination via <see cref="DataGridUtils{T}"/>.
+/// All operations are delegated to the API via <see cref="ApiRoleService"/>.
 /// </summary>
 public partial class Index : ComponentBase
 {
     #region Injected Services
 
     /// <summary>
-    /// Manages roles.
+    /// HTTP client service for role operations.
     /// </summary>
-    [Inject] private RoleManager<ApplicationRole> RoleManager { get; set; } = default!;
-
-    /// <summary>
-    /// Manages user accounts for counting users per role.
-    /// </summary>
-    [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
+    [Inject] private ApiRoleService RoleService { get; set; } = default!;
 
     /// <summary>
     /// Structured logger.
@@ -45,7 +40,6 @@ public partial class Index : ComponentBase
     /// <summary>
     /// Server-side helper that applies column filters, multi-sort, global search,
     /// and pagination based on <see cref="GridState{T}"/>.
-    /// Maps each filterable/sortable column to its corresponding property selector.
     /// </summary>
     private readonly DataGridUtils<RoleViewModel> _dataGridUtils = new DataGridUtils<RoleViewModel>()
         .MapString(nameof(RoleViewModel.Name),          x => x.Name)
@@ -61,7 +55,6 @@ public partial class Index : ComponentBase
 
     /// <summary>
     /// The set of currently selected roles in the data grid.
-    /// Bound via <c>@bind-SelectedItems</c>.
     /// </summary>
     private HashSet<RoleViewModel> selectedRoles = new();
 
@@ -86,7 +79,6 @@ public partial class Index : ComponentBase
 
     /// <summary>
     /// The current global search term for the toolbar search box.
-    /// Applied across all searchable fields via <see cref="DataGridUtils{T}"/>.
     /// </summary>
     private string? searchString;
 
@@ -110,18 +102,13 @@ public partial class Index : ComponentBase
 
     /// <summary>
     /// Server-side reload callback for <see cref="MudDataGrid{T}"/>.
-    /// Loads all roles, then delegates filtering, sorting, and pagination
+    /// Loads all roles from the API, then delegates filtering, sorting, and pagination
     /// to <see cref="DataGridUtils{T}.ServerReloadAsync"/>.
     /// </summary>
-    /// <param name="state">The current grid state containing page, page size, filters, and sort definitions.</param>
-    /// <param name="cancellationToken">Cancellation token provided by the grid (unused but required by delegate signature).</param>
-    /// <returns>A <see cref="GridData{T}"/> containing the paged items and total count.</returns>
     private async Task<GridData<RoleViewModel>> ServerReload(GridState<RoleViewModel> state, CancellationToken cancellationToken)
     {
-        // Loader function: fetches all roles and maps to view models
         async Task<IEnumerable<RoleViewModel>> loader() => await LoadRoleViewModelsAsync();
 
-        // Global search fields — searches across all user-visible text columns
         IEnumerable<string> GlobalFields(RoleViewModel r) => new[]
         {
             r.Name,
@@ -131,7 +118,6 @@ public partial class Index : ComponentBase
             r.IsActive ? "Active" : "Inactive"
         };
 
-        // Set page-aware line numbers (e.g., page 2 with size 10 starts at 11)
         void SetLine(RoleViewModel item, int lineNo) => item.LineNumber = lineNo;
 
         return await _dataGridUtils.ServerReloadAsync(
@@ -143,35 +129,26 @@ public partial class Index : ComponentBase
     }
 
     /// <summary>
-    /// Loads all roles from the Identity store and maps them to <see cref="RoleViewModel"/> instances.
-    /// This serves as the data loader for <see cref="DataGridUtils{T}.ServerReloadAsync"/>.
+    /// Loads all roles from the API and maps them to <see cref="RoleViewModel"/> instances.
     /// </summary>
-    /// <returns>An enumerable of <see cref="RoleViewModel"/> representing all roles.</returns>
     private async Task<IEnumerable<RoleViewModel>> LoadRoleViewModelsAsync()
     {
-        var appRoles = RoleManager.Roles.OrderBy(r => r.Name).ToList();
-        var viewModels = new List<RoleViewModel>();
+        var roles = await RoleService.GetRolesAsync();
+        if (roles is null) return [];
 
-        foreach (var role in appRoles)
+        return roles.Select(r => new RoleViewModel
         {
-            // Fetch users in role to compute the count
-            var usersInRole = await UserManager.GetUsersInRoleAsync(role.Name!);
-            viewModels.Add(new RoleViewModel
-            {
-                Id = role.Id,
-                Name = role.Name ?? "",
-                DisplayName = role.DisplayName ?? "",
-                Description = role.Description ?? "",
-                IsActive = role.IsActive,
-                UserCount = usersInRole.Count,
-                CreatedUtc = role.CreatedUtc,
-                UpdatedUtc = role.UpdatedUtc,
-                IsSystem = role.IsSystem,
-                Position = role.Position,
-            });
-        }
-
-        return viewModels;
+            Id = r.Id,
+            Name = r.Name,
+            DisplayName = r.DisplayName ?? "",
+            Description = r.Description ?? "",
+            IsActive = r.IsActive,
+            UserCount = r.UserCount,
+            CreatedUtc = r.CreatedUtc,
+            UpdatedUtc = r.UpdatedUtc,
+            IsSystem = r.IsSystem,
+            Position = r.Position,
+        });
     }
 
     #endregion
@@ -180,18 +157,15 @@ public partial class Index : ComponentBase
 
     /// <summary>
     /// Clears the current selection and reloads the grid.
-    /// Called after any bulk action completes.
     /// </summary>
     private async Task ClearSelectionAndReloadAsync()
     {
-        // Assign a new instance to trigger binding update in the grid
         selectedRoles = new HashSet<RoleViewModel>();
         await dataGrid.ReloadServerData();
     }
 
     /// <summary>
     /// Clears the current selection without reloading the grid.
-    /// Used by the "Clear selection" (X) button in the toolbar.
     /// </summary>
     private void ClearSelection()
     {
@@ -204,14 +178,11 @@ public partial class Index : ComponentBase
 
     /// <summary>
     /// Activates all selected roles.
-    /// Shows a confirmation dialog before executing.
-    /// Sets <c>IsActive = true</c> and stamps <c>UpdatedUtc</c> for each role.
     /// </summary>
     private async Task BulkActivateAsync()
     {
         if (selectedRoles.Count == 0) return;
 
-        // Filter out system roles — they cannot be activated/deactivated
         var targets = selectedRoles.Where(r => !r.IsSystem).ToList();
         var skippedSystem = selectedRoles.Count - targets.Count;
 
@@ -221,7 +192,6 @@ public partial class Index : ComponentBase
             return;
         }
 
-        // Confirmation dialog
         var parameters = new DialogParameters<ConfirmationDialog>
         {
             { x => x.ContentText, $"Are you sure you want to activate {targets.Count} role(s)?{(skippedSystem > 0 ? $" ({skippedSystem} skipped: system role)" : "")}" },
@@ -238,27 +208,9 @@ public partial class Index : ComponentBase
         int success = 0, failed = 0;
         foreach (var roleVm in targets)
         {
-            try
-            {
-                var role = await RoleManager.FindByIdAsync(roleVm.Id);
-                if (role is null) { failed++; continue; }
-
-                role.IsActive = true;
-                role.UpdatedUtc = DateTime.UtcNow;
-                var updateResult = await RoleManager.UpdateAsync(role);
-                if (updateResult.Succeeded) success++;
-                else
-                {
-                    failed++;
-                    Logger.LogWarning("Failed to activate role '{Role}': {Errors}",
-                        role.Name, string.Join(", ", updateResult.Errors.Select(e => e.Description)));
-                }
-            }
-            catch (Exception ex)
-            {
-                failed++;
-                Logger.LogError(ex, "Unexpected error activating role '{RoleId}'.", roleVm.Id);
-            }
+            var ok = await RoleService.ActivateRoleAsync(roleVm.Id);
+            if (ok) success++;
+            else failed++;
         }
 
         Snackbar.Add($"{success} activated, {skippedSystem} skipped (system), {failed} failed.", Severity.Success);
@@ -267,14 +219,11 @@ public partial class Index : ComponentBase
 
     /// <summary>
     /// Deactivates all selected roles (excluding system roles).
-    /// Shows a confirmation dialog before executing.
-    /// Sets <c>IsActive = false</c> and stamps <c>UpdatedUtc</c> for each role.
     /// </summary>
     private async Task BulkDeactivateAsync()
     {
         if (selectedRoles.Count == 0) return;
 
-        // Filter out system roles — they cannot be activated/deactivated
         var targets = selectedRoles.Where(r => !r.IsSystem).ToList();
         var skippedSystem = selectedRoles.Count - targets.Count;
 
@@ -284,7 +233,6 @@ public partial class Index : ComponentBase
             return;
         }
 
-        // Confirmation dialog
         var parameters = new DialogParameters<ConfirmationDialog>
         {
             { x => x.ContentText, $"Are you sure you want to deactivate {targets.Count} role(s)?{(skippedSystem > 0 ? $" ({skippedSystem} skipped: system role)" : "")}" },
@@ -301,27 +249,9 @@ public partial class Index : ComponentBase
         int success = 0, failed = 0;
         foreach (var roleVm in targets)
         {
-            try
-            {
-                var role = await RoleManager.FindByIdAsync(roleVm.Id);
-                if (role is null) { failed++; continue; }
-
-                role.IsActive = false;
-                role.UpdatedUtc = DateTime.UtcNow;
-                var updateResult = await RoleManager.UpdateAsync(role);
-                if (updateResult.Succeeded) success++;
-                else
-                {
-                    failed++;
-                    Logger.LogWarning("Failed to deactivate role '{Role}': {Errors}",
-                        role.Name, string.Join(", ", updateResult.Errors.Select(e => e.Description)));
-                }
-            }
-            catch (Exception ex)
-            {
-                failed++;
-                Logger.LogError(ex, "Unexpected error deactivating role '{RoleId}'.", roleVm.Id);
-            }
+            var ok = await RoleService.DeactivateRoleAsync(roleVm.Id);
+            if (ok) success++;
+            else failed++;
         }
 
         Snackbar.Add($"{success} deactivated, {skippedSystem} skipped (system), {failed} failed.", Severity.Success);
@@ -336,7 +266,6 @@ public partial class Index : ComponentBase
     {
         if (selectedRoles.Count == 0) return;
 
-        // Filter out system roles and roles that have users assigned
         var systemRoles = selectedRoles.Where(r => r.IsSystem).ToList();
         var skippedSystem = systemRoles.Count;
 
@@ -377,25 +306,9 @@ public partial class Index : ComponentBase
 
         foreach (var roleVm in targets)
         {
-            try
-            {
-                var role = await RoleManager.FindByIdAsync(roleVm.Id);
-                if (role is null) { failed++; continue; }
-
-                var deleteResult = await RoleManager.DeleteAsync(role);
-                if (deleteResult.Succeeded) success++;
-                else
-                {
-                    failed++;
-                    Logger.LogWarning("Failed to delete role '{Role}': {Errors}",
-                        role.Name, string.Join(", ", deleteResult.Errors.Select(e => e.Description)));
-                }
-            }
-            catch (Exception ex)
-            {
-                failed++;
-                Logger.LogError(ex, "Unexpected error deleting role '{RoleId}'.", roleVm.Id);
-            }
+            var (ok, _) = await RoleService.DeleteRoleAsync(roleVm.Id);
+            if (ok) success++;
+            else failed++;
         }
 
         var parts = new List<string> { $"{success} deleted" };
@@ -413,10 +326,7 @@ public partial class Index : ComponentBase
 
     /// <summary>
     /// Handles the global search text change from the toolbar search box.
-    /// Triggers a server-side reload with the new search term.
     /// </summary>
-    /// <param name="text">The search text entered by the user.</param>
-    /// <returns>A task representing the asynchronous reload operation.</returns>
     private Task OnSearch(string text)
     {
         searchString = text;
@@ -434,7 +344,6 @@ public partial class Index : ComponentBase
 
         if (result is not null && !result.Canceled)
         {
-            // Reload the grid to reflect the newly added role
             await dataGrid.ReloadServerData();
             Snackbar.Add("Role created successfully.", Severity.Success);
         }
@@ -442,9 +351,7 @@ public partial class Index : ComponentBase
 
     /// <summary>
     /// Opens the Edit Role dialog for a specific role.
-    /// On success, reloads the grid.
     /// </summary>
-    /// <param name="role">The role view model to edit.</param>
     protected async Task OpenEditRoleDialog(RoleViewModel role)
     {
         var parameters = new DialogParameters<EditRoleDialog>
@@ -459,7 +366,6 @@ public partial class Index : ComponentBase
 
         if (result is not null && !result.Canceled)
         {
-            // Reload the grid to reflect the updated role data
             await dataGrid.ReloadServerData();
             Snackbar.Add("Role updated successfully.", Severity.Success);
         }
@@ -467,13 +373,9 @@ public partial class Index : ComponentBase
 
     /// <summary>
     /// Toggles a role's active status with a confirmation dialog.
-    /// Deactivation is allowed regardless of user count — a warning is shown if users are assigned.
-    /// System roles cannot be deactivated.
     /// </summary>
-    /// <param name="role">The role view model to activate or deactivate.</param>
     protected async Task ToggleActivationAsync(RoleViewModel role)
     {
-        // Guard: system roles cannot be deactivated
         if (role.IsSystem && role.IsActive)
         {
             Snackbar.Add("Cannot deactivate a system role.", Severity.Error);
@@ -482,7 +384,6 @@ public partial class Index : ComponentBase
 
         var action = role.IsActive ? "deactivate" : "activate";
 
-        // Build confirmation content — include warning when deactivating a role with assigned users
         var contentText = $"Are you sure you want to {action} the role '{role.Name}'?";
         if (role.IsActive && role.UserCount > 0)
         {
@@ -503,53 +404,37 @@ public partial class Index : ComponentBase
         var result = await dialog.Result;
         if (result is null || result.Canceled) return;
 
-        var appRole = await RoleManager.FindByIdAsync(role.Id);
-        if (appRole is null)
+        bool ok;
+        if (role.IsActive)
+            ok = await RoleService.DeactivateRoleAsync(role.Id);
+        else
+            ok = await RoleService.ActivateRoleAsync(role.Id);
+
+        if (ok)
         {
-            ErrorMessage = $"Role '{role.Name}' not found.";
-            return;
-        }
-
-        appRole.IsActive = !appRole.IsActive;
-        appRole.UpdatedUtc = DateTime.UtcNow;
-        var updateResult = await RoleManager.UpdateAsync(appRole);
-
-        if (updateResult.Succeeded)
-        {
-            Snackbar.Add($"Role '{role.Name}' {(appRole.IsActive ? "activated" : "deactivated")} successfully.", Severity.Success);
-
-            // Reload the grid to reflect the updated activation status
+            Snackbar.Add($"Role '{role.Name}' {(!role.IsActive ? "activated" : "deactivated")} successfully.", Severity.Success);
             await dataGrid.ReloadServerData();
         }
         else
         {
-            ErrorMessage = "Failed to update role status: " +
-                           string.Join(", ", updateResult.Errors.Select(e => e.Description));
+            ErrorMessage = "Failed to update role status.";
         }
     }
 
     /// <summary>
     /// Deletes a single role with a confirmation dialog.
-    /// Prevents deletion if users are still assigned to the role.
     /// </summary>
-    /// <param name="role">The role view model to delete.</param>
     protected async Task DeleteRoleAsync(RoleViewModel role)
     {
-        // Guard: prevent deletion of system roles
         if (role.IsSystem)
         {
-            Snackbar.Add(
-                $"Cannot delete '{role.Name}' — it is a protected system role.",
-                Severity.Error);
+            Snackbar.Add($"Cannot delete '{role.Name}' — it is a protected system role.", Severity.Error);
             return;
         }
 
-        // Guard: prevent deletion if users are still assigned
         if (role.UserCount > 0)
         {
-            Snackbar.Add(
-                $"Cannot delete '{role.Name}' — {role.UserCount} user(s) are still assigned to this role.",
-                Severity.Warning);
+            Snackbar.Add($"Cannot delete '{role.Name}' — {role.UserCount} user(s) are still assigned to this role.", Severity.Warning);
             return;
         }
 
@@ -566,31 +451,15 @@ public partial class Index : ComponentBase
         var result = await dialog.Result;
         if (result is null || result.Canceled) return;
 
-        try
+        var (ok, error) = await RoleService.DeleteRoleAsync(role.Id);
+        if (ok)
         {
-            var appRole = await RoleManager.FindByIdAsync(role.Id);
-            if (appRole is null)
-            {
-                ErrorMessage = $"Role '{role.Name}' not found.";
-                return;
-            }
-
-            var deleteResult = await RoleManager.DeleteAsync(appRole);
-            if (deleteResult.Succeeded)
-            {
-                Snackbar.Add($"Role '{role.Name}' deleted successfully.", Severity.Success);
-                await dataGrid.ReloadServerData();
-            }
-            else
-            {
-                ErrorMessage = "Failed to delete role: " +
-                               string.Join(", ", deleteResult.Errors.Select(e => e.Description));
-            }
+            Snackbar.Add($"Role '{role.Name}' deleted successfully.", Severity.Success);
+            await dataGrid.ReloadServerData();
         }
-        catch (Exception ex)
+        else
         {
-            Logger.LogError(ex, "Error deleting role '{RoleId}'.", role.Id);
-            ErrorMessage = "An unexpected error occurred while deleting the role.";
+            ErrorMessage = error ?? "Failed to delete role.";
         }
     }
 
@@ -600,21 +469,19 @@ public partial class Index : ComponentBase
 
     /// <summary>
     /// Flattened view model for the role data grid.
-    /// Properties are mapped to <see cref="DataGridUtils{T}"/> for server-side
-    /// filtering and sorting support.
     /// </summary>
     public class RoleViewModel
     {
-        /// <summary>Display line number (1-based, page-aware). Set by <see cref="DataGridUtils{T}"/>.</summary>
+        /// <summary>Display line number (1-based, page-aware).</summary>
         public int LineNumber { get; set; }
 
         /// <summary>The role's Identity ID.</summary>
         public string Id { get; set; } = "";
 
-        /// <summary>The technical role name used by Identity (e.g., "Admin").</summary>
+        /// <summary>The technical role name.</summary>
         public string Name { get; set; } = "";
 
-        /// <summary>The human-readable display name (e.g., "Administrator").</summary>
+        /// <summary>The human-readable display name.</summary>
         public string DisplayName { get; set; } = "";
 
         /// <summary>The role description.</summary>
@@ -623,10 +490,10 @@ public partial class Index : ComponentBase
         /// <summary>Whether the role is active.</summary>
         public bool IsActive { get; set; }
 
-        /// <summary>Whether the role is a protected system role (cannot be deleted/deactivated/renamed).</summary>
+        /// <summary>Whether the role is a protected system role.</summary>
         public bool IsSystem { get; set; }
 
-        /// <summary>The role's position value indicating authority level (higher = more authority).</summary>
+        /// <summary>The role's position value indicating authority level.</summary>
         public int Position { get; set; }
 
         /// <summary>Number of users currently assigned to this role.</summary>
@@ -635,12 +502,11 @@ public partial class Index : ComponentBase
         /// <summary>When the role was created (UTC).</summary>
         public DateTime CreatedUtc { get; set; }
 
-        /// <summary>When the role was last updated (UTC). Null if never updated.</summary>
+        /// <summary>When the role was last updated (UTC).</summary>
         public DateTime? UpdatedUtc { get; set; }
 
         /// <summary>
-        /// Determines equality by <see cref="Id"/> so the grid can match selected items
-        /// across page reloads (where new object instances are created by ServerData).
+        /// Determines equality by <see cref="Id"/>.
         /// </summary>
         public override bool Equals(object? obj)
             => obj is RoleViewModel other && Id == other.Id;

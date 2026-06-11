@@ -1,53 +1,61 @@
-using BlazorWebAppTemplate.Data;
-using BlazorWebAppTemplate.Data.Entities;
+using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
+using Microsoft.JSInterop;
 
-namespace BlazorWebAppTemplate.Components.Account.Pages.Manage;
+namespace AspireWebAppTemplate.Web.Components.Pages.Account.Manage;
 
 /// <summary>
-/// Personal data page using <c>InteractiveServer</c> render mode.
-/// Provides links to download or delete the user's personal data.
+/// Personal data page. Provides download functionality via the API.
 /// </summary>
 public partial class PersonalData : ComponentBase
 {
     #region Injected Services
 
-    /// <summary>
-    /// Manages user accounts. Used to verify the user exists.
-    /// </summary>
-    [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
-
-    /// <summary>
-    /// Provides navigation actions.
-    /// </summary>
+    [Inject] private ApiAuthService AuthService { get; set; } = default!;
     [Inject] private NavigationManager NavigationManager { get; set; } = default!;
+    [Inject] private IJSRuntime JS { get; set; } = default!;
+    [Inject] private ILogger<PersonalData> Logger { get; set; } = default!;
 
     #endregion
 
-    #region Cascading Parameters
+    #region State
 
-    /// <summary>
-    /// Provides the current authentication state to resolve the user.
-    /// </summary>
-    [CascadingParameter]
-    private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
+    protected string? StatusMessage { get; set; }
+    protected bool IsBusy { get; set; }
 
     #endregion
 
-    #region Lifecycle
+    #region Event Handlers
 
-    /// <summary>
-    /// Verifies the current user exists.
-    /// </summary>
-    protected override async Task OnInitializedAsync()
+    protected async Task OnDownloadAsync()
     {
-        var authState = await AuthStateTask;
-        var user = await UserManager.GetUserAsync(authState.User);
-        if (user is null)
+        if (IsBusy) return;
+        IsBusy = true;
+        StatusMessage = null;
+
+        try
         {
-            NavigationManager.NavigateTo("Account/InvalidUser", forceLoad: true);
+            var data = await AuthService.DownloadPersonalDataAsync();
+            if (data is not null)
+            {
+                // Trigger browser download via JS interop
+                using var streamRef = new DotNetStreamReference(new MemoryStream(data));
+                await JS.InvokeVoidAsync("downloadFileFromStream", "PersonalData.json", streamRef);
+            }
+            else
+            {
+                StatusMessage = "Error: Unable to download personal data.";
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error downloading personal data.");
+            StatusMessage = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
 

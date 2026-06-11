@@ -1,7 +1,7 @@
-using BlazorWebAppTemplate.Core.Domain.Enums;
-using BlazorWebAppTemplate.Data;
-using BlazorWebAppTemplate.Data.Entities;
-using BlazorWebAppTemplate.Services;
+using AspireWebAppTemplate.ApiService.Data;
+using AspireWebAppTemplate.ApiService.Data.Entities;
+using AspireWebAppTemplate.Core.Domain.Enums;
+using AspireWebAppTemplate.Services;
 using FsCheck;
 using FsCheck.Xunit;
 using Microsoft.AspNetCore.Identity;
@@ -11,7 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
-namespace BlazorWebAppTemplate.Tests.AuditLog;
+namespace AspireWebAppTemplate.Tests.AuditLog;
 
 /// <summary>
 /// Property-based tests for Property 2: User display name resolution.

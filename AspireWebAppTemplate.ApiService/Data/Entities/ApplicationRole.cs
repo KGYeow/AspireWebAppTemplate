@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace BlazorWebAppTemplate.Data.Entities;
+namespace AspireWebAppTemplate.ApiService.Data.Entities;
 
 /// <summary>
 /// Extends <see cref="IdentityRole"/> with additional metadata for display,

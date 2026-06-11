@@ -1,0 +1,83 @@
+@page "/Account/LoginWith2fa"
+@rendermode InteractiveServer
+
+<PageTitle>Two-factor authentication</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="vh-100">
+    <MudStack Class="h-75" Justify="Justify.Center">
+        <MudCard Elevation="0" Class="p-4">
+            <MudCardContent>
+                <MudStack Class="align-content-center" AlignItems="AlignItems.Center" Spacing="3">
+                    <MudAvatar Size="Size.Large"
+                               Color="Color.Primary"
+                               Variant="Variant.Filled"
+                               Class="mb-2">
+                        <MudIcon Icon="@Icons.Material.Rounded.Security" Size="Size.Large" />
+                    </MudAvatar>
+                    <MudText Typo="Typo.h5" Class="fw-bold">
+                        Two-Factor Authentication
+                    </MudText>
+                    <MudText Typo="Typo.body2" Class="text-muted text-center">
+                        Your login is protected with an authenticator app. Enter your authenticator code below.
+                    </MudText>
+                </MudStack>
+
+                @if (!string.IsNullOrEmpty(ErrorMessage))
+                {
+                    <MudAlert Severity="Severity.Error"
+                              Class="mt-4 border-1"
+                              ShowCloseIcon
+                              CloseIconClicked="ClearError">
+                        @ErrorMessage
+                    </MudAlert>
+                }
+
+                <EditForm EditContext="editContext"
+                          OnValidSubmit="OnValidSubmitAsync"
+                          FormName="loginWith2faForm"
+                          Class="mt-4">
+                    <DataAnnotationsValidator />
+
+                    <MudStack Spacing="3">
+                        <MudTextField T="string"
+                                      @bind-Value="Input.TwoFactorCode"
+                                      Label="Authenticator code"
+                                      Placeholder="Enter your 6-digit code"
+                                      Variant="Variant.Outlined"
+                                      Margin="Margin.Dense"
+                                      Typo="Typo.body2"
+                                      For="@(() => Input.TwoFactorCode)"
+                                      autocomplete="off" />
+
+                        <MudCheckBox T="bool"
+                                     @bind-Value="Input.RememberMachine"
+                                     Label="Remember this machine"
+                                     Color="Color.Primary"
+                                     Dense />
+
+                        <MudButton ButtonType="ButtonType.Submit"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   FullWidth
+                                   Disabled="@IsBusy"
+                                   DropShadow="false"
+                                   Style="text-transform: none;">
+                            @if (IsBusy)
+                            {
+                                <MudProgressCircular Size="Size.Small" Indeterminate Class="me-2" />
+                            }
+                            Log in
+                        </MudButton>
+
+                        <MudText Typo="Typo.body2" Align="Align.Center" Class="mt-2">
+                            Don't have access to your authenticator device?
+                            <MudLink Href="Account/LoginWithRecoveryCode" Typo="Typo.body2">
+                                Log in with a recovery code
+                            </MudLink>
+                        </MudText>
+                    </MudStack>
+                </EditForm>
+            </MudCardContent>
+        </MudCard>
+    </MudStack>
+</MudContainer>

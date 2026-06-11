@@ -1,4 +1,4 @@
-namespace BlazorWebAppTemplate.Abstractions;
+namespace AspireWebAppTemplate.Abstractions;
 
 /// <summary>
 /// Provides user-aware datetime formatting using the current user's configured time zone.

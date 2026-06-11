@@ -20,28 +20,29 @@
     <MudTable Items="@CurrentPasskeys" Dense Hover Elevation="0" Class="border-1 mb-4">
         <HeaderContent>
             <MudTh>Name</MudTh>
+            <MudTh>Created</MudTh>
             <MudTh Style="width: 200px;">Actions</MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Name">
                 <MudText Typo="Typo.body2">@(context.Name ?? "Unnamed passkey")</MudText>
             </MudTd>
+            <MudTd DataLabel="Created">
+                <MudText Typo="Typo.body2">@context.CreatedUtc.ToString("yyyy-MM-dd")</MudText>
+            </MudTd>
             <MudTd DataLabel="Actions">
-                @{
-                    var credentialId = System.Buffers.Text.Base64Url.EncodeToString(context.CredentialId);
-                }
                 <MudStack Row Spacing="1">
                     <MudButton Variant="Variant.Outlined"
                                Color="Color.Primary"
                                Size="Size.Small"
-                               Href="@($"Account/Manage/RenamePasskey/{credentialId}")"
+                               Href="@($"Account/Manage/RenamePasskey/{context.CredentialId}")"
                                Style="text-transform: none;">
                         Rename
                     </MudButton>
                     <MudButton Variant="Variant.Outlined"
                                Color="Color.Error"
                                Size="Size.Small"
-                               OnClick="@(() => DeletePasskeyAsync(credentialId))"
+                               OnClick="@(() => DeletePasskeyAsync(context.CredentialId))"
                                Style="text-transform: none;">
                         Delete
                     </MudButton>

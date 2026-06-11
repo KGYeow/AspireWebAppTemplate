@@ -1,6 +1,6 @@
-using BlazorWebAppTemplate.Contracts;
+using AspireWebAppTemplate.Core.Contracts;
 
-namespace BlazorWebAppTemplate.Abstractions;
+namespace AspireWebAppTemplate.Abstractions;
 
 /// <summary>
 /// Defines the contract for the LDAP login orchestration service that handles

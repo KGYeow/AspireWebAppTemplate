@@ -1,7 +1,5 @@
 @page "/role-management/{RoleId}"
-@using BlazorWebAppTemplate.Data
-@using BlazorWebAppTemplate.Data.Entities
-@using static BlazorWebAppTemplate.Components.Pages.UserManagement.Index
+@using AspireWebAppTemplate.Core.Contracts
 @attribute [Authorize(Roles = "Admin")]
 
 <PageTitle>Role Details</PageTitle>

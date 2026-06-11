@@ -1,7 +1,7 @@
-﻿using BlazorWebAppTemplate.UI.Theme;
+using AspireWebAppTemplate.UI.Theme;
 using Microsoft.AspNetCore.Components;
 
-namespace BlazorWebAppTemplate.Components.Layout;
+namespace AspireWebAppTemplate.Web.Components.Layout;
 
 /// <summary>
 /// Minimal layout for authentication pages (Login, Register, ForgotPassword, etc.).

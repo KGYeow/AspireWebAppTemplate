@@ -1,0 +1,79 @@
+@page "/Account/LoginWithRecoveryCode"
+@rendermode InteractiveServer
+
+<PageTitle>Recovery code verification</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="vh-100">
+    <MudStack Class="h-75" Justify="Justify.Center">
+        <MudCard Elevation="0" Class="p-4">
+            <MudCardContent>
+                <MudStack Class="align-content-center" AlignItems="AlignItems.Center" Spacing="3">
+                    <MudAvatar Size="Size.Large"
+                               Color="Color.Warning"
+                               Variant="Variant.Filled"
+                               Class="mb-2">
+                        <MudIcon Icon="@Icons.Material.Rounded.Key" Size="Size.Large" />
+                    </MudAvatar>
+                    <MudText Typo="Typo.h5" Class="fw-bold">
+                        Recovery Code Verification
+                    </MudText>
+                    <MudText Typo="Typo.body2" Class="text-muted text-center">
+                        You have requested to log in with a recovery code. Enter one of your recovery codes below.
+                    </MudText>
+                </MudStack>
+
+                @if (!string.IsNullOrEmpty(ErrorMessage))
+                {
+                    <MudAlert Severity="Severity.Error"
+                              Class="mt-4 border-1"
+                              ShowCloseIcon
+                              CloseIconClicked="ClearError">
+                        @ErrorMessage
+                    </MudAlert>
+                }
+
+                <EditForm EditContext="editContext"
+                          OnValidSubmit="OnValidSubmitAsync"
+                          FormName="loginWithRecoveryCodeForm"
+                          Class="mt-4">
+                    <DataAnnotationsValidator />
+
+                    <MudStack Spacing="3">
+                        <MudTextField T="string"
+                                      @bind-Value="Input.RecoveryCode"
+                                      Label="Recovery Code"
+                                      Placeholder="Enter your recovery code"
+                                      Variant="Variant.Outlined"
+                                      Margin="Margin.Dense"
+                                      Typo="Typo.body2"
+                                      For="@(() => Input.RecoveryCode)"
+                                      autocomplete="off" />
+
+                        <MudButton ButtonType="ButtonType.Submit"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   FullWidth
+                                   Disabled="@IsBusy"
+                                   DropShadow="false"
+                                   Style="text-transform: none;">
+                            @if (IsBusy)
+                            {
+                                <MudProgressCircular Size="Size.Small" Indeterminate Class="me-2" />
+                            }
+                            Log in
+                        </MudButton>
+
+                        <MudButton Variant="Variant.Text"
+                                   Color="Color.Primary"
+                                   Href="Account/Login"
+                                   FullWidth
+                                   DropShadow="false"
+                                   Style="text-transform: none;">
+                            Back to Login
+                        </MudButton>
+                    </MudStack>
+                </EditForm>
+            </MudCardContent>
+        </MudCard>
+    </MudStack>
+</MudContainer>

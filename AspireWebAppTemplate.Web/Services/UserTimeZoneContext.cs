@@ -1,11 +1,8 @@
-using BlazorWebAppTemplate.Abstractions;
-using BlazorWebAppTemplate.Core.Application.Abstractions;
-using BlazorWebAppTemplate.Core.Common.Defaults;
-using BlazorWebAppTemplate.Data;
-using BlazorWebAppTemplate.Data.Entities;
-using Microsoft.AspNetCore.Identity;
+using AspireWebAppTemplate.Abstractions;
+using AspireWebAppTemplate.Core.Application.Abstractions;
+using AspireWebAppTemplate.Core.Common.Defaults;
 
-namespace BlazorWebAppTemplate.Services;
+namespace AspireWebAppTemplate.Web.Services;
 
 /// <summary>
 /// Scoped service that holds the current user's time zone preference and provides
@@ -15,11 +12,11 @@ namespace BlazorWebAppTemplate.Services;
 /// <para>
 /// This service is registered as <b>scoped</b> — one instance per SignalR circuit.
 /// It is initialized once by <see cref="Components.Layout.MainLayout"/> on first render
-/// via <see cref="InitializeAsync"/>, which loads the user's <c>TimeZoneId</c> from the database.
+/// via <see cref="InitializeAsync"/>, which loads the user's <c>TimeZoneId</c> from the API.
 /// </para>
 /// <para>
 /// After initialization, all formatting calls use the cached time zone ID without
-/// additional database lookups, making them safe to call frequently in Razor markup.
+/// additional API lookups, making them safe to call frequently in Razor markup.
 /// </para>
 /// <para>
 /// If the user has no time zone configured (null or empty <c>TimeZoneId</c>),
@@ -28,17 +25,17 @@ namespace BlazorWebAppTemplate.Services;
 /// </remarks>
 public sealed class UserTimeZoneContext : IUserTimeZoneContext
 {
-    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly ApiAuthService _authService;
     private readonly ITimeZoneService _timeZoneService;
 
     /// <summary>
     /// Initializes a new instance of <see cref="UserTimeZoneContext"/>.
     /// </summary>
-    /// <param name="userManager">The Identity user manager for loading user preferences.</param>
+    /// <param name="authService">The API auth service for loading user preferences.</param>
     /// <param name="timeZoneService">The singleton time zone service for UTC-to-local conversion.</param>
-    public UserTimeZoneContext(UserManager<ApplicationUser> userManager, ITimeZoneService timeZoneService)
+    public UserTimeZoneContext(ApiAuthService authService, ITimeZoneService timeZoneService)
     {
-        _userManager = userManager;
+        _authService = authService;
         _timeZoneService = timeZoneService;
     }
 
@@ -56,7 +53,7 @@ public sealed class UserTimeZoneContext : IUserTimeZoneContext
     /// </remarks>
     public async Task InitializeAsync(string userId)
     {
-        var user = await _userManager.FindByIdAsync(userId);
+        var user = await _authService.GetCurrentUserAsync();
         TimeZoneId = user?.TimeZoneId;
         DateTimeFormat = user?.DateTimeFormat;
     }

@@ -1,0 +1,19 @@
+@page "/counter"
+
+<PageTitle>Counter</PageTitle>
+
+<PageHeader Title="Counter" Subtitle="Click the button to increment the counter." />
+
+<MudStack Spacing="3">
+    <MudText Typo="Typo.h4">Current count: @currentCount</MudText>
+
+    <div>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   OnClick="IncrementCount"
+                   DropShadow="false"
+                   Style="text-transform: none;">
+            Click me
+        </MudButton>
+    </div>
+</MudStack>

@@ -1,6 +1,6 @@
-using BlazorWebAppTemplate.Core.Domain.Enums;
+using AspireWebAppTemplate.Core.Domain.Enums;
 
-namespace BlazorWebAppTemplate.Data.Entities;
+namespace AspireWebAppTemplate.ApiService.Data.Entities;
 
 /// <summary>
 /// Represents a single audit log record capturing a significant action performed within the application.

@@ -1,4 +1,4 @@
-namespace BlazorWebAppTemplate.Options;
+namespace AspireWebAppTemplate.Options;
 
 /// <summary>
 /// Strongly-typed configuration for LDAP authentication, bound from the

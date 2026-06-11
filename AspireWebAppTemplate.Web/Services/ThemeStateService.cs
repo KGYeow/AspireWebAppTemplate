@@ -1,7 +1,7 @@
-using BlazorWebAppTemplate.Abstractions;
-using BlazorWebAppTemplate.Core.Domain.Enums;
+using AspireWebAppTemplate.Abstractions;
+using AspireWebAppTemplate.Core.Domain.Enums;
 
-namespace BlazorWebAppTemplate.Services;
+namespace AspireWebAppTemplate.Web.Services;
 
 /// <summary>
 /// Scoped service that holds the current dark mode state for a Blazor Server circuit.

@@ -1,37 +1,29 @@
 using System.ComponentModel.DataAnnotations;
-using BlazorWebAppTemplate.Abstractions;
-using BlazorWebAppTemplate.Core.Domain.Enums;
-using BlazorWebAppTemplate.Data;
-using BlazorWebAppTemplate.Data.Entities;
+using AspireWebAppTemplate.Core.Contracts;
+using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.AspNetCore.Identity;
 using MudBlazor;
 
-namespace BlazorWebAppTemplate.Components.Pages.UserManagement;
+namespace AspireWebAppTemplate.Web.Components.Pages.UserManagement;
 
 /// <summary>
 /// Dialog for adding a new local user with email, display name, password, and role.
+/// Delegates all persistence to the API via <see cref="ApiUserService"/>.
 /// </summary>
 public partial class AddUserDialog : ComponentBase
 {
     #region Injected Services
 
     /// <summary>
-    /// Manages user accounts.
+    /// HTTP client service for user operations.
     /// </summary>
-    [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
+    [Inject] private ApiUserService UserService { get; set; } = default!;
 
     /// <summary>
-    /// Manages roles for querying the default role.
+    /// HTTP client service for role operations (to get default role).
     /// </summary>
-    [Inject] private RoleManager<ApplicationRole> RoleManager { get; set; } = default!;
-
-    /// <summary>
-    /// Audit log service for recording user creation events.
-    /// </summary>
-    [Inject] private IAuditLogService AuditLogService { get; set; } = default!;
+    [Inject] private ApiRoleService RoleService { get; set; } = default!;
 
     #endregion
 
@@ -42,12 +34,6 @@ public partial class AddUserDialog : ComponentBase
     /// </summary>
     [CascadingParameter]
     private IMudDialogInstance MudDialog { get; set; } = default!;
-
-    /// <summary>
-    /// Provides the current authentication state for identifying the acting user.
-    /// </summary>
-    [CascadingParameter]
-    private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
 
     #endregion
 
@@ -90,9 +76,11 @@ public partial class AddUserDialog : ComponentBase
     /// <summary>
     /// Initializes the edit context and sets the default role.
     /// </summary>
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        var defaultRoleName = RoleManager.Roles.FirstOrDefault(r => r.IsDefault)?.Name ?? "User";
+        // Fetch roles to determine the default one
+        var roles = await RoleService.GetRolesAsync();
+        var defaultRoleName = roles?.FirstOrDefault(r => r.IsDefault)?.Name ?? "User";
         Input.Role = AllRoleNames.Contains(defaultRoleName) ? defaultRoleName : AllRoleNames.FirstOrDefault() ?? "";
         editContext = new EditContext(Input);
     }
@@ -102,7 +90,7 @@ public partial class AddUserDialog : ComponentBase
     #region Event Handlers
 
     /// <summary>
-    /// Creates the user on valid form submission.
+    /// Creates the user on valid form submission via the API.
     /// </summary>
     protected async Task OnSubmitAsync()
     {
@@ -114,62 +102,20 @@ public partial class AddUserDialog : ComponentBase
 
         try
         {
-            var existing = await UserManager.FindByEmailAsync(Input.Email);
-            if (existing is not null)
+            var request = new CreateUserRequest
             {
-                StatusMessage = $"A user with email '{Input.Email}' already exists.";
-                return;
-            }
-
-            var user = new ApplicationUser
-            {
-                UserName = Input.Email,
                 Email = Input.Email,
-                EmailConfirmed = true,
                 DisplayName = Input.DisplayName,
-                IsActive = true,
-                AuthSource = AuthSource.Local,
-                CreatedUtc = DateTime.UtcNow
+                Password = Input.Password,
+                Role = Input.Role
             };
 
-            var createResult = await UserManager.CreateAsync(user, Input.Password);
-            if (!createResult.Succeeded)
+            var (success, error) = await UserService.CreateUserAsync(request);
+            if (!success)
             {
-                StatusMessage = string.Join(" ", createResult.Errors.Select(e => e.Description));
+                StatusMessage = error ?? "Failed to create user.";
                 return;
             }
-
-            if (!string.IsNullOrEmpty(Input.Role))
-            {
-                var roleResult = await UserManager.AddToRoleAsync(user, Input.Role);
-                if (!roleResult.Succeeded)
-                {
-                    StatusMessage = $"User created but failed to assign role: {string.Join(", ", roleResult.Errors.Select(e => e.Description))}";
-                    return;
-                }
-            }
-
-            // Audit: log user creation event (fire-and-forget safe — failures won't interrupt)
-            try
-            {
-                var authState = await AuthStateTask;
-                var actingUserName = authState.User.Identity?.Name;
-                string? actingUserId = null;
-                if (actingUserName is not null)
-                {
-                    var actingUser = await UserManager.FindByNameAsync(actingUserName);
-                    actingUserId = actingUser?.Id;
-                }
-
-                await AuditLogService.LogAsync(
-                    actingUserId,
-                    AuditActionType.UserCreated,
-                    AuditEntityType.User,
-                    user.Id,
-                    user.DisplayName ?? user.UserName ?? "",
-                    $"User '{user.DisplayName ?? user.UserName}' created.");
-            }
-            catch { /* audit failures must not interrupt the primary operation */ }
 
             MudDialog.Close(DialogResult.Ok(true));
         }

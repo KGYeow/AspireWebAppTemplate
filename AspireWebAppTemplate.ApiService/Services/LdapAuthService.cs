@@ -1,13 +1,13 @@
 using System.DirectoryServices;
 using System.DirectoryServices.Protocols;
 using System.Net;
-using BlazorWebAppTemplate.Abstractions;
-using BlazorWebAppTemplate.Contracts;
-using BlazorWebAppTemplate.Options;
+using AspireWebAppTemplate.Abstractions;
+using AspireWebAppTemplate.Core.Contracts;
+using AspireWebAppTemplate.Options;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace BlazorWebAppTemplate.Services;
+namespace AspireWebAppTemplate.Services;
 
 /// <summary>
 /// Implements <see cref="ILdapAuthService"/> using LDAPS to authenticate users

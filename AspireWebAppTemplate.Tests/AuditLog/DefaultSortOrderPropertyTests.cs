@@ -1,8 +1,8 @@
 // Feature: audit-log, Property 6: Default sort order
-using BlazorWebAppTemplate.Core.Domain.Enums;
-using BlazorWebAppTemplate.Data;
-using BlazorWebAppTemplate.Data.Entities;
-using BlazorWebAppTemplate.UI.Utilities;
+using AspireWebAppTemplate.ApiService.Data;
+using AspireWebAppTemplate.ApiService.Data.Entities;
+using AspireWebAppTemplate.Core.Domain.Enums;
+using AspireWebAppTemplate.UI.Utilities;
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;
@@ -12,7 +12,7 @@ using MudBlazor;
 using Gen = FsCheck.Fluent.Gen;
 using Property = FsCheck.Property;
 
-namespace BlazorWebAppTemplate.Tests.AuditLog;
+namespace AspireWebAppTemplate.Tests.AuditLog;
 
 /// <summary>
 /// Property-based tests verifying that when QueryableDataGridUtils&lt;T&gt;.ServerReloadAsync

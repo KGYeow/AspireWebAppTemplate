@@ -1,10 +1,10 @@
-﻿using BlazorWebAppTemplate.Core.Common;
+using AspireWebAppTemplate.Core.Common;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Routing;
 using MudBlazor;
 
-namespace BlazorWebAppTemplate.Components.Layout;
+namespace AspireWebAppTemplate.Web.Components.Layout;
 
 /// <summary>
 /// Renders a navigation menu (headers, links, dividers, and groups) from a single, unified model
@@ -27,7 +27,7 @@ public partial class NavMenu : ComponentBase, IDisposable
     /// <summary>
     /// Unified list of navigation items to render (headers, links, dividers, groups).
     /// Defaults to an empty list. If a parent assigns <c>null</c> at runtime, this property
-    /// may become <c>null</c>; callers should null‑coalesce when enumerating.
+    /// may become <c>null</c>; callers should null-coalesce when enumerating.
     /// </summary>
     [Parameter]
     public IReadOnlyList<NavItem> Items { get; set; } = [];

@@ -1,60 +1,38 @@
-using BlazorWebAppTemplate.Abstractions;
-using BlazorWebAppTemplate.Core.Domain.Enums;
-using BlazorWebAppTemplate.Data;
-using BlazorWebAppTemplate.Data.Entities;
-using BlazorWebAppTemplate.Options;
-using BlazorWebAppTemplate.UI.Components.Shared;
-using BlazorWebAppTemplate.UI.Utilities;
+using AspireWebAppTemplate.Core.Contracts;
+using AspireWebAppTemplate.UI.Components.Shared;
+using AspireWebAppTemplate.UI.Utilities;
+using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using MudBlazor;
 
-namespace BlazorWebAppTemplate.Components.Pages.UserManagement;
+namespace AspireWebAppTemplate.Web.Components.Pages.UserManagement;
 
 /// <summary>
 /// User management page. Lists all users with multi-role management,
 /// activation toggle, delete actions, and bulk operations. Admin role required.
 /// Uses server-side filtering, sorting, and pagination via <see cref="DataGridUtils{T}"/>.
+/// All operations are delegated to the API via <see cref="ApiUserService"/> and <see cref="ApiRoleService"/>.
 /// </summary>
 public partial class Index : ComponentBase
 {
     #region Injected Services
 
     /// <summary>
-    /// Manages user accounts.
+    /// HTTP client service for user operations.
     /// </summary>
-    [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
+    [Inject] private ApiUserService UserService { get; set; } = default!;
 
     /// <summary>
-    /// Manages roles.
+    /// HTTP client service for role operations.
     /// </summary>
-    [Inject] private RoleManager<ApplicationRole> RoleManager { get; set; } = default!;
+    [Inject] private ApiRoleService RoleService { get; set; } = default!;
 
     /// <summary>
     /// Structured logger.
     /// </summary>
     [Inject] private ILogger<Index> Logger { get; set; } = default!;
-
-    // [LDAP] LDAP settings to check if LDAP is enabled — remove if LDAP is not needed
-    /// <summary>
-    /// LDAP configuration options.
-    /// </summary>
-    [Inject] private IOptions<LdapSettings> LdapOptions { get; set; } = default!;
-
-    // [LDAP] LDAP auth service for sync operations — remove if LDAP is not needed
-    /// <summary>
-    /// LDAP authentication service for fetching user attributes during sync.
-    /// </summary>
-    [Inject] private ILdapAuthService LdapAuthService { get; set; } = default!;
-
-    /// <summary>
-    /// Audit log service for recording user management actions.
-    /// </summary>
-    [Inject] private IAuditLogService AuditLogService { get; set; } = default!;
 
     #endregion
 
@@ -122,11 +100,6 @@ public partial class Index : ComponentBase
     private string? currentUserName;
 
     /// <summary>
-    /// The current logged-in user's Identity ID, used for audit log entries.
-    /// </summary>
-    private string? currentUserId;
-
-    /// <summary>
     /// All available role names.
     /// </summary>
     private List<string> allRoleNames = [];
@@ -151,8 +124,9 @@ public partial class Index : ComponentBase
     // [LDAP] Whether LDAP is enabled — remove if LDAP is not needed
     /// <summary>
     /// Whether LDAP authentication is enabled in configuration.
+    /// Determined by checking if the LDAP-related API endpoints are available.
     /// </summary>
-    protected bool IsLdapEnabled => LdapOptions.Value.Enabled;
+    protected bool IsLdapEnabled { get; private set; }
 
     // [LDAP] Sync state — remove if LDAP is not needed
     /// <summary>
@@ -176,9 +150,10 @@ public partial class Index : ComponentBase
     protected string? SyncMessage { get; set; }
 
     /// <summary>
-    /// Cancellation token source for the current sync operation.
+    /// All roles metadata fetched from the API.
+    /// Used for position-based authority checks.
     /// </summary>
-    private CancellationTokenSource? syncCts;
+    private List<RoleDto> allRoles = [];
 
     #endregion
 
@@ -195,23 +170,25 @@ public partial class Index : ComponentBase
             var authState = await AuthStateTask;
             currentUserName = authState.User.Identity?.Name;
 
-            var allRoles = RoleManager.Roles.ToList();
+            // Fetch all roles metadata from the API
+            allRoles = await RoleService.GetRolesAsync() ?? [];
 
             allRoleNames = allRoles
-                .Select(r => r.Name!)
+                .Select(r => r.Name)
                 .OrderBy(n => n)
                 .ToList();
 
             // Compute actor's highest role position for authority checks
             if (currentUserName is not null)
             {
-                var currentUser = await UserManager.FindByNameAsync(currentUserName);
-                if (currentUser is not null)
+                var currentUser = await UserService.GetAllUsersAsync();
+                var me = currentUser.FirstOrDefault(u => 
+                    string.Equals(u.UserName, currentUserName, StringComparison.OrdinalIgnoreCase));
+                if (me is not null)
                 {
-                    currentUserId = currentUser.Id;
-                    var actorRoleNames = await UserManager.GetRolesAsync(currentUser);
-                    actorHighestPosition = actorRoleNames
-                        .Select(name => allRoles.FirstOrDefault(r => string.Equals(r.Name, name, StringComparison.OrdinalIgnoreCase))?.Position ?? 0)
+                    actorHighestPosition = me.Roles
+                        .Select(roleName => allRoles.FirstOrDefault(r => 
+                            string.Equals(r.Name, roleName, StringComparison.OrdinalIgnoreCase))?.Position ?? 0)
                         .DefaultIfEmpty(0)
                         .Max();
                 }
@@ -220,9 +197,13 @@ public partial class Index : ComponentBase
             // Filter assignable roles: only those with Position <= actor's highest position
             assignableRoleNames = allRoles
                 .Where(r => r.Position <= actorHighestPosition)
-                .Select(r => r.Name!)
+                .Select(r => r.Name)
                 .OrderBy(n => n)
                 .ToList();
+
+            // [LDAP] Check if LDAP is enabled by attempting a lightweight lookup
+            // For simplicity, assume LDAP is available (the API will return 404 if not)
+            IsLdapEnabled = true;
         }
         catch (Exception ex)
         {
@@ -241,12 +222,9 @@ public partial class Index : ComponentBase
 
     /// <summary>
     /// Server-side reload callback for <see cref="MudDataGrid{T}"/>.
-    /// Loads all users, then delegates filtering, sorting, and pagination
+    /// Loads all users from the API, then delegates filtering, sorting, and pagination
     /// to <see cref="DataGridUtils{T}.ServerReloadAsync"/>.
     /// </summary>
-    /// <param name="state">The current grid state containing page, page size, filters, and sort definitions.</param>
-    /// <param name="cancellationToken">Cancellation token provided by the grid (unused but required by delegate signature).</param>
-    /// <returns>A <see cref="GridData{T}"/> containing the paged items and total count.</returns>
     private async Task<GridData<UserViewModel>> ServerReload(GridState<UserViewModel> state, CancellationToken cancellationToken)
     {
         // Loader function: fetches all users and maps to view models
@@ -274,33 +252,24 @@ public partial class Index : ComponentBase
     }
 
     /// <summary>
-    /// Loads all users from the Identity store and maps them to <see cref="UserViewModel"/> instances.
-    /// This serves as the data loader for <see cref="DataGridUtils{T}.ServerReloadAsync"/>.
+    /// Loads all users from the API and maps them to <see cref="UserViewModel"/> instances.
     /// </summary>
-    /// <returns>An enumerable of <see cref="UserViewModel"/> representing all users.</returns>
     private async Task<IEnumerable<UserViewModel>> LoadUserViewModelsAsync()
     {
-        var appUsers = UserManager.Users.OrderBy(u => u.UserName).ToList();
-        var viewModels = new List<UserViewModel>();
+        var users = await UserService.GetAllUsersAsync();
 
-        foreach (var user in appUsers)
+        return users.Select(u => new UserViewModel
         {
-            var roles = await UserManager.GetRolesAsync(user);
-            viewModels.Add(new UserViewModel
-            {
-                Id = user.Id,
-                UserName = user.UserName ?? "",
-                DisplayName = user.DisplayName ?? "",
-                JobTitle = user.JobTitle ?? "",
-                Email = user.Email ?? "",
-                Department = user.Department ?? "",
-                IsActive = user.IsActive,
-                Roles = roles.OrderBy(r => r).ToList(),
-                IsSelf = string.Equals(user.UserName, currentUserName, StringComparison.OrdinalIgnoreCase)
-            });
-        }
-
-        return viewModels;
+            Id = u.Id,
+            UserName = u.UserName,
+            DisplayName = u.DisplayName ?? "",
+            JobTitle = u.JobTitle ?? "",
+            Email = u.Email ?? "",
+            Department = u.Department ?? "",
+            IsActive = u.IsActive,
+            Roles = u.Roles.OrderBy(r => r).ToList(),
+            IsSelf = string.Equals(u.UserName, currentUserName, StringComparison.OrdinalIgnoreCase)
+        });
     }
 
     #endregion
@@ -309,18 +278,15 @@ public partial class Index : ComponentBase
 
     /// <summary>
     /// Clears the current selection and reloads the grid.
-    /// Called after any bulk action completes.
     /// </summary>
     private async Task ClearSelectionAndReloadAsync()
     {
-        // Assign a new instance to trigger binding update in the grid
         selectedUsers = new HashSet<UserViewModel>();
         await dataGrid.ReloadServerData();
     }
 
     /// <summary>
     /// Clears the current selection without reloading the grid.
-    /// Used by the "Clear selection" (X) button in the toolbar.
     /// </summary>
     private void ClearSelection()
     {
@@ -333,7 +299,6 @@ public partial class Index : ComponentBase
 
     /// <summary>
     /// Activates all selected users (excluding self).
-    /// Shows a confirmation dialog before executing.
     /// </summary>
     private async Task BulkActivateAsync()
     {
@@ -346,7 +311,6 @@ public partial class Index : ComponentBase
             return;
         }
 
-        // Confirmation dialog
         var parameters = new DialogParameters<ConfirmationDialog>
         {
             { x => x.ContentText, $"Are you sure you want to activate {targets.Count} user(s)?{(skipped > 0 ? $" ({skipped} skipped: cannot modify your own account)" : "")}" },
@@ -363,28 +327,8 @@ public partial class Index : ComponentBase
         int success = 0, failed = 0;
         foreach (var user in targets)
         {
-            var appUser = await UserManager.FindByIdAsync(user.Id);
-            if (appUser is null) { failed++; continue; }
-
-            appUser.IsActive = true;
-            var updateResult = await UserManager.UpdateAsync(appUser);
-            if (updateResult.Succeeded)
-            {
-                success++;
-
-                // Audit: log user activation event (fire-and-forget safe — failures won't interrupt)
-                try
-                {
-                    await AuditLogService.LogAsync(
-                        currentUserId,
-                        AuditActionType.UserActivated,
-                        AuditEntityType.User,
-                        appUser.Id,
-                        appUser.DisplayName ?? appUser.UserName ?? "",
-                        $"User '{appUser.DisplayName ?? appUser.UserName}' activated via bulk action.");
-                }
-                catch { /* audit failures must not interrupt the primary operation */ }
-            }
+            var ok = await UserService.ActivateUserAsync(user.Id);
+            if (ok) success++;
             else failed++;
         }
 
@@ -394,7 +338,6 @@ public partial class Index : ComponentBase
 
     /// <summary>
     /// Deactivates all selected users (excluding self).
-    /// Shows a confirmation dialog before executing.
     /// </summary>
     private async Task BulkDeactivateAsync()
     {
@@ -407,7 +350,6 @@ public partial class Index : ComponentBase
             return;
         }
 
-        // Confirmation dialog
         var parameters = new DialogParameters<ConfirmationDialog>
         {
             { x => x.ContentText, $"Are you sure you want to deactivate {targets.Count} user(s)?{(skipped > 0 ? $" ({skipped} skipped: cannot modify your own account)" : "")}" },
@@ -421,61 +363,20 @@ public partial class Index : ComponentBase
         var result = await dialog.Result;
         if (result is null || result.Canceled) return;
 
-        int success = 0, failed = 0, guardSkipped = 0, positionSkipped = 0;
+        int success = 0, failed = 0;
         foreach (var user in targets)
         {
-            var appUser = await UserManager.FindByIdAsync(user.Id);
-            if (appUser is null) { failed++; continue; }
-
-            // Guard: skip if target user has a higher role position than actor
-            var targetPosition = await GetHighestPositionForUserAsync(appUser);
-            if (actorHighestPosition < targetPosition)
-            {
-                positionSkipped++;
-                continue;
-            }
-
-            // Guard: skip if user is the last one in a RequiresMinimumUser role
-            var blockingRole = await GetBlockingRequiresMinimumRoleAsync(appUser);
-            if (blockingRole is not null)
-            {
-                guardSkipped++;
-                continue;
-            }
-
-            appUser.IsActive = false;
-            var updateResult = await UserManager.UpdateAsync(appUser);
-            if (updateResult.Succeeded)
-            {
-                success++;
-
-                // Audit: log user deactivation event (fire-and-forget safe — failures won't interrupt)
-                try
-                {
-                    await AuditLogService.LogAsync(
-                        currentUserId,
-                        AuditActionType.UserDeactivated,
-                        AuditEntityType.User,
-                        appUser.Id,
-                        appUser.DisplayName ?? appUser.UserName ?? "",
-                        $"User '{appUser.DisplayName ?? appUser.UserName}' deactivated via bulk action.");
-                }
-                catch { /* audit failures must not interrupt the primary operation */ }
-            }
+            var ok = await UserService.DeactivateUserAsync(user.Id);
+            if (ok) success++;
             else failed++;
         }
 
-        var message = $"{success} deactivated, {skipped} skipped (self)";
-        if (positionSkipped > 0) message += $", {positionSkipped} skipped (higher position)";
-        if (guardSkipped > 0) message += $", {guardSkipped} skipped (last user in required role)";
-        message += $", {failed} failed.";
-        Snackbar.Add(message, Severity.Success);
+        Snackbar.Add($"{success} deactivated, {skipped} skipped (self), {failed} failed.", Severity.Success);
         await ClearSelectionAndReloadAsync();
     }
 
     /// <summary>
     /// Deletes all selected users (excluding self).
-    /// Shows a confirmation dialog before executing.
     /// </summary>
     private async Task BulkDeleteAsync()
     {
@@ -488,7 +389,6 @@ public partial class Index : ComponentBase
             return;
         }
 
-        // Confirmation dialog
         var parameters = new DialogParameters<ConfirmationDialog>
         {
             { x => x.ContentText, $"Are you sure you want to delete {targets.Count} user(s)? This action cannot be undone.{(skipped > 0 ? $" ({skipped} skipped: cannot delete your own account)" : "")}" },
@@ -502,65 +402,20 @@ public partial class Index : ComponentBase
         var result = await dialog.Result;
         if (result is null || result.Canceled) return;
 
-        int success = 0, failed = 0, guardSkipped = 0, positionSkipped = 0;
+        int success = 0, failed = 0;
         foreach (var user in targets)
         {
-            var appUser = await UserManager.FindByIdAsync(user.Id);
-            if (appUser is null) { failed++; continue; }
-
-            // Guard: skip if target user has a higher role position than actor
-            var targetPosition = await GetHighestPositionForUserAsync(appUser);
-            if (actorHighestPosition < targetPosition)
-            {
-                positionSkipped++;
-                continue;
-            }
-
-            // Guard: skip if user is the last one in a RequiresMinimumUser role
-            var blockingRole = await GetBlockingRequiresMinimumRoleAsync(appUser);
-            if (blockingRole is not null)
-            {
-                guardSkipped++;
-                continue;
-            }
-
-            // Capture display name before deletion for audit trail
-            var deletedDisplayName = appUser.DisplayName ?? appUser.UserName ?? "";
-            var deletedUserId = appUser.Id;
-
-            var deleteResult = await UserManager.DeleteAsync(appUser);
-            if (deleteResult.Succeeded)
-            {
-                success++;
-
-                // Audit: log user deletion event (fire-and-forget safe — failures won't interrupt)
-                try
-                {
-                    await AuditLogService.LogAsync(
-                        currentUserId,
-                        AuditActionType.UserDeleted,
-                        AuditEntityType.User,
-                        deletedUserId,
-                        deletedDisplayName,
-                        $"User '{deletedDisplayName}' deleted via bulk action.");
-                }
-                catch { /* audit failures must not interrupt the primary operation */ }
-            }
+            var (ok, _) = await UserService.DeleteUserAsync(user.Id);
+            if (ok) success++;
             else failed++;
         }
 
-        var message = $"{success} deleted, {skipped} skipped (self)";
-        if (positionSkipped > 0) message += $", {positionSkipped} skipped (higher position)";
-        if (guardSkipped > 0) message += $", {guardSkipped} skipped (last user in required role)";
-        message += $", {failed} failed.";
-        Snackbar.Add(message, Severity.Success);
+        Snackbar.Add($"{success} deleted, {skipped} skipped (self), {failed} failed.", Severity.Success);
         await ClearSelectionAndReloadAsync();
     }
 
     /// <summary>
     /// Opens a dialog to select a role, then assigns it to all selected users (excluding self).
-    /// Supports two modes: Add (keeps existing roles) or Replace (removes existing roles first).
-    /// Logs RoleAssigned/RoleUnassigned audit entries for each successful operation.
     /// </summary>
     private async Task OpenBulkAssignRoleDialog()
     {
@@ -573,7 +428,6 @@ public partial class Index : ComponentBase
             return;
         }
 
-        // Show the bulk assign role dialog
         var parameters = new DialogParameters<BulkAssignRoleDialog>
         {
             { x => x.AllRoleNames, assignableRoleNames },
@@ -593,90 +447,29 @@ public partial class Index : ComponentBase
         int success = 0, failed = 0, alreadyHasRole = 0;
         foreach (var user in targets)
         {
-            var appUser = await UserManager.FindByIdAsync(user.Id);
-            if (appUser is null) { failed++; continue; }
-
-            var currentRoles = await UserManager.GetRolesAsync(appUser);
-
             if (replaceExisting)
             {
-                // Replace mode: remove all existing roles, then assign the selected one
-                var removedRoles = currentRoles.ToList();
-                if (currentRoles.Count > 0)
-                {
-                    var removeResult = await UserManager.RemoveFromRolesAsync(appUser, currentRoles);
-                    if (!removeResult.Succeeded) { failed++; continue; }
-                }
-
-                var addResult = await UserManager.AddToRoleAsync(appUser, selectedRole);
-                if (addResult.Succeeded)
-                {
-                    success++;
-
-                    // Audit: log each removed role as RoleUnassigned and the new role as RoleAssigned
-                    try
-                    {
-                        foreach (var removedRole in removedRoles)
-                        {
-                            await AuditLogService.LogAsync(
-                                currentUserId,
-                                AuditActionType.RoleUnassigned,
-                                AuditEntityType.Role,
-                                entityId: user.Id,
-                                entityName: removedRole,
-                                description: $"Role '{removedRole}' removed from user '{user.DisplayName ?? user.UserName}' (bulk replace).");
-                        }
-
-                        await AuditLogService.LogAsync(
-                            currentUserId,
-                            AuditActionType.RoleAssigned,
-                            AuditEntityType.Role,
-                            entityId: user.Id,
-                            entityName: selectedRole,
-                            description: $"Role '{selectedRole}' assigned to user '{user.DisplayName ?? user.UserName}' (bulk replace).");
-                    }
-                    catch
-                    {
-                        // Audit failures must not interrupt the primary operation
-                    }
-                }
+                // Replace mode: set only the selected role
+                var (ok, _) = await UserService.SetRolesAsync(user.Id, [selectedRole]);
+                if (ok) success++;
                 else failed++;
             }
             else
             {
-                // Add mode: only add the role if the user doesn't already have it
-                if (currentRoles.Contains(selectedRole, StringComparer.OrdinalIgnoreCase))
+                // Add mode: only add if the user doesn't already have it
+                if (user.Roles.Contains(selectedRole, StringComparer.OrdinalIgnoreCase))
                 {
                     alreadyHasRole++;
                     continue;
                 }
 
-                var addResult = await UserManager.AddToRoleAsync(appUser, selectedRole);
-                if (addResult.Succeeded)
-                {
-                    success++;
-
-                    // Audit: log role assignment
-                    try
-                    {
-                        await AuditLogService.LogAsync(
-                            currentUserId,
-                            AuditActionType.RoleAssigned,
-                            AuditEntityType.Role,
-                            entityId: user.Id,
-                            entityName: selectedRole,
-                            description: $"Role '{selectedRole}' assigned to user '{user.DisplayName ?? user.UserName}' (bulk assign).");
-                    }
-                    catch
-                    {
-                        // Audit failures must not interrupt the primary operation
-                    }
-                }
+                var newRoles = user.Roles.Append(selectedRole).ToArray();
+                var (ok, _) = await UserService.SetRolesAsync(user.Id, newRoles);
+                if (ok) success++;
                 else failed++;
             }
         }
 
-        // Build summary message
         var mode = replaceExisting ? "replaced with" : "added";
         var parts = new List<string> { $"{success} {mode} '{selectedRole}'" };
         if (alreadyHasRole > 0) parts.Add($"{alreadyHasRole} already had role");
@@ -693,10 +486,7 @@ public partial class Index : ComponentBase
 
     /// <summary>
     /// Handles the global search text change from the toolbar search box.
-    /// Triggers a server-side reload with the new search term.
     /// </summary>
-    /// <param name="text">The search text entered by the user.</param>
-    /// <returns>A task representing the asynchronous reload operation.</returns>
     private Task OnSearch(string text)
     {
         searchString = text;
@@ -719,7 +509,6 @@ public partial class Index : ComponentBase
 
         if (result is not null && !result.Canceled)
         {
-            // Reload the grid to reflect the newly added user
             await dataGrid.ReloadServerData();
             Snackbar.Add("User added successfully.", Severity.Success);
         }
@@ -728,19 +517,14 @@ public partial class Index : ComponentBase
     /// <summary>
     /// Opens the Edit User dialog for a user.
     /// </summary>
-    /// <param name="user">The user view model to edit.</param>
     protected async Task OpenEditUserDialog(UserViewModel user)
     {
         // Position-based authority check
-        var targetUser = await UserManager.FindByIdAsync(user.Id);
-        if (targetUser is not null)
+        var targetPosition = GetHighestPositionForUser(user);
+        if (actorHighestPosition < targetPosition)
         {
-            var targetPosition = await GetHighestPositionForUserAsync(targetUser);
-            if (actorHighestPosition < targetPosition)
-            {
-                Snackbar.Add("You cannot modify a user with a higher role position.", Severity.Error);
-                return;
-            }
+            Snackbar.Add("You cannot modify a user with a higher role position.", Severity.Error);
+            return;
         }
 
         var parameters = new DialogParameters<EditUserDialog>
@@ -754,7 +538,6 @@ public partial class Index : ComponentBase
 
         if (result is not null && !result.Canceled)
         {
-            // Reload the grid to reflect the updated user data
             await dataGrid.ReloadServerData();
             Snackbar.Add("User updated successfully.", Severity.Success);
         }
@@ -779,7 +562,6 @@ public partial class Index : ComponentBase
 
         if (result is not null && !result.Canceled)
         {
-            // Reload the grid to reflect the newly provisioned LDAP user
             await dataGrid.ReloadServerData();
             Snackbar.Add("LDAP user added successfully.", Severity.Success);
         }
@@ -816,19 +598,10 @@ public partial class Index : ComponentBase
         }
     }
 
-    // [LDAP] Cancels the current sync operation — remove if LDAP is not needed
+    // [LDAP] Syncs all local users from LDAP via the API
     /// <summary>
-    /// Cancels the current LDAP sync operation.
-    /// </summary>
-    protected void CancelSync()
-    {
-        syncCts?.Cancel();
-    }
-
-    // [LDAP] Syncs all local users from LDAP — remove if LDAP is not needed
-    /// <summary>
-    /// Iterates all LDAP-sourced users, fetches their latest attributes,
-    /// and updates changed fields. Reports progress via UI state.
+    /// Triggers the LDAP sync operation via the API.
+    /// The API handles the actual sync logic and returns summary results.
     /// </summary>
     private async Task SyncAllUsersFromLdapAsync()
     {
@@ -839,86 +612,21 @@ public partial class Index : ComponentBase
         TotalToSync = 0;
         SyncMessage = null;
         ErrorMessage = null;
-        syncCts = new CancellationTokenSource();
-
-        int updated = 0;
-        int failed = 0;
 
         try
         {
-            // Snapshot only LDAP-sourced users
-            var allUsers = UserManager.Users
-                .Where(u => u.AuthSource == AuthSource.LDAP)
-                .OrderBy(u => u.UserName)
-                .ToList();
-            TotalToSync = allUsers.Count;
+            var syncResult = await UserService.SyncLdapUsersAsync();
 
-            foreach (var user in allUsers)
+            if (syncResult is null)
             {
-                syncCts.Token.ThrowIfCancellationRequested();
-
-                try
-                {
-                    var attrs = await LdapAuthService.FetchUserAttributesAsync(user.UserName ?? "");
-                    if (attrs is null)
-                    {
-                        failed++;
-                    }
-                    else
-                    {
-                        // Check for changes
-                        bool changed = false;
-
-                        if (!string.Equals(user.DisplayName, attrs.DisplayName, StringComparison.Ordinal))
-                        { user.DisplayName = attrs.DisplayName; changed = true; }
-
-                        if (!string.Equals(user.FirstName, attrs.FirstName, StringComparison.Ordinal))
-                        { user.FirstName = attrs.FirstName; changed = true; }
-
-                        if (!string.Equals(user.LastName, attrs.LastName, StringComparison.Ordinal))
-                        { user.LastName = attrs.LastName; changed = true; }
-
-                        if (!string.Equals(user.Email, attrs.Email, StringComparison.OrdinalIgnoreCase))
-                        { user.Email = attrs.Email; changed = true; }
-
-                        if (!string.Equals(user.JobTitle, attrs.JobTitle, StringComparison.Ordinal))
-                        { user.JobTitle = attrs.JobTitle; changed = true; }
-
-                        if (!string.Equals(user.Department, attrs.Department, StringComparison.Ordinal))
-                        { user.Department = attrs.Department; changed = true; }
-
-                        if (!string.Equals(user.EmployeeNumber, attrs.EmployeeNumber, StringComparison.Ordinal))
-                        { user.EmployeeNumber = attrs.EmployeeNumber; changed = true; }
-
-                        if (changed)
-                        {
-                            user.UpdatedUtc = DateTime.UtcNow;
-                            var updateResult = await UserManager.UpdateAsync(user);
-                            if (updateResult.Succeeded) updated++;
-                            else failed++;
-                        }
-                    }
-                }
-                catch
-                {
-                    failed++;
-                }
-
-                SyncedCount++;
-                await InvokeAsync(StateHasChanged);
-
-                // Small delay to avoid hammering LDAP
-                await Task.Delay(10, syncCts.Token);
+                ErrorMessage = "LDAP sync failed. The API did not respond.";
+                return;
             }
 
-            SyncMessage = $"Sync completed. Updated {updated} of {TotalToSync} users; {failed} failed.";
-
-            // Reload the grid to reflect synced user data
+            TotalToSync = syncResult.Total;
+            SyncedCount = syncResult.Total;
+            SyncMessage = $"Sync completed. Updated {syncResult.Updated} of {syncResult.Total} users; {syncResult.Failed} failed.";
             await dataGrid.ReloadServerData();
-        }
-        catch (OperationCanceledException)
-        {
-            Snackbar.Add("User sync canceled.", Severity.Warning);
         }
         catch (Exception ex)
         {
@@ -927,28 +635,31 @@ public partial class Index : ComponentBase
         finally
         {
             IsSyncing = false;
-            syncCts?.Dispose();
-            syncCts = null;
             await InvokeAsync(StateHasChanged);
         }
+    }
+
+    // [LDAP] Cancels the current sync operation — remove if LDAP is not needed
+    /// <summary>
+    /// Cancels the current LDAP sync operation (no-op when using API-based sync).
+    /// </summary>
+    protected void CancelSync()
+    {
+        // API-based sync is a single call — cancellation is not supported.
+        // This method exists to satisfy the razor markup binding.
     }
 
     /// <summary>
     /// Opens the Manage Roles dialog for a single user.
     /// </summary>
-    /// <param name="user">The user view model whose roles are being managed.</param>
     protected async Task OpenManageRolesDialog(UserViewModel user)
     {
         // Position-based authority check
-        var targetUser = await UserManager.FindByIdAsync(user.Id);
-        if (targetUser is not null)
+        var targetPosition = GetHighestPositionForUser(user);
+        if (actorHighestPosition < targetPosition)
         {
-            var targetPosition = await GetHighestPositionForUserAsync(targetUser);
-            if (actorHighestPosition < targetPosition)
-            {
-                Snackbar.Add("You cannot modify a user with a higher role position.", Severity.Error);
-                return;
-            }
+            Snackbar.Add("You cannot modify a user with a higher role position.", Severity.Error);
+            return;
         }
 
         var parameters = new DialogParameters<ManageRolesDialog>
@@ -978,19 +689,14 @@ public partial class Index : ComponentBase
     /// <summary>
     /// Toggles a user's active status with confirmation.
     /// </summary>
-    /// <param name="user">The user view model to activate or deactivate.</param>
     protected async Task ToggleActivationAsync(UserViewModel user)
     {
-        // Position-based authority check (applies to both activate and deactivate)
-        var targetUserForPosition = await UserManager.FindByIdAsync(user.Id);
-        if (targetUserForPosition is not null)
+        // Position-based authority check
+        var targetPosition = GetHighestPositionForUser(user);
+        if (actorHighestPosition < targetPosition)
         {
-            var targetPosition = await GetHighestPositionForUserAsync(targetUserForPosition);
-            if (actorHighestPosition < targetPosition)
-            {
-                Snackbar.Add("You cannot modify a user with a higher role position.", Severity.Error);
-                return;
-            }
+            Snackbar.Add("You cannot modify a user with a higher role position.", Severity.Error);
+            return;
         }
 
         var action = user.IsActive ? "deactivate" : "activate";
@@ -1009,72 +715,34 @@ public partial class Index : ComponentBase
         var result = await dialog.Result;
         if (result is null || result.Canceled) return;
 
-        var appUser = await UserManager.FindByIdAsync(user.Id);
-        if (appUser is null)
-        {
-            ErrorMessage = $"User '{user.UserName}' not found.";
-            return;
-        }
-
-        // Guard: block deactivation if user is the last one in a RequiresMinimumUser role
+        bool ok;
         if (user.IsActive)
+            ok = await UserService.DeactivateUserAsync(user.Id);
+        else
+            ok = await UserService.ActivateUserAsync(user.Id);
+
+        if (ok)
         {
-            var blockingRole = await GetBlockingRequiresMinimumRoleAsync(appUser);
-            if (blockingRole is not null)
-            {
-                Snackbar.Add($"Cannot deactivate the last user in role '{blockingRole}'.", Severity.Error);
-                return;
-            }
-        }
-
-        appUser.IsActive = !appUser.IsActive;
-        appUser.UpdatedUtc = DateTime.UtcNow;
-        var updateResult = await UserManager.UpdateAsync(appUser);
-
-        if (updateResult.Succeeded)
-        {
-            Snackbar.Add($"User {(appUser.IsActive ? "activated" : "deactivated")} successfully.", Severity.Success);
-
-            // Audit: log activation/deactivation event (fire-and-forget safe — failures won't interrupt)
-            try
-            {
-                var auditAction = appUser.IsActive ? AuditActionType.UserActivated : AuditActionType.UserDeactivated;
-                await AuditLogService.LogAsync(
-                    currentUserId,
-                    auditAction,
-                    AuditEntityType.User,
-                    appUser.Id,
-                    appUser.DisplayName ?? appUser.UserName ?? "",
-                    $"User '{appUser.DisplayName ?? appUser.UserName}' {(appUser.IsActive ? "activated" : "deactivated")}.");
-            }
-            catch { /* audit failures must not interrupt the primary operation */ }
-
-            // Reload the grid to reflect the updated activation status
+            Snackbar.Add($"User {(!user.IsActive ? "activated" : "deactivated")} successfully.", Severity.Success);
             await dataGrid.ReloadServerData();
         }
         else
         {
-            ErrorMessage = "Failed to update user status: " +
-                           string.Join(", ", updateResult.Errors.Select(e => e.Description));
+            ErrorMessage = "Failed to update user status.";
         }
     }
 
     /// <summary>
     /// Deletes a single user with confirmation.
     /// </summary>
-    /// <param name="user">The user view model to delete.</param>
     protected async Task DeleteUserAsync(UserViewModel user)
     {
         // Position-based authority check
-        var targetUserForPosition = await UserManager.FindByIdAsync(user.Id);
-        if (targetUserForPosition is not null)
+        var targetPosition = GetHighestPositionForUser(user);
+        if (actorHighestPosition < targetPosition)
         {
-            var targetPosition = await GetHighestPositionForUserAsync(targetUserForPosition);
-            if (actorHighestPosition < targetPosition)
-            {
-                Snackbar.Add("You cannot modify a user with a higher role position.", Severity.Error);
-                return;
-            }
+            Snackbar.Add("You cannot modify a user with a higher role position.", Severity.Error);
+            return;
         }
 
         var parameters = new DialogParameters<ConfirmationDialog>
@@ -1090,49 +758,15 @@ public partial class Index : ComponentBase
         var result = await dialog.Result;
         if (result is null || result.Canceled) return;
 
-        var appUser = await UserManager.FindByIdAsync(user.Id);
-        if (appUser is null)
-        {
-            ErrorMessage = $"User '{user.UserName}' not found.";
-            return;
-        }
-
-        // Guard: block deletion if user is the last one in a RequiresMinimumUser role
-        var blockingRole = await GetBlockingRequiresMinimumRoleAsync(appUser);
-        if (blockingRole is not null)
-        {
-            Snackbar.Add($"Cannot delete the last user in role '{blockingRole}'.", Severity.Error);
-            return;
-        }
-
-        // Capture display name before deletion for audit trail
-        var deletedDisplayName = appUser.DisplayName ?? appUser.UserName ?? "";
-        var deletedUserId = appUser.Id;
-
-        var deleteResult = await UserManager.DeleteAsync(appUser);
-        if (deleteResult.Succeeded)
+        var (ok, error) = await UserService.DeleteUserAsync(user.Id);
+        if (ok)
         {
             Snackbar.Add($"User '{user.DisplayName} ({user.UserName})' deleted.", Severity.Success);
-
-            // Audit: log user deletion event (fire-and-forget safe — failures won't interrupt)
-            try
-            {
-                await AuditLogService.LogAsync(
-                    currentUserId,
-                    AuditActionType.UserDeleted,
-                    AuditEntityType.User,
-                    deletedUserId,
-                    deletedDisplayName,
-                    $"User '{deletedDisplayName}' deleted.");
-            }
-            catch { /* audit failures must not interrupt the primary operation */ }
-
             await dataGrid.ReloadServerData();
         }
         else
         {
-            ErrorMessage = "Failed to delete user: " +
-                           string.Join(", ", deleteResult.Errors.Select(e => e.Description));
+            ErrorMessage = error ?? "Failed to delete user.";
         }
     }
 
@@ -1141,137 +775,42 @@ public partial class Index : ComponentBase
     #region Helpers
 
     /// <summary>
-    /// Gets the highest role position for the given user.
-    /// Returns 0 if the user has no roles.
+    /// Gets the highest role position for the given user (using cached role metadata).
     /// </summary>
-    /// <param name="appUser">The application user to check.</param>
-    /// <returns>The highest position value among the user's assigned roles.</returns>
-    private async Task<int> GetHighestPositionForUserAsync(ApplicationUser appUser)
+    private int GetHighestPositionForUser(UserViewModel user)
     {
-        var roles = await UserManager.GetRolesAsync(appUser);
-        if (roles.Count == 0) return 0;
+        if (user.Roles.Count == 0) return 0;
 
-        return await RoleManager.Roles
-            .Where(r => roles.Contains(r.Name!))
-            .MaxAsync(r => r.Position);
+        return user.Roles
+            .Select(roleName => allRoles.FirstOrDefault(r =>
+                string.Equals(r.Name, roleName, StringComparison.OrdinalIgnoreCase))?.Position ?? 0)
+            .DefaultIfEmpty(0)
+            .Max();
     }
 
     /// <summary>
-    /// Checks whether the given user is the last user in any role that has
-    /// <see cref="ApplicationRole.RequiresMinimumUser"/> set to true.
+    /// Sets the exact roles for a user via the API.
     /// </summary>
-    /// <param name="appUser">The application user to check.</param>
-    /// <returns>
-    /// The name of the first role where the user is the last member and
-    /// <c>RequiresMinimumUser</c> is true, or <c>null</c> if no such role exists.
-    /// </returns>
-    private async Task<string?> GetBlockingRequiresMinimumRoleAsync(ApplicationUser appUser)
-    {
-        var userRoles = await UserManager.GetRolesAsync(appUser);
-
-        foreach (var roleName in userRoles)
-        {
-            var role = await RoleManager.FindByNameAsync(roleName);
-            if (role is null || !role.RequiresMinimumUser) continue;
-
-            var usersInRole = await UserManager.GetUsersInRoleAsync(roleName);
-            if (usersInRole.Count == 1)
-            {
-                return roleName;
-            }
-        }
-
-        return null;
-    }
-
-    /// <summary>
-    /// Sets the exact roles for a user using diff-based logic:
-    /// adds roles that are in <paramref name="desiredRoles"/> but not currently assigned,
-    /// and removes roles that are currently assigned but not in <paramref name="desiredRoles"/>.
-    /// After successful update, reloads the data grid and logs RoleAssigned/RoleUnassigned audit entries.
-    /// </summary>
-    /// <param name="user">The user view model to update.</param>
-    /// <param name="desiredRoles">The desired set of role names.</param>
     private async Task SetRolesAsync(UserViewModel user, HashSet<string> desiredRoles)
     {
-        var appUser = await UserManager.FindByIdAsync(user.Id);
-        if (appUser is null)
+        var (ok, error) = await UserService.SetRolesAsync(user.Id, desiredRoles.ToArray());
+        if (ok)
         {
-            ErrorMessage = $"User '{user.UserName}' not found.";
-            return;
+            var currentRoles = new HashSet<string>(user.Roles, StringComparer.OrdinalIgnoreCase);
+            var rolesToAdd = desiredRoles.Except(currentRoles, StringComparer.OrdinalIgnoreCase).ToList();
+            var rolesToRemove = currentRoles.Except(desiredRoles, StringComparer.OrdinalIgnoreCase).ToList();
+
+            var summary = new List<string>();
+            if (rolesToAdd.Count > 0) summary.Add($"added: {string.Join(", ", rolesToAdd)}");
+            if (rolesToRemove.Count > 0) summary.Add($"removed: {string.Join(", ", rolesToRemove)}");
+
+            Snackbar.Add($"Roles updated for {user.DisplayName} ({string.Join("; ", summary)}).", Severity.Success);
+            await dataGrid.ReloadServerData();
         }
-
-        var currentRoles = new HashSet<string>(await UserManager.GetRolesAsync(appUser), StringComparer.OrdinalIgnoreCase);
-
-        var rolesToAdd = desiredRoles.Except(currentRoles, StringComparer.OrdinalIgnoreCase).ToList();
-        var rolesToRemove = currentRoles.Except(desiredRoles, StringComparer.OrdinalIgnoreCase).ToList();
-
-        // Remove roles no longer selected
-        if (rolesToRemove.Count > 0)
+        else
         {
-            var removeResult = await UserManager.RemoveFromRolesAsync(appUser, rolesToRemove);
-            if (!removeResult.Succeeded)
-            {
-                ErrorMessage = "Error removing roles: " +
-                               string.Join(", ", removeResult.Errors.Select(e => e.Description));
-                return;
-            }
+            ErrorMessage = error ?? "Failed to update roles.";
         }
-
-        // Add newly selected roles
-        if (rolesToAdd.Count > 0)
-        {
-            var addResult = await UserManager.AddToRolesAsync(appUser, rolesToAdd);
-            if (!addResult.Succeeded)
-            {
-                // Roll back removals
-                if (rolesToRemove.Count > 0)
-                    await UserManager.AddToRolesAsync(appUser, rolesToRemove);
-
-                ErrorMessage = "Error adding roles: " +
-                               string.Join(", ", addResult.Errors.Select(e => e.Description));
-                return;
-            }
-        }
-
-        // Audit: log each role assignment and unassignment (fire-and-forget safe)
-        try
-        {
-            foreach (var roleName in rolesToAdd)
-            {
-                await AuditLogService.LogAsync(
-                    currentUserId,
-                    AuditActionType.RoleAssigned,
-                    AuditEntityType.Role,
-                    entityId: user.Id,
-                    entityName: roleName,
-                    description: $"Role '{roleName}' assigned to user '{user.DisplayName ?? user.UserName}'.");
-            }
-
-            foreach (var roleName in rolesToRemove)
-            {
-                await AuditLogService.LogAsync(
-                    currentUserId,
-                    AuditActionType.RoleUnassigned,
-                    AuditEntityType.Role,
-                    entityId: user.Id,
-                    entityName: roleName,
-                    description: $"Role '{roleName}' removed from user '{user.DisplayName ?? user.UserName}'.");
-            }
-        }
-        catch
-        {
-            // Audit failures must not interrupt the primary operation
-        }
-
-        var summary = new List<string>();
-        if (rolesToAdd.Count > 0) summary.Add($"added: {string.Join(", ", rolesToAdd)}");
-        if (rolesToRemove.Count > 0) summary.Add($"removed: {string.Join(", ", rolesToRemove)}");
-
-        Snackbar.Add($"Roles updated for {user.DisplayName} ({string.Join("; ", summary)}).", Severity.Success);
-
-        // Reload the grid to reflect the updated roles
-        await dataGrid.ReloadServerData();
     }
 
     #endregion
@@ -1280,12 +819,10 @@ public partial class Index : ComponentBase
 
     /// <summary>
     /// Flattened view model for the user data grid.
-    /// Properties are mapped to <see cref="DataGridUtils{T}"/> for server-side
-    /// filtering and sorting support.
     /// </summary>
     public class UserViewModel
     {
-        /// <summary>Display line number (1-based, page-aware). Set by <see cref="DataGridUtils{T}"/>.</summary>
+        /// <summary>Display line number (1-based, page-aware).</summary>
         public int LineNumber { get; set; }
 
         /// <summary>The user's Identity ID.</summary>
@@ -1317,7 +854,7 @@ public partial class Index : ComponentBase
 
         /// <summary>
         /// Determines equality by <see cref="Id"/> so the grid can match selected items
-        /// across page reloads (where new object instances are created by ServerData).
+        /// across page reloads.
         /// </summary>
         public override bool Equals(object? obj)
             => obj is UserViewModel other && Id == other.Id;

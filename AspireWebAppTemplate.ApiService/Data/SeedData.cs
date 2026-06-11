@@ -1,8 +1,8 @@
-﻿using BlazorWebAppTemplate.Data.Entities;
+using AspireWebAppTemplate.ApiService.Data.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 
-namespace BlazorWebAppTemplate.Data;
+namespace AspireWebAppTemplate.ApiService.Data;
 
 /// <summary>
 /// Provides database seeding logic for roles and default user accounts.

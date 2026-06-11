@@ -1,11 +1,11 @@
-using BlazorWebAppTemplate.Abstractions;
-using BlazorWebAppTemplate.Core.Domain.Enums;
-using BlazorWebAppTemplate.Data;
-using BlazorWebAppTemplate.Data.Entities;
+using AspireWebAppTemplate.Abstractions;
+using AspireWebAppTemplate.ApiService.Data;
+using AspireWebAppTemplate.ApiService.Data.Entities;
+using AspireWebAppTemplate.Core.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace BlazorWebAppTemplate.Services;
+namespace AspireWebAppTemplate.Services;
 
 /// <summary>
 /// Implements the <see cref="IAuditLogService"/> interface to record significant user and system

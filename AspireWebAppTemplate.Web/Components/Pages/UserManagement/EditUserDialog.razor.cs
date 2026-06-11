@@ -1,34 +1,25 @@
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json;
-using BlazorWebAppTemplate.Abstractions;
-using BlazorWebAppTemplate.Core.Domain.Enums;
-using BlazorWebAppTemplate.Core.Utilities;
-using BlazorWebAppTemplate.Data;
-using BlazorWebAppTemplate.Data.Entities;
+using AspireWebAppTemplate.Core.Contracts;
+using AspireWebAppTemplate.Core.Utilities;
+using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.AspNetCore.Identity;
 using MudBlazor;
 
-namespace BlazorWebAppTemplate.Components.Pages.UserManagement;
+namespace AspireWebAppTemplate.Web.Components.Pages.UserManagement;
 
 /// <summary>
 /// Dialog for editing a user's profile information.
+/// Delegates all persistence to the API via <see cref="ApiUserService"/>.
 /// </summary>
 public partial class EditUserDialog : ComponentBase
 {
     #region Injected Services
 
     /// <summary>
-    /// Manages user accounts.
+    /// HTTP client service for user operations.
     /// </summary>
-    [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
-
-    /// <summary>
-    /// Audit log service for recording user update events.
-    /// </summary>
-    [Inject] private IAuditLogService AuditLogService { get; set; } = default!;
+    [Inject] private ApiUserService UserService { get; set; } = default!;
 
     #endregion
 
@@ -39,12 +30,6 @@ public partial class EditUserDialog : ComponentBase
     /// </summary>
     [CascadingParameter]
     private IMudDialogInstance MudDialog { get; set; } = default!;
-
-    /// <summary>
-    /// Provides the current authentication state for identifying the acting user.
-    /// </summary>
-    [CascadingParameter]
-    private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
 
     #endregion
 
@@ -69,11 +54,6 @@ public partial class EditUserDialog : ComponentBase
     /// Drives the <c>EditForm</c> validation context.
     /// </summary>
     private EditContext editContext = default!;
-
-    /// <summary>
-    /// The loaded user entity.
-    /// </summary>
-    private ApplicationUser? user;
 
     /// <summary>
     /// Whether the user is being loaded.
@@ -101,7 +81,7 @@ public partial class EditUserDialog : ComponentBase
     {
         editContext = new EditContext(Input);
 
-        user = await UserManager.FindByIdAsync(UserId);
+        var user = await UserService.GetUserAsync(UserId);
         if (user is not null)
         {
             Input.DisplayName = user.DisplayName ?? "";
@@ -122,11 +102,11 @@ public partial class EditUserDialog : ComponentBase
     #region Event Handlers
 
     /// <summary>
-    /// Saves the updated user profile.
+    /// Saves the updated user profile via the API.
     /// </summary>
     protected async Task OnSubmitAsync()
     {
-        if (IsBusy || user is null) return;
+        if (IsBusy) return;
         if (!editContext.Validate()) return;
 
         IsBusy = true;
@@ -134,86 +114,24 @@ public partial class EditUserDialog : ComponentBase
 
         try
         {
-            // Capture old values before applying changes for audit trail
-            var oldValues = new Dictionary<string, string?>
+            var request = new UpdateUserRequest
             {
-                [nameof(user.DisplayName)] = user.DisplayName,
-                [nameof(user.FirstName)] = user.FirstName,
-                [nameof(user.LastName)] = user.LastName,
-                [nameof(user.Email)] = user.Email,
-                [nameof(user.PhoneNumber)] = user.PhoneNumber,
-                [nameof(user.EmployeeNumber)] = user.EmployeeNumber,
-                [nameof(user.JobTitle)] = user.JobTitle,
-                [nameof(user.Department)] = user.Department
+                DisplayName = Input.DisplayName,
+                FirstName = Input.FirstName,
+                LastName = Input.LastName,
+                Email = Input.Email,
+                PhoneNumber = Input.Phone,
+                EmployeeNumber = Input.EmployeeNumber,
+                JobTitle = Input.JobTitle,
+                Department = Input.Department
             };
 
-            user.DisplayName = Input.DisplayName;
-            user.FirstName = Input.FirstName;
-            user.LastName = Input.LastName;
-            user.Email = Input.Email;
-            user.PhoneNumber = Input.Phone;
-            user.EmployeeNumber = Input.EmployeeNumber;
-            user.JobTitle = Input.JobTitle;
-            user.Department = Input.Department;
-            user.UpdatedUtc = DateTime.UtcNow;
-
-            var result = await UserManager.UpdateAsync(user);
-            if (!result.Succeeded)
+            var (success, error) = await UserService.UpdateUserAsync(UserId, request);
+            if (!success)
             {
-                StatusMessage = string.Join(" ", result.Errors.Select(e => e.Description));
+                StatusMessage = error ?? "Failed to update user.";
                 return;
             }
-
-            // Audit: log user update event with old/new values (fire-and-forget safe)
-            try
-            {
-                var newValues = new Dictionary<string, string?>
-                {
-                    [nameof(user.DisplayName)] = user.DisplayName,
-                    [nameof(user.FirstName)] = user.FirstName,
-                    [nameof(user.LastName)] = user.LastName,
-                    [nameof(user.Email)] = user.Email,
-                    [nameof(user.PhoneNumber)] = user.PhoneNumber,
-                    [nameof(user.EmployeeNumber)] = user.EmployeeNumber,
-                    [nameof(user.JobTitle)] = user.JobTitle,
-                    [nameof(user.Department)] = user.Department
-                };
-
-                // Only include fields that actually changed
-                var changedOld = new Dictionary<string, string?>();
-                var changedNew = new Dictionary<string, string?>();
-                foreach (var key in oldValues.Keys)
-                {
-                    if (!string.Equals(oldValues[key], newValues[key], StringComparison.Ordinal))
-                    {
-                        changedOld[key] = oldValues[key];
-                        changedNew[key] = newValues[key];
-                    }
-                }
-
-                var authState = await AuthStateTask;
-                var actingUserName = authState.User.Identity?.Name;
-                string? actingUserId = null;
-                if (actingUserName is not null)
-                {
-                    var actingUser = await UserManager.FindByNameAsync(actingUserName);
-                    actingUserId = actingUser?.Id;
-                }
-
-                var oldValuesJson = changedOld.Count > 0 ? JsonSerializer.Serialize(changedOld) : null;
-                var newValuesJson = changedNew.Count > 0 ? JsonSerializer.Serialize(changedNew) : null;
-
-                await AuditLogService.LogAsync(
-                    actingUserId,
-                    AuditActionType.UserUpdated,
-                    AuditEntityType.User,
-                    user.Id,
-                    user.DisplayName ?? user.UserName ?? "",
-                    $"User '{user.DisplayName ?? user.UserName}' profile updated.",
-                    oldValues: oldValuesJson,
-                    newValues: newValuesJson);
-            }
-            catch { /* audit failures must not interrupt the primary operation */ }
 
             MudDialog.Close(DialogResult.Ok(true));
         }

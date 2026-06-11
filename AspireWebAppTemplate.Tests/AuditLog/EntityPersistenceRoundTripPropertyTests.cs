@@ -1,14 +1,14 @@
 // Feature: audit-log, Property 1: Entity persistence round-trip
-using BlazorWebAppTemplate.Core.Domain.Enums;
-using BlazorWebAppTemplate.Data;
-using BlazorWebAppTemplate.Data.Entities;
+using AspireWebAppTemplate.ApiService.Data;
+using AspireWebAppTemplate.ApiService.Data.Entities;
+using AspireWebAppTemplate.Core.Domain.Enums;
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
-namespace BlazorWebAppTemplate.Tests.AuditLog;
+namespace AspireWebAppTemplate.Tests.AuditLog;
 
 /// <summary>
 /// Property-based tests verifying that persisting and retrieving an AuditLogEntry

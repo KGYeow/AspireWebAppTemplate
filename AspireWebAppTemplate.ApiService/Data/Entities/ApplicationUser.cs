@@ -1,7 +1,7 @@
-using BlazorWebAppTemplate.Core.Domain.Enums;
+using AspireWebAppTemplate.Core.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 
-namespace BlazorWebAppTemplate.Data.Entities;
+namespace AspireWebAppTemplate.ApiService.Data.Entities;
 
 /// <summary>
 /// Represents an application user record stored by ASP.NET Core Identity.

@@ -1,6 +1,6 @@
-using BlazorWebAppTemplate.Core.Domain.Enums;
+using AspireWebAppTemplate.Core.Domain.Enums;
 
-namespace BlazorWebAppTemplate.Abstractions;
+namespace AspireWebAppTemplate.Abstractions;
 
 /// <summary>
 /// Defines the contract for the audit log service that records significant user and system

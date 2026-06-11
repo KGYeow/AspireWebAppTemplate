@@ -1,13 +1,13 @@
-using BlazorWebAppTemplate.Abstractions;
-using BlazorWebAppTemplate.Core.Domain.Enums;
-using BlazorWebAppTemplate.Data;
-using BlazorWebAppTemplate.Data.Entities;
-using BlazorWebAppTemplate.Contracts;
+using AspireWebAppTemplate.Abstractions;
+using AspireWebAppTemplate.Core.Domain.Enums;
+using AspireWebAppTemplate.ApiService.Data;
+using AspireWebAppTemplate.Core.Contracts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using AspireWebAppTemplate.ApiService.Data.Entities;
 
-namespace BlazorWebAppTemplate.Services;
+namespace AspireWebAppTemplate.Services;
 
 /// <summary>
 /// Implements <see cref="ILdapLoginService"/> by orchestrating LDAP authentication,

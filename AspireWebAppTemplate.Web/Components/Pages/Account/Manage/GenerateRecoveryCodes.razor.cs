@@ -1,110 +1,54 @@
-using BlazorWebAppTemplate.Data;
-using BlazorWebAppTemplate.Data.Entities;
+using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 
-namespace BlazorWebAppTemplate.Components.Account.Pages.Manage;
+namespace AspireWebAppTemplate.Web.Components.Pages.Account.Manage;
 
 /// <summary>
-/// Generate new 2FA recovery codes page using <c>InteractiveServer</c> render mode.
+/// Generate new 2FA recovery codes page. Calls the API to generate codes.
 /// </summary>
 public partial class GenerateRecoveryCodes : ComponentBase
 {
     #region Injected Services
 
-    /// <summary>
-    /// Manages user accounts. Used to generate recovery codes.
-    /// </summary>
-    [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
-
-    /// <summary>
-    /// Provides navigation actions.
-    /// </summary>
+    [Inject] private ApiAuthService AuthService { get; set; } = default!;
     [Inject] private NavigationManager NavigationManager { get; set; } = default!;
-
-    /// <summary>
-    /// Structured logger for recording recovery code generation events.
-    /// </summary>
     [Inject] private ILogger<GenerateRecoveryCodes> Logger { get; set; } = default!;
-
-    #endregion
-
-    #region Cascading Parameters
-
-    /// <summary>
-    /// Provides the current authentication state to resolve the user.
-    /// </summary>
-    [CascadingParameter]
-    private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
 
     #endregion
 
     #region State
 
-    /// <summary>
-    /// The current user.
-    /// </summary>
-    private ApplicationUser? user;
-
-    /// <summary>
-    /// The generated recovery codes, displayed after generation.
-    /// </summary>
     protected string[]? RecoveryCodes { get; private set; }
-
-    /// <summary>
-    /// Status message displayed on error.
-    /// </summary>
     protected string? StatusMessage { get; set; }
-
-    /// <summary>
-    /// Controls the button's disabled state and loading spinner.
-    /// </summary>
     protected bool IsBusy { get; set; }
-
-    #endregion
-
-    #region Lifecycle
-
-    /// <summary>
-    /// Loads the current user and validates that 2FA is enabled.
-    /// </summary>
-    protected override async Task OnInitializedAsync()
-    {
-        var authState = await AuthStateTask;
-        user = await UserManager.GetUserAsync(authState.User);
-        if (user is null)
-        {
-            NavigationManager.NavigateTo("Account/InvalidUser", forceLoad: true);
-            return;
-        }
-
-        if (!await UserManager.GetTwoFactorEnabledAsync(user))
-        {
-            StatusMessage = "Error: Cannot generate recovery codes because 2FA is not enabled.";
-        }
-    }
 
     #endregion
 
     #region Event Handlers
 
-    /// <summary>
-    /// Generates new recovery codes for the current user.
-    /// </summary>
     protected async Task OnSubmitAsync()
     {
-        if (IsBusy || user is null) return;
+        if (IsBusy) return;
         IsBusy = true;
+        StatusMessage = null;
 
         try
         {
-            var userId = await UserManager.GetUserIdAsync(user);
-            var codes = await UserManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
-            RecoveryCodes = codes?.ToArray();
-
-            Logger.LogInformation("User with ID '{UserId}' has generated new 2FA recovery codes.", userId);
+            var codes = await AuthService.GenerateRecoveryCodesAsync();
+            if (codes is not null)
+            {
+                RecoveryCodes = codes;
+            }
+            else
+            {
+                StatusMessage = "Error generating recovery codes. 2FA may not be enabled.";
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error generating recovery codes.");
+            StatusMessage = $"Error: {ex.Message}";
         }
         finally
         {

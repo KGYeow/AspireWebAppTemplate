@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 
-namespace BlazorWebAppTemplate.Components.Pages.UserManagement;
+namespace AspireWebAppTemplate.Web.Components.Pages.UserManagement;
 
 /// <summary>
 /// Dialog for managing a user's roles with multi-selection.

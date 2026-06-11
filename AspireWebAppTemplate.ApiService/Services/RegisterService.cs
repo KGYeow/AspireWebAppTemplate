@@ -1,14 +1,14 @@
 using System.Text;
 using System.Text.Encodings.Web;
-using BlazorWebAppTemplate.Abstractions;
-using BlazorWebAppTemplate.Data;
-using BlazorWebAppTemplate.Data.Entities;
-using BlazorWebAppTemplate.Contracts;
+using AspireWebAppTemplate.Abstractions;
+using AspireWebAppTemplate.ApiService.Data;
+using AspireWebAppTemplate.Core.Contracts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using AspireWebAppTemplate.ApiService.Data.Entities;
 
-namespace BlazorWebAppTemplate.Services;
+namespace AspireWebAppTemplate.Services;
 
 /// <summary>
 /// Implements <see cref="IRegisterService"/> by creating a new user via

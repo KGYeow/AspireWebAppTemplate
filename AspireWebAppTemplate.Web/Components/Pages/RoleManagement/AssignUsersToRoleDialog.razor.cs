@@ -1,34 +1,28 @@
-using BlazorWebAppTemplate.Abstractions;
-using BlazorWebAppTemplate.Core.Domain.Enums;
-using BlazorWebAppTemplate.Data;
-using BlazorWebAppTemplate.Data.Entities;
+using AspireWebAppTemplate.Core.Contracts;
+using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 
-namespace BlazorWebAppTemplate.Components.Pages.RoleManagement;
+namespace AspireWebAppTemplate.Web.Components.Pages.RoleManagement;
 
 /// <summary>
 /// Dialog for searching and assigning multiple users to a role.
 /// Displays a searchable list of available users (excluding those already assigned),
-/// supports multi-selection, and calls UserManager.AddToRoleAsync for each selected user.
-/// Returns success/failed counts via snackbar notification.
+/// supports multi-selection, and calls the API to assign users.
 /// </summary>
 public partial class AssignUsersToRoleDialog : ComponentBase
 {
     #region Injected Services
 
     /// <summary>
-    /// Manages user accounts. Used to search users and assign the role.
+    /// HTTP client service for user operations (searching users).
     /// </summary>
-    [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
+    [Inject] private ApiUserService UserService { get; set; } = default!;
 
     /// <summary>
-    /// Audit log service for recording role assignment events.
+    /// HTTP client service for role operations (assigning users to role).
     /// </summary>
-    [Inject] private IAuditLogService AuditLogService { get; set; } = default!;
+    [Inject] private ApiRoleService RoleService { get; set; } = default!;
 
     #endregion
 
@@ -40,12 +34,6 @@ public partial class AssignUsersToRoleDialog : ComponentBase
     [CascadingParameter]
     private IMudDialogInstance MudDialog { get; set; } = default!;
 
-    /// <summary>
-    /// Provides the current authentication state for identifying the acting user.
-    /// </summary>
-    [CascadingParameter]
-    private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
-
     #endregion
 
     #region Parameters
@@ -55,6 +43,12 @@ public partial class AssignUsersToRoleDialog : ComponentBase
     /// </summary>
     [Parameter]
     public string RoleName { get; set; } = "";
+
+    /// <summary>
+    /// The ID of the role to assign users to.
+    /// </summary>
+    [Parameter]
+    public string RoleId { get; set; } = "";
 
     /// <summary>
     /// The IDs of users already assigned to the role.
@@ -75,16 +69,15 @@ public partial class AssignUsersToRoleDialog : ComponentBase
     /// <summary>
     /// The list of users matching the search criteria.
     /// </summary>
-    private List<ApplicationUser> SearchResults { get; set; } = [];
+    private List<UserDto> SearchResults { get; set; } = [];
 
     /// <summary>
     /// The set of users selected for assignment.
     /// </summary>
-    private HashSet<ApplicationUser> SelectedUsers { get; set; } = [];
+    private HashSet<UserDto> SelectedUsers { get; set; } = [];
 
     /// <summary>
-    /// Controls the button disabled state and loading spinner
-    /// to prevent duplicate submissions.
+    /// Controls the button disabled state.
     /// </summary>
     private bool IsBusy { get; set; }
 
@@ -103,7 +96,7 @@ public partial class AssignUsersToRoleDialog : ComponentBase
     #region Event Handlers
 
     /// <summary>
-    /// Searches users by username or display name when the search term changes.
+    /// Searches users by username or display name via the API.
     /// Excludes users already assigned to the role.
     /// </summary>
     private async Task OnSearchAsync(string value)
@@ -121,14 +114,11 @@ public partial class AssignUsersToRoleDialog : ComponentBase
 
         try
         {
-            var term = SearchTerm.ToLower();
-            SearchResults = await UserManager.Users
-                .Where(u => !ExistingUserIds.Contains(u.Id) &&
-                    (u.UserName!.ToLower().Contains(term) ||
-                    (u.DisplayName != null && u.DisplayName.ToLower().Contains(term))))
-                .OrderBy(u => u.UserName)
+            var allUsers = await UserService.GetAllUsersAsync(SearchTerm);
+            SearchResults = allUsers
+                .Where(u => !ExistingUserIds.Contains(u.Id))
                 .Take(50)
-                .ToListAsync();
+                .ToList();
         }
         finally
         {
@@ -139,7 +129,7 @@ public partial class AssignUsersToRoleDialog : ComponentBase
     /// <summary>
     /// Toggles a user's selection state.
     /// </summary>
-    private void ToggleUserSelection(ApplicationUser user)
+    private void ToggleUserSelection(UserDto user)
     {
         if (!SelectedUsers.Remove(user))
         {
@@ -150,20 +140,18 @@ public partial class AssignUsersToRoleDialog : ComponentBase
     /// <summary>
     /// Checks if a user is currently selected.
     /// </summary>
-    private bool IsUserSelected(ApplicationUser user) => SelectedUsers.Contains(user);
+    private bool IsUserSelected(UserDto user) => SelectedUsers.Any(u => u.Id == user.Id);
 
     /// <summary>
     /// Removes a user from the selection.
     /// </summary>
-    private void RemoveFromSelection(ApplicationUser user)
+    private void RemoveFromSelection(UserDto user)
     {
-        SelectedUsers.Remove(user);
+        SelectedUsers.RemoveWhere(u => u.Id == user.Id);
     }
 
     /// <summary>
-    /// Assigns all selected users to the role and closes the dialog on success.
-    /// Displays a summary snackbar with success/failed counts.
-    /// Logs a RoleAssigned audit entry for each successful assignment.
+    /// Assigns all selected users to the role via the API.
     /// </summary>
     private async Task OnConfirmAsync()
     {
@@ -174,53 +162,18 @@ public partial class AssignUsersToRoleDialog : ComponentBase
 
         try
         {
-            // Resolve the acting user's ID for audit logging
-            var authState = await AuthStateTask;
-            var actingUserId = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userIds = SelectedUsers.Select(u => u.Id).ToArray();
+            var (success, error) = await RoleService.AssignUsersToRoleAsync(RoleId, userIds);
 
-            int successCount = 0;
-            int failedCount = 0;
-
-            foreach (var user in SelectedUsers)
+            if (success)
             {
-                var result = await UserManager.AddToRoleAsync(user, RoleName);
-                if (result.Succeeded)
-                {
-                    successCount++;
-
-                    // Log audit entry for role assignment — failures are swallowed by the service
-                    try
-                    {
-                        await AuditLogService.LogAsync(
-                            actingUserId,
-                            AuditActionType.RoleAssigned,
-                            AuditEntityType.Role,
-                            entityId: user.Id,
-                            entityName: RoleName,
-                            description: $"Role '{RoleName}' assigned to user '{user.DisplayName ?? user.UserName}'.");
-                    }
-                    catch
-                    {
-                        // Audit failures must not interrupt the primary operation
-                    }
-                }
-                else
-                {
-                    failedCount++;
-                }
-            }
-
-            // Show summary snackbar
-            if (failedCount == 0)
-            {
-                Snackbar.Add($"Successfully assigned {successCount} user(s) to role '{RoleName}'.", Severity.Success);
+                Snackbar.Add($"Successfully assigned {userIds.Length} user(s) to role '{RoleName}'.", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(true));
             }
             else
             {
-                Snackbar.Add($"Assigned {successCount} user(s), {failedCount} failed for role '{RoleName}'.", Severity.Warning);
+                StatusMessage = error ?? "Failed to assign users to role.";
             }
-
-            MudDialog.Close(DialogResult.Ok(true));
         }
         finally
         {

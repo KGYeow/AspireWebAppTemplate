@@ -1,6 +1,6 @@
-using BlazorWebAppTemplate.Core.Domain.Enums;
+using AspireWebAppTemplate.Core.Domain.Enums;
 
-namespace BlazorWebAppTemplate.Abstractions;
+namespace AspireWebAppTemplate.Abstractions;
 
 /// <summary>
 /// Provides per-circuit theme state management for Blazor Server.

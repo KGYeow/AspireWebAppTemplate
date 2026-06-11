@@ -1,4 +1,4 @@
-namespace BlazorWebAppTemplate.Abstractions;
+namespace AspireWebAppTemplate.Abstractions;
 
 /// <summary>
 /// Defines the contract for generating Excel (.xlsx) and CSV exports from data collections.

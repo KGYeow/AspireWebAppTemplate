@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components;
 
-namespace BlazorWebAppTemplate.Components.Layout;
+namespace AspireWebAppTemplate.Web.Components.Layout;
 
 public partial class Topbar : ComponentBase
 {

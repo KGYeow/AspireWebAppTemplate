@@ -1,0 +1,26 @@
+@inherits LayoutComponentBase
+@layout AuthLayout
+
+<MudAppBar Class="topbar" ToolBarClass="gap-4" Dense>
+    <MudIconButton Icon="@Icons.Material.Rounded.ArrowBack"
+                   Color="Color.Inherit"
+                   Href="/"
+                   Edge="Edge.Start" />
+    <MudText Class="fw-bold" Typo="Typo.subtitle1">Account Settings</MudText>
+    <MudSpacer />
+</MudAppBar>
+
+<MudMainContent Class="min-vh-100">
+    <MudContainer Class="py-6" MaxWidth="MaxWidth.ExtraLarge">
+        <PageHeader Title="Manage your account" Subtitle="Change your account settings." />
+
+        <MudGrid Spacing="3">
+            <MudItem xs="12" md="3">
+                <ManageNavMenu />
+            </MudItem>
+            <MudItem xs="12" md="9">
+                @Body
+            </MudItem>
+        </MudGrid>
+    </MudContainer>
+</MudMainContent>

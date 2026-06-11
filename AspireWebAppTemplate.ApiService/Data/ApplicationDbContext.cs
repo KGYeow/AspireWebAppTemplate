@@ -1,10 +1,10 @@
-using BlazorWebAppTemplate.Core.Domain.Enums;
-using BlazorWebAppTemplate.Data.Entities;
+using AspireWebAppTemplate.ApiService.Data.Entities;
+using AspireWebAppTemplate.Core.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace BlazorWebAppTemplate.Data;
+namespace AspireWebAppTemplate.ApiService.Data;
 
 /// <summary>
 /// Entity Framework Core DbContext for the application.

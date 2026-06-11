@@ -1,25 +1,21 @@
-using BlazorWebAppTemplate.Abstractions;
-using BlazorWebAppTemplate.Core.Application.Abstractions;
-using BlazorWebAppTemplate.Core.Common.Defaults;
-using BlazorWebAppTemplate.Core.Domain.Enums;
-using BlazorWebAppTemplate.Data;
-using BlazorWebAppTemplate.Data.Entities;
+using AspireWebAppTemplate.Abstractions;
+using AspireWebAppTemplate.Core.Application.Abstractions;
+using AspireWebAppTemplate.Core.Common.Defaults;
+using AspireWebAppTemplate.Core.Contracts;
+using AspireWebAppTemplate.Core.Domain.Enums;
+using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 
-namespace BlazorWebAppTemplate.Components.Pages.Settings;
+namespace AspireWebAppTemplate.Web.Components.Pages.Settings;
 
 /// <summary>
 /// Settings page allowing authenticated users to view and edit their
 /// preferences (Time Zone, Locale, Date/Time Format) and appearance (Theme).
 /// All fields use instant-save on value change — no Save button or EditForm.
-/// Uses <see cref="AuthenticationStateProvider"/> to resolve the current user
-/// since <c>HttpContext</c> is not available on a SignalR circuit.
+/// Delegates persistence to the API via <see cref="ApiAuthService"/>.
 /// </summary>
 [Authorize]
 public partial class Index : ComponentBase
@@ -27,9 +23,9 @@ public partial class Index : ComponentBase
     #region Injected Services
 
     /// <summary>
-    /// Manages user accounts.
+    /// HTTP client service for auth operations including preference updates.
     /// </summary>
-    [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
+    [Inject] private ApiAuthService AuthService { get; set; } = default!;
 
     /// <summary>
     /// Provides navigation actions.
@@ -58,43 +54,16 @@ public partial class Index : ComponentBase
 
     #endregion
 
-    #region Cascading Parameters
-
-    /// <summary>
-    /// Provides the current authentication state to resolve the user
-    /// without depending on <c>HttpContext</c>.
-    /// </summary>
-    [CascadingParameter]
-    private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
-
-    #endregion
-
     #region State
-
-    /// <summary>
-    /// The current user entity.
-    /// </summary>
-    private ApplicationUser? User { get; set; }
 
     /// <summary>
     /// Status message displayed after save.
     /// </summary>
     protected string? StatusMessage { get; set; }
 
-    /// <summary>
-    /// Backing field for the theme preference instant-save toggle.
-    /// </summary>
     private ThemePreference _themeValue;
-    /// <summary>
-    /// Stores the previous theme value for revert-on-failure logic.
-    /// </summary>
     private ThemePreference _previousThemeValue;
 
-    /// <summary>
-    /// Gets or sets the user's theme preference.
-    /// The setter triggers an immediate async save when the value changes.
-    /// Stores the previous value for revert-on-failure logic.
-    /// </summary>
     private ThemePreference ThemeValue
     {
         get => _themeValue;
@@ -107,14 +76,9 @@ public partial class Index : ComponentBase
         }
     }
 
-    // Time Zone state
     private string? _timeZoneValue;
     private string? _previousTimeZoneValue;
 
-    /// <summary>
-    /// Gets or sets the user's time zone preference.
-    /// The setter triggers an immediate async save when the value changes.
-    /// </summary>
     private string? TimeZoneValue
     {
         get => _timeZoneValue;
@@ -127,14 +91,9 @@ public partial class Index : ComponentBase
         }
     }
 
-    // Date/Time Format state
     private string? _dateTimeFormatValue;
     private string? _previousDateTimeFormatValue;
 
-    /// <summary>
-    /// Gets or sets the user's date/time format preference.
-    /// The setter triggers an immediate async save when the value changes.
-    /// </summary>
     private string? DateTimeFormatValue
     {
         get => _dateTimeFormatValue;
@@ -151,78 +110,58 @@ public partial class Index : ComponentBase
 
     #region Lifecycle
 
-    /// <summary>
-    /// Loads the current user's preferences data using <see cref="AuthenticationState"/>.
-    /// </summary>
     protected override async Task OnInitializedAsync()
     {
-        var authState = await AuthStateTask;
-        User = await UserManager.GetUserAsync(authState.User);
+        var user = await AuthService.GetCurrentUserAsync();
 
-        if (User is null)
+        if (user is null)
         {
             NavigationManager.NavigateTo("Account/InvalidUser", forceLoad: true);
             return;
         }
 
-        _timeZoneValue = User.TimeZoneId;
-        _dateTimeFormatValue = User.DateTimeFormat;
-        _themeValue = User.Theme;
+        _timeZoneValue = user.TimeZoneId;
+        _dateTimeFormatValue = user.DateTimeFormat;
+        _themeValue = user.Theme;
     }
 
     #endregion
 
     #region Event Handlers
 
-    /// <summary>
-    /// Persists the selected theme preference immediately (instant-save pattern).
-    /// Called by the <see cref="ThemeValue"/> property setter.
-    /// Implements optimistic UI: updates User.Theme immediately, and on failure
-    /// reverts both _themeValue and User.Theme to the previous value and shows an error alert.
-    /// On success, notifies the <see cref="IThemeStateService"/> so the layout updates immediately.
-    /// </summary>
     private async Task SaveThemeAsync(ThemePreference theme)
     {
-        if (User is null) return;
-        User.Theme = theme;
         try
         {
-            await UserManager.UpdateAsync(User);
+            var error = await AuthService.UpdatePreferencesAsync(new UpdatePreferencesRequest { Theme = theme });
+            if (error is not null)
+            {
+                _themeValue = _previousThemeValue;
+                StatusMessage = "Error: Theme change failed, please try again.";
+                StateHasChanged();
+                return;
+            }
 
-            // Detect system preference for the "System" option
             var themeModule = await JS.InvokeAsync<IJSObjectReference>("import", "./js/theme.js");
             var systemPrefersDark = await themeModule.InvokeAsync<bool>("getSystemPrefersDark");
-
-            // Notify the layout to apply the new theme immediately
             ThemeState.SetThemePreference(theme, systemPrefersDark);
         }
         catch (Exception)
         {
-            // Revert on failure
             _themeValue = _previousThemeValue;
-            User.Theme = _previousThemeValue;
             StatusMessage = "Error: Theme change failed, please try again.";
             StateHasChanged();
         }
     }
 
-    /// <summary>
-    /// Persists the selected time zone preference immediately (instant-save pattern).
-    /// Called by the <see cref="TimeZoneValue"/> property setter.
-    /// Implements optimistic UI: updates User.TimeZoneId immediately, and on failure
-    /// reverts both _timeZoneValue and User.TimeZoneId to the previous value and shows an error alert.
-    /// </summary>
     private async Task SaveTimeZoneAsync(string? timeZoneId)
     {
-        if (User is null) return;
-        User.TimeZoneId = timeZoneId;
         try
         {
-            var result = await UserManager.UpdateAsync(User);
-            if (!result.Succeeded)
+            var error = await AuthService.UpdatePreferencesAsync(new UpdatePreferencesRequest { TimeZoneId = timeZoneId ?? "" });
+            if (error is not null)
             {
                 _timeZoneValue = _previousTimeZoneValue;
-                User.TimeZoneId = _previousTimeZoneValue;
                 StatusMessage = "Error: Save failed, please try again.";
             }
             else
@@ -231,49 +170,23 @@ public partial class Index : ComponentBase
             }
             StateHasChanged();
         }
-        catch (DbUpdateConcurrencyException ex)
+        catch (Exception ex)
         {
-            Logger.LogWarning(ex, "Concurrency conflict saving TimeZone for user {UserId}.", User.Id);
+            Logger.LogWarning(ex, "Error saving TimeZone preference.");
             _timeZoneValue = _previousTimeZoneValue;
-            User.TimeZoneId = _previousTimeZoneValue;
-            StatusMessage = "Error: Profile was modified elsewhere, please reload.";
-            StateHasChanged();
-        }
-        catch (DbUpdateException ex)
-        {
-            Logger.LogError(ex, "Database error saving TimeZone for user {UserId}.", User.Id);
-            _timeZoneValue = _previousTimeZoneValue;
-            User.TimeZoneId = _previousTimeZoneValue;
-            StatusMessage = "Error: Save failed, please try again.";
-            StateHasChanged();
-        }
-        catch (TaskCanceledException ex)
-        {
-            Logger.LogWarning(ex, "Save timed out for TimeZone for user {UserId}.", User.Id);
-            _timeZoneValue = _previousTimeZoneValue;
-            User.TimeZoneId = _previousTimeZoneValue;
             StatusMessage = "Error: Save failed, please try again.";
             StateHasChanged();
         }
     }
 
-    /// <summary>
-    /// Persists the selected date/time format preference immediately (instant-save pattern).
-    /// Called by the <see cref="DateTimeFormatValue"/> property setter.
-    /// Implements optimistic UI: updates User.DateTimeFormat immediately, and on failure
-    /// reverts both _dateTimeFormatValue and User.DateTimeFormat to the previous value and shows an error alert.
-    /// </summary>
     private async Task SaveDateTimeFormatAsync(string? format)
     {
-        if (User is null) return;
-        User.DateTimeFormat = format;
         try
         {
-            var result = await UserManager.UpdateAsync(User);
-            if (!result.Succeeded)
+            var error = await AuthService.UpdatePreferencesAsync(new UpdatePreferencesRequest { DateTimeFormat = format ?? "" });
+            if (error is not null)
             {
                 _dateTimeFormatValue = _previousDateTimeFormatValue;
-                User.DateTimeFormat = _previousDateTimeFormatValue;
                 StatusMessage = "Error: Save failed, please try again.";
             }
             else
@@ -282,27 +195,10 @@ public partial class Index : ComponentBase
             }
             StateHasChanged();
         }
-        catch (DbUpdateConcurrencyException ex)
+        catch (Exception ex)
         {
-            Logger.LogWarning(ex, "Concurrency conflict saving DateTimeFormat for user {UserId}.", User.Id);
+            Logger.LogWarning(ex, "Error saving DateTimeFormat preference.");
             _dateTimeFormatValue = _previousDateTimeFormatValue;
-            User.DateTimeFormat = _previousDateTimeFormatValue;
-            StatusMessage = "Error: Profile was modified elsewhere, please reload.";
-            StateHasChanged();
-        }
-        catch (DbUpdateException ex)
-        {
-            Logger.LogError(ex, "Database error saving DateTimeFormat for user {UserId}.", User.Id);
-            _dateTimeFormatValue = _previousDateTimeFormatValue;
-            User.DateTimeFormat = _previousDateTimeFormatValue;
-            StatusMessage = "Error: Save failed, please try again.";
-            StateHasChanged();
-        }
-        catch (TaskCanceledException ex)
-        {
-            Logger.LogWarning(ex, "Save timed out for DateTimeFormat for user {UserId}.", User.Id);
-            _dateTimeFormatValue = _previousDateTimeFormatValue;
-            User.DateTimeFormat = _previousDateTimeFormatValue;
             StatusMessage = "Error: Save failed, please try again.";
             StateHasChanged();
         }
@@ -312,18 +208,11 @@ public partial class Index : ComponentBase
 
     #region Helpers
 
-    /// <summary>
-    /// Searches timezones for the MudAutocomplete component.
-    /// Returns timezone IDs filtered by the search text (case-insensitive match on DisplayName or Id).
-    /// Injects the user's saved TimeZoneId into results if it's not in the canonical list
-    /// (handles IANA aliases like "Asia/Kuala_Lumpur").
-    /// </summary>
     private Task<IEnumerable<string>> SearchTimeZones(string value, CancellationToken token)
     {
         var allTimeZones = TimeZoneService.GetAllTimeZones();
         IEnumerable<TimeZoneOption> source = allTimeZones;
 
-        // Inject the user's saved TimeZoneId if it's not in the canonical list
         if (!string.IsNullOrEmpty(_timeZoneValue)
             && !allTimeZones.Any(tz => tz.Id == _timeZoneValue))
         {
@@ -343,10 +232,6 @@ public partial class Index : ComponentBase
         return Task.FromResult(filtered);
     }
 
-    /// <summary>
-    /// Attempts to build a TimeZoneOption for an alias ID by resolving it via
-    /// TimeZoneInfo.FindSystemTimeZoneById(). Returns null if the ID is unresolvable.
-    /// </summary>
     private static TimeZoneOption? BuildTimeZoneOptionForAlias(string id)
     {
         try
@@ -364,11 +249,6 @@ public partial class Index : ComponentBase
         }
     }
 
-    /// <summary>
-    /// Maps a date/time format string to a user-friendly display label.
-    /// Returns "Default (2026-05-28 14:30)" for null/empty values.
-    /// Returns the raw format string if no predefined label exists.
-    /// </summary>
     private static string GetFormatLabel(string? format) => format switch
     {
         null or "" => DateTimeFormatDefaults.Label,
@@ -386,22 +266,16 @@ public partial class Index : ComponentBase
         _ => format
     };
 
-    /// <summary>
-    /// Converts a timezone IANA identifier to its display name for the autocomplete's ToStringFunc.
-    /// Handles canonical IDs, resolvable aliases, and unresolvable IDs gracefully.
-    /// </summary>
     private string TimeZoneToString(string? id)
     {
         if (string.IsNullOrEmpty(id))
             return string.Empty;
 
-        // First: check the canonical list
         var allTimeZones = TimeZoneService.GetAllTimeZones();
         var match = allTimeZones.FirstOrDefault(tz => tz.Id == id);
         if (match is not null)
             return match.DisplayName;
 
-        // Second: attempt alias resolution via FindSystemTimeZoneById
         try
         {
             var tzInfo = TimeZoneInfo.FindSystemTimeZoneById(id);
@@ -412,7 +286,6 @@ public partial class Index : ComponentBase
         }
         catch (TimeZoneNotFoundException)
         {
-            // Graceful fallback: return raw ID
             return id;
         }
     }

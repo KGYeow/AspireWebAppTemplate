@@ -1,25 +1,25 @@
 using System.ComponentModel.DataAnnotations;
-using BlazorWebAppTemplate.Data;
-using BlazorWebAppTemplate.Data.Entities;
+using AspireWebAppTemplate.Core.Contracts;
+using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.AspNetCore.Identity;
 using MudBlazor;
 
-namespace BlazorWebAppTemplate.Components.Pages.RoleManagement;
+namespace AspireWebAppTemplate.Web.Components.Pages.RoleManagement;
 
 /// <summary>
 /// Dialog for adding a new application role with a name, display name,
 /// description, and active status.
+/// Delegates all persistence to the API via <see cref="ApiRoleService"/>.
 /// </summary>
 public partial class AddRoleDialog : ComponentBase
 {
     #region Injected Services
 
     /// <summary>
-    /// Manages roles.
+    /// HTTP client service for role operations.
     /// </summary>
-    [Inject] private RoleManager<ApplicationRole> RoleManager { get; set; } = default!;
+    [Inject] private ApiRoleService RoleService { get; set; } = default!;
 
     #endregion
 
@@ -51,8 +51,7 @@ public partial class AddRoleDialog : ComponentBase
     protected string? StatusMessage { get; private set; }
 
     /// <summary>
-    /// Controls the button disabled state and loading spinner
-    /// to prevent duplicate submissions.
+    /// Controls the button disabled state and loading spinner.
     /// </summary>
     protected bool IsBusy { get; private set; }
 
@@ -61,7 +60,7 @@ public partial class AddRoleDialog : ComponentBase
     #region Lifecycle
 
     /// <summary>
-    /// Initializes the edit context bound to <see cref="Input"/>.
+    /// Initializes the edit context.
     /// </summary>
     protected override void OnInitialized()
     {
@@ -73,9 +72,7 @@ public partial class AddRoleDialog : ComponentBase
     #region Event Handlers
 
     /// <summary>
-    /// Creates the role on valid form submission.
-    /// Checks for duplicate role names before creating.
-    /// Closes the dialog with <see cref="DialogResult.Ok{T}"/> on success.
+    /// Creates the role on valid form submission via the API.
     /// </summary>
     protected async Task OnSubmitAsync()
     {
@@ -87,28 +84,18 @@ public partial class AddRoleDialog : ComponentBase
 
         try
         {
-            // Guard: check for existing role with the same name
-            var existing = await RoleManager.FindByNameAsync(Input.Name);
-            if (existing is not null)
-            {
-                StatusMessage = $"A role with the name '{Input.Name}' already exists.";
-                return;
-            }
-
-            var role = new ApplicationRole
+            var request = new CreateRoleRequest
             {
                 Name = Input.Name,
                 DisplayName = Input.DisplayName,
                 Description = Input.Description,
-                IsActive = Input.IsActive,
-                Position = Input.Position,
-                CreatedUtc = DateTime.UtcNow,
+                Position = Input.Position
             };
 
-            var createResult = await RoleManager.CreateAsync(role);
-            if (!createResult.Succeeded)
+            var (success, error) = await RoleService.CreateRoleAsync(request);
+            if (!success)
             {
-                StatusMessage = string.Join(" ", createResult.Errors.Select(e => e.Description));
+                StatusMessage = error ?? "Failed to create role.";
                 return;
             }
 
@@ -131,7 +118,6 @@ public partial class AddRoleDialog : ComponentBase
     {
         /// <summary>
         /// The technical role name used by Identity (e.g., "Admin").
-        /// Must be unique across all roles.
         /// </summary>
         [Required]
         [StringLength(50, ErrorMessage = "Role name cannot exceed 50 characters.")]
@@ -140,7 +126,6 @@ public partial class AddRoleDialog : ComponentBase
 
         /// <summary>
         /// A human-readable label shown in the UI (e.g., "Administrator").
-        /// Falls back to <see cref="Name"/> if not set.
         /// </summary>
         [StringLength(100, ErrorMessage = "Display name cannot exceed 100 characters.")]
         [Display(Name = "Display Name")]
@@ -160,8 +145,7 @@ public partial class AddRoleDialog : ComponentBase
         public bool IsActive { get; set; } = true;
 
         /// <summary>
-        /// The authority position of the role. Higher values indicate higher authority.
-        /// Must be zero or positive.
+        /// The authority position of the role.
         /// </summary>
         [Range(0, int.MaxValue, ErrorMessage = "Position must be zero or positive.")]
         [Display(Name = "Position")]

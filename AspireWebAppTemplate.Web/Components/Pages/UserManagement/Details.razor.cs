@@ -1,10 +1,9 @@
-using BlazorWebAppTemplate.Abstractions;
-using BlazorWebAppTemplate.Data;
-using BlazorWebAppTemplate.Data.Entities;
+using AspireWebAppTemplate.Abstractions;
+using AspireWebAppTemplate.Core.Contracts;
+using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Identity;
 
-namespace BlazorWebAppTemplate.Components.Pages.UserManagement;
+namespace AspireWebAppTemplate.Web.Components.Pages.UserManagement;
 
 /// <summary>
 /// User details page. Displays all information about a user account
@@ -15,9 +14,9 @@ public partial class Details : ComponentBase
     #region Injected Services
 
     /// <summary>
-    /// Manages user accounts.
+    /// HTTP client service for user operations.
     /// </summary>
-    [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
+    [Inject] private ApiUserService UserService { get; set; } = default!;
 
     /// <summary>
     /// Provides navigation actions.
@@ -44,9 +43,9 @@ public partial class Details : ComponentBase
     #region State
 
     /// <summary>
-    /// The loaded user entity.
+    /// The loaded user DTO.
     /// </summary>
-    protected ApplicationUser? User { get; private set; }
+    protected UserDto? User { get; private set; }
 
     /// <summary>
     /// The user's assigned roles.
@@ -69,11 +68,10 @@ public partial class Details : ComponentBase
     {
         try
         {
-            User = await UserManager.FindByIdAsync(UserId);
+            User = await UserService.GetUserAsync(UserId);
             if (User is not null)
             {
-                var roles = await UserManager.GetRolesAsync(User);
-                UserRoles = roles.OrderBy(r => r).ToList();
+                UserRoles = User.Roles.OrderBy(r => r).ToList();
             }
         }
         finally

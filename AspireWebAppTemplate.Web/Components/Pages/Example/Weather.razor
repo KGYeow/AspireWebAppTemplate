@@ -1,0 +1,31 @@
+@page "/weather"
+
+<PageTitle>Weather</PageTitle>
+
+<PageHeader Title="Weather" Subtitle="This component demonstrates showing data." />
+
+<MudDataGrid T="WeatherForecast"
+             Items="@forecasts"
+             Loading="@isLoading"
+             Elevation="0"
+             Hover
+             Dense
+             Bordered
+             Filterable
+             Class="px-2 pt-2">
+    <NoRecordsContent>
+        <MudText Typo="Typo.body2">No weather data available.</MudText>
+    </NoRecordsContent>
+    <LoadingContent>
+        <MudText Typo="Typo.body2">Loading weather data...</MudText>
+    </LoadingContent>
+    <Columns>
+        <PropertyColumn Property="f => f.Date" Title="Date" Format="d" />
+        <PropertyColumn Property="f => f.TemperatureC" Title="Temp. (C)" />
+        <PropertyColumn Property="f => f.TemperatureF" Title="Temp. (F)" />
+        <PropertyColumn Property="f => f.Summary" Title="Summary" />
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="WeatherForecast" />
+    </PagerContent>
+</MudDataGrid>

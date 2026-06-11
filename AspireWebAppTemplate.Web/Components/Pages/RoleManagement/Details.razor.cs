@@ -1,35 +1,31 @@
-using BlazorWebAppTemplate.Abstractions;
-using BlazorWebAppTemplate.Core.Domain.Enums;
-using BlazorWebAppTemplate.Data;
-using BlazorWebAppTemplate.Data.Entities;
-using BlazorWebAppTemplate.UI.Components.Shared;
-using BlazorWebAppTemplate.UI.Utilities;
+using AspireWebAppTemplate.Abstractions;
+using AspireWebAppTemplate.Core.Contracts;
+using AspireWebAppTemplate.UI.Components.Shared;
+using AspireWebAppTemplate.UI.Utilities;
+using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Identity;
 using MudBlazor;
-using static BlazorWebAppTemplate.Components.Pages.UserManagement.Index;
 
-namespace BlazorWebAppTemplate.Components.Pages.RoleManagement;
+namespace AspireWebAppTemplate.Web.Components.Pages.RoleManagement;
 
 /// <summary>
 /// Role details page. Displays all information about a role
 /// organized in sections, including assigned users in a server-side data grid.
-/// Admin role required.
+/// Admin role required. All operations delegated to the API via <see cref="ApiRoleService"/>.
 /// </summary>
 public partial class Details : ComponentBase
 {
     #region Injected Services
 
     /// <summary>
-    /// Manages application roles.
+    /// HTTP client service for role operations.
     /// </summary>
-    [Inject] private RoleManager<ApplicationRole> RoleManager { get; set; } = default!;
+    [Inject] private ApiRoleService RoleService { get; set; } = default!;
 
     /// <summary>
-    /// Manages user accounts.
+    /// HTTP client service for user operations.
     /// </summary>
-    [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
+    [Inject] private ApiUserService UserService { get; set; } = default!;
 
     /// <summary>
     /// Provides navigation actions.
@@ -40,21 +36,6 @@ public partial class Details : ComponentBase
     /// Provides user-aware datetime formatting in the viewer's configured time zone.
     /// </summary>
     [Inject] private IUserTimeZoneContext UserTimeZone { get; set; } = default!;
-
-    /// <summary>
-    /// Audit log service for recording role unassignment events.
-    /// </summary>
-    [Inject] private IAuditLogService AuditLogService { get; set; } = default!;
-
-    #endregion
-
-    #region Cascading Parameters
-
-    /// <summary>
-    /// Provides the current authentication state for identifying the acting user.
-    /// </summary>
-    [CascadingParameter]
-    private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
 
     #endregion
 
@@ -90,14 +71,12 @@ public partial class Details : ComponentBase
     private string? usersSearchString;
 
     /// <summary>
-    /// Total number of users assigned to this role. Updated after each grid reload.
-    /// Displayed in the "Assigned Users (N)" section title.
+    /// Total number of users assigned to this role.
     /// </summary>
     protected int UsersInRoleCount { get; private set; }
 
     /// <summary>
     /// The set of currently selected users in the data grid.
-    /// Bound via <c>@bind-SelectedItems</c>.
     /// </summary>
     private HashSet<UserViewModel> selectedUsers = new();
 
@@ -106,9 +85,9 @@ public partial class Details : ComponentBase
     #region State
 
     /// <summary>
-    /// The loaded role entity.
+    /// The loaded role DTO.
     /// </summary>
-    protected ApplicationRole? Role { get; private set; }
+    protected RoleDto? Role { get; private set; }
 
     /// <summary>
     /// Whether data is currently loading.
@@ -120,14 +99,13 @@ public partial class Details : ComponentBase
     #region Lifecycle
 
     /// <summary>
-    /// Loads the role on initialization. Users are NOT pre-loaded here —
-    /// the <see cref="ServerReloadUsers"/> callback handles all user data loading.
+    /// Loads the role on initialization.
     /// </summary>
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            Role = await RoleManager.FindByIdAsync(RoleId);
+            Role = await RoleService.GetRoleAsync(RoleId);
         }
         finally
         {
@@ -140,44 +118,37 @@ public partial class Details : ComponentBase
     #region Server-Side Users Data Loading
 
     /// <summary>
-    /// Loads users assigned to the current role from the database and maps them to <see cref="UserViewModel"/> instances.
-    /// Called by the <see cref="ServerReloadUsers"/> callback on every grid reload.
+    /// Loads users assigned to the current role from the API.
     /// </summary>
     private async Task<IEnumerable<UserViewModel>> LoadUsersInRoleAsync()
     {
-        if (Role is null) return Enumerable.Empty<UserViewModel>();
+        if (Role is null) return [];
 
-        var users = await UserManager.GetUsersInRoleAsync(Role.Name!);
+        var users = await RoleService.GetUsersInRoleAsync(Role.Id);
+        if (users is null) return [];
 
         return users.Select(u => new UserViewModel
         {
             Id = u.Id,
-            UserName = u.UserName ?? "",
+            UserName = u.UserName,
             DisplayName = u.DisplayName ?? "",
             Email = u.Email ?? ""
         });
     }
 
     /// <summary>
-    /// Server-side reload callback for the users <see cref="MudDataGrid{T}"/>.
-    /// Fetches fresh user data via <see cref="LoadUsersInRoleAsync"/>, then delegates
-    /// filtering, sorting, pagination, and line numbering to <see cref="DataGridUtils{T}.ServerReloadAsync"/>.
+    /// Server-side reload callback for the users MudDataGrid.
     /// </summary>
     private async Task<GridData<UserViewModel>> ServerReloadUsers(GridState<UserViewModel> state, CancellationToken cancellationToken)
     {
-        // Loader function: fetches users in role and maps to view models
         async Task<IEnumerable<UserViewModel>> loader()
         {
             var users = await LoadUsersInRoleAsync();
             var userList = users.ToList();
-
-            // Update the total count for the section title (unfiltered)
             UsersInRoleCount = userList.Count;
-
             return userList;
         }
 
-        // Global search fields — searches across username, display name, and email
         IEnumerable<string> GlobalFields(UserViewModel u) => new[]
         {
             u.UserName,
@@ -185,7 +156,6 @@ public partial class Details : ComponentBase
             u.Email
         };
 
-        // Set page-aware line numbers (e.g., page 2 with size 10 starts at 11)
         void SetLine(UserViewModel item, int lineNo) => item.LineNumber = lineNo;
 
         var gridData = await _usersDataGridUtils.ServerReloadAsync(
@@ -205,8 +175,7 @@ public partial class Details : ComponentBase
     #region Event Handlers
 
     /// <summary>
-    /// Handles the search text change from the users grid toolbar search box.
-    /// Triggers a server-side reload with the new search term.
+    /// Handles the search text change from the users grid toolbar.
     /// </summary>
     private Task OnUsersSearch(string text)
     {
@@ -215,7 +184,7 @@ public partial class Details : ComponentBase
     }
 
     /// <summary>
-    /// Clears the current user selection in the data grid.
+    /// Clears the current user selection.
     /// </summary>
     private void ClearUserSelection()
     {
@@ -223,24 +192,17 @@ public partial class Details : ComponentBase
     }
 
     /// <summary>
-    /// Removes all selected users from the current role after showing a confirmation dialog.
-    /// Displays a summary snackbar with success/failed counts and reloads the grid.
-    /// Guards against removing all users from a role that requires at least one user.
-    /// Logs a RoleUnassigned audit entry for each successful removal.
+    /// Removes all selected users from the current role via the API.
     /// </summary>
     protected async Task BulkRemoveUsersAsync()
     {
         if (Role is null || selectedUsers.Count == 0) return;
 
-        // Guard: prevent bulk removal that would leave a RequiresMinimumUser role empty
-        if (Role.RequiresMinimumUser)
+        // Guard: prevent removal that would leave a RequiresMinimumUser role empty
+        if (Role.RequiresMinimumUser && selectedUsers.Count >= UsersInRoleCount)
         {
-            var usersInRole = await UserManager.GetUsersInRoleAsync(Role.Name!);
-            if (selectedUsers.Count >= usersInRole.Count)
-            {
-                Snackbar.Add($"Cannot remove all users from the role '{Role.Name}'. At least one user must remain assigned.", Severity.Error);
-                return;
-            }
+            Snackbar.Add($"Cannot remove all users from the role '{Role.Name}'. At least one user must remain assigned.", Severity.Error);
+            return;
         }
 
         var targets = selectedUsers.ToList();
@@ -258,72 +220,40 @@ public partial class Details : ComponentBase
         var result = await dialog.Result;
         if (result is null || result.Canceled) return;
 
-        // Resolve the acting user's ID for audit logging
-        var authState = await AuthStateTask;
-        var actingUserId = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
-        int successCount = 0;
-        int failedCount = 0;
+        int successCount = 0, failedCount = 0;
 
         foreach (var userVm in targets)
         {
-            var appUser = await UserManager.FindByIdAsync(userVm.Id);
-            if (appUser is null) { failedCount++; continue; }
-
-            var removeResult = await UserManager.RemoveFromRoleAsync(appUser, Role.Name!);
-            if (removeResult.Succeeded)
-            {
-                successCount++;
-
-                // Log audit entry for role unassignment — failures are swallowed by the service
-                try
-                {
-                    await AuditLogService.LogAsync(
-                        actingUserId,
-                        AuditActionType.RoleUnassigned,
-                        AuditEntityType.Role,
-                        entityId: userVm.Id,
-                        entityName: Role.Name!,
-                        description: $"Role '{Role.Name}' removed from user '{userVm.DisplayName ?? userVm.UserName}'.");
-                }
-                catch
-                {
-                    // Audit failures must not interrupt the primary operation
-                }
-            }
-            else
-                failedCount++;
+            var (ok, _) = await RoleService.RemoveUserFromRoleAsync(Role.Id, userVm.Id);
+            if (ok) successCount++;
+            else failedCount++;
         }
 
         if (failedCount == 0)
-        {
             Snackbar.Add($"Successfully removed {successCount} user(s) from role '{Role.DisplayName ?? Role.Name}'.", Severity.Success);
-        }
         else
-        {
             Snackbar.Add($"Removed {successCount} user(s), {failedCount} failed.", Severity.Warning);
-        }
 
         selectedUsers = new HashSet<UserViewModel>();
         await usersDataGrid.ReloadServerData();
     }
 
     /// <summary>
-    /// Opens the Assign Users to Role dialog (multi-select).
-    /// Fetches current users in role to build the exclusion list,
-    /// then opens the dialog. On success, reloads the users grid.
+    /// Opens the Assign Users to Role dialog.
     /// </summary>
     protected async Task OpenAssignUsersDialog()
     {
         if (Role is null) return;
 
-        // Fetch current users in role to exclude from the dialog
-        var currentUsers = await UserManager.GetUsersInRoleAsync(Role.Name!);
+        // Get current users in role for the exclusion list
+        var currentUsers = await RoleService.GetUsersInRoleAsync(Role.Id);
+        var existingUserIds = currentUsers?.Select(u => u.Id).ToList() ?? [];
 
         var parameters = new DialogParameters<AssignUsersToRoleDialog>
         {
-            { x => x.RoleName, Role.Name! },
-            { x => x.ExistingUserIds, currentUsers.Select(u => u.Id).ToList() }
+            { x => x.RoleName, Role.Name },
+            { x => x.RoleId, Role.Id },
+            { x => x.ExistingUserIds, existingUserIds }
         };
 
         var options = new DialogOptions { CloseButton = true, CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
@@ -337,8 +267,7 @@ public partial class Details : ComponentBase
     }
 
     /// <summary>
-    /// Removes a user from the current role after showing a confirmation dialog.
-    /// On success, reloads the users data grid and logs a RoleUnassigned audit entry.
+    /// Removes a single user from the current role via the API.
     /// </summary>
     protected async Task RemoveUserFromRoleAsync(UserViewModel user)
     {
@@ -357,54 +286,22 @@ public partial class Details : ComponentBase
         var result = await dialog.Result;
         if (result is null || result.Canceled) return;
 
-        // Guard: prevent removing the last user from a role that requires at least one user
-        if (Role.RequiresMinimumUser)
+        // Guard: prevent removing the last user from a RequiresMinimumUser role
+        if (Role.RequiresMinimumUser && UsersInRoleCount <= 1)
         {
-            var usersInRole = await UserManager.GetUsersInRoleAsync(Role.Name!);
-            if (usersInRole.Count <= 1)
-            {
-                Snackbar.Add($"Cannot remove the last user from the role '{Role.Name}'. At least one user must remain assigned.", Severity.Error);
-                return;
-            }
-        }
-
-        var appUser = await UserManager.FindByIdAsync(user.Id);
-        if (appUser is null)
-        {
-            Snackbar.Add("User not found.", Severity.Error);
+            Snackbar.Add($"Cannot remove the last user from the role '{Role.Name}'. At least one user must remain assigned.", Severity.Error);
             return;
         }
 
-        var removeResult = await UserManager.RemoveFromRoleAsync(appUser, Role.Name!);
-        if (removeResult.Succeeded)
+        var (ok, _) = await RoleService.RemoveUserFromRoleAsync(Role.Id, user.Id);
+        if (ok)
         {
             Snackbar.Add($"'{user.DisplayName ?? user.UserName}' removed from role '{Role.DisplayName ?? Role.Name}'.", Severity.Success);
             await usersDataGrid.ReloadServerData();
-
-            // Log audit entry for role unassignment — failures are swallowed by the service
-            try
-            {
-                var authState = await AuthStateTask;
-                var actingUserId = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
-                await AuditLogService.LogAsync(
-                    actingUserId,
-                    AuditActionType.RoleUnassigned,
-                    AuditEntityType.Role,
-                    entityId: user.Id,
-                    entityName: Role.Name!,
-                    description: $"Role '{Role.Name}' removed from user '{user.DisplayName ?? user.UserName}'.");
-            }
-            catch
-            {
-                // Audit failures must not interrupt the primary operation
-            }
         }
         else
         {
-            Snackbar.Add(
-                "Failed to remove user: " + string.Join(", ", removeResult.Errors.Select(e => e.Description)),
-                Severity.Error);
+            Snackbar.Add("Failed to remove user from role.", Severity.Error);
         }
     }
 
@@ -423,6 +320,28 @@ public partial class Details : ComponentBase
     /// </summary>
     protected string FormatDateTime(DateTime? utcDateTime, string fallback = "Never")
         => UserTimeZone.FormatDateTime(utcDateTime, format: "dd/MM/yyyy hh:mm:ss tt", fallback: fallback);
+
+    #endregion
+
+    #region View Model
+
+    /// <summary>
+    /// View model for users in the data grid.
+    /// </summary>
+    public class UserViewModel
+    {
+        public int LineNumber { get; set; }
+        public string Id { get; set; } = "";
+        public string UserName { get; set; } = "";
+        public string DisplayName { get; set; } = "";
+        public string Email { get; set; } = "";
+
+        public override bool Equals(object? obj)
+            => obj is UserViewModel other && Id == other.Id;
+
+        public override int GetHashCode()
+            => Id.GetHashCode();
+    }
 
     #endregion
 }

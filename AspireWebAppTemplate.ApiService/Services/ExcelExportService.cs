@@ -1,13 +1,13 @@
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Text;
-using BlazorWebAppTemplate.Abstractions;
-using BlazorWebAppTemplate.Core.Domain.Enums;
-using BlazorWebAppTemplate.Core.Utilities;
+using AspireWebAppTemplate.Abstractions;
+using AspireWebAppTemplate.Core.Domain.Enums;
+using AspireWebAppTemplate.Core.Utilities;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 
-namespace BlazorWebAppTemplate.Services;
+namespace AspireWebAppTemplate.Services;
 
 /// <summary>
 /// Generates Excel (.xlsx) and CSV exports from data collections using EPPlus.
