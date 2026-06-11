@@ -1,12 +1,12 @@
-namespace AspireWebAppTemplate.Web;
+namespace AspireWebAppTemplate.Web.Services;
 
-public class WeatherApiClient(HttpClient httpClient)
+public class ApiWeatherService(HttpClient httpClient)
 {
     public async Task<WeatherForecast[]> GetWeatherAsync(int maxItems = 10, CancellationToken cancellationToken = default)
     {
         List<WeatherForecast>? forecasts = null;
 
-        await foreach (var forecast in httpClient.GetFromJsonAsAsyncEnumerable<WeatherForecast>("/weatherforecast", cancellationToken))
+        await foreach (var forecast in httpClient.GetFromJsonAsAsyncEnumerable<WeatherForecast>("/WeatherForecast", cancellationToken))
         {
             if (forecasts?.Count >= maxItems)
             {

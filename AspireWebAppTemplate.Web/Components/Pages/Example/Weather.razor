@@ -1,8 +1,9 @@
 @page "/weather"
+@using AspireWebAppTemplate.Web.Services
 
 <PageTitle>Weather</PageTitle>
 
-<PageHeader Title="Weather" Subtitle="This component demonstrates showing data." />
+<PageHeader Title="Weather" Subtitle="This component demonstrates fetching data from the API service." />
 
 <MudDataGrid T="WeatherForecast"
              Items="@forecasts"
@@ -17,7 +18,7 @@
         <MudText Typo="Typo.body2">No weather data available.</MudText>
     </NoRecordsContent>
     <LoadingContent>
-        <MudText Typo="Typo.body2">Loading weather data...</MudText>
+        <MudText Typo="Typo.body2">Loading weather data from API...</MudText>
     </LoadingContent>
     <Columns>
         <PropertyColumn Property="f => f.Date" Title="Date" Format="d" />

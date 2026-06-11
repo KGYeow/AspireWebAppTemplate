@@ -3,13 +3,12 @@ using AspireWebAppTemplate.Core.Application.Abstractions;
 using AspireWebAppTemplate.Core.Application.Services;
 using AspireWebAppTemplate.Web;
 using AspireWebAppTemplate.Web.Components;
+using AspireWebAppTemplate.Web.Endpoints;
 using AspireWebAppTemplate.Web.Services;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using MudBlazor.Services;
-using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,7 +28,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LoginPath = "/Account/Login";
         options.LogoutPath = "/Account/Logout";
         options.AccessDeniedPath = "/Account/AccessDenied";
-        options.ExpireTimeSpan = TimeSpan.FromDays(14);
+        options.ExpireTimeSpan = TimeSpan.FromHours(1);
         options.SlidingExpiration = true;
     });
 
@@ -41,18 +40,26 @@ builder.Services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStat
 
 builder.Services.AddHttpContextAccessor();
 
+// Delegating handler that forwards authenticated user identity to the API service
+builder.Services.AddTransient<UserIdentityDelegatingHandler>();
+
 // HTTP client services (call ApiService via Aspire service discovery)
-builder.Services.AddHttpClient<WeatherApiClient>(client =>
-    client.BaseAddress = new("https+http://apiservice"));
+builder.Services.AddHttpClient<ApiWeatherService>(client =>
+    client.BaseAddress = new("https+http://apiservice"))
+    .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
 
 builder.Services.AddHttpClient<ApiAuthService>(client =>
-    client.BaseAddress = new("https+http://apiservice"));
+    client.BaseAddress = new("https+http://apiservice"))
+    .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
 builder.Services.AddHttpClient<ApiUserService>(client =>
-    client.BaseAddress = new("https+http://apiservice"));
+    client.BaseAddress = new("https+http://apiservice"))
+    .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
 builder.Services.AddHttpClient<ApiRoleService>(client =>
-    client.BaseAddress = new("https+http://apiservice"));
+    client.BaseAddress = new("https+http://apiservice"))
+    .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
 builder.Services.AddHttpClient<ApiAuditLogService>(client =>
-    client.BaseAddress = new("https+http://apiservice"));
+    client.BaseAddress = new("https+http://apiservice"))
+    .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
 
 // Application services (frontend-only, no API calls)
 builder.Services.AddSingleton<INavigationProvider, DefaultNavigationProvider>();
@@ -81,6 +88,8 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseStatusCodePagesWithReExecute("/not-found");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -90,57 +99,8 @@ app.UseOutputCache();
 
 app.MapStaticAssets();
 
-// ─── Minimal API endpoints for auth (must be real HTTP requests, not on SignalR) ───
-
-// PerformLogin: called after successful API login — sets the auth cookie from token claims
-app.MapGet("/Account/PerformLogin", async (HttpContext context, string? token, ApiAuthService authService) =>
-{
-    if (string.IsNullOrEmpty(token))
-        return Results.Redirect("/Account/Login");
-
-    var result = await authService.ValidateLoginTokenAsync(token);
-    if (result is null)
-        return Results.Redirect("/Account/Login");
-
-    var claims = new List<Claim>
-    {
-        new(ClaimTypes.NameIdentifier, result.UserId),
-        new(ClaimTypes.Name, result.UserName),
-        new(ClaimTypes.Email, result.Email ?? ""),
-    };
-
-    foreach (var role in result.Roles)
-    {
-        claims.Add(new Claim(ClaimTypes.Role, role));
-    }
-
-    var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-    var principal = new ClaimsPrincipal(identity);
-
-    await context.SignInAsync(
-        CookieAuthenticationDefaults.AuthenticationScheme,
-        principal,
-        new AuthenticationProperties
-        {
-            IsPersistent = result.RememberMe,
-            ExpiresUtc = DateTimeOffset.UtcNow.AddDays(result.RememberMe ? 14 : 1)
-        });
-
-    return Results.Redirect(result.ReturnUrl ?? "/");
-});
-
-// Logout: clears the auth cookie
-app.MapGet("/Account/Logout", async (HttpContext context) =>
-{
-    await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-    return Results.Redirect("/Account/Login");
-});
-
-app.MapPost("/Account/Logout", async (HttpContext context) =>
-{
-    await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-    return Results.Redirect("/Account/Login");
-});
+// Auth endpoints (PerformLogin, Logout — must be real HTTP requests for cookie operations)
+app.MapAuthEndpoints();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

@@ -1,7 +1,7 @@
 using AspireWebAppTemplate.ApiService.Data.Entities;
 using Microsoft.AspNetCore.Identity;
 
-namespace AspireWebAppTemplate.Services;
+namespace AspireWebAppTemplate.ApiService.Services;
 
 /// <summary>
 /// No-op email sender that does nothing. Replace with a real implementation

@@ -1,0 +1,210 @@
+@page "/profile"
+
+<PageTitle>Profile</PageTitle>
+
+<!-- Cover Banner -->
+<div style="position: relative;">
+    <MudPaper Class="rounded-t-lg"
+              Style="height: 160px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"
+              Elevation="0"
+              Square />
+</div>
+
+<!-- Profile Header Card -->
+<MudPaper Class="pa-0 pb-4 px-5 mb-4 rounded-b-lg" Elevation="0" Square>
+    <!-- Avatar Row -->
+    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Start">
+
+        <!-- Avatar -->
+        <MudAvatar Color="Color.Primary" Style="width: 96px; height: 96px; border: 4px solid white; margin-top: -48px; font-size: 2.5rem;">
+            @AvatarText
+        </MudAvatar>
+
+        <!-- Action Buttons -->
+        @if (!IsEditing)
+        {
+            <MudIconButton Icon="@Icons.Material.Outlined.Edit"
+                           Size="Size.Small"
+                           Style="margin-top: 10px;"
+                           OnClick="EnterEditMode" />
+        }
+    </MudStack>
+
+    <!-- Name and Summary Info -->
+    <MudStack Class="mt-2" Style="gap: 2px !important;">
+        <MudText Typo="Typo.h5" Style="font-weight: 600;">
+            @(User?.DisplayName ?? User?.UserName ?? "-")
+        </MudText>
+
+        @if (!string.IsNullOrEmpty(User?.JobTitle) || !string.IsNullOrEmpty(User?.Department))
+        {
+            <MudText Typo="Typo.body2">
+                @(string.IsNullOrEmpty(User?.JobTitle) ? "" : User.JobTitle)
+                @if (!string.IsNullOrEmpty(User?.JobTitle) && !string.IsNullOrEmpty(User?.Department))
+                {
+                    <span> · </span>
+                }
+                @(string.IsNullOrEmpty(User?.Department) ? "" : User.Department)
+            </MudText>
+        }
+
+        @if (!string.IsNullOrEmpty(User?.Email))
+        {
+            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                @User.Email
+            </MudText>
+        }
+    </MudStack>
+</MudPaper>
+
+@if (!string.IsNullOrEmpty(StatusMessage))
+{
+    <MudAlert Severity="@(StatusMessage.StartsWith("Error") ? Severity.Error : Severity.Success)"
+              Class="my-4 border-1"
+              ShowCloseIcon
+              CloseIconClicked="() => StatusMessage = null">
+        @StatusMessage
+    </MudAlert>
+}
+
+@if (!IsEditing)
+{
+    <!-- VIEW MODE -->
+    <MudPaper Class="pa-4 mb-4" Elevation="0">
+        <MudText Typo="Typo.h6" Class="mb-3">Personal Information</MudText>
+        <MudStack>
+            <div>
+                <MudInputLabel Class="fw-bold">Display Name</MudInputLabel>
+                <MudText Typo="Typo.body2">@(string.IsNullOrEmpty(User?.DisplayName) ? "-" : User.DisplayName)</MudText>
+            </div>
+            <div>
+                <MudInputLabel Class="fw-bold">First Name</MudInputLabel>
+                <MudText Typo="Typo.body2">@(string.IsNullOrEmpty(User?.FirstName) ? "-" : User.FirstName)</MudText>
+            </div>
+            <div>
+                <MudInputLabel Class="fw-bold">Last Name</MudInputLabel>
+                <MudText Typo="Typo.body2">@(string.IsNullOrEmpty(User?.LastName) ? "-" : User.LastName)</MudText>
+            </div>
+            <div>
+                <MudInputLabel Class="fw-bold">Email</MudInputLabel>
+                <MudText Typo="Typo.body2">@(string.IsNullOrEmpty(User?.Email) ? "-" : User.Email)</MudText>
+            </div>
+            <div>
+                <MudInputLabel Class="fw-bold">Phone Number</MudInputLabel>
+                <MudText Typo="Typo.body2">@(string.IsNullOrEmpty(User?.PhoneNumber) ? "-" : User.PhoneNumber)</MudText>
+            </div>
+        </MudStack>
+    </MudPaper>
+
+    <MudPaper Class="pa-4 mb-4" Elevation="0">
+        <MudText Typo="Typo.h6" Class="mb-3">Organization</MudText>
+        <MudStack>
+            <div>
+                <MudInputLabel Class="fw-bold">Job Title</MudInputLabel>
+                <MudText Typo="Typo.body2">@(string.IsNullOrEmpty(User?.JobTitle) ? "-" : User.JobTitle)</MudText>
+            </div>
+            <div>
+                <MudInputLabel Class="fw-bold">Department</MudInputLabel>
+                <MudText Typo="Typo.body2">@(string.IsNullOrEmpty(User?.Department) ? "-" : User.Department)</MudText>
+            </div>
+            <div>
+                <MudInputLabel Class="fw-bold">Employee Number</MudInputLabel>
+                <MudText Typo="Typo.body2">@(string.IsNullOrEmpty(User?.EmployeeNumber) ? "-" : User.EmployeeNumber)</MudText>
+            </div>
+        </MudStack>
+    </MudPaper>
+}
+else
+{
+    <!-- EDIT MODE -->
+    <EditForm EditContext="editContext" OnValidSubmit="OnValidSubmitAsync" FormName="profileForm">
+        <DataAnnotationsValidator />
+
+        <MudPaper Class="pa-4 mb-4" Elevation="0">
+            <MudText Typo="Typo.h6" Class="mb-3">Personal Information</MudText>
+            <MudStack>
+                <div>
+                    <MudInputLabel Class="fw-bold">Display Name</MudInputLabel>
+                    <MudTextField T="string"
+                                  @bind-Value="Input.DisplayName"
+                                  Placeholder="Enter your display name"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  Typo="Typo.body2"
+                                  Disabled="@IsLdapUser"
+                                  HelperText="@(IsLdapUser ? "Managed by Active Directory" : null)"
+                                  For="@(() => Input.DisplayName)" />
+                </div>
+                <div>
+                    <MudInputLabel Class="fw-bold">First Name</MudInputLabel>
+                    <MudTextField T="string"
+                                  @bind-Value="Input.FirstName"
+                                  Placeholder="Enter your first name"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  Typo="Typo.body2"
+                                  Disabled="@IsLdapUser"
+                                  HelperText="@(IsLdapUser ? "Managed by Active Directory" : null)"
+                                  For="@(() => Input.FirstName)" />
+                </div>
+                <div>
+                    <MudInputLabel Class="fw-bold">Last Name</MudInputLabel>
+                    <MudTextField T="string"
+                                  @bind-Value="Input.LastName"
+                                  Placeholder="Enter your last name"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  Typo="Typo.body2"
+                                  Disabled="@IsLdapUser"
+                                  HelperText="@(IsLdapUser ? "Managed by Active Directory" : null)"
+                                  For="@(() => Input.LastName)" />
+                </div>
+                <div>
+                    <MudInputLabel Class="fw-bold">Email</MudInputLabel>
+                    <MudTextField T="string"
+                                  Value="@(User?.Email ?? "-")"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  Typo="Typo.body2"
+                                  Disabled />
+                </div>
+                <div>
+                    <MudInputLabel Class="fw-bold">Phone Number</MudInputLabel>
+                    <MudTextField T="string"
+                                  @bind-Value="Input.PhoneNumber"
+                                  Placeholder="Enter your phone number"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  Typo="Typo.body2"
+                                  For="@(() => Input.PhoneNumber)" />
+                </div>
+            </MudStack>
+        </MudPaper>
+
+        <MudPaper Class="pa-4 mb-4" Elevation="0">
+            <MudText Typo="Typo.h6" Class="mb-3">Organization</MudText>
+            <MudStack>
+                <div>
+                    <MudInputLabel Class="fw-bold">Job Title</MudInputLabel>
+                    <MudTextField T="string" Value="@(User?.JobTitle ?? "-")" Variant="Variant.Outlined" Margin="Margin.Dense" Typo="Typo.body2" Disabled />
+                </div>
+                <div>
+                    <MudInputLabel Class="fw-bold">Department</MudInputLabel>
+                    <MudTextField T="string" Value="@(User?.Department ?? "-")" Variant="Variant.Outlined" Margin="Margin.Dense" Typo="Typo.body2" Disabled />
+                </div>
+                <div>
+                    <MudInputLabel Class="fw-bold">Employee Number</MudInputLabel>
+                    <MudTextField T="string" Value="@(User?.EmployeeNumber ?? "-")" Variant="Variant.Outlined" Margin="Margin.Dense" Typo="Typo.body2" Disabled />
+                </div>
+            </MudStack>
+        </MudPaper>
+
+        <MudStack Row Spacing="2">
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Disabled="@IsBusy" DropShadow="false" Style="text-transform: none;">
+                @if (IsBusy) { <MudProgressCircular Size="Size.Small" Indeterminate Class="me-2" /> }
+                Save
+            </MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Default" Style="text-transform: none;" OnClick="CancelEdit">Cancel</MudButton>
+        </MudStack>
+    </EditForm>
+}

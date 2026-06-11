@@ -1,0 +1,33 @@
+@page "/not-found"
+@attribute [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+
+<PageTitle>Page Not Found</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="vh-100">
+    <MudStack Class="h-75" Justify="Justify.Center">
+        <MudCard Elevation="0" Class="p-4">
+            <MudCardContent>
+                <MudStack Class="align-content-center" AlignItems="AlignItems.Center">
+                    <MudAvatar Size="Size.Large" Color="Color.Warning" Variant="Variant.Filled" Class="mb-2">
+                        <MudIcon Icon="@Icons.Material.Rounded.SearchOff" Size="Size.Large" />
+                    </MudAvatar>
+                    <MudSpacer />
+                    <MudText Typo="Typo.h3" Color="Color.Warning" Class="fw-bold">
+                        Page not found
+                    </MudText>
+                    <MudText Typo="Typo.body1" Class="mt-1 text-muted">
+                        Sorry, the page you are looking for does not exist or has been moved.
+                    </MudText>
+
+                    <MudButton Href="/"
+                               Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               Class="mt-4"
+                               DropShadow="false">
+                        Go to Home
+                    </MudButton>
+                </MudStack>
+            </MudCardContent>
+        </MudCard>
+    </MudStack>
+</MudContainer>

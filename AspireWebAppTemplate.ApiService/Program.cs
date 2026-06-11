@@ -1,8 +1,11 @@
 using AspireWebAppTemplate.Abstractions;
+using AspireWebAppTemplate.ApiService.Authentication;
 using AspireWebAppTemplate.ApiService.Data;
 using AspireWebAppTemplate.ApiService.Data.Entities;
+using AspireWebAppTemplate.ApiService.Services;
 using AspireWebAppTemplate.Options;
 using AspireWebAppTemplate.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,6 +35,12 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
+// Authentication: trust internal service-to-service headers from the Web frontend
+builder.Services.AddAuthentication(InternalAuthenticationHandler.SchemeName)
+    .AddScheme<AuthenticationSchemeOptions, InternalAuthenticationHandler>(
+        InternalAuthenticationHandler.SchemeName, options => { });
+builder.Services.AddAuthorization();
+
 // Memory cache (used by LoginService for single-use login tokens)
 builder.Services.AddMemoryCache();
 
@@ -46,7 +55,7 @@ builder.Services.AddScoped<IRegisterService, RegisterService>();
 builder.Services.AddScoped<ILdapAuthService, LdapAuthService>();
 builder.Services.AddScoped<ILdapLoginService, LdapLoginService>();
 
-// LDAP configuration
+// [LDAP] LDAP configuration — remove this block if LDAP is not needed
 builder.Services.Configure<LdapSettings>(builder.Configuration.GetSection("LDAP"));
 
 // Email sender (no-op — replace with real implementation when needed)
@@ -73,31 +82,13 @@ if (app.Environment.IsDevelopment())
     }
 }
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapControllers();
 
-string[] summaries = ["Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"];
-
-app.MapGet("/", () => "API service is running. Navigate to /weatherforecast to see sample data.");
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+app.MapGet("/", () => "API service is running.");
 
 app.MapDefaultEndpoints();
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 
-namespace AspireWebAppTemplate.Web.Components.Pages.Settings;
+namespace AspireWebAppTemplate.Web.Components.Pages.Account.Settings;
 
 /// <summary>
 /// Settings page allowing authenticated users to view and edit their

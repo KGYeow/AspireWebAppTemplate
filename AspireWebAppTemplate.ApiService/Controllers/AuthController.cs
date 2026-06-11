@@ -344,12 +344,24 @@ public class AuthController : ControllerBase
         if (user is null)
             return NotFound("User not found.");
 
+        if (request.DisplayName is not null)
+            user.DisplayName = request.DisplayName;
+        if (request.FirstName is not null)
+            user.FirstName = request.FirstName;
+        if (request.LastName is not null)
+            user.LastName = request.LastName;
+
         if (request.PhoneNumber is not null)
         {
             var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, request.PhoneNumber);
             if (!setPhoneResult.Succeeded)
                 return BadRequest(string.Join("; ", setPhoneResult.Errors.Select(e => e.Description)));
         }
+
+        user.UpdatedUtc = DateTime.UtcNow;
+        var result = await _userManager.UpdateAsync(user);
+        if (!result.Succeeded)
+            return BadRequest(string.Join("; ", result.Errors.Select(e => e.Description)));
 
         return Ok();
     }
@@ -965,6 +977,7 @@ public class AuthController : ControllerBase
             UserId = user.Id,
             UserName = user.UserName ?? "",
             Email = user.Email,
+            DisplayName = user.DisplayName,
             Roles = roles.ToList(),
             RememberMe = loginData.RememberMe,
             ReturnUrl = loginData.ReturnUrl
