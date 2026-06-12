@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using AspireWebAppTemplate.Abstractions;
 using AspireWebAppTemplate.ApiService.Data.Entities;
 using AspireWebAppTemplate.Core.Contracts;
@@ -20,7 +19,7 @@ namespace AspireWebAppTemplate.ApiService.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize(Roles = "Admin")]
-public class UsersController : ControllerBase
+public class UsersController : BaseController
 {
     #region Constructor
 
@@ -174,8 +173,8 @@ public class UsersController : ControllerBase
             await _userManager.AddToRoleAsync(user, request.Role);
         }
 
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var currentUserId = CurrentUserId;
+        var ipAddress = ClientIpAddress;
         await _auditLogService.LogAsync(
             currentUserId,
             AuditActionType.UserCreated,
@@ -236,8 +235,8 @@ public class UsersController : ControllerBase
             return BadRequest(errors);
         }
 
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var currentUserId = CurrentUserId;
+        var ipAddress = ClientIpAddress;
         await _auditLogService.LogAsync(
             currentUserId,
             AuditActionType.UserUpdated,
@@ -263,7 +262,7 @@ public class UsersController : ControllerBase
         if (user is null)
             return NotFound();
 
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var currentUserId = CurrentUserId;
         if (user.Id == currentUserId)
             return BadRequest("You cannot delete your own account.");
 
@@ -275,7 +274,7 @@ public class UsersController : ControllerBase
             return BadRequest(errors);
         }
 
-        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var ipAddress = ClientIpAddress;
         await _auditLogService.LogAsync(
             currentUserId,
             AuditActionType.UserDeleted,
@@ -308,8 +307,8 @@ public class UsersController : ControllerBase
         user.UpdatedUtc = DateTime.UtcNow;
         await _userManager.UpdateAsync(user);
 
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var currentUserId = CurrentUserId;
+        var ipAddress = ClientIpAddress;
         await _auditLogService.LogAsync(
             currentUserId,
             AuditActionType.UserActivated,
@@ -331,7 +330,7 @@ public class UsersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeactivateUser(string id)
     {
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var currentUserId = CurrentUserId;
         if (id == currentUserId)
             return BadRequest("You cannot deactivate your own account.");
 
@@ -343,7 +342,7 @@ public class UsersController : ControllerBase
         user.UpdatedUtc = DateTime.UtcNow;
         await _userManager.UpdateAsync(user);
 
-        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var ipAddress = ClientIpAddress;
         await _auditLogService.LogAsync(
             currentUserId,
             AuditActionType.UserDeactivated,
@@ -391,8 +390,8 @@ public class UsersController : ControllerBase
             }
         }
 
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var currentUserId = CurrentUserId;
+        var ipAddress = ClientIpAddress;
         await _auditLogService.LogAsync(
             currentUserId,
             AuditActionType.RoleAssigned,
@@ -473,8 +472,8 @@ public class UsersController : ControllerBase
         var defaultRoleName = defaultRole?.Name ?? "User";
         await _userManager.AddToRoleAsync(user, defaultRoleName);
 
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var currentUserId = CurrentUserId;
+        var ipAddress = ClientIpAddress;
         await _auditLogService.LogAsync(
             currentUserId,
             AuditActionType.UserCreated,

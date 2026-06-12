@@ -120,8 +120,9 @@ public partial class LoginWith2fa : ComponentBase
 
             if (result.Succeeded)
             {
-                var returnUrl = ReturnUrl ?? "/";
-                NavigationManager.NavigateTo(returnUrl, forceLoad: true);
+                // Navigate to PerformLogin to create the auth cookie using the single-use token
+                NavigationManager.NavigateTo(
+                    $"Account/PerformLogin?token={result.Token}", forceLoad: true);
             }
             else if (result.IsLockedOut)
             {

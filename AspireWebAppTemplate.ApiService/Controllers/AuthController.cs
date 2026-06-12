@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
@@ -26,7 +25,7 @@ namespace AspireWebAppTemplate.ApiService.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController : ControllerBase
+public class AuthController : BaseController
 {
     #region Constructor
 
@@ -69,7 +68,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<LoginResult>> Login([FromBody] LoginRequest request)
     {
-        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var ipAddress = ClientIpAddress;
 
         LoginResult result;
         if (_ldapSettings.Enabled)
@@ -174,9 +173,9 @@ public class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> Logout()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var userName = User.Identity?.Name ?? "Unknown";
-        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var userId = CurrentUserId;
+        var userName = CurrentUserName ?? "Unknown";
+        var ipAddress = ClientIpAddress;
 
         await _signInManager.SignOutAsync();
 
@@ -205,7 +204,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = CurrentUserId;
         if (userId is null)
             return Unauthorized();
 
@@ -224,7 +223,7 @@ public class AuthController : ControllerBase
         user.UpdatedUtc = DateTime.UtcNow;
         await _userManager.UpdateAsync(user);
 
-        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var ipAddress = ClientIpAddress;
         await _auditLogService.LogAsync(
             userId,
             AuditActionType.PasswordChanged,
@@ -246,7 +245,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<UserDto>> Me()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = CurrentUserId;
         if (userId is null)
             return Unauthorized();
 
@@ -290,7 +289,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdatePreferences([FromBody] UpdatePreferencesRequest request)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = CurrentUserId;
         if (userId is null)
             return Unauthorized();
 
@@ -323,7 +322,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> SetPassword([FromBody] SetPasswordRequest request)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = CurrentUserId;
         if (userId is null)
             return Unauthorized();
 
@@ -350,7 +349,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = CurrentUserId;
         if (userId is null)
             return Unauthorized();
 
@@ -465,7 +464,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(EmailInfoDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<EmailInfoDto>> GetEmail()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = CurrentUserId;
         if (userId is null) return Unauthorized();
 
         var user = await _userManager.FindByIdAsync(userId);
@@ -487,7 +486,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ChangeEmail([FromBody] ChangeEmailRequest request)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = CurrentUserId;
         if (userId is null) return Unauthorized();
 
         var user = await _userManager.FindByIdAsync(userId);
@@ -520,7 +519,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> SendVerificationEmail()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = CurrentUserId;
         if (userId is null) return Unauthorized();
 
         var user = await _userManager.FindByIdAsync(userId);
@@ -542,7 +541,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
     public async Task<IActionResult> DownloadPersonalData()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = CurrentUserId;
         if (userId is null) return Unauthorized();
 
         var user = await _userManager.FindByIdAsync(userId);
@@ -586,7 +585,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteAccount([FromBody] DeleteAccountRequest request)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = CurrentUserId;
         if (userId is null) return Unauthorized();
 
         var user = await _userManager.FindByIdAsync(userId);
@@ -607,7 +606,7 @@ public class AuthController : ControllerBase
 
         await _signInManager.SignOutAsync();
 
-        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var ipAddress = ClientIpAddress;
         await _auditLogService.LogAsync(
             userId,
             AuditActionType.UserDeleted,
@@ -632,7 +631,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(TwoFactorStatusDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<TwoFactorStatusDto>> Get2faStatus()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = CurrentUserId;
         if (userId is null) return Unauthorized();
 
         var user = await _userManager.FindByIdAsync(userId);
@@ -657,7 +656,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(AuthenticatorSetupDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<AuthenticatorSetupDto>> GetAuthenticatorSetup()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = CurrentUserId;
         if (userId is null) return Unauthorized();
 
         var user = await _userManager.FindByIdAsync(userId);
@@ -690,7 +689,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<VerifyAuthenticatorResult>> VerifyAuthenticator([FromBody] VerifyAuthenticatorRequest request)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = CurrentUserId;
         if (userId is null) return Unauthorized();
 
         var user = await _userManager.FindByIdAsync(userId);
@@ -725,7 +724,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Disable2fa()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = CurrentUserId;
         if (userId is null) return Unauthorized();
 
         var user = await _userManager.FindByIdAsync(userId);
@@ -750,7 +749,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GenerateRecoveryCodes()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = CurrentUserId;
         if (userId is null) return Unauthorized();
 
         var user = await _userManager.FindByIdAsync(userId);
@@ -771,7 +770,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> ResetAuthenticator()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = CurrentUserId;
         if (userId is null) return Unauthorized();
 
         var user = await _userManager.FindByIdAsync(userId);
@@ -804,7 +803,25 @@ public class AuthController : ControllerBase
 
         if (result.Succeeded)
         {
-            return Ok(new LoginResult { Succeeded = true, UserId = user.Id });
+            // Generate a single-use login token for the Web project to create a cookie
+            var token = Guid.NewGuid().ToString("N");
+            var loginData = new LoginTokenData
+            {
+                UserId = user.Id,
+                RememberMe = request.RememberMe,
+                ReturnUrl = "/"
+            };
+
+            var memoryCache = HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Caching.Memory.IMemoryCache>();
+            memoryCache.Set(
+                $"LoginToken:{token}",
+                loginData,
+                new Microsoft.Extensions.Caching.Memory.MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2)
+                });
+
+            return Ok(new LoginResult { Succeeded = true, Token = token, UserId = user.Id });
         }
         else if (result.IsLockedOut)
         {
@@ -834,7 +851,25 @@ public class AuthController : ControllerBase
 
         if (result.Succeeded)
         {
-            return Ok(new LoginResult { Succeeded = true, UserId = user.Id });
+            // Generate a single-use login token for the Web project to create a cookie
+            var token = Guid.NewGuid().ToString("N");
+            var loginData = new LoginTokenData
+            {
+                UserId = user.Id,
+                RememberMe = false,
+                ReturnUrl = "/"
+            };
+
+            var memoryCache = HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Caching.Memory.IMemoryCache>();
+            memoryCache.Set(
+                $"LoginToken:{token}",
+                loginData,
+                new Microsoft.Extensions.Caching.Memory.MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2)
+                });
+
+            return Ok(new LoginResult { Succeeded = true, Token = token, UserId = user.Id });
         }
         else if (result.IsLockedOut)
         {
@@ -858,7 +893,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(List<PasskeyInfoDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<List<PasskeyInfoDto>>> GetPasskeys()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = CurrentUserId;
         if (userId is null) return Unauthorized();
 
         var user = await _userManager.FindByIdAsync(userId);
@@ -878,7 +913,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeletePasskey(string credentialId)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = CurrentUserId;
         if (userId is null) return Unauthorized();
 
         var user = await _userManager.FindByIdAsync(userId);
@@ -898,7 +933,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RenamePasskey(string credentialId, [FromBody] RenamePasskeyRequest request)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = CurrentUserId;
         if (userId is null) return Unauthorized();
 
         var user = await _userManager.FindByIdAsync(userId);
@@ -917,7 +952,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(ExternalLoginsDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<ExternalLoginsDto>> GetExternalLogins()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = CurrentUserId;
         if (userId is null) return Unauthorized();
 
         var user = await _userManager.FindByIdAsync(userId);
@@ -949,7 +984,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RemoveExternalLogin([FromBody] RemoveExternalLoginRequest request)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = CurrentUserId;
         if (userId is null) return Unauthorized();
 
         var user = await _userManager.FindByIdAsync(userId);

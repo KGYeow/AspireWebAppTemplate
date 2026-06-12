@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using AspireWebAppTemplate.Abstractions;
 using AspireWebAppTemplate.ApiService.Data.Entities;
 using AspireWebAppTemplate.Core.Contracts;
@@ -20,7 +19,7 @@ namespace AspireWebAppTemplate.ApiService.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize(Roles = "Admin")]
-public class RolesController : ControllerBase
+public class RolesController : BaseController
 {
     #region Constructor
 
@@ -135,8 +134,8 @@ public class RolesController : ControllerBase
             return BadRequest(errors);
         }
 
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var currentUserId = CurrentUserId;
+        var ipAddress = ClientIpAddress;
         await _auditLogService.LogAsync(
             currentUserId,
             AuditActionType.RoleCreated,
@@ -193,8 +192,8 @@ public class RolesController : ControllerBase
             return BadRequest(errors);
         }
 
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var currentUserId = CurrentUserId;
+        var ipAddress = ClientIpAddress;
         await _auditLogService.LogAsync(
             currentUserId,
             AuditActionType.RoleUpdated,
@@ -235,8 +234,8 @@ public class RolesController : ControllerBase
             return BadRequest(errors);
         }
 
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var currentUserId = CurrentUserId;
+        var ipAddress = ClientIpAddress;
         await _auditLogService.LogAsync(
             currentUserId,
             AuditActionType.RoleDeleted,
@@ -331,8 +330,8 @@ public class RolesController : ControllerBase
             else failed++;
         }
 
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var currentUserId = CurrentUserId;
+        var ipAddress = ClientIpAddress;
         await _auditLogService.LogAsync(
             currentUserId,
             AuditActionType.RoleAssigned,
@@ -377,8 +376,8 @@ public class RolesController : ControllerBase
         if (!result.Succeeded)
             return BadRequest(string.Join("; ", result.Errors.Select(e => e.Description)));
 
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var currentUserId = CurrentUserId;
+        var ipAddress = ClientIpAddress;
         await _auditLogService.LogAsync(
             currentUserId,
             AuditActionType.RoleUnassigned,

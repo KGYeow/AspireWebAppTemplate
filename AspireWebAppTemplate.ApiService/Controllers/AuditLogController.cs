@@ -17,7 +17,7 @@ namespace AspireWebAppTemplate.ApiService.Controllers;
 [ApiController]
 [Route("api/audit-log")]
 [Authorize(Roles = "Admin")]
-public class AuditLogController : ControllerBase
+public class AuditLogController : BaseController
 {
     #region Constructor
 

@@ -128,8 +128,7 @@ public partial class Login : ComponentBase
 
             if (result.Succeeded)
             {
-                NavigationManager.NavigateTo(
-                    $"Account/PerformLogin?token={result.Token}", forceLoad: true);
+                NavigationManager.NavigateTo($"Account/PerformLogin?token={result.Token}", forceLoad: true);
             }
             else if (result.RequiresTwoFactor)
             {
