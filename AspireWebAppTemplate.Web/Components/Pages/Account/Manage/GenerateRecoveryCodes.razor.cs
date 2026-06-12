@@ -1,3 +1,4 @@
+using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
@@ -35,14 +36,14 @@ public partial class GenerateRecoveryCodes : ComponentBase
 
         try
         {
-            var codes = await AuthService.GenerateRecoveryCodesAsync();
-            if (codes is not null)
+            var result = await AuthService.GenerateRecoveryCodesAsync();
+            if (result.Succeeded && result.Data is not null)
             {
-                RecoveryCodes = codes;
+                RecoveryCodes = result.Data;
             }
             else
             {
-                StatusMessage = "Error generating recovery codes. 2FA may not be enabled.";
+                StatusMessage = result.Error ?? "Error generating recovery codes. 2FA may not be enabled.";
             }
         }
         catch (Exception ex)

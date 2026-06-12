@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -42,11 +43,11 @@ public partial class EnableAuthenticator : ComponentBase
     {
         try
         {
-            var setup = await AuthService.GetAuthenticatorSetupAsync();
-            if (setup is not null)
+            var result = await AuthService.GetAuthenticatorSetupAsync();
+            if (result.Succeeded && result.Data is not null)
             {
-                SharedKey = setup.SharedKey;
-                AuthenticatorUri = setup.AuthenticatorUri;
+                SharedKey = result.Data.SharedKey;
+                AuthenticatorUri = result.Data.AuthenticatorUri;
             }
             else
             {
@@ -73,15 +74,15 @@ public partial class EnableAuthenticator : ComponentBase
         try
         {
             var result = await AuthService.VerifyAuthenticatorAsync(Input.Code);
-            if (result is null)
+            if (!result.Succeeded || result.Data is null)
             {
                 StatusMessage = "Error: Unable to verify authenticator code.";
                 return;
             }
 
-            if (result.Succeeded)
+            if (result.Data.Succeeded)
             {
-                RecoveryCodes = result.RecoveryCodes;
+                RecoveryCodes = result.Data.RecoveryCodes;
             }
             else
             {

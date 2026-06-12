@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Core.Contracts;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
@@ -58,10 +59,10 @@ public partial class ChangePassword : ComponentBase
                 NewPassword = Input.NewPassword
             };
 
-            var error = await AuthService.ChangePasswordAsync(request);
-            if (error is not null)
+            var result = await AuthService.ChangePasswordAsync(request);
+            if (!result.Succeeded)
             {
-                StatusMessage = $"Error: {error}";
+                StatusMessage = $"Error: {result.Error}";
                 return;
             }
 

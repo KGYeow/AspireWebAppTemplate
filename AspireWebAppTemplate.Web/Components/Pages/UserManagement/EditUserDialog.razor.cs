@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Core.Contracts;
 using AspireWebAppTemplate.Core.Utilities;
 using AspireWebAppTemplate.Web.Services;
@@ -81,9 +82,10 @@ public partial class EditUserDialog : ComponentBase
     {
         editContext = new EditContext(Input);
 
-        var user = await UserService.GetUserAsync(UserId);
-        if (user is not null)
+        var userResult = await UserService.GetUserAsync(UserId);
+        if (userResult.Succeeded && userResult.Data is not null)
         {
+            var user = userResult.Data;
             Input.DisplayName = user.DisplayName ?? "";
             Input.FirstName = user.FirstName;
             Input.LastName = user.LastName;
@@ -126,10 +128,10 @@ public partial class EditUserDialog : ComponentBase
                 Department = Input.Department
             };
 
-            var (success, error) = await UserService.UpdateUserAsync(UserId, request);
-            if (!success)
+            var result = await UserService.UpdateUserAsync(UserId, request);
+            if (!result.Succeeded)
             {
-                StatusMessage = error ?? "Failed to update user.";
+                StatusMessage = result.Error ?? "Failed to update user.";
                 return;
             }
 

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace AspireWebAppTemplate.Controllers;
+namespace AspireWebAppTemplate.ApiService.Controllers;
 
 /// <summary>
 /// Example weather forecast controller demonstrating a simple API endpoint.

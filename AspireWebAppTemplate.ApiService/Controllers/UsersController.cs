@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace AspireWebAppTemplate.Controllers;
+namespace AspireWebAppTemplate.ApiService.Controllers;
 
 /// <summary>
 /// Manages user accounts including CRUD operations, activation, and role assignment.

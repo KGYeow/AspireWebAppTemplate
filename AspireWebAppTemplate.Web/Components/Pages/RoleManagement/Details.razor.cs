@@ -1,4 +1,5 @@
 using AspireWebAppTemplate.Abstractions;
+using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Core.Contracts;
 using AspireWebAppTemplate.UI.Components.Shared;
 using AspireWebAppTemplate.UI.Utilities;
@@ -105,7 +106,9 @@ public partial class Details : ComponentBase
     {
         try
         {
-            Role = await RoleService.GetRoleAsync(RoleId);
+            var result = await RoleService.GetRoleAsync(RoleId);
+            if (result.Succeeded && result.Data is not null)
+                Role = result.Data;
         }
         finally
         {
@@ -124,10 +127,10 @@ public partial class Details : ComponentBase
     {
         if (Role is null) return [];
 
-        var users = await RoleService.GetUsersInRoleAsync(Role.Id);
-        if (users is null) return [];
+        var result = await RoleService.GetUsersInRoleAsync(Role.Id);
+        if (!result.Succeeded || result.Data is null) return [];
 
-        return users.Select(u => new UserViewModel
+        return result.Data.Select(u => new UserViewModel
         {
             Id = u.Id,
             UserName = u.UserName,
@@ -224,8 +227,8 @@ public partial class Details : ComponentBase
 
         foreach (var userVm in targets)
         {
-            var (ok, _) = await RoleService.RemoveUserFromRoleAsync(Role.Id, userVm.Id);
-            if (ok) successCount++;
+            var removeResult = await RoleService.RemoveUserFromRoleAsync(Role.Id, userVm.Id);
+            if (removeResult.Succeeded) successCount++;
             else failedCount++;
         }
 
@@ -246,8 +249,10 @@ public partial class Details : ComponentBase
         if (Role is null) return;
 
         // Get current users in role for the exclusion list
-        var currentUsers = await RoleService.GetUsersInRoleAsync(Role.Id);
-        var existingUserIds = currentUsers?.Select(u => u.Id).ToList() ?? [];
+        var currentUsersResult = await RoleService.GetUsersInRoleAsync(Role.Id);
+        var existingUserIds = (currentUsersResult.Succeeded && currentUsersResult.Data is not null)
+            ? currentUsersResult.Data.Select(u => u.Id).ToList()
+            : [];
 
         var parameters = new DialogParameters<AssignUsersToRoleDialog>
         {
@@ -293,8 +298,8 @@ public partial class Details : ComponentBase
             return;
         }
 
-        var (ok, _) = await RoleService.RemoveUserFromRoleAsync(Role.Id, user.Id);
-        if (ok)
+        var removeResult = await RoleService.RemoveUserFromRoleAsync(Role.Id, user.Id);
+        if (removeResult.Succeeded)
         {
             Snackbar.Add($"'{user.DisplayName ?? user.UserName}' removed from role '{Role.DisplayName ?? Role.Name}'.", Severity.Success);
             await usersDataGrid.ReloadServerData();

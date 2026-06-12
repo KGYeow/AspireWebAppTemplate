@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -41,11 +42,11 @@ public partial class Email : ComponentBase
     {
         try
         {
-            var emailInfo = await AuthService.GetEmailInfoAsync();
-            if (emailInfo is not null)
+            var result = await AuthService.GetEmailInfoAsync();
+            if (result.Succeeded && result.Data is not null)
             {
-                CurrentEmail = emailInfo.Email;
-                IsEmailConfirmed = emailInfo.IsEmailConfirmed;
+                CurrentEmail = result.Data.Email;
+                IsEmailConfirmed = result.Data.IsEmailConfirmed;
             }
         }
         catch (Exception ex)
@@ -67,22 +68,22 @@ public partial class Email : ComponentBase
 
         try
         {
-            var (success, error) = await AuthService.ChangeEmailAsync(Input.NewEmail!);
-            if (success)
+            var result = await AuthService.ChangeEmailAsync(Input.NewEmail!);
+            if (result.Succeeded)
             {
                 StatusMessage = "Your email has been changed. Please verify your new email address.";
                 // Refresh email info
-                var emailInfo = await AuthService.GetEmailInfoAsync();
-                if (emailInfo is not null)
+                var emailInfoResult = await AuthService.GetEmailInfoAsync();
+                if (emailInfoResult.Succeeded && emailInfoResult.Data is not null)
                 {
-                    CurrentEmail = emailInfo.Email;
-                    IsEmailConfirmed = emailInfo.IsEmailConfirmed;
+                    CurrentEmail = emailInfoResult.Data.Email;
+                    IsEmailConfirmed = emailInfoResult.Data.IsEmailConfirmed;
                 }
                 Input.NewEmail = null;
             }
             else
             {
-                StatusMessage = $"Error: {error}";
+                StatusMessage = $"Error: {result.Error}";
             }
         }
         catch (Exception ex)
@@ -104,10 +105,10 @@ public partial class Email : ComponentBase
 
         try
         {
-            var (success, error) = await AuthService.SendVerificationEmailAsync();
-            StatusMessage = success
+            var result = await AuthService.SendVerificationEmailAsync();
+            StatusMessage = result.Succeeded
                 ? "Verification email sent. Please check your email."
-                : $"Error: {error}";
+                : $"Error: {result.Error}";
         }
         catch (Exception ex)
         {

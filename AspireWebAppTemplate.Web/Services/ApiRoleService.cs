@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Core.Contracts;
 
 namespace AspireWebAppTemplate.Web.Services;
@@ -14,43 +15,53 @@ public class ApiRoleService(HttpClient http)
     /// <summary>
     /// Retrieves all roles in the system.
     /// </summary>
-    public async Task<List<RoleDto>?> GetRolesAsync()
-        => await http.GetFromJsonAsync<List<RoleDto>>("/api/roles");
+    public async Task<ApiResult<List<RoleDto>>> GetRolesAsync()
+    {
+        var response = await http.GetAsync("/api/roles");
+        if (response.IsSuccessStatusCode)
+            return ApiResult<List<RoleDto>>.Success(await response.Content.ReadFromJsonAsync<List<RoleDto>>()!);
+        return ApiResult<List<RoleDto>>.Failure(await response.Content.ReadAsStringAsync());
+    }
 
     /// <summary>
     /// Retrieves a single role by its unique identifier.
     /// </summary>
-    public async Task<RoleDto?> GetRoleAsync(string id)
-        => await http.GetFromJsonAsync<RoleDto>($"/api/roles/{id}");
+    public async Task<ApiResult<RoleDto>> GetRoleAsync(string id)
+    {
+        var response = await http.GetAsync($"/api/roles/{id}");
+        if (response.IsSuccessStatusCode)
+            return ApiResult<RoleDto>.Success(await response.Content.ReadFromJsonAsync<RoleDto>()!);
+        return ApiResult<RoleDto>.Failure(await response.Content.ReadAsStringAsync());
+    }
 
     /// <summary>
     /// Creates a new role with the specified name and permissions.
     /// </summary>
-    public async Task<(bool Success, string? Error)> CreateRoleAsync(CreateRoleRequest request)
+    public async Task<ApiResult> CreateRoleAsync(CreateRoleRequest request)
     {
         var response = await http.PostAsJsonAsync("/api/roles", request);
-        if (response.IsSuccessStatusCode) return (true, null);
-        return (false, await response.Content.ReadAsStringAsync());
+        if (response.IsSuccessStatusCode) return ApiResult.Success();
+        return ApiResult.Failure(await response.Content.ReadAsStringAsync());
     }
 
     /// <summary>
     /// Updates an existing role's name or permissions.
     /// </summary>
-    public async Task<(bool Success, string? Error)> UpdateRoleAsync(string id, CreateRoleRequest request)
+    public async Task<ApiResult> UpdateRoleAsync(string id, CreateRoleRequest request)
     {
         var response = await http.PutAsJsonAsync($"/api/roles/{id}", request);
-        if (response.IsSuccessStatusCode) return (true, null);
-        return (false, await response.Content.ReadAsStringAsync());
+        if (response.IsSuccessStatusCode) return ApiResult.Success();
+        return ApiResult.Failure(await response.Content.ReadAsStringAsync());
     }
 
     /// <summary>
     /// Deletes a role by its unique identifier.
     /// </summary>
-    public async Task<(bool Success, string? Error)> DeleteRoleAsync(string id)
+    public async Task<ApiResult> DeleteRoleAsync(string id)
     {
         var response = await http.DeleteAsync($"/api/roles/{id}");
-        if (response.IsSuccessStatusCode) return (true, null);
-        return (false, await response.Content.ReadAsStringAsync());
+        if (response.IsSuccessStatusCode) return ApiResult.Success();
+        return ApiResult.Failure(await response.Content.ReadAsStringAsync());
     }
 
     #endregion
@@ -60,14 +71,22 @@ public class ApiRoleService(HttpClient http)
     /// <summary>
     /// Activates a previously deactivated role.
     /// </summary>
-    public async Task<bool> ActivateRoleAsync(string id)
-        => (await http.PostAsync($"/api/roles/{id}/activate", null)).IsSuccessStatusCode;
+    public async Task<ApiResult> ActivateRoleAsync(string id)
+    {
+        var response = await http.PostAsync($"/api/roles/{id}/activate", null);
+        if (response.IsSuccessStatusCode) return ApiResult.Success();
+        return ApiResult.Failure(await response.Content.ReadAsStringAsync());
+    }
 
     /// <summary>
     /// Deactivates a role, preventing it from being assigned.
     /// </summary>
-    public async Task<bool> DeactivateRoleAsync(string id)
-        => (await http.PostAsync($"/api/roles/{id}/deactivate", null)).IsSuccessStatusCode;
+    public async Task<ApiResult> DeactivateRoleAsync(string id)
+    {
+        var response = await http.PostAsync($"/api/roles/{id}/deactivate", null);
+        if (response.IsSuccessStatusCode) return ApiResult.Success();
+        return ApiResult.Failure(await response.Content.ReadAsStringAsync());
+    }
 
     #endregion
 
@@ -76,27 +95,32 @@ public class ApiRoleService(HttpClient http)
     /// <summary>
     /// Returns all users assigned to the specified role.
     /// </summary>
-    public async Task<List<UserDto>?> GetUsersInRoleAsync(string id)
-        => await http.GetFromJsonAsync<List<UserDto>>($"/api/roles/{id}/users");
+    public async Task<ApiResult<List<UserDto>>> GetUsersInRoleAsync(string id)
+    {
+        var response = await http.GetAsync($"/api/roles/{id}/users");
+        if (response.IsSuccessStatusCode)
+            return ApiResult<List<UserDto>>.Success(await response.Content.ReadFromJsonAsync<List<UserDto>>()!);
+        return ApiResult<List<UserDto>>.Failure(await response.Content.ReadAsStringAsync());
+    }
 
     /// <summary>
     /// Assigns multiple users to a role.
     /// </summary>
-    public async Task<(bool Success, string? Error)> AssignUsersToRoleAsync(string roleId, string[] userIds)
+    public async Task<ApiResult> AssignUsersToRoleAsync(string roleId, string[] userIds)
     {
         var response = await http.PostAsJsonAsync($"/api/roles/{roleId}/users", userIds);
-        if (response.IsSuccessStatusCode) return (true, null);
-        return (false, await response.Content.ReadAsStringAsync());
+        if (response.IsSuccessStatusCode) return ApiResult.Success();
+        return ApiResult.Failure(await response.Content.ReadAsStringAsync());
     }
 
     /// <summary>
     /// Removes a user from a role.
     /// </summary>
-    public async Task<(bool Success, string? Error)> RemoveUserFromRoleAsync(string roleId, string userId)
+    public async Task<ApiResult> RemoveUserFromRoleAsync(string roleId, string userId)
     {
         var response = await http.DeleteAsync($"/api/roles/{roleId}/users/{userId}");
-        if (response.IsSuccessStatusCode) return (true, null);
-        return (false, await response.Content.ReadAsStringAsync());
+        if (response.IsSuccessStatusCode) return ApiResult.Success();
+        return ApiResult.Failure(await response.Content.ReadAsStringAsync());
     }
 
     #endregion

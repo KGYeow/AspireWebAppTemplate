@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Core.Contracts;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
@@ -79,7 +80,8 @@ public partial class AddUserDialog : ComponentBase
     protected override async Task OnInitializedAsync()
     {
         // Fetch roles to determine the default one
-        var roles = await RoleService.GetRolesAsync();
+        var rolesResult = await RoleService.GetRolesAsync();
+        var roles = rolesResult.Succeeded ? rolesResult.Data : null;
         var defaultRoleName = roles?.FirstOrDefault(r => r.IsDefault)?.Name ?? "User";
         Input.Role = AllRoleNames.Contains(defaultRoleName) ? defaultRoleName : AllRoleNames.FirstOrDefault() ?? "";
         editContext = new EditContext(Input);
@@ -110,10 +112,10 @@ public partial class AddUserDialog : ComponentBase
                 Role = Input.Role
             };
 
-            var (success, error) = await UserService.CreateUserAsync(request);
-            if (!success)
+            var result = await UserService.CreateUserAsync(request);
+            if (!result.Succeeded)
             {
-                StatusMessage = error ?? "Failed to create user.";
+                StatusMessage = result.Error ?? "Failed to create user.";
                 return;
             }
 

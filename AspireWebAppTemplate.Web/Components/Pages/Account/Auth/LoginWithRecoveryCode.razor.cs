@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -54,13 +55,15 @@ public partial class LoginWithRecoveryCode : ComponentBase
 
         try
         {
-            var result = await AuthService.LoginWithRecoveryCodeAsync(Input.RecoveryCode);
+            var apiResult = await AuthService.LoginWithRecoveryCodeAsync(Input.RecoveryCode);
 
-            if (result is null)
+            if (!apiResult.Succeeded || apiResult.Data is null)
             {
-                ErrorMessage = "Unable to reach the authentication service. Please try again.";
+                ErrorMessage = apiResult.Error ?? "Unable to reach the authentication service. Please try again.";
                 return;
             }
+
+            var result = apiResult.Data;
 
             if (result.Succeeded)
             {

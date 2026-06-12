@@ -1,3 +1,4 @@
+using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Core.Contracts;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
@@ -163,16 +164,16 @@ public partial class AssignUsersToRoleDialog : ComponentBase
         try
         {
             var userIds = SelectedUsers.Select(u => u.Id).ToArray();
-            var (success, error) = await RoleService.AssignUsersToRoleAsync(RoleId, userIds);
+            var result = await RoleService.AssignUsersToRoleAsync(RoleId, userIds);
 
-            if (success)
+            if (result.Succeeded)
             {
                 Snackbar.Add($"Successfully assigned {userIds.Length} user(s) to role '{RoleName}'.", Severity.Success);
                 MudDialog.Close(DialogResult.Ok(true));
             }
             else
             {
-                StatusMessage = error ?? "Failed to assign users to role.";
+                StatusMessage = result.Error ?? "Failed to assign users to role.";
             }
         }
         finally

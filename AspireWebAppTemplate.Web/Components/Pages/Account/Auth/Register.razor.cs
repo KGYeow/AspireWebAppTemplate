@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Core.Contracts;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
@@ -64,13 +65,15 @@ public partial class Register : ComponentBase
                 Password = Input.Password
             };
 
-            var result = await AuthService.RegisterAsync(request);
+            var apiResult = await AuthService.RegisterAsync(request);
 
-            if (result is null)
+            if (!apiResult.Succeeded || apiResult.Data is null)
             {
-                ErrorMessage = "Unable to reach the registration service. Please try again.";
+                ErrorMessage = apiResult.Error ?? "Unable to reach the registration service. Please try again.";
                 return;
             }
+
+            var result = apiResult.Data;
 
             if (!result.Succeeded)
             {

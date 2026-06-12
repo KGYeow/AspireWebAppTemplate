@@ -1,4 +1,5 @@
 using AspireWebAppTemplate.Abstractions;
+using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Core.Contracts;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
@@ -68,9 +69,10 @@ public partial class Details : ComponentBase
     {
         try
         {
-            User = await UserService.GetUserAsync(UserId);
-            if (User is not null)
+            var result = await UserService.GetUserAsync(UserId);
+            if (result.Succeeded && result.Data is not null)
             {
+                User = result.Data;
                 UserRoles = User.Roles.OrderBy(r => r).ToList();
             }
         }

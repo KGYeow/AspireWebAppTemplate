@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -55,14 +56,14 @@ public partial class RenamePasskey : ComponentBase
 
         try
         {
-            var (success, error) = await AuthService.RenamePasskeyAsync(Id, Input.Name);
-            if (success)
+            var result = await AuthService.RenamePasskeyAsync(Id, Input.Name);
+            if (result.Succeeded)
             {
                 NavigationManager.NavigateTo("Account/Manage/Passkeys");
             }
             else
             {
-                StatusMessage = error ?? "Error renaming passkey.";
+                StatusMessage = result.Error ?? "Error renaming passkey.";
             }
         }
         catch (Exception ex)

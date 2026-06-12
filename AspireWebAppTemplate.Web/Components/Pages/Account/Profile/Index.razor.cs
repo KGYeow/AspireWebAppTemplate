@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Core.Contracts;
 using AspireWebAppTemplate.Core.Utilities;
 using AspireWebAppTemplate.Web.Services;
@@ -44,14 +45,15 @@ public partial class Index : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        User = await AuthService.GetCurrentUserAsync();
+        var result = await AuthService.GetCurrentUserAsync();
 
-        if (User is null)
+        if (!result.Succeeded || result.Data is null)
         {
             NavigationManager.NavigateTo("Account/InvalidUser", forceLoad: true);
             return;
         }
 
+        User = result.Data;
         Input.DisplayName = User.DisplayName;
         Input.FirstName = User.FirstName;
         Input.LastName = User.LastName;
@@ -103,15 +105,17 @@ public partial class Index : ComponentBase
                 request.LastName = Input.LastName;
             }
 
-            var error = await AuthService.UpdateProfileAsync(request);
-            if (error is not null)
+            var profileResult = await AuthService.UpdateProfileAsync(request);
+            if (!profileResult.Succeeded)
             {
-                StatusMessage = $"Error: {error}";
+                StatusMessage = $"Error: {profileResult.Error}";
                 return;
             }
 
             // Refresh user data
-            User = await AuthService.GetCurrentUserAsync();
+            var refreshResult = await AuthService.GetCurrentUserAsync();
+            if (refreshResult.Succeeded && refreshResult.Data is not null)
+                User = refreshResult.Data;
             StatusMessage = "Your profile has been updated.";
             IsEditing = false;
         }

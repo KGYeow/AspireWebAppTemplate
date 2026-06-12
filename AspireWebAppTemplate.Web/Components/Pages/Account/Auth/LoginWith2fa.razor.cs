@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Core.Contracts;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
@@ -65,13 +66,15 @@ public partial class LoginWith2fa : ComponentBase
                 RememberMachine = Input.RememberMachine
             };
 
-            var result = await AuthService.LoginWith2faAsync(request);
+            var apiResult = await AuthService.LoginWith2faAsync(request);
 
-            if (result is null)
+            if (!apiResult.Succeeded || apiResult.Data is null)
             {
-                ErrorMessage = "Unable to reach the authentication service. Please try again.";
+                ErrorMessage = apiResult.Error ?? "Unable to reach the authentication service. Please try again.";
                 return;
             }
+
+            var result = apiResult.Data;
 
             if (result.Succeeded)
             {

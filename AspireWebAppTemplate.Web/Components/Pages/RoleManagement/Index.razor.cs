@@ -1,3 +1,4 @@
+using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Core.Contracts;
 using AspireWebAppTemplate.UI.Components.Shared;
 using AspireWebAppTemplate.UI.Utilities;
@@ -133,10 +134,10 @@ public partial class Index : ComponentBase
     /// </summary>
     private async Task<IEnumerable<RoleViewModel>> LoadRoleViewModelsAsync()
     {
-        var roles = await RoleService.GetRolesAsync();
-        if (roles is null) return [];
+        var result = await RoleService.GetRolesAsync();
+        if (!result.Succeeded || result.Data is null) return [];
 
-        return roles.Select(r => new RoleViewModel
+        return result.Data.Select(r => new RoleViewModel
         {
             Id = r.Id,
             Name = r.Name,
@@ -208,8 +209,8 @@ public partial class Index : ComponentBase
         int success = 0, failed = 0;
         foreach (var roleVm in targets)
         {
-            var ok = await RoleService.ActivateRoleAsync(roleVm.Id);
-            if (ok) success++;
+            var activateResult = await RoleService.ActivateRoleAsync(roleVm.Id);
+            if (activateResult.Succeeded) success++;
             else failed++;
         }
 
@@ -249,8 +250,8 @@ public partial class Index : ComponentBase
         int success = 0, failed = 0;
         foreach (var roleVm in targets)
         {
-            var ok = await RoleService.DeactivateRoleAsync(roleVm.Id);
-            if (ok) success++;
+            var deactivateResult = await RoleService.DeactivateRoleAsync(roleVm.Id);
+            if (deactivateResult.Succeeded) success++;
             else failed++;
         }
 
@@ -306,8 +307,8 @@ public partial class Index : ComponentBase
 
         foreach (var roleVm in targets)
         {
-            var (ok, _) = await RoleService.DeleteRoleAsync(roleVm.Id);
-            if (ok) success++;
+            var deleteResult = await RoleService.DeleteRoleAsync(roleVm.Id);
+            if (deleteResult.Succeeded) success++;
             else failed++;
         }
 
@@ -406,9 +407,15 @@ public partial class Index : ComponentBase
 
         bool ok;
         if (role.IsActive)
-            ok = await RoleService.DeactivateRoleAsync(role.Id);
+        {
+            var deactivateResult = await RoleService.DeactivateRoleAsync(role.Id);
+            ok = deactivateResult.Succeeded;
+        }
         else
-            ok = await RoleService.ActivateRoleAsync(role.Id);
+        {
+            var activateResult = await RoleService.ActivateRoleAsync(role.Id);
+            ok = activateResult.Succeeded;
+        }
 
         if (ok)
         {
@@ -451,15 +458,15 @@ public partial class Index : ComponentBase
         var result = await dialog.Result;
         if (result is null || result.Canceled) return;
 
-        var (ok, error) = await RoleService.DeleteRoleAsync(role.Id);
-        if (ok)
+        var deleteResult = await RoleService.DeleteRoleAsync(role.Id);
+        if (deleteResult.Succeeded)
         {
             Snackbar.Add($"Role '{role.Name}' deleted successfully.", Severity.Success);
             await dataGrid.ReloadServerData();
         }
         else
         {
-            ErrorMessage = error ?? "Failed to delete role.";
+            ErrorMessage = deleteResult.Error ?? "Failed to delete role.";
         }
     }
 

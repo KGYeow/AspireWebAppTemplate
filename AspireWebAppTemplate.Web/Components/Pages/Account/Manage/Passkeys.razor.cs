@@ -1,3 +1,4 @@
+using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Core.Contracts;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
@@ -33,7 +34,9 @@ public partial class Passkeys : ComponentBase
     {
         try
         {
-            CurrentPasskeys = await AuthService.GetPasskeysAsync();
+            var result = await AuthService.GetPasskeysAsync();
+            if (result.Succeeded)
+                CurrentPasskeys = result.Data;
         }
         catch (Exception ex)
         {
@@ -50,15 +53,17 @@ public partial class Passkeys : ComponentBase
     {
         try
         {
-            var (success, error) = await AuthService.DeletePasskeyAsync(credentialId);
-            if (success)
+            var result = await AuthService.DeletePasskeyAsync(credentialId);
+            if (result.Succeeded)
             {
                 StatusMessage = "Passkey deleted successfully.";
-                CurrentPasskeys = await AuthService.GetPasskeysAsync();
+                var refreshResult = await AuthService.GetPasskeysAsync();
+                if (refreshResult.Succeeded)
+                    CurrentPasskeys = refreshResult.Data;
             }
             else
             {
-                StatusMessage = $"Error: {error}";
+                StatusMessage = $"Error: {result.Error}";
             }
         }
         catch (Exception ex)

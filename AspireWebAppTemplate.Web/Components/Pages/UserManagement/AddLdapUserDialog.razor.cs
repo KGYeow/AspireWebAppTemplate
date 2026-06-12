@@ -1,3 +1,4 @@
+using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Core.Contracts;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
@@ -94,14 +95,14 @@ public partial class AddLdapUserDialog : ComponentBase
         IsBusy = true;
         try
         {
-            var attributes = await UserService.LdapLookupAsync(Identifier.Trim());
-            if (attributes is null)
+            var result = await UserService.LdapLookupAsync(Identifier.Trim());
+            if (!result.Succeeded || result.Data is null)
             {
                 ErrorMessage = "User not found in corporate directory.";
                 return;
             }
 
-            PreviewAttributes = attributes;
+            PreviewAttributes = result.Data;
             InfoMessage = "User found in LDAP.";
         }
         catch (Exception)
@@ -127,10 +128,10 @@ public partial class AddLdapUserDialog : ComponentBase
 
         try
         {
-            var (success, error) = await UserService.CreateLdapUserAsync(PreviewAttributes);
-            if (!success)
+            var result = await UserService.CreateLdapUserAsync(PreviewAttributes);
+            if (!result.Succeeded)
             {
-                ErrorMessage = error ?? "Failed to create LDAP user.";
+                ErrorMessage = result.Error ?? "Failed to create LDAP user.";
                 return;
             }
 

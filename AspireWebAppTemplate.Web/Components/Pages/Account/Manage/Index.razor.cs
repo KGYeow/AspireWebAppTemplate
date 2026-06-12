@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Core.Contracts;
 using AspireWebAppTemplate.Core.Utilities;
 using AspireWebAppTemplate.Web.Services;
@@ -42,13 +43,14 @@ public partial class Index : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        var user = await AuthService.GetCurrentUserAsync();
-        if (user is null)
+        var result = await AuthService.GetCurrentUserAsync();
+        if (!result.Succeeded || result.Data is null)
         {
             NavigationManager.NavigateTo("Account/InvalidUser", forceLoad: true);
             return;
         }
 
+        var user = result.Data;
         Username = user.UserName;
         phoneNumber = user.PhoneNumber;
         Input.PhoneNumber = phoneNumber;
@@ -68,12 +70,12 @@ public partial class Index : ComponentBase
         {
             if (Input.PhoneNumber != phoneNumber)
             {
-                var error = await AuthService.UpdateProfileAsync(
+                var result = await AuthService.UpdateProfileAsync(
                     new UpdateProfileRequest { PhoneNumber = Input.PhoneNumber });
 
-                if (error is not null)
+                if (!result.Succeeded)
                 {
-                    StatusMessage = $"Error: {error}";
+                    StatusMessage = $"Error: {result.Error}";
                     return;
                 }
 

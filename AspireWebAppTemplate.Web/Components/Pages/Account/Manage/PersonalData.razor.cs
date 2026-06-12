@@ -1,3 +1,4 @@
+using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
@@ -36,11 +37,11 @@ public partial class PersonalData : ComponentBase
 
         try
         {
-            var data = await AuthService.DownloadPersonalDataAsync();
-            if (data is not null)
+            var result = await AuthService.DownloadPersonalDataAsync();
+            if (result.Succeeded && result.Data is not null)
             {
                 // Trigger browser download via JS interop
-                using var streamRef = new DotNetStreamReference(new MemoryStream(data));
+                using var streamRef = new DotNetStreamReference(new MemoryStream(result.Data));
                 await JS.InvokeVoidAsync("downloadFileFromStream", "PersonalData.json", streamRef);
             }
             else

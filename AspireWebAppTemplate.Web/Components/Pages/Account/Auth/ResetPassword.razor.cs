@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text;
+using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -45,14 +46,14 @@ public partial class ResetPassword : ComponentBase
 
         try
         {
-            var (success, error) = await AuthService.ResetPasswordAsync(Input.Email, decodedCode, Input.Password);
-            if (success)
+            var result = await AuthService.ResetPasswordAsync(Input.Email, decodedCode, Input.Password);
+            if (result.Succeeded)
             {
                 NavigationManager.NavigateTo("Account/ResetPasswordConfirmation", forceLoad: true);
             }
             else
             {
-                ErrorMessage = error ?? "Failed to reset password. The link may have expired.";
+                ErrorMessage = result.Error ?? "Failed to reset password. The link may have expired.";
             }
         }
         catch (Exception ex)

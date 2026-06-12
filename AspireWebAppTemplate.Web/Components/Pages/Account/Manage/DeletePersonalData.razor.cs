@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -48,15 +49,15 @@ public partial class DeletePersonalData : ComponentBase
 
         try
         {
-            var (success, error) = await AuthService.DeleteAccountAsync(Input.Password);
-            if (success)
+            var result = await AuthService.DeleteAccountAsync(Input.Password);
+            if (result.Succeeded)
             {
                 await AuthService.LogoutAsync();
                 NavigationManager.NavigateTo("Account/Login", forceLoad: true);
             }
             else
             {
-                StatusMessage = error ?? "Error deleting account.";
+                StatusMessage = result.Error ?? "Error deleting account.";
             }
         }
         catch (Exception ex)

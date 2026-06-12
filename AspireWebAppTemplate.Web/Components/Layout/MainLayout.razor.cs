@@ -116,8 +116,10 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
             var authState = await AuthStateTask;
             if (authState.User.Identity?.IsAuthenticated != true) return;
 
-            var user = await AuthService.GetCurrentUserAsync();
-            if (user is null) return;
+            var userResult = await AuthService.GetCurrentUserAsync();
+            if (!userResult.Succeeded || userResult.Data is null) return;
+
+            var user = userResult.Data;
 
             // Initialize the scoped user time zone context for this circuit
             await UserTimeZone.InitializeAsync(user.Id);

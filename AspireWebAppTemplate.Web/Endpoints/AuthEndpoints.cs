@@ -1,3 +1,4 @@
+using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -26,18 +27,18 @@ public static class AuthEndpoints
                 return Results.Redirect("/Account/Login");
 
             var result = await authService.ValidateLoginTokenAsync(token);
-            if (result is null)
+            if (!result.Succeeded || result.Data is null)
                 return Results.Redirect("/Account/Login");
 
             var claims = new List<Claim>
             {
-                new(ClaimTypes.NameIdentifier, result.UserId),
-                new(ClaimTypes.Name, result.UserName),
-                new(ClaimTypes.Email, result.Email ?? ""),
-                new("DisplayName", result.DisplayName ?? result.UserName),
+                new(ClaimTypes.NameIdentifier, result.Data.UserId),
+                new(ClaimTypes.Name, result.Data.UserName),
+                new(ClaimTypes.Email, result.Data.Email ?? ""),
+                new("DisplayName", result.Data.DisplayName ?? result.Data.UserName),
             };
 
-            foreach (var role in result.Roles)
+            foreach (var role in result.Data.Roles)
             {
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }
@@ -50,11 +51,11 @@ public static class AuthEndpoints
                 principal,
                 new AuthenticationProperties
                 {
-                    IsPersistent = result.RememberMe,
-                    ExpiresUtc = DateTimeOffset.UtcNow.AddDays(result.RememberMe ? 7 : 0)
+                    IsPersistent = result.Data.RememberMe,
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddDays(result.Data.RememberMe ? 7 : 0)
                 });
 
-            return Results.Redirect(result.ReturnUrl ?? "/");
+            return Results.Redirect(result.Data.ReturnUrl ?? "/");
         });
 
         // Logout: clears the auth cookie and redirects to login

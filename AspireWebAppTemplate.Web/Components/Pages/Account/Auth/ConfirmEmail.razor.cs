@@ -1,3 +1,4 @@
+using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
@@ -29,14 +30,14 @@ public partial class ConfirmEmail : ComponentBase
 
         try
         {
-            var (success, error) = await AuthService.ConfirmEmailAsync(UserId, Code);
-            if (success)
+            var result = await AuthService.ConfirmEmailAsync(UserId, Code);
+            if (result.Succeeded)
             {
                 IsSuccess = true;
             }
             else
             {
-                StatusMessage = error ?? "Error confirming your email. The link may have expired or already been used.";
+                StatusMessage = result.Error ?? "Error confirming your email. The link may have expired or already been used.";
             }
         }
         catch (Exception ex)

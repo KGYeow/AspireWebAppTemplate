@@ -1,3 +1,4 @@
+using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Core.Contracts;
 using AspireWebAppTemplate.UI.Components.Shared;
 using AspireWebAppTemplate.UI.Utilities;
@@ -171,7 +172,8 @@ public partial class Index : ComponentBase
             currentUserName = authState.User.Identity?.Name;
 
             // Fetch all roles metadata from the API
-            allRoles = await RoleService.GetRolesAsync() ?? [];
+            var rolesResult = await RoleService.GetRolesAsync();
+            allRoles = rolesResult.Succeeded && rolesResult.Data is not null ? rolesResult.Data : [];
 
             allRoleNames = allRoles
                 .Select(r => r.Name)
@@ -327,8 +329,8 @@ public partial class Index : ComponentBase
         int success = 0, failed = 0;
         foreach (var user in targets)
         {
-            var ok = await UserService.ActivateUserAsync(user.Id);
-            if (ok) success++;
+            var activateResult = await UserService.ActivateUserAsync(user.Id);
+            if (activateResult.Succeeded) success++;
             else failed++;
         }
 
@@ -366,8 +368,8 @@ public partial class Index : ComponentBase
         int success = 0, failed = 0;
         foreach (var user in targets)
         {
-            var ok = await UserService.DeactivateUserAsync(user.Id);
-            if (ok) success++;
+            var deactivateResult = await UserService.DeactivateUserAsync(user.Id);
+            if (deactivateResult.Succeeded) success++;
             else failed++;
         }
 
@@ -405,8 +407,8 @@ public partial class Index : ComponentBase
         int success = 0, failed = 0;
         foreach (var user in targets)
         {
-            var (ok, _) = await UserService.DeleteUserAsync(user.Id);
-            if (ok) success++;
+            var deleteResult = await UserService.DeleteUserAsync(user.Id);
+            if (deleteResult.Succeeded) success++;
             else failed++;
         }
 
@@ -450,8 +452,8 @@ public partial class Index : ComponentBase
             if (replaceExisting)
             {
                 // Replace mode: set only the selected role
-                var (ok, _) = await UserService.SetRolesAsync(user.Id, [selectedRole]);
-                if (ok) success++;
+                var setResult = await UserService.SetRolesAsync(user.Id, [selectedRole]);
+                if (setResult.Succeeded) success++;
                 else failed++;
             }
             else
@@ -464,8 +466,8 @@ public partial class Index : ComponentBase
                 }
 
                 var newRoles = user.Roles.Append(selectedRole).ToArray();
-                var (ok, _) = await UserService.SetRolesAsync(user.Id, newRoles);
-                if (ok) success++;
+                var setResult = await UserService.SetRolesAsync(user.Id, newRoles);
+                if (setResult.Succeeded) success++;
                 else failed++;
             }
         }
@@ -615,14 +617,15 @@ public partial class Index : ComponentBase
 
         try
         {
-            var syncResult = await UserService.SyncLdapUsersAsync();
+            var syncResultResponse = await UserService.SyncLdapUsersAsync();
 
-            if (syncResult is null)
+            if (!syncResultResponse.Succeeded || syncResultResponse.Data is null)
             {
                 ErrorMessage = "LDAP sync failed. The API did not respond.";
                 return;
             }
 
+            var syncResult = syncResultResponse.Data;
             TotalToSync = syncResult.Total;
             SyncedCount = syncResult.Total;
             SyncMessage = $"Sync completed. Updated {syncResult.Updated} of {syncResult.Total} users; {syncResult.Failed} failed.";
@@ -717,9 +720,15 @@ public partial class Index : ComponentBase
 
         bool ok;
         if (user.IsActive)
-            ok = await UserService.DeactivateUserAsync(user.Id);
+        {
+            var deactivateResult = await UserService.DeactivateUserAsync(user.Id);
+            ok = deactivateResult.Succeeded;
+        }
         else
-            ok = await UserService.ActivateUserAsync(user.Id);
+        {
+            var activateResult = await UserService.ActivateUserAsync(user.Id);
+            ok = activateResult.Succeeded;
+        }
 
         if (ok)
         {
@@ -758,15 +767,15 @@ public partial class Index : ComponentBase
         var result = await dialog.Result;
         if (result is null || result.Canceled) return;
 
-        var (ok, error) = await UserService.DeleteUserAsync(user.Id);
-        if (ok)
+        var deleteResult = await UserService.DeleteUserAsync(user.Id);
+        if (deleteResult.Succeeded)
         {
             Snackbar.Add($"User '{user.DisplayName} ({user.UserName})' deleted.", Severity.Success);
             await dataGrid.ReloadServerData();
         }
         else
         {
-            ErrorMessage = error ?? "Failed to delete user.";
+            ErrorMessage = deleteResult.Error ?? "Failed to delete user.";
         }
     }
 
@@ -793,8 +802,8 @@ public partial class Index : ComponentBase
     /// </summary>
     private async Task SetRolesAsync(UserViewModel user, HashSet<string> desiredRoles)
     {
-        var (ok, error) = await UserService.SetRolesAsync(user.Id, desiredRoles.ToArray());
-        if (ok)
+        var setResult = await UserService.SetRolesAsync(user.Id, desiredRoles.ToArray());
+        if (setResult.Succeeded)
         {
             var currentRoles = new HashSet<string>(user.Roles, StringComparer.OrdinalIgnoreCase);
             var rolesToAdd = desiredRoles.Except(currentRoles, StringComparer.OrdinalIgnoreCase).ToList();
@@ -809,7 +818,7 @@ public partial class Index : ComponentBase
         }
         else
         {
-            ErrorMessage = error ?? "Failed to update roles.";
+            ErrorMessage = setResult.Error ?? "Failed to update roles.";
         }
     }
 

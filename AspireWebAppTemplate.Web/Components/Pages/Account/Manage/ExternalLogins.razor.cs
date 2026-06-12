@@ -1,3 +1,4 @@
+using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Core.Contracts;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
@@ -35,10 +36,10 @@ public partial class ExternalLogins : ComponentBase
         try
         {
             var result = await AuthService.GetExternalLoginsAsync();
-            if (result is not null)
+            if (result.Succeeded && result.Data is not null)
             {
-                CurrentLogins = result.CurrentLogins;
-                ShowRemoveButton = result.ShowRemoveButton;
+                CurrentLogins = result.Data.CurrentLogins;
+                ShowRemoveButton = result.Data.ShowRemoveButton;
             }
             else
             {
@@ -60,20 +61,20 @@ public partial class ExternalLogins : ComponentBase
     {
         try
         {
-            var (success, error) = await AuthService.RemoveExternalLoginAsync(loginProvider, providerKey);
-            if (success)
+            var result = await AuthService.RemoveExternalLoginAsync(loginProvider, providerKey);
+            if (result.Succeeded)
             {
                 StatusMessage = "The external login was removed.";
-                var result = await AuthService.GetExternalLoginsAsync();
-                if (result is not null)
+                var refreshResult = await AuthService.GetExternalLoginsAsync();
+                if (refreshResult.Succeeded && refreshResult.Data is not null)
                 {
-                    CurrentLogins = result.CurrentLogins;
-                    ShowRemoveButton = result.ShowRemoveButton;
+                    CurrentLogins = refreshResult.Data.CurrentLogins;
+                    ShowRemoveButton = refreshResult.Data.ShowRemoveButton;
                 }
             }
             else
             {
-                StatusMessage = $"Error: {error}";
+                StatusMessage = $"Error: {result.Error}";
             }
         }
         catch (Exception ex)

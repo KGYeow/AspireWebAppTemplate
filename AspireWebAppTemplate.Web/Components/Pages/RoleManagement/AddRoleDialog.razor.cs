@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Core.Contracts;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
@@ -92,10 +93,10 @@ public partial class AddRoleDialog : ComponentBase
                 Position = Input.Position
             };
 
-            var (success, error) = await RoleService.CreateRoleAsync(request);
-            if (!success)
+            var result = await RoleService.CreateRoleAsync(request);
+            if (!result.Succeeded)
             {
-                StatusMessage = error ?? "Failed to create role.";
+                StatusMessage = result.Error ?? "Failed to create role.";
                 return;
             }
 

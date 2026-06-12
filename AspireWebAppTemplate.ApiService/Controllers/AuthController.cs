@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 
-namespace AspireWebAppTemplate.Controllers;
+namespace AspireWebAppTemplate.ApiService.Controllers;
 
 /// <summary>
 /// Handles authentication operations including login, logout, registration, and password management.

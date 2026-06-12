@@ -53,9 +53,9 @@ public sealed class UserTimeZoneContext : IUserTimeZoneContext
     /// </remarks>
     public async Task InitializeAsync(string userId)
     {
-        var user = await _authService.GetCurrentUserAsync();
-        TimeZoneId = user?.TimeZoneId;
-        DateTimeFormat = user?.DateTimeFormat;
+        var result = await _authService.GetCurrentUserAsync();
+        TimeZoneId = result.Succeeded ? result.Data?.TimeZoneId : null;
+        DateTimeFormat = result.Succeeded ? result.Data?.DateTimeFormat : null;
     }
 
     /// <inheritdoc />

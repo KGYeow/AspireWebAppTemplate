@@ -1,3 +1,4 @@
+using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
@@ -34,14 +35,14 @@ public partial class ResetAuthenticator : ComponentBase
 
         try
         {
-            var (success, error) = await AuthService.ResetAuthenticatorAsync();
-            if (success)
+            var result = await AuthService.ResetAuthenticatorAsync();
+            if (result.Succeeded)
             {
                 NavigationManager.NavigateTo("Account/Manage/EnableAuthenticator");
             }
             else
             {
-                StatusMessage = error ?? "Error resetting authenticator.";
+                StatusMessage = result.Error ?? "Error resetting authenticator.";
             }
         }
         catch (Exception ex)

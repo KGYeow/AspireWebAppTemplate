@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Core.Contracts;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
@@ -94,14 +95,15 @@ public partial class EditRoleDialog : ComponentBase
     {
         try
         {
-            var role = await RoleService.GetRoleAsync(RoleId);
-            if (role is null)
+            var roleResult = await RoleService.GetRoleAsync(RoleId);
+            if (!roleResult.Succeeded || roleResult.Data is null)
             {
                 Logger.LogWarning("EditRoleDialog: role '{RoleId}' not found.", RoleId);
                 MudDialog.Cancel();
                 return;
             }
 
+            var role = roleResult.Data;
             Input = new InputModel
             {
                 Name = role.Name,
@@ -148,10 +150,10 @@ public partial class EditRoleDialog : ComponentBase
                 Position = Input.Position
             };
 
-            var (success, error) = await RoleService.UpdateRoleAsync(RoleId, request);
-            if (!success)
+            var result = await RoleService.UpdateRoleAsync(RoleId, request);
+            if (!result.Succeeded)
             {
-                StatusMessage = error ?? "Failed to update role.";
+                StatusMessage = result.Error ?? "Failed to update role.";
                 return;
             }
 

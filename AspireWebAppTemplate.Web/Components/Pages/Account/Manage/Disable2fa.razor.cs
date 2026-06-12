@@ -1,3 +1,4 @@
+using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
@@ -34,14 +35,14 @@ public partial class Disable2fa : ComponentBase
 
         try
         {
-            var (success, error) = await AuthService.Disable2faAsync();
-            if (success)
+            var result = await AuthService.Disable2faAsync();
+            if (result.Succeeded)
             {
                 NavigationManager.NavigateTo("Account/Manage/TwoFactorAuthentication");
             }
             else
             {
-                StatusMessage = error ?? "Error disabling 2FA.";
+                StatusMessage = result.Error ?? "Error disabling 2FA.";
             }
         }
         catch (Exception ex)

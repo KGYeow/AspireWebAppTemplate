@@ -1,5 +1,6 @@
 using AspireWebAppTemplate.Abstractions;
 using AspireWebAppTemplate.Core.Application.Abstractions;
+using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Core.Common.Defaults;
 using AspireWebAppTemplate.Core.Contracts;
 using AspireWebAppTemplate.Core.Domain.Enums;
@@ -112,14 +113,15 @@ public partial class Index : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        var user = await AuthService.GetCurrentUserAsync();
+        var result = await AuthService.GetCurrentUserAsync();
 
-        if (user is null)
+        if (!result.Succeeded || result.Data is null)
         {
             NavigationManager.NavigateTo("Account/InvalidUser", forceLoad: true);
             return;
         }
 
+        var user = result.Data;
         _timeZoneValue = user.TimeZoneId;
         _dateTimeFormatValue = user.DateTimeFormat;
         _themeValue = user.Theme;
@@ -133,8 +135,8 @@ public partial class Index : ComponentBase
     {
         try
         {
-            var error = await AuthService.UpdatePreferencesAsync(new UpdatePreferencesRequest { Theme = theme });
-            if (error is not null)
+            var result = await AuthService.UpdatePreferencesAsync(new UpdatePreferencesRequest { Theme = theme });
+            if (!result.Succeeded)
             {
                 _themeValue = _previousThemeValue;
                 StatusMessage = "Error: Theme change failed, please try again.";
@@ -158,8 +160,8 @@ public partial class Index : ComponentBase
     {
         try
         {
-            var error = await AuthService.UpdatePreferencesAsync(new UpdatePreferencesRequest { TimeZoneId = timeZoneId ?? "" });
-            if (error is not null)
+            var result = await AuthService.UpdatePreferencesAsync(new UpdatePreferencesRequest { TimeZoneId = timeZoneId ?? "" });
+            if (!result.Succeeded)
             {
                 _timeZoneValue = _previousTimeZoneValue;
                 StatusMessage = "Error: Save failed, please try again.";
@@ -183,8 +185,8 @@ public partial class Index : ComponentBase
     {
         try
         {
-            var error = await AuthService.UpdatePreferencesAsync(new UpdatePreferencesRequest { DateTimeFormat = format ?? "" });
-            if (error is not null)
+            var result = await AuthService.UpdatePreferencesAsync(new UpdatePreferencesRequest { DateTimeFormat = format ?? "" });
+            if (!result.Succeeded)
             {
                 _dateTimeFormatValue = _previousDateTimeFormatValue;
                 StatusMessage = "Error: Save failed, please try again.";

@@ -1,4 +1,5 @@
 using AspireWebAppTemplate.Abstractions;
+using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Core.Contracts;
 using AspireWebAppTemplate.Core.Domain.Enums;
 using AspireWebAppTemplate.Web.Services;
@@ -97,7 +98,7 @@ public partial class Index : ComponentBase
 
         try
         {
-            var result = await AuditLogService.GetPagedAsync(
+            var apiResult = await AuditLogService.GetPagedAsync(
                 page: state.Page,
                 pageSize: state.PageSize,
                 searchTerm: _searchString,
@@ -106,12 +107,13 @@ public partial class Index : ComponentBase
                 dateStart: _dateRange?.Start,
                 dateEnd: _dateRange?.End);
 
-            if (result is null)
+            if (!apiResult.Succeeded || apiResult.Data is null)
             {
                 _totalItems = 0;
                 return new GridData<AuditLogViewModel> { Items = [], TotalItems = 0 };
             }
 
+            var result = apiResult.Data;
             _totalItems = result.TotalCount;
 
             var viewModels = result.Items.Select((entry, index) => new AuditLogViewModel
@@ -184,13 +186,13 @@ public partial class Index : ComponentBase
     /// </summary>
     protected async Task OnRowClick(DataGridRowClickEventArgs<AuditLogViewModel> args)
     {
-        var entry = await AuditLogService.GetByIdAsync(args.Item.Id);
-        if (entry is null)
+        var apiResult = await AuditLogService.GetByIdAsync(args.Item.Id);
+        if (!apiResult.Succeeded || apiResult.Data is null)
             return;
 
         var parameters = new DialogParameters<AuditLogDetailDialog>
         {
-            { x => x.Entry, entry }
+            { x => x.Entry, apiResult.Data }
         };
 
         var options = new DialogOptions
@@ -221,19 +223,20 @@ public partial class Index : ComponentBase
 
         try
         {
-            var bytes = await AuditLogService.ExportExcelAsync(
+            var exportResult = await AuditLogService.ExportExcelAsync(
                 searchTerm: _searchString,
                 actionType: _actionTypeFilter,
                 entityType: _entityTypeFilter,
                 dateStart: _dateRange?.Start,
                 dateEnd: _dateRange?.End);
 
-            if (bytes is null || bytes.Length == 0)
+            if (!exportResult.Succeeded || exportResult.Data is null || exportResult.Data.Length == 0)
             {
                 Snackbar.Add("No entries to export.", Severity.Info);
                 return;
             }
 
+            var bytes = exportResult.Data;
             var fileName = $"audit-log-{DateTime.UtcNow:yyyy-MM-dd}.xlsx";
             var base64 = Convert.ToBase64String(bytes);
             var mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";

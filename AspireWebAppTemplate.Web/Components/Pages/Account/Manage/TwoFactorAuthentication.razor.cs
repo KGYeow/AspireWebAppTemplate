@@ -1,3 +1,4 @@
+using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
@@ -32,12 +33,12 @@ public partial class TwoFactorAuthentication : ComponentBase
     {
         try
         {
-            var status = await AuthService.Get2faStatusAsync();
-            if (status is not null)
+            var result = await AuthService.Get2faStatusAsync();
+            if (result.Succeeded && result.Data is not null)
             {
-                HasAuthenticator = status.HasAuthenticator;
-                Is2faEnabled = status.Is2faEnabled;
-                RecoveryCodesLeft = status.RecoveryCodesLeft;
+                HasAuthenticator = result.Data.HasAuthenticator;
+                Is2faEnabled = result.Data.Is2faEnabled;
+                RecoveryCodesLeft = result.Data.RecoveryCodesLeft;
             }
             else
             {
