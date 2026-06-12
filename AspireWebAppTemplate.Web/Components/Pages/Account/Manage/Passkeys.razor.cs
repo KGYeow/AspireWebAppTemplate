@@ -1,5 +1,9 @@
 using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Core.Contracts;
+using AspireWebAppTemplate.Core.Contracts.Auth;
+using AspireWebAppTemplate.Core.Contracts.AuditLog;
+using AspireWebAppTemplate.Core.Contracts.Roles;
+using AspireWebAppTemplate.Core.Contracts.Users;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;

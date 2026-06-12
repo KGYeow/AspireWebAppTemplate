@@ -1,6 +1,10 @@
 using AspireWebAppTemplate.Abstractions;
 using AspireWebAppTemplate.ApiService.Data;
 using AspireWebAppTemplate.Core.Contracts;
+using AspireWebAppTemplate.Core.Contracts.Auth;
+using AspireWebAppTemplate.Core.Contracts.AuditLog;
+using AspireWebAppTemplate.Core.Contracts.Roles;
+using AspireWebAppTemplate.Core.Contracts.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
