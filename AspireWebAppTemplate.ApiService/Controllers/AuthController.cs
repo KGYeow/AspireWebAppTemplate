@@ -24,6 +24,8 @@ namespace AspireWebAppTemplate.Controllers;
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
+    #region Constructor
+
     private readonly ILoginService _loginService;
     private readonly ILdapLoginService _ldapLoginService;
     private readonly IRegisterService _registerService;
@@ -49,6 +51,10 @@ public class AuthController : ControllerBase
         _auditLogService = auditLogService;
         _ldapSettings = ldapSettings.Value;
     }
+
+    #endregion
+
+    #region Authentication (Login, Register, Logout)
 
     /// <summary>
     /// Authenticates a user with email/password credentials.
@@ -181,6 +187,10 @@ public class AuthController : ControllerBase
 
         return Ok();
     }
+
+    #endregion
+
+    #region User Profile + Password
 
     /// <summary>
     /// Changes the password for the currently authenticated user.
@@ -439,7 +449,9 @@ public class AuthController : ControllerBase
         return BadRequest("Error confirming email.");
     }
 
-    // ─── PHASE 2: Email Management + Personal Data ────────────────────────
+    #endregion
+
+    #region Email Management + Personal Data
 
     /// <summary>
     /// Returns the current user's email and confirmation status.
@@ -604,7 +616,9 @@ public class AuthController : ControllerBase
         return Ok();
     }
 
-    // ─── PHASE 3: Two-Factor Authentication ───────────────────────────────
+    #endregion
+
+    #region Two-Factor Authentication
 
     /// <summary>
     /// Returns the current 2FA status for the authenticated user.
@@ -828,7 +842,9 @@ public class AuthController : ControllerBase
         }
     }
 
-    // ─── PHASE 4: Passkeys + External Logins ──────────────────────────────
+    #endregion
+
+    #region Passkeys + External Logins
 
     /// <summary>
     /// Lists the user's registered passkeys.
@@ -943,7 +959,9 @@ public class AuthController : ControllerBase
         return Ok();
     }
 
-    // ─── Token Validation (for Web project cookie sign-in) ──────────────
+    #endregion
+
+    #region Token Validation
 
     /// <summary>
     /// Validates a login token and returns the user claims needed for cookie creation.
@@ -984,7 +1002,9 @@ public class AuthController : ControllerBase
         });
     }
 
-    // ─── Helper Methods ───────────────────────────────────────────────────
+    #endregion
+
+    #region Helpers
 
     private static string FormatKey(string unformattedKey)
     {
@@ -1012,4 +1032,6 @@ public class AuthController : ControllerBase
             UrlEncoder.Default.Encode(email),
             unformattedKey);
     }
+
+    #endregion
 }

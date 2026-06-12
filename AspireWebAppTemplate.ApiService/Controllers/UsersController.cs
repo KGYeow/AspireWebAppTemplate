@@ -18,6 +18,8 @@ namespace AspireWebAppTemplate.Controllers;
 [Authorize(Roles = "Admin")]
 public class UsersController : ControllerBase
 {
+    #region Constructor
+
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<ApplicationRole> _roleManager;
     private readonly IAuditLogService _auditLogService;
@@ -34,6 +36,10 @@ public class UsersController : ControllerBase
         _auditLogService = auditLogService;
         _ldapAuthService = ldapAuthService;
     }
+
+    #endregion
+
+    #region CRUD Operations
 
     /// <summary>
     /// Returns a paged list of users with their assigned roles.
@@ -278,6 +284,10 @@ public class UsersController : ControllerBase
         return Ok();
     }
 
+    #endregion
+
+    #region Activation
+
     /// <summary>
     /// Activates a user account.
     /// </summary>
@@ -342,6 +352,10 @@ public class UsersController : ControllerBase
         return Ok();
     }
 
+    #endregion
+
+    #region Roles
+
     /// <summary>
     /// Sets the roles for a user, replacing all existing role assignments.
     /// </summary>
@@ -386,6 +400,10 @@ public class UsersController : ControllerBase
 
         return Ok();
     }
+
+    #endregion
+
+    #region LDAP Operations
 
     /// <summary>
     /// [LDAP] Looks up a user from Active Directory by NTID or email.
@@ -530,6 +548,10 @@ public class UsersController : ControllerBase
         return Ok(new LdapSyncResult { Total = ldapUsers.Count, Updated = updated, Failed = failed });
     }
 
+    #endregion
+
+    #region Roles
+
     /// <summary>
     /// Returns all roles with metadata (for frontend to use in authority checks and role pickers).
     /// Duplicates the roles endpoint but scoped to user context needs.
@@ -561,6 +583,8 @@ public class UsersController : ControllerBase
 
         return Ok(roleDtos);
     }
+
+    #endregion
 }
 
 /// <summary>

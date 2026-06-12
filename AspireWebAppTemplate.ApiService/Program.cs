@@ -25,17 +25,21 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-// Identity
-builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
+// Identity (core services only — UserManager, SignInManager, stores).
+// Using AddIdentityCore instead of AddIdentity to avoid registering Identity's cookie auth
+// scheme which conflicts with our internal service-to-service authentication.
+builder.Services.AddIdentityCore<ApplicationUser>(options =>
     {
         options.SignIn.RequireConfirmedAccount = true;
         options.Lockout.AllowedForNewUsers = false;
         options.Lockout.MaxFailedAccessAttempts = int.MaxValue;
     })
+    .AddRoles<ApplicationRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddSignInManager()
     .AddDefaultTokenProviders();
 
-// Authentication: trust internal service-to-service headers from the Web frontend
+// Authentication: trust internal service-to-service headers from the Web frontend.
 builder.Services.AddAuthentication(InternalAuthenticationHandler.SchemeName)
     .AddScheme<AuthenticationSchemeOptions, InternalAuthenticationHandler>(
         InternalAuthenticationHandler.SchemeName, options => { });

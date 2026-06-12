@@ -15,6 +15,8 @@ namespace AspireWebAppTemplate.ApiService.Controllers;
 [Authorize(Roles = "Admin")]
 public class AuditLogController : ControllerBase
 {
+    #region Constructor
+
     private readonly ApplicationDbContext _dbContext;
     private readonly IExcelExportService _excelExportService;
     private readonly IAuditLogService _auditLogService;
@@ -28,6 +30,10 @@ public class AuditLogController : ControllerBase
         _excelExportService = excelExportService;
         _auditLogService = auditLogService;
     }
+
+    #endregion
+
+    #region Query
 
     /// <summary>
     /// Returns a paged list of audit log entries with optional filtering.
@@ -136,6 +142,10 @@ public class AuditLogController : ControllerBase
         return Ok(entry);
     }
 
+    #endregion
+
+    #region Export
+
     /// <summary>
     /// Exports audit log entries matching the query to an Excel file.
     /// Capped at 50,000 rows.
@@ -204,4 +214,6 @@ public class AuditLogController : ControllerBase
 
         return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
     }
+
+    #endregion
 }

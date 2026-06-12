@@ -9,6 +9,11 @@ namespace AspireWebAppTemplate.Web.Services;
 /// </summary>
 public class ApiUserService(HttpClient http)
 {
+    #region CRUD Operations
+
+    /// <summary>
+    /// Returns a paged list of users with optional search filtering.
+    /// </summary>
     public async Task<PagedResult<UserDto>?> GetUsersAsync(int page = 0, int pageSize = 10, string? searchTerm = null)
     {
         var url = $"/api/users?page={page}&pageSize={pageSize}";
@@ -29,9 +34,15 @@ public class ApiUserService(HttpClient http)
         return result?.Items ?? [];
     }
 
+    /// <summary>
+    /// Retrieves a single user by their unique identifier.
+    /// </summary>
     public async Task<UserDto?> GetUserAsync(string id)
         => await http.GetFromJsonAsync<UserDto>($"/api/users/{id}");
 
+    /// <summary>
+    /// Creates a new user account with the specified details.
+    /// </summary>
     public async Task<(bool Success, string? Error)> CreateUserAsync(CreateUserRequest request)
     {
         var response = await http.PostAsJsonAsync("/api/users", request);
@@ -39,6 +50,9 @@ public class ApiUserService(HttpClient http)
         return (false, await response.Content.ReadAsStringAsync());
     }
 
+    /// <summary>
+    /// Updates an existing user's profile information.
+    /// </summary>
     public async Task<(bool Success, string? Error)> UpdateUserAsync(string id, UpdateUserRequest request)
     {
         var response = await http.PutAsJsonAsync($"/api/users/{id}", request);
@@ -46,6 +60,9 @@ public class ApiUserService(HttpClient http)
         return (false, await response.Content.ReadAsStringAsync());
     }
 
+    /// <summary>
+    /// Deletes a user account by their unique identifier.
+    /// </summary>
     public async Task<(bool Success, string? Error)> DeleteUserAsync(string id)
     {
         var response = await http.DeleteAsync($"/api/users/{id}");
@@ -53,12 +70,25 @@ public class ApiUserService(HttpClient http)
         return (false, await response.Content.ReadAsStringAsync());
     }
 
+    #endregion
+
+    #region Activation + Roles
+
+    /// <summary>
+    /// Activates a previously deactivated user account.
+    /// </summary>
     public async Task<bool> ActivateUserAsync(string id)
         => (await http.PostAsync($"/api/users/{id}/activate", null)).IsSuccessStatusCode;
 
+    /// <summary>
+    /// Deactivates a user account, preventing login.
+    /// </summary>
     public async Task<bool> DeactivateUserAsync(string id)
         => (await http.PostAsync($"/api/users/{id}/deactivate", null)).IsSuccessStatusCode;
 
+    /// <summary>
+    /// Assigns the specified roles to a user, replacing any existing role assignments.
+    /// </summary>
     public async Task<(bool Success, string? Error)> SetRolesAsync(string id, string[] roleNames)
     {
         var response = await http.PostAsJsonAsync($"/api/users/{id}/roles", roleNames);
@@ -71,6 +101,10 @@ public class ApiUserService(HttpClient http)
     /// </summary>
     public async Task<List<RoleDto>?> GetRolesMetadataAsync()
         => await http.GetFromJsonAsync<List<RoleDto>>("/api/users/roles-metadata");
+
+    #endregion
+
+    #region LDAP Operations
 
     /// <summary>
     /// [LDAP] Looks up a user from Active Directory.
@@ -101,6 +135,8 @@ public class ApiUserService(HttpClient http)
         if (!response.IsSuccessStatusCode) return null;
         return await response.Content.ReadFromJsonAsync<LdapSyncResult>();
     }
+
+    #endregion
 }
 
 /// <summary>

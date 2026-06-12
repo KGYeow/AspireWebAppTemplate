@@ -18,6 +18,8 @@ namespace AspireWebAppTemplate.Controllers;
 [Authorize(Roles = "Admin")]
 public class RolesController : ControllerBase
 {
+    #region Constructor
+
     private readonly RoleManager<ApplicationRole> _roleManager;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IAuditLogService _auditLogService;
@@ -31,6 +33,10 @@ public class RolesController : ControllerBase
         _userManager = userManager;
         _auditLogService = auditLogService;
     }
+
+    #endregion
+
+    #region CRUD Operations
 
     /// <summary>
     /// Returns all roles with their user counts.
@@ -239,6 +245,10 @@ public class RolesController : ControllerBase
         return Ok();
     }
 
+    #endregion
+
+    #region Activation
+
     /// <summary>
     /// Activates a role.
     /// </summary>
@@ -288,6 +298,10 @@ public class RolesController : ControllerBase
 
         return Ok();
     }
+
+    #endregion
+
+    #region User-Role Assignment
 
     /// <summary>
     /// Assigns a user to this role.
@@ -402,4 +416,6 @@ public class RolesController : ControllerBase
 
         return Ok(userDtos);
     }
+
+    #endregion
 }

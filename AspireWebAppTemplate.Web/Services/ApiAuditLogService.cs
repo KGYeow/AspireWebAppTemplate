@@ -10,6 +10,11 @@ namespace AspireWebAppTemplate.Web.Services;
 /// </summary>
 public class ApiAuditLogService(HttpClient http)
 {
+    #region Query
+
+    /// <summary>
+    /// Returns a paged list of audit log entries with optional filtering by search term, action type, entity type, and date range.
+    /// </summary>
     public async Task<PagedResult<AuditLogEntryDto>?> GetPagedAsync(
         int page = 0,
         int pageSize = 10,
@@ -33,9 +38,19 @@ public class ApiAuditLogService(HttpClient http)
         return await http.GetFromJsonAsync<PagedResult<AuditLogEntryDto>>(url);
     }
 
+    /// <summary>
+    /// Retrieves a single audit log entry by its unique identifier.
+    /// </summary>
     public async Task<AuditLogEntryDto?> GetByIdAsync(Guid id)
         => await http.GetFromJsonAsync<AuditLogEntryDto>($"/api/audit-log/{id}");
 
+    #endregion
+
+    #region Export
+
+    /// <summary>
+    /// Exports filtered audit log entries as an Excel file.
+    /// </summary>
     public async Task<byte[]?> ExportExcelAsync(
         string? searchTerm = null,
         AuditActionType? actionType = null,
@@ -60,4 +75,6 @@ public class ApiAuditLogService(HttpClient http)
             return await response.Content.ReadAsByteArrayAsync();
         return null;
     }
+
+    #endregion
 }
