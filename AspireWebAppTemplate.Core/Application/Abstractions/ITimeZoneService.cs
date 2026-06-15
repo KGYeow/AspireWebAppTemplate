@@ -18,6 +18,17 @@ public interface ITimeZoneService
     DateTime? ConvertFromUtc(DateTime? utcDateTime, string ianaTimeZoneId);
 
     /// <summary>
+    /// Converts a local DateTime in the specified IANA timezone to UTC.
+    /// </summary>
+    DateTime ConvertToUtc(DateTime localDateTime, string ianaTimeZoneId);
+
+    /// <summary>
+    /// Converts a local DateTime in the specified IANA timezone to UTC,
+    /// returning null if the input is null.
+    /// </summary>
+    DateTime? ConvertToUtc(DateTime? localDateTime, string ianaTimeZoneId);
+
+    /// <summary>
     /// Gets all available IANA timezone identifiers with their UTC offsets.
     /// </summary>
     IReadOnlyList<TimeZoneOption> GetAllTimeZones();

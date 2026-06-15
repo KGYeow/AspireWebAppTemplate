@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 using MudBlazor;
+using AspireWebAppTemplate.Web.Abstractions;
 
 namespace AspireWebAppTemplate.Web.Components.Layout;
 

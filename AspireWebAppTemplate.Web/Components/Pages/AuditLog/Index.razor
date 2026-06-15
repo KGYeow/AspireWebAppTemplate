@@ -79,13 +79,21 @@
         </MudSelect>
 
         <!-- Date range picker -->
-        <MudDateRangePicker DateRange="_dateRange"
+        <MudDateRangePicker @ref="_picker"
+                            DateRange="_dateRange"
                             DateRangeChanged="OnDateRangeChanged"
                             Placeholder="Date Range"
                             Variant="Variant.Outlined"
                             Margin="Margin.Dense"
                             IconSize="Size.Small"
-                            Style="min-width: 220px; font-size: 14px;" />
+                            PickerVariant="PickerVariant.Dialog"
+                            Style="min-width: 220px; font-size: 14px;">
+            <PickerActions>
+                <MudButton Class="mr-auto align-self-start" OnClick="@(() => _picker.ClearAsync())">Clear</MudButton>
+                <MudButton OnClick="@(() => _picker.CloseAsync(false))">Cancel</MudButton>
+                <MudButton Color="Color.Primary" OnClick="@(() => _picker.CloseAsync())">OK</MudButton>
+            </PickerActions>
+        </MudDateRangePicker>
     </MudStack>
 
     <!-- Audit Log Data Grid -->

@@ -1,4 +1,4 @@
-namespace AspireWebAppTemplate.Abstractions;
+namespace AspireWebAppTemplate.Web.Abstractions;
 
 /// <summary>
 /// Provides user-aware datetime formatting using the current user's configured time zone.

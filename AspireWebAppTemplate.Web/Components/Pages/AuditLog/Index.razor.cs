@@ -1,5 +1,5 @@
-using AspireWebAppTemplate.Abstractions;
 using AspireWebAppTemplate.Core.Common;
+using AspireWebAppTemplate.Core.Application.Abstractions;
 using AspireWebAppTemplate.Core.Contracts;
 using AspireWebAppTemplate.Core.Contracts.Auth;
 using AspireWebAppTemplate.Core.Contracts.AuditLog;
@@ -10,6 +10,7 @@ using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using MudBlazor;
+using AspireWebAppTemplate.Web.Abstractions;
 
 namespace AspireWebAppTemplate.Web.Components.Pages.AuditLog;
 
@@ -33,6 +34,11 @@ public partial class Index : ComponentBase
     [Inject] private IUserTimeZoneContext TimeZoneContext { get; set; } = default!;
 
     /// <summary>
+    /// Provides timezone conversion utilities (local → UTC) for date range filtering.
+    /// </summary>
+    [Inject] private ITimeZoneService TimeZoneService { get; set; } = default!;
+
+    /// <summary>
     /// JavaScript runtime for triggering browser file downloads.
     /// </summary>
     [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
@@ -45,6 +51,11 @@ public partial class Index : ComponentBase
     /// Reference to the MudDataGrid component for triggering server-side reloads.
     /// </summary>
     private MudDataGrid<AuditLogViewModel> _dataGrid = null!;
+
+    /// <summary>
+    /// Reference to the MudDateRangePicker for dialog action buttons (Clear, Cancel, OK).
+    /// </summary>
+    private MudDateRangePicker _picker = null!;
 
     #endregion
 
@@ -83,27 +94,22 @@ public partial class Index : ComponentBase
 
     /// <summary>
     /// The date range filter (inclusive on both ends).
+    /// Displayed in the user's local time; converted to UTC before querying the API.
     /// Defaults to the last 30 days.
     /// </summary>
-    private DateRange _dateRange = new(DateTime.Today.AddDays(-30), DateTime.Today);
+    private DateRange? _dateRange = new(DateTime.Today.AddDays(-30), DateTime.Today);
 
     #endregion
 
     #region Lifecycle
 
     /// <summary>
-    /// Forces a grid reload after the first interactive render to ensure data is fetched
-    /// with a fully authenticated context (HttpContext may not be available on prerender).
+    /// Marks the page as ready. The data grid is populated via <see cref="ServerReload"/> (server-side callback).
     /// </summary>
-    private bool _firstRenderComplete;
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override Task OnInitializedAsync()
     {
-        if (firstRender)
-        {
-            _firstRenderComplete = true;
-            await _dataGrid.ReloadServerData();
-        }
+        IsLoading = false;
+        return Task.CompletedTask;
     }
 
     #endregion
@@ -121,14 +127,21 @@ public partial class Index : ComponentBase
 
         try
         {
+            // Use default page size if not yet initialized by the grid
+            var pageSize = state.PageSize > 0 ? state.PageSize : 10;
+
+            // Convert user's local date range to UTC for the database query
+            var utcStart = ConvertLocalDateToUtc(_dateRange?.Start);
+            var utcEnd = ConvertLocalDateToUtc(_dateRange?.End?.Date.AddDays(1).AddTicks(-1));
+
             var apiResult = await AuditLogService.GetPagedAsync(
                 page: state.Page,
-                pageSize: state.PageSize,
+                pageSize: pageSize,
                 searchTerm: _searchString,
                 actionType: _actionTypeFilter,
                 entityType: _entityTypeFilter,
-                dateStart: _dateRange?.Start,
-                dateEnd: _dateRange?.End?.Date.AddDays(1).AddTicks(-1));
+                dateStart: utcStart,
+                dateEnd: utcEnd);
 
             if (!apiResult.Succeeded || apiResult.Data is null)
             {
@@ -250,8 +263,8 @@ public partial class Index : ComponentBase
                 searchTerm: _searchString,
                 actionType: _actionTypeFilter,
                 entityType: _entityTypeFilter,
-                dateStart: _dateRange?.Start,
-                dateEnd: _dateRange?.End?.Date.AddDays(1).AddTicks(-1));
+                dateStart: ConvertLocalDateToUtc(_dateRange?.Start),
+                dateEnd: ConvertLocalDateToUtc(_dateRange?.End?.Date.AddDays(1).AddTicks(-1)));
 
             if (!exportResult.Succeeded || exportResult.Data is null || exportResult.Data.Length == 0)
             {
@@ -276,6 +289,25 @@ public partial class Index : ComponentBase
         {
             IsExporting = false;
         }
+    }
+
+    #endregion
+
+    #region Helpers
+
+    /// <summary>
+    /// Converts a local DateTime (from the user's timezone) to UTC for database queries.
+    /// If the user has no timezone configured, returns the date as-is (assumes server local).
+    /// </summary>
+    private DateTime? ConvertLocalDateToUtc(DateTime? localDateTime)
+    {
+        if (localDateTime is null) return null;
+
+        var userTimeZoneId = TimeZoneContext.TimeZoneId;
+        if (string.IsNullOrEmpty(userTimeZoneId))
+            return localDateTime; // No timezone configured — pass through as-is
+
+        return TimeZoneService.ConvertToUtc(localDateTime, userTimeZoneId);
     }
 
     #endregion

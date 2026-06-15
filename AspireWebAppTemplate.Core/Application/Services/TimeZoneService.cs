@@ -42,6 +42,22 @@ public sealed class TimeZoneService : ITimeZoneService
     }
 
     /// <inheritdoc />
+    public DateTime ConvertToUtc(DateTime localDateTime, string ianaTimeZoneId)
+    {
+        var timeZone = TimeZoneInfo.FindSystemTimeZoneById(ianaTimeZoneId);
+        return TimeZoneInfo.ConvertTimeToUtc(DateTime.SpecifyKind(localDateTime, DateTimeKind.Unspecified), timeZone);
+    }
+
+    /// <inheritdoc />
+    public DateTime? ConvertToUtc(DateTime? localDateTime, string ianaTimeZoneId)
+    {
+        if (localDateTime is null)
+            return null;
+
+        return ConvertToUtc(localDateTime.Value, ianaTimeZoneId);
+    }
+
+    /// <inheritdoc />
     public IReadOnlyList<TimeZoneOption> GetAllTimeZones() => _allTimeZones.Value;
 
     /// <summary>

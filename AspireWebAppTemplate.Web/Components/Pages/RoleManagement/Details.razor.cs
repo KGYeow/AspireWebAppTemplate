@@ -1,4 +1,3 @@
-using AspireWebAppTemplate.Abstractions;
 using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Core.Contracts;
 using AspireWebAppTemplate.Core.Contracts.Auth;
@@ -10,6 +9,7 @@ using AspireWebAppTemplate.UI.Utilities;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
+using AspireWebAppTemplate.Web.Abstractions;
 
 namespace AspireWebAppTemplate.Web.Components.Pages.RoleManagement;
 

@@ -2,6 +2,7 @@ using AspireWebAppTemplate.Abstractions;
 using AspireWebAppTemplate.Core.Application.Abstractions;
 using AspireWebAppTemplate.Core.Application.Services;
 using AspireWebAppTemplate.Web;
+using AspireWebAppTemplate.Web.Abstractions;
 using AspireWebAppTemplate.Web.Components;
 using AspireWebAppTemplate.Web.Endpoints;
 using AspireWebAppTemplate.Web.Services;
