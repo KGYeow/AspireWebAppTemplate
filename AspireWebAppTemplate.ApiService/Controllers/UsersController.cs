@@ -500,54 +500,82 @@ public class UsersController : BaseController
 
     /// <summary>
     /// [LDAP] Syncs all LDAP-sourced users with Active Directory attributes.
-    /// Returns a summary of how many were updated/failed.
+    /// Streams progress per-user as NDJSON (newline-delimited JSON) for real-time UI updates.
     /// </summary>
     [HttpPost("ldap-sync")]
-    [ProducesResponseType(typeof(LdapSyncResult), StatusCodes.Status200OK)]
-    public async Task<ActionResult<LdapSyncResult>> SyncLdapUsers()
+    public async Task SyncLdapUsers()
     {
+        Response.ContentType = "application/x-ndjson";
+        Response.Headers["Cache-Control"] = "no-cache";
+        Response.Headers["X-Content-Type-Options"] = "nosniff";
+
         var ldapUsers = await _userManager.Users
             .Where(u => u.AuthSource == AuthSource.LDAP)
             .OrderBy(u => u.UserName)
             .ToListAsync();
 
-        int updated = 0, failed = 0;
+        var total = ldapUsers.Count;
 
-        foreach (var user in ldapUsers)
+        for (var i = 0; i < ldapUsers.Count; i++)
         {
+            var user = ldapUsers[i];
+            bool? updated = null;
+
             try
             {
                 var attrs = await _ldapAuthService.FetchUserAttributesAsync(user.UserName ?? "");
-                if (attrs is null) { failed++; continue; }
-
-                bool changed = false;
-                if (!string.Equals(user.DisplayName, attrs.DisplayName, StringComparison.Ordinal))
-                { user.DisplayName = attrs.DisplayName; changed = true; }
-                if (!string.Equals(user.FirstName, attrs.FirstName, StringComparison.Ordinal))
-                { user.FirstName = attrs.FirstName; changed = true; }
-                if (!string.Equals(user.LastName, attrs.LastName, StringComparison.Ordinal))
-                { user.LastName = attrs.LastName; changed = true; }
-                if (!string.Equals(user.Email, attrs.Email, StringComparison.OrdinalIgnoreCase))
-                { user.Email = attrs.Email; changed = true; }
-                if (!string.Equals(user.JobTitle, attrs.JobTitle, StringComparison.Ordinal))
-                { user.JobTitle = attrs.JobTitle; changed = true; }
-                if (!string.Equals(user.Department, attrs.Department, StringComparison.Ordinal))
-                { user.Department = attrs.Department; changed = true; }
-                if (!string.Equals(user.EmployeeNumber, attrs.EmployeeNumber, StringComparison.Ordinal))
-                { user.EmployeeNumber = attrs.EmployeeNumber; changed = true; }
-
-                if (changed)
+                if (attrs is null)
                 {
-                    user.UpdatedUtc = DateTime.UtcNow;
-                    var updateResult = await _userManager.UpdateAsync(user);
-                    if (updateResult.Succeeded) updated++;
-                    else failed++;
+                    updated = null; // failed
+                }
+                else
+                {
+                    bool changed = false;
+                    if (!string.Equals(user.DisplayName, attrs.DisplayName, StringComparison.Ordinal))
+                    { user.DisplayName = attrs.DisplayName; changed = true; }
+                    if (!string.Equals(user.FirstName, attrs.FirstName, StringComparison.Ordinal))
+                    { user.FirstName = attrs.FirstName; changed = true; }
+                    if (!string.Equals(user.LastName, attrs.LastName, StringComparison.Ordinal))
+                    { user.LastName = attrs.LastName; changed = true; }
+                    if (!string.Equals(user.Email, attrs.Email, StringComparison.OrdinalIgnoreCase))
+                    { user.Email = attrs.Email; changed = true; }
+                    if (!string.Equals(user.JobTitle, attrs.JobTitle, StringComparison.Ordinal))
+                    { user.JobTitle = attrs.JobTitle; changed = true; }
+                    if (!string.Equals(user.Department, attrs.Department, StringComparison.Ordinal))
+                    { user.Department = attrs.Department; changed = true; }
+                    if (!string.Equals(user.EmployeeNumber, attrs.EmployeeNumber, StringComparison.Ordinal))
+                    { user.EmployeeNumber = attrs.EmployeeNumber; changed = true; }
+
+                    if (changed)
+                    {
+                        user.UpdatedUtc = DateTime.UtcNow;
+                        var updateResult = await _userManager.UpdateAsync(user);
+                        updated = updateResult.Succeeded;
+                    }
+                    else
+                    {
+                        updated = false; // no changes needed
+                    }
                 }
             }
-            catch { failed++; }
-        }
+            catch
+            {
+                updated = null; // failed
+            }
 
-        return Ok(new LdapSyncResult { Total = ldapUsers.Count, Updated = updated, Failed = failed });
+            var item = new LdapSyncProgressItem
+            {
+                Total = total,
+                Current = i + 1,
+                UserName = user.UserName ?? "",
+                Updated = updated
+            };
+
+            // Write as NDJSON (one JSON object per line) and flush immediately
+            var json = System.Text.Json.JsonSerializer.Serialize(item);
+            await Response.WriteAsync(json + "\n");
+            await Response.Body.FlushAsync();
+        }
     }
 
     #endregion
@@ -587,14 +615,4 @@ public class UsersController : BaseController
     }
 
     #endregion
-}
-
-/// <summary>
-/// Result returned by the LDAP sync operation.
-/// </summary>
-public sealed class LdapSyncResult
-{
-    public int Total { get; set; }
-    public int Updated { get; set; }
-    public int Failed { get; set; }
 }

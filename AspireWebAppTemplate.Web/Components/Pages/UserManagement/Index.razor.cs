@@ -609,8 +609,8 @@ public partial class Index : ComponentBase
 
     // [LDAP] Syncs all local users from LDAP via the API
     /// <summary>
-    /// Triggers the LDAP sync operation via the API.
-    /// The API handles the actual sync logic and returns summary results.
+    /// Triggers the LDAP sync operation via the API using streaming.
+    /// Updates progress in real-time as each user is processed.
     /// </summary>
     private async Task SyncAllUsersFromLdapAsync()
     {
@@ -622,20 +622,24 @@ public partial class Index : ComponentBase
         SyncMessage = null;
         ErrorMessage = null;
 
+        int updated = 0, failed = 0;
+
         try
         {
-            var syncResultResponse = await UserService.SyncLdapUsersAsync();
-
-            if (!syncResultResponse.Succeeded || syncResultResponse.Data is null)
+            await foreach (var item in UserService.SyncLdapUsersStreamAsync())
             {
-                ErrorMessage = "LDAP sync failed. The API did not respond.";
-                return;
+                if (item is null) continue;
+
+                TotalToSync = item.Total;
+                SyncedCount = item.Current;
+
+                if (item.Updated == true) updated++;
+                else if (item.Updated == null) failed++;
+
+                await InvokeAsync(StateHasChanged);
             }
 
-            var syncResult = syncResultResponse.Data;
-            TotalToSync = syncResult.Total;
-            SyncedCount = syncResult.Total;
-            SyncMessage = $"Sync completed. Updated {syncResult.Updated} of {syncResult.Total} users; {syncResult.Failed} failed.";
+            SyncMessage = $"Sync completed. Updated {updated} of {TotalToSync} users; {failed} failed.";
             await dataGrid.ReloadServerData();
         }
         catch (Exception ex)

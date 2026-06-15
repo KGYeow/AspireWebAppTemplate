@@ -160,24 +160,29 @@ public class ApiUserService(HttpClient http)
 
     /// <summary>
     /// [LDAP] Syncs all LDAP-sourced users with Active Directory.
+    /// Streams progress items (NDJSON) for real-time UI updates.
     /// </summary>
-    public async Task<ApiResult<LdapSyncResult>> SyncLdapUsersAsync()
+    public async IAsyncEnumerable<LdapSyncProgressItem?> SyncLdapUsersStreamAsync([System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var response = await http.PostAsync("/api/users/ldap-sync", null);
-        if (response.IsSuccessStatusCode)
-            return ApiResult<LdapSyncResult>.Success(await response.Content.ReadFromJsonAsync<LdapSyncResult>()!);
-        return ApiResult<LdapSyncResult>.Failure(await response.Content.ReadAsStringAsync());
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/api/users/ldap-sync");
+        using var response = await http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+            yield break;
+
+        using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+        using var reader = new System.IO.StreamReader(stream);
+
+        while (!reader.EndOfStream)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var line = await reader.ReadLineAsync(cancellationToken);
+            if (string.IsNullOrWhiteSpace(line)) continue;
+
+            var item = System.Text.Json.JsonSerializer.Deserialize<LdapSyncProgressItem>(line);
+            yield return item;
+        }
     }
 
     #endregion
-}
-
-/// <summary>
-/// Result returned by the LDAP sync API.
-/// </summary>
-public sealed class LdapSyncResult
-{
-    public int Total { get; set; }
-    public int Updated { get; set; }
-    public int Failed { get; set; }
 }
