@@ -1,10 +1,6 @@
 using AspireWebAppTemplate.Abstractions;
 using AspireWebAppTemplate.Core.Application.Abstractions;
 using AspireWebAppTemplate.Core.Common;
-using AspireWebAppTemplate.Core.Contracts;
-using AspireWebAppTemplate.Core.Contracts.Auth;
-using AspireWebAppTemplate.Core.Contracts.AuditLog;
-using AspireWebAppTemplate.Core.Contracts.Roles;
 using AspireWebAppTemplate.Core.Contracts.Users;
 using AspireWebAppTemplate.Core.Domain.Enums;
 using AspireWebAppTemplate.UI.Theme;
@@ -108,6 +104,29 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
     }
 
     /// <summary>
+    /// Initializes the user timezone context early so child components can convert dates
+    /// to UTC without race conditions. Runs before children render.
+    /// </summary>
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var authState = await AuthStateTask;
+            if (authState.User.Identity?.IsAuthenticated != true) return;
+
+            var userResult = await AuthService.GetCurrentUserAsync();
+            if (!userResult.Succeeded || userResult.Data is null) return;
+
+            // Initialize the scoped user time zone context for this circuit (before children render)
+            await UserTimeZone.InitializeAsync(userResult.Data.Id);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Failed to initialize user timezone context.");
+        }
+    }
+
+    /// <summary>
     /// Runs after the component has rendered. On the first render, detects the browser
     /// timezone via JS interop and auto-saves it to the user's profile if their
     /// TimeZoneId is null. Also initializes the theme state based on the user's stored preference.
@@ -125,9 +144,6 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
             if (!userResult.Succeeded || userResult.Data is null) return;
 
             var user = userResult.Data;
-
-            // Initialize the scoped user time zone context for this circuit
-            await UserTimeZone.InitializeAsync(user.Id);
 
             // Initialize theme based on user preference
             await ApplyThemePreferenceAsync(user.Theme);

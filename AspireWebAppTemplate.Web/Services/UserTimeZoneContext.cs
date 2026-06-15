@@ -46,16 +46,21 @@ public sealed class UserTimeZoneContext : IUserTimeZoneContext
     public string? DateTimeFormat { get; private set; }
 
     /// <inheritdoc />
+    public event Action? OnInitialized;
+
+    /// <inheritdoc />
     /// <remarks>
-    /// Called once per circuit from <see cref="Components.Layout.MainLayout.OnAfterRenderAsync"/>.
+    /// Called once per circuit from MainLayout.OnInitializedAsync.
     /// Subsequent calls overwrite the cached <see cref="TimeZoneId"/> and <see cref="DateTimeFormat"/>
     /// (e.g., after the user changes their preferences in Settings and the layout re-initializes).
+    /// Raises <see cref="OnInitialized"/> to notify dependent components.
     /// </remarks>
     public async Task InitializeAsync(string userId)
     {
         var result = await _authService.GetCurrentUserAsync();
         TimeZoneId = result.Succeeded ? result.Data?.TimeZoneId : null;
         DateTimeFormat = result.Succeeded ? result.Data?.DateTimeFormat : null;
+        OnInitialized?.Invoke();
     }
 
     /// <inheritdoc />

@@ -1,16 +1,10 @@
-using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Core.Application.Abstractions;
-using AspireWebAppTemplate.Core.Contracts;
-using AspireWebAppTemplate.Core.Contracts.Auth;
-using AspireWebAppTemplate.Core.Contracts.AuditLog;
-using AspireWebAppTemplate.Core.Contracts.Roles;
-using AspireWebAppTemplate.Core.Contracts.Users;
 using AspireWebAppTemplate.Core.Domain.Enums;
 using AspireWebAppTemplate.Web.Services;
+using AspireWebAppTemplate.Web.Abstractions;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using MudBlazor;
-using AspireWebAppTemplate.Web.Abstractions;
 
 namespace AspireWebAppTemplate.Web.Components.Pages.AuditLog;
 
@@ -19,7 +13,7 @@ namespace AspireWebAppTemplate.Web.Components.Pages.AuditLog;
 /// Requires the "Admin" role for access. Delegates all data operations to the API
 /// via <see cref="ApiAuditLogService"/>.
 /// </summary>
-public partial class Index : ComponentBase
+public partial class Index : ComponentBase, IDisposable
 {
     #region Injected Services
 
@@ -104,12 +98,72 @@ public partial class Index : ComponentBase
     #region Lifecycle
 
     /// <summary>
-    /// Marks the page as ready. The data grid is populated via <see cref="ServerReload"/> (server-side callback).
+    /// Tracks whether the timezone context is ready for date conversion.
     /// </summary>
-    protected override Task OnInitializedAsync()
+    private bool _isReady;
+
+    /// <summary>
+    /// Tracks whether the component has been disposed (prerender cleanup).
+    /// </summary>
+    private bool _disposed;
+
+    /// <summary>
+    /// Subscribes to the timezone context initialization event.
+    /// If the timezone is already initialized (SPA navigation), marks ready immediately.
+    /// </summary>
+    protected override void OnInitialized()
     {
-        IsLoading = false;
-        return Task.CompletedTask;
+        // If timezone is already available (navigating from another page), mark ready immediately
+        if (!string.IsNullOrEmpty(TimeZoneContext.TimeZoneId))
+        {
+            _isReady = true;
+        }
+
+        // Subscribe to be notified when timezone becomes available (page refresh scenario)
+        TimeZoneContext.OnInitialized += OnTimeZoneReady;
+    }
+
+    /// <summary>
+    /// Triggered when the timezone context is initialized by MainLayout.
+    /// Marks the component as ready and reloads the grid with proper date conversion.
+    /// </summary>
+    private async void OnTimeZoneReady()
+    {
+        if (_isReady || _disposed) return;
+        _isReady = true;
+        try
+        {
+            await InvokeAsync(async () =>
+            {
+                await _dataGrid.ReloadServerData();
+                StateHasChanged();
+            });
+        }
+        catch (ObjectDisposedException)
+        {
+            // Component was disposed during prerender→circuit transition — safe to ignore
+        }
+    }
+
+    /// <summary>
+    /// Triggers the initial grid load if the timezone was already available.
+    /// </summary>
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && _isReady)
+        {
+            await _dataGrid.ReloadServerData();
+            StateHasChanged();
+        }
+    }
+
+    /// <summary>
+    /// Unsubscribes from the timezone event to prevent memory leaks.
+    /// </summary>
+    public void Dispose()
+    {
+        _disposed = true;
+        TimeZoneContext.OnInitialized -= OnTimeZoneReady;
     }
 
     #endregion
@@ -123,6 +177,10 @@ public partial class Index : ComponentBase
     /// </summary>
     private async Task<GridData<AuditLogViewModel>> ServerReload(GridState<AuditLogViewModel> state, CancellationToken cancellationToken)
     {
+        // Skip during prerender and before timezone context is initialized
+        if (!_isReady)
+            return new GridData<AuditLogViewModel> { Items = [], TotalItems = 0 };
+
         IsLoading = true;
 
         try
@@ -130,18 +188,15 @@ public partial class Index : ComponentBase
             // Use default page size if not yet initialized by the grid
             var pageSize = state.PageSize > 0 ? state.PageSize : 10;
 
-            // Convert user's local date range to UTC for the database query
-            var utcStart = ConvertLocalDateToUtc(_dateRange?.Start);
-            var utcEnd = ConvertLocalDateToUtc(_dateRange?.End?.Date.AddDays(1).AddTicks(-1));
-
+            // Send local dates to the API — the API converts to UTC using the user's timezone
             var apiResult = await AuditLogService.GetPagedAsync(
                 page: state.Page,
                 pageSize: pageSize,
                 searchTerm: _searchString,
                 actionType: _actionTypeFilter,
                 entityType: _entityTypeFilter,
-                dateStart: utcStart,
-                dateEnd: utcEnd);
+                dateStart: ConvertLocalDateToUtc(_dateRange?.Start),
+                dateEnd: ConvertLocalDateToUtc(_dateRange?.End?.Date.AddDays(1).AddTicks(-1)));
 
             if (!apiResult.Succeeded || apiResult.Data is null)
             {
@@ -296,8 +351,9 @@ public partial class Index : ComponentBase
     #region Helpers
 
     /// <summary>
-    /// Converts a local DateTime (from the user's timezone) to UTC for database queries.
-    /// If the user has no timezone configured, returns the date as-is (assumes server local).
+    /// Converts a local DateTime (from the user's timezone) to UTC for API queries.
+    /// The timezone is guaranteed to be initialized by MainLayout.OnInitializedAsync
+    /// before this page renders. Falls back to returning the date as-is if no timezone is configured.
     /// </summary>
     private DateTime? ConvertLocalDateToUtc(DateTime? localDateTime)
     {

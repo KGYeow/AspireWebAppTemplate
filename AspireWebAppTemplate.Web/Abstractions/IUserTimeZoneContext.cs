@@ -27,6 +27,12 @@ public interface IUserTimeZoneContext
     string? DateTimeFormat { get; }
 
     /// <summary>
+    /// Raised when the timezone context is initialized or updated.
+    /// Pages can subscribe to trigger data reloads that depend on timezone conversion.
+    /// </summary>
+    event Action? OnInitialized;
+
+    /// <summary>
     /// Initializes the context by loading the current user's time zone preference.
     /// Called once per circuit (typically from the root layout or auth state handler).
     /// </summary>
