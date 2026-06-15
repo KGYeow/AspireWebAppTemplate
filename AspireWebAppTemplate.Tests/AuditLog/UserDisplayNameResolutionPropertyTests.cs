@@ -1,7 +1,7 @@
 using AspireWebAppTemplate.ApiService.Data;
 using AspireWebAppTemplate.ApiService.Data.Entities;
+using AspireWebAppTemplate.ApiService.Services;
 using AspireWebAppTemplate.Core.Domain.Enums;
-using AspireWebAppTemplate.Services;
 using FsCheck;
 using FsCheck.Xunit;
 using Microsoft.AspNetCore.Identity;

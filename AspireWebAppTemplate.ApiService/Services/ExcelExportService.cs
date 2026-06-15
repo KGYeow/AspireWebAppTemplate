@@ -7,7 +7,7 @@ using AspireWebAppTemplate.Core.Utilities;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 
-namespace AspireWebAppTemplate.Services;
+namespace AspireWebAppTemplate.ApiService.Services;
 
 /// <summary>
 /// Generates Excel (.xlsx) and CSV exports from data collections using EPPlus.

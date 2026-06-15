@@ -5,7 +5,7 @@ using AspireWebAppTemplate.Core.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace AspireWebAppTemplate.Services;
+namespace AspireWebAppTemplate.ApiService.Services;
 
 /// <summary>
 /// Implements the <see cref="IAuditLogService"/> interface to record significant user and system

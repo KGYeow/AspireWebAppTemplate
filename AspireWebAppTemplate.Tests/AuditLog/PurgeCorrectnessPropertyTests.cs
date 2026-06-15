@@ -1,8 +1,8 @@
 // Feature: audit-log, Property 11: Purge correctness
 using AspireWebAppTemplate.ApiService.Data;
 using AspireWebAppTemplate.ApiService.Data.Entities;
+using AspireWebAppTemplate.ApiService.Services;
 using AspireWebAppTemplate.Core.Domain.Enums;
-using AspireWebAppTemplate.Services;
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;

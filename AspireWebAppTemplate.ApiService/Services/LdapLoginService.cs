@@ -1,17 +1,12 @@
 using AspireWebAppTemplate.Abstractions;
 using AspireWebAppTemplate.Core.Domain.Enums;
-using AspireWebAppTemplate.ApiService.Data;
-using AspireWebAppTemplate.Core.Contracts;
 using AspireWebAppTemplate.Core.Contracts.Auth;
-using AspireWebAppTemplate.Core.Contracts.AuditLog;
-using AspireWebAppTemplate.Core.Contracts.Roles;
 using AspireWebAppTemplate.Core.Contracts.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
 using AspireWebAppTemplate.ApiService.Data.Entities;
 
-namespace AspireWebAppTemplate.Services;
+namespace AspireWebAppTemplate.ApiService.Services;
 
 /// <summary>
 /// Implements <see cref="ILdapLoginService"/> by orchestrating LDAP authentication,

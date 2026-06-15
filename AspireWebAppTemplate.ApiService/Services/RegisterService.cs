@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using AspireWebAppTemplate.ApiService.Data.Entities;
 
-namespace AspireWebAppTemplate.Services;
+namespace AspireWebAppTemplate.ApiService.Services;
 
 /// <summary>
 /// Implements <see cref="IRegisterService"/> by creating a new user via

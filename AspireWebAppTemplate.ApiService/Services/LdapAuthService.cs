@@ -2,16 +2,11 @@ using System.DirectoryServices;
 using System.DirectoryServices.Protocols;
 using System.Net;
 using AspireWebAppTemplate.Abstractions;
-using AspireWebAppTemplate.Core.Contracts;
-using AspireWebAppTemplate.Core.Contracts.Auth;
-using AspireWebAppTemplate.Core.Contracts.AuditLog;
-using AspireWebAppTemplate.Core.Contracts.Roles;
 using AspireWebAppTemplate.Core.Contracts.Users;
 using AspireWebAppTemplate.Options;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace AspireWebAppTemplate.Services;
+namespace AspireWebAppTemplate.ApiService.Services;
 
 /// <summary>
 /// Implements <see cref="ILdapAuthService"/> using LDAPS to authenticate users
