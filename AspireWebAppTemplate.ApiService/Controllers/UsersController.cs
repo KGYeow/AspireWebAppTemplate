@@ -1,8 +1,6 @@
 using AspireWebAppTemplate.Abstractions;
 using AspireWebAppTemplate.ApiService.Data.Entities;
 using AspireWebAppTemplate.Core.Contracts;
-using AspireWebAppTemplate.Core.Contracts.Auth;
-using AspireWebAppTemplate.Core.Contracts.AuditLog;
 using AspireWebAppTemplate.Core.Contracts.Roles;
 using AspireWebAppTemplate.Core.Contracts.Users;
 using AspireWebAppTemplate.Core.Domain.Enums;
@@ -45,13 +43,14 @@ public class UsersController : BaseController
     #region CRUD Operations
 
     /// <summary>
-    /// Returns a paged list of users with their assigned roles.
+    /// Returns a list of users with their assigned roles.
+    /// When page/pageSize are provided, returns a paged subset; otherwise returns all users.
     /// </summary>
     [HttpGet]
     [ProducesResponseType(typeof(PagedResult<UserDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<PagedResult<UserDto>>> GetUsers(
-        [FromQuery] int page = 0,
-        [FromQuery] int pageSize = 10,
+        [FromQuery] int? page = null,
+        [FromQuery] int? pageSize = null,
         [FromQuery] string? searchTerm = null)
     {
         var query = _userManager.Users.AsNoTracking();
@@ -70,11 +69,11 @@ public class UsersController : BaseController
 
         var totalCount = await query.CountAsync();
 
-        var users = await query
-            .OrderBy(u => u.UserName)
-            .Skip(page * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
+        // Apply pagination only when both page and pageSize are provided
+        var orderedQuery = query.OrderBy(u => u.UserName);
+        var users = (page.HasValue && pageSize.HasValue)
+            ? await orderedQuery.Skip(page.Value * pageSize.Value).Take(pageSize.Value).ToListAsync()
+            : await orderedQuery.ToListAsync();
 
         var userDtos = new List<UserDto>();
         foreach (var user in users)
@@ -104,8 +103,8 @@ public class UsersController : BaseController
         {
             Items = userDtos,
             TotalCount = totalCount,
-            Page = page,
-            PageSize = pageSize
+            Page = page ?? 0,
+            PageSize = pageSize ?? totalCount
         });
     }
 

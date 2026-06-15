@@ -44,8 +44,7 @@ public class AuditLogController : BaseController
     /// </summary>
     [HttpGet]
     [ProducesResponseType(typeof(PagedResult<AuditLogEntryDto>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<PagedResult<AuditLogEntryDto>>> GetAuditLog(
-        [FromQuery] AuditLogQueryParams queryParams)
+    public async Task<ActionResult<PagedResult<AuditLogEntryDto>>> GetAuditLog([FromQuery] AuditLogQueryParams queryParams)
     {
         var query = _dbContext.AuditLogEntries.AsNoTracking().AsQueryable();
 

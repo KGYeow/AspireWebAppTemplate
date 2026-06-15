@@ -89,6 +89,25 @@ public partial class Index : ComponentBase
 
     #endregion
 
+    #region Lifecycle
+
+    /// <summary>
+    /// Forces a grid reload after the first interactive render to ensure data is fetched
+    /// with a fully authenticated context (HttpContext may not be available on prerender).
+    /// </summary>
+    private bool _firstRenderComplete;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _firstRenderComplete = true;
+            await _dataGrid.ReloadServerData();
+        }
+    }
+
+    #endregion
+
     #region Server-Side Data Loading
 
     /// <summary>
@@ -109,7 +128,7 @@ public partial class Index : ComponentBase
                 actionType: _actionTypeFilter,
                 entityType: _entityTypeFilter,
                 dateStart: _dateRange?.Start,
-                dateEnd: _dateRange?.End);
+                dateEnd: _dateRange?.End?.Date.AddDays(1).AddTicks(-1));
 
             if (!apiResult.Succeeded || apiResult.Data is null)
             {
@@ -232,7 +251,7 @@ public partial class Index : ComponentBase
                 actionType: _actionTypeFilter,
                 entityType: _entityTypeFilter,
                 dateStart: _dateRange?.Start,
-                dateEnd: _dateRange?.End);
+                dateEnd: _dateRange?.End?.Date.AddDays(1).AddTicks(-1));
 
             if (!exportResult.Succeeded || exportResult.Data is null || exportResult.Data.Length == 0)
             {

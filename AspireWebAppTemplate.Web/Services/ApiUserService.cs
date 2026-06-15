@@ -19,7 +19,7 @@ public class ApiUserService(HttpClient http)
     /// <summary>
     /// Returns a paged list of users with optional search filtering.
     /// </summary>
-    public async Task<ApiResult<PagedResult<UserDto>>> GetUsersAsync(int page = 0, int pageSize = 10, string? searchTerm = null)
+    public async Task<ApiResult<PagedResult<UserDto>>> GetUsersAsync(int page, int pageSize, string? searchTerm = null)
     {
         var url = $"/api/users?page={page}&pageSize={pageSize}";
         if (!string.IsNullOrWhiteSpace(searchTerm))
@@ -31,13 +31,13 @@ public class ApiUserService(HttpClient http)
     }
 
     /// <summary>
-    /// Gets all users (large page size) for client-side grid operations.
+    /// Gets all users (no pagination) for client-side grid operations.
     /// </summary>
     public async Task<List<UserDto>> GetAllUsersAsync(string? searchTerm = null)
     {
-        var url = $"/api/users?page=0&pageSize=10000";
+        var url = "/api/users";
         if (!string.IsNullOrWhiteSpace(searchTerm))
-            url += $"&searchTerm={Uri.EscapeDataString(searchTerm)}";
+            url += $"?searchTerm={Uri.EscapeDataString(searchTerm)}";
         var response = await http.GetAsync(url);
         if (response.IsSuccessStatusCode)
         {
