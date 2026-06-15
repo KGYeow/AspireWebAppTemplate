@@ -504,9 +504,12 @@ public partial class Index : ComponentBase
     /// </summary>
     protected async Task OpenAddUserDialog()
     {
+        var defaultRoleName = allRoles.FirstOrDefault(r => r.IsDefault)?.Name ?? "User";
+
         var parameters = new DialogParameters<AddUserDialog>
         {
-            { x => x.AllRoleNames, allRoleNames }
+            { x => x.AllRoleNames, allRoleNames },
+            { x => x.DefaultRoleName, defaultRoleName }
         };
 
         var options = new DialogOptions { CloseButton = true, CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true };

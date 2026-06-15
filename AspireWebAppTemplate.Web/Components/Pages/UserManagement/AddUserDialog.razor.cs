@@ -1,9 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using AspireWebAppTemplate.Core.Common;
-using AspireWebAppTemplate.Core.Contracts;
-using AspireWebAppTemplate.Core.Contracts.Auth;
-using AspireWebAppTemplate.Core.Contracts.AuditLog;
-using AspireWebAppTemplate.Core.Contracts.Roles;
 using AspireWebAppTemplate.Core.Contracts.Users;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
@@ -25,11 +20,6 @@ public partial class AddUserDialog : ComponentBase
     /// </summary>
     [Inject] private ApiUserService UserService { get; set; } = default!;
 
-    /// <summary>
-    /// HTTP client service for role operations (to get default role).
-    /// </summary>
-    [Inject] private ApiRoleService RoleService { get; set; } = default!;
-
     #endregion
 
     #region Cascading Parameters
@@ -49,6 +39,12 @@ public partial class AddUserDialog : ComponentBase
     /// </summary>
     [Parameter]
     public List<string> AllRoleNames { get; set; } = [];
+
+    /// <summary>
+    /// The default role name to pre-select (the role marked as IsDefault).
+    /// </summary>
+    [Parameter]
+    public string DefaultRoleName { get; set; } = "";
 
     #endregion
 
@@ -79,15 +75,11 @@ public partial class AddUserDialog : ComponentBase
     #region Lifecycle
 
     /// <summary>
-    /// Initializes the edit context and sets the default role.
+    /// Initializes the edit context and sets the default role based on the IsDefault parameter.
     /// </summary>
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        // Fetch roles to determine the default one
-        var rolesResult = await RoleService.GetRolesAsync();
-        var roles = rolesResult.Succeeded ? rolesResult.Data : null;
-        var defaultRoleName = roles?.FirstOrDefault(r => r.IsDefault)?.Name ?? "User";
-        Input.Role = AllRoleNames.Contains(defaultRoleName) ? defaultRoleName : AllRoleNames.FirstOrDefault() ?? "";
+        Input.Role = AllRoleNames.Contains(DefaultRoleName) ? DefaultRoleName : AllRoleNames.FirstOrDefault() ?? "";
         editContext = new EditContext(Input);
     }
 
