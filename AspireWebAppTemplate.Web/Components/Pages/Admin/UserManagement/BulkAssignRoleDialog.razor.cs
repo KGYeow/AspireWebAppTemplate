@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 
-namespace AspireWebAppTemplate.Web.Components.Pages.UserManagement;
+namespace AspireWebAppTemplate.Web.Components.Pages.Admin.UserManagement;
 
 /// <summary>
 /// Dialog for selecting a role to assign in bulk to multiple users.

@@ -1,9 +1,4 @@
-using AspireWebAppTemplate.Core.Common;
-using AspireWebAppTemplate.Core.Contracts;
-using AspireWebAppTemplate.Core.Contracts.Auth;
-using AspireWebAppTemplate.Core.Contracts.AuditLog;
 using AspireWebAppTemplate.Core.Contracts.Roles;
-using AspireWebAppTemplate.Core.Contracts.Users;
 using AspireWebAppTemplate.UI.Components.Shared;
 using AspireWebAppTemplate.UI.Utilities;
 using AspireWebAppTemplate.Web.Services;
@@ -12,7 +7,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.Logging;
 using MudBlazor;
 
-namespace AspireWebAppTemplate.Web.Components.Pages.UserManagement;
+namespace AspireWebAppTemplate.Web.Components.Pages.Admin.UserManagement;
 
 /// <summary>
 /// User management page. Lists all users with multi-role management,

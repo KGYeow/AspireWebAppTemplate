@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using AspireWebAppTemplate.Web.Abstractions;
 
-namespace AspireWebAppTemplate.Web.Components.Pages.AuditLog;
+namespace AspireWebAppTemplate.Web.Components.Pages.Admin.AuditLog;
 
 /// <summary>
 /// Dialog component that displays the full details of a single audit log entry.

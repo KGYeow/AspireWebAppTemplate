@@ -1,4 +1,4 @@
-@page "/user-management"
+@page "/admin/user-management"
 @using AspireWebAppTemplate.UI.Components.DataGrid
 @attribute [Authorize(Roles = "Admin")]
 
@@ -236,7 +236,7 @@
                     <!-- Primary action — View Details (direct) -->
                     <MudIconButton Size="Size.Small"
                                    Icon="@Icons.Material.Outlined.Visibility"
-                                   Href="@($"user-management/{context.Item.Id}")"
+                                   Href="@($"/admin/user-management/{context.Item.Id}")"
                                    title="View Details" />
 
                     <!-- Overflow menu for remaining actions -->

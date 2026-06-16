@@ -1,14 +1,9 @@
-using AspireWebAppTemplate.Core.Common;
-using AspireWebAppTemplate.Core.Contracts;
-using AspireWebAppTemplate.Core.Contracts.Auth;
-using AspireWebAppTemplate.Core.Contracts.AuditLog;
-using AspireWebAppTemplate.Core.Contracts.Roles;
 using AspireWebAppTemplate.Core.Contracts.Users;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
 using AspireWebAppTemplate.Web.Abstractions;
 
-namespace AspireWebAppTemplate.Web.Components.Pages.UserManagement;
+namespace AspireWebAppTemplate.Web.Components.Pages.Admin.UserManagement;
 
 /// <summary>
 /// User details page. Displays all information about a user account

@@ -1,4 +1,4 @@
-@page "/role-management"
+@page "/admin/role-management"
 @using AspireWebAppTemplate.UI.Components.DataGrid
 @attribute [Authorize(Roles = "Admin")]
 
@@ -144,7 +144,7 @@
                 <MudStack Row Spacing="1">
                     <MudIconButton Size="Size.Small"
                                    Icon="@Icons.Material.Outlined.Visibility"
-                                   Href="@($"/role-management/{context.Item.Id}")"
+                                   Href="@($"/admin/role-management/{context.Item.Id}")"
                                    title="View Details" />
                     <MudIconButton Size="Size.Small"
                                    Icon="@Icons.Material.Outlined.Edit"

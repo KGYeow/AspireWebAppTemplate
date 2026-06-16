@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using MudBlazor;
 
-namespace AspireWebAppTemplate.Web.Components.Pages.AuditLog;
+namespace AspireWebAppTemplate.Web.Components.Pages.Admin.AuditLog;
 
 /// <summary>
 /// Audit log page displaying a searchable, filterable, paginated data grid of audit entries.

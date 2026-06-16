@@ -1,10 +1,10 @@
-@page "/user-management/{UserId}"
+@page "/admin/user-management/{UserId}"
 @attribute [Authorize(Roles = "Admin")]
 
 <PageTitle>User Details</PageTitle>
 
 <!-- Back Button -->
-<MudButton Href="user-management"
+<MudButton Href="/admin/user-management"
            Variant="Variant.Text"
            StartIcon="@Icons.Material.Rounded.ArrowBack"
            Class="mb-2"

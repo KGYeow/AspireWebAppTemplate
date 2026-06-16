@@ -22,7 +22,15 @@ A curated list of pages and features that would complement the existing template
 
 ## High Priority — Common in Every Internal/Enterprise App
 
-### 1. Notification System
+### 1. Page Access Permissions (Role-Based Page Authorization)
+- Admin UI to configure which roles can access which pages
+- Database-driven — no code changes needed when adding new roles
+- Permissions cached per-circuit for zero performance impact
+- Navigation menu auto-filters based on role permissions
+- See [`docs/features/page-access-permissions/brief.md`](./page-access-permissions/brief.md) for full context
+- Route: `/admin/page-permissions`
+
+### 2. Notification System
 - In-app notification bell in the topbar
 - Notification preferences page (email, in-app toggles)
 - Mark as read, bulk dismiss

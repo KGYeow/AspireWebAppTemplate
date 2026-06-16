@@ -1,9 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using AspireWebAppTemplate.Core.Common;
-using AspireWebAppTemplate.Core.Contracts;
-using AspireWebAppTemplate.Core.Contracts.Auth;
-using AspireWebAppTemplate.Core.Contracts.AuditLog;
-using AspireWebAppTemplate.Core.Contracts.Roles;
 using AspireWebAppTemplate.Core.Contracts.Users;
 using AspireWebAppTemplate.Core.Utilities;
 using AspireWebAppTemplate.Web.Services;
@@ -11,7 +6,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
 
-namespace AspireWebAppTemplate.Web.Components.Pages.UserManagement;
+namespace AspireWebAppTemplate.Web.Components.Pages.Admin.UserManagement;
 
 /// <summary>
 /// Dialog for editing a user's profile information.

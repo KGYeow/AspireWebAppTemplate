@@ -1,4 +1,4 @@
-@page "/role-management/{RoleId}"
+@page "/admin/role-management/{RoleId}"
 @using AspireWebAppTemplate.Core.Contracts
 @using AspireWebAppTemplate.Core.Contracts.Auth
 @using AspireWebAppTemplate.Core.Contracts.AuditLog
@@ -9,7 +9,7 @@
 <PageTitle>Role Details</PageTitle>
 
 <!-- Back Button -->
-<MudButton Href="role-management"
+<MudButton Href="/admin/role-management"
            Variant="Variant.Text"
            StartIcon="@Icons.Material.Rounded.ArrowBack"
            Class="mb-2"

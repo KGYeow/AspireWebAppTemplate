@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
 
-namespace AspireWebAppTemplate.Web.Components.Pages.UserManagement;
+namespace AspireWebAppTemplate.Web.Components.Pages.Admin.UserManagement;
 
 /// <summary>
 /// Dialog for adding a new local user with email, display name, password, and role.

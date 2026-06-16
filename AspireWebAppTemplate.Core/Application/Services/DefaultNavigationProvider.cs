@@ -46,9 +46,9 @@ public sealed class DefaultNavigationProvider : INavigationProvider
             Roles = "Admin",
             Children =
             [
-                new() { Type = NavItemType.Link, Text = "User Management", Href = "user-management", Icon = "material-symbols-rounded/group" },
-                new() { Type = NavItemType.Link, Text = "Role Management", Href = "role-management", Icon = "material-symbols-rounded/assignment_ind" },
-                new() { Type = NavItemType.Link, Text = "Audit Log",       Href = "audit-log",       Icon = "material-symbols-rounded/history" },
+                new() { Type = NavItemType.Link, Text = "User Management", Href = "admin/user-management", Icon = "material-symbols-rounded/group" },
+                new() { Type = NavItemType.Link, Text = "Role Management", Href = "admin/role-management", Icon = "material-symbols-rounded/assignment_ind" },
+                new() { Type = NavItemType.Link, Text = "Audit Log",       Href = "admin/audit-log",       Icon = "material-symbols-rounded/history" },
             ]
         },
     ];
