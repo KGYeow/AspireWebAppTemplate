@@ -76,7 +76,7 @@ Complete implementation history of the Settings page feature across all phases: 
 ## Phase 3: Theme Switching
 
 - [x] 15. Define domain enum and JS interop module
-  - [x] 15.1 Create the ThemePreference enum at `BlazorWebAppTemplate.Core/Domain/Enums/ThemePreference.cs`
+  - [x] 15.1 Create the ThemePreference enum at `AspireWebAppTemplate.Core/Domain/Enums/ThemePreference.cs`
   - [x] 15.2 Create the `theme.js` JavaScript interop module at `wwwroot/js/theme.js`
 
 - [x] 16. Implement ThemeStateService and interface
@@ -84,7 +84,7 @@ Complete implementation history of the Settings page feature across all phases: 
   - [x] 16.2 Implement `ThemeStateService` at `Services/ThemeStateService.cs`
 
 - [x] 17. Implement ApplicationTheme with dual palettes
-  - [x] 17.1 Create `ApplicationTheme` class at `BlazorWebAppTemplate.UI/Theme/ApplicationTheme.cs`
+  - [x] 17.1 Create `ApplicationTheme` class at `AspireWebAppTemplate.UI/Theme/ApplicationTheme.cs`
 
 - [x] 18. Integrate MainLayout with theme subscription
   - [x] 18.1 Update MainLayout to subscribe to ThemeStateService and bind MudThemeProvider

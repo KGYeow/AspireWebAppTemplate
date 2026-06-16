@@ -18,7 +18,7 @@ If no specific branding is needed, the template defaults to a clean neutral pale
 
 ## Customization
 
-Modify `BlazorWebAppTemplate.UI/Theme/ApplicationTheme.cs`:
+Modify `AspireWebAppTemplate.UI/Theme/ApplicationTheme.cs`:
 
 ```csharp
 // Replace Jabil colors with your own

@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Audit Log feature introduces a comprehensive audit trail system into the BlazorWebAppTemplate application. It captures significant user and system actions (user CRUD, role changes, authentication events, settings modifications) and exposes them through a searchable, filterable, exportable admin page.
+The Audit Log feature introduces a comprehensive audit trail system into the AspireWebAppTemplate application. It captures significant user and system actions (user CRUD, role changes, authentication events, settings modifications) and exposes them through a searchable, filterable, exportable admin page.
 
 The system consists of:
 - **Data layer**: A new `AuditLogEntry` EF Core entity with indexed columns for efficient querying
@@ -74,10 +74,10 @@ graph TD
 
 ### QueryableDataGridUtils\<T\> (new reusable utility)
 
-Located at `BlazorWebAppTemplate.UI/Utilities/QueryableDataGridUtils.cs`, this mirrors the API of `DataGridUtils<T>` but operates on `IQueryable<T>` for database-level execution.
+Located at `AspireWebAppTemplate.UI/Utilities/QueryableDataGridUtils.cs`, this mirrors the API of `DataGridUtils<T>` but operates on `IQueryable<T>` for database-level execution.
 
 ```csharp
-namespace BlazorWebAppTemplate.UI.Utilities;
+namespace AspireWebAppTemplate.UI.Utilities;
 
 /// <summary>
 /// Generic database-level server-side filtering, sorting, and pagination utility for MudDataGrid.
@@ -167,7 +167,7 @@ private async Task<GridData<AuditLogViewModel>> ServerReload(GridState<AuditLogV
 ### IAuditLogService
 
 ```csharp
-namespace BlazorWebAppTemplate.Abstractions;
+namespace AspireWebAppTemplate.ApiService.Abstractions;
 
 public interface IAuditLogService
 {
@@ -195,7 +195,7 @@ public interface IAuditLogService
 ### AuditLogEntry Entity
 
 ```csharp
-namespace BlazorWebAppTemplate.Data.Entities;
+namespace AspireWebAppTemplate.ApiService.Data.Entities;
 
 public class AuditLogEntry
 {
@@ -220,8 +220,8 @@ public class AuditLogEntry
 ### Enums
 
 ```csharp
-// BlazorWebAppTemplate.Core/Domain/Enums/AuditActionType.cs
-namespace BlazorWebAppTemplate.Core.Domain.Enums;
+// AspireWebAppTemplate.Core/Domain/Enums/AuditActionType.cs
+namespace AspireWebAppTemplate.Core.Domain.Enums;
 
 public enum AuditActionType
 {
@@ -233,8 +233,8 @@ public enum AuditActionType
     SettingsChanged, PasswordChanged, ProfileUpdated
 }
 
-// BlazorWebAppTemplate.Core/Domain/Enums/AuditEntityType.cs
-namespace BlazorWebAppTemplate.Core.Domain.Enums;
+// AspireWebAppTemplate.Core/Domain/Enums/AuditEntityType.cs
+namespace AspireWebAppTemplate.Core.Domain.Enums;
 
 public enum AuditEntityType
 {
@@ -501,17 +501,17 @@ The project already uses **FsCheck.Xunit 3.1.0** for property-based testing. Eac
 - Tag format: `Feature: audit-log, Property {number}: {title}`
 
 **Test structure:**
-- `BlazorWebAppTemplate.Tests/AuditLog/EntityPersistenceRoundTripPropertyTests.cs` → Property 1
-- `BlazorWebAppTemplate.Tests/AuditLog/UserDisplayNameResolutionPropertyTests.cs` → Property 2
-- `BlazorWebAppTemplate.Tests/AuditLog/SearchFilteringPropertyTests.cs` → Property 3 (tests QueryableDataGridUtils)
-- `BlazorWebAppTemplate.Tests/AuditLog/SingleFieldFilterPropertyTests.cs` → Property 4
-- `BlazorWebAppTemplate.Tests/AuditLog/DateRangeFilterPropertyTests.cs` → Property 5
-- `BlazorWebAppTemplate.Tests/AuditLog/DefaultSortOrderPropertyTests.cs` → Property 6 (tests QueryableDataGridUtils)
-- `BlazorWebAppTemplate.Tests/AuditLog/PageOverflowPropertyTests.cs` → Property 7 (tests QueryableDataGridUtils)
-- `BlazorWebAppTemplate.Tests/AuditLog/CsvRowFormatPropertyTests.cs` → Property 8
-- `BlazorWebAppTemplate.Tests/AuditLog/CsvExportFilterPropertyTests.cs` → Property 9 (tests GetAllMatchingAsync)
-- `BlazorWebAppTemplate.Tests/AuditLog/RetentionConfigPropertyTests.cs` → Property 10
-- `BlazorWebAppTemplate.Tests/AuditLog/PurgeCorrectnessPropertyTests.cs` → Property 11
+- `AspireWebAppTemplate.Tests/AuditLog/EntityPersistenceRoundTripPropertyTests.cs` → Property 1
+- `AspireWebAppTemplate.Tests/AuditLog/UserDisplayNameResolutionPropertyTests.cs` → Property 2
+- `AspireWebAppTemplate.Tests/AuditLog/SearchFilteringPropertyTests.cs` → Property 3 (tests QueryableDataGridUtils)
+- `AspireWebAppTemplate.Tests/AuditLog/SingleFieldFilterPropertyTests.cs` → Property 4
+- `AspireWebAppTemplate.Tests/AuditLog/DateRangeFilterPropertyTests.cs` → Property 5
+- `AspireWebAppTemplate.Tests/AuditLog/DefaultSortOrderPropertyTests.cs` → Property 6 (tests QueryableDataGridUtils)
+- `AspireWebAppTemplate.Tests/AuditLog/PageOverflowPropertyTests.cs` → Property 7 (tests QueryableDataGridUtils)
+- `AspireWebAppTemplate.Tests/AuditLog/CsvRowFormatPropertyTests.cs` → Property 8
+- `AspireWebAppTemplate.Tests/AuditLog/CsvExportFilterPropertyTests.cs` → Property 9 (tests GetAllMatchingAsync)
+- `AspireWebAppTemplate.Tests/AuditLog/RetentionConfigPropertyTests.cs` → Property 10
+- `AspireWebAppTemplate.Tests/AuditLog/PurgeCorrectnessPropertyTests.cs` → Property 11
 
 **Test dependencies:**
 - EF Core InMemory provider for database tests (or SQLite in-memory)

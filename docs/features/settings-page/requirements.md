@@ -22,13 +22,13 @@ The Settings page at `/settings` provides authenticated users with instant-save 
 - **IThemeStateService**: The interface (`Abstractions/IThemeStateService.cs`) defining the contract for theme state management: `IsDarkMode` property, `OnChange` event, `SetDarkMode(bool)` method, and `SetThemePreference(ThemePreference, bool)` method.
 - **MainLayout**: The root layout component (`Components/Layout/MainLayout.razor`) that renders the `MudThemeProvider` with `IsDarkMode` bound, subscribes to `ThemeStateService.OnChange`, and re-renders when the theme changes.
 - **MudThemeProvider**: MudBlazor's theme provider component that automatically applies `PaletteLight` or `PaletteDark` from the configured `MudTheme` based on its `IsDarkMode` property.
-- **ApplicationTheme**: The custom `MudTheme` subclass (`BlazorWebAppTemplate.UI/Theme/ApplicationTheme.cs`) that defines both `PaletteLight` and `PaletteDark` color palettes for the application.
+- **ApplicationTheme**: The custom `MudTheme` subclass (`AspireWebAppTemplate.UI/Theme/ApplicationTheme.cs`) that defines both `PaletteLight` and `PaletteDark` color palettes for the application.
 - **ThemePreference**: An enum (`Core/Domain/Enums/ThemePreference.cs`) with values `System`, `Light`, `Dark` representing the user's preferred UI theme.
 - **ApplicationUser**: The Identity user entity that stores the user's `Theme` property (of type `ThemePreference`), `TimeZoneId`, `Locale`, and `DateTimeFormat` persisted to the database.
 - **JS_Interop_Module**: The JavaScript module at `wwwroot/js/theme.js` that exports `getSystemPrefersDark()` for detecting the OS color scheme preference.
 - **SignalR_Circuit**: A Blazor Server connection representing a single user session; scoped DI services are unique per circuit.
-- **PillToggle**: A generic reusable shared component at `BlazorWebAppTemplate.UI/Components/Shared/PillToggle.razor` that wraps `MudToggleGroup<T>` with pill styling (border-radius: 9999px, no delimiters, no ripple, outlined with input field border color). Renders child `PillToggleItem<T>` elements within a pill-shaped container.
-- **PillToggleItem**: A single item within a `PillToggle`, located at `BlazorWebAppTemplate.UI/Components/Shared/PillToggleItem.razor`, that wraps `MudToggleItem<T>` with circular styling (rounded-circle, 36x36px) and accessibility attributes (`title` and `aria-label` set via the `Title` parameter).
+- **PillToggle**: A generic reusable shared component at `AspireWebAppTemplate.UI/Components/Shared/PillToggle.razor` that wraps `MudToggleGroup<T>` with pill styling (border-radius: 9999px, no delimiters, no ripple, outlined with input field border color). Renders child `PillToggleItem<T>` elements within a pill-shaped container.
+- **PillToggleItem**: A single item within a `PillToggle`, located at `AspireWebAppTemplate.UI/Components/Shared/PillToggleItem.razor`, that wraps `MudToggleItem<T>` with circular styling (rounded-circle, 36x36px) and accessibility attributes (`title` and `aria-label` set via the `Title` parameter).
 - **Theme_Pill_Toggle**: A `PillToggle<ThemePreference>` instance containing three `PillToggleItem<ThemePreference>` items (Light, Dark, System) that allows the user to select a theme preference.
 - **Instant_Save**: A persistence pattern where the value is saved immediately upon user selection or value change without requiring a separate Save button click. Used for all fields on the Settings page.
 - **Theme_Property**: The `Theme` property on `ApplicationUser` storing the user's preferred UI theme as a `ThemePreference` enum (persisted as string via EF Core `HasConversion`).
@@ -138,7 +138,7 @@ The Settings page at `/settings` provides authenticated users with instant-save 
 2. THE IUserTimeZoneContext SHALL be initialized once per circuit from MainLayout on first render.
 3. THE IUserTimeZoneContext SHALL provide `FormatDateTime` overloads for `DateTime`, `DateTime?`, and `DateTimeOffset?` with configurable format strings and fallback values.
 4. WHEN the user has no time zone configured, THE IUserTimeZoneContext SHALL format dates with a "UTC" suffix as fallback.
-5. THE IUserTimeZoneContext interface SHALL reside in `BlazorWebAppTemplate/Abstractions/` alongside other server-project interfaces.
+5. THE IUserTimeZoneContext interface SHALL reside in `AspireWebAppTemplate.Web/Abstractions/` alongside other frontend-project interfaces.
 
 ### Requirement 9: UTC DateTime Display Conversion
 

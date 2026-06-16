@@ -64,7 +64,7 @@ graph TD
 
 ### IThemeStateService Interface
 
-**Location:** `BlazorWebAppTemplate/Abstractions/IThemeStateService.cs`
+**Location:** `AspireWebAppTemplate.Web/Abstractions/IThemeStateService.cs`
 
 ```csharp
 public interface IThemeStateService
@@ -83,7 +83,7 @@ public interface IThemeStateService
 
 ### ThemeStateService Implementation
 
-**Location:** `BlazorWebAppTemplate/Services/ThemeStateService.cs`
+**Location:** `AspireWebAppTemplate.Web/Services/ThemeStateService.cs`
 
 **DI Registration:** `AddScoped<IThemeStateService, ThemeStateService>()` — one instance per SignalR circuit.
 
@@ -94,7 +94,7 @@ public interface IThemeStateService
 
 ### IUserTimeZoneContext Interface
 
-**Location:** `BlazorWebAppTemplate/Abstractions/IUserTimeZoneContext.cs`
+**Location:** `AspireWebAppTemplate.Web/Abstractions/IUserTimeZoneContext.cs`
 
 ```csharp
 public interface IUserTimeZoneContext
@@ -110,13 +110,13 @@ public interface IUserTimeZoneContext
 
 ### UserTimeZoneContext Implementation
 
-**Location:** `BlazorWebAppTemplate/Services/UserTimeZoneContext.cs`
+**Location:** `AspireWebAppTemplate.Web/Services/UserTimeZoneContext.cs`
 
 Scoped implementation that injects `UserManager<ApplicationUser>` and `ITimeZoneService`. Loads user's `TimeZoneId` and `DateTimeFormat` once via `InitializeAsync`, then formats dates using the cached values. Uses `format ?? DateTimeFormat ?? "yyyy-MM-dd HH:mm"` as effective format.
 
 ### ITimeZoneService / TimeZoneService
 
-**Location:** `BlazorWebAppTemplate/Core/Application/Abstractions/ITimeZoneService.cs` and `BlazorWebAppTemplate/Core/Application/Services/TimeZoneService.cs`
+**Location:** `AspireWebAppTemplate.Core/Application/Abstractions/ITimeZoneService.cs` and `AspireWebAppTemplate.Core/Application/Services/TimeZoneService.cs`
 
 - Converts Windows IDs to IANA via `TryConvertWindowsIdToIanaId()`
 - Deduplicates entries with `.DistinctBy(tz => tz.Id)`
@@ -125,7 +125,7 @@ Scoped implementation that injects `UserManager<ApplicationUser>` and `ITimeZone
 
 ### Settings Page (Index)
 
-**Location:** `BlazorWebAppTemplate/Components/Pages/Settings/Index.razor(.cs)`
+**Location:** `AspireWebAppTemplate.Web/Components/Pages/Settings/Index.razor(.cs)`
 
 **Responsibilities:**
 - Render Preferences and Appearance sections within a single MudPaper card separated by MudDivider
@@ -172,7 +172,7 @@ public partial class Index : ComponentBase
 
 ### MainLayout Component
 
-**Location:** `BlazorWebAppTemplate/Components/Layout/MainLayout.razor(.cs)`
+**Location:** `AspireWebAppTemplate.Web/Components/Layout/MainLayout.razor(.cs)`
 
 **Responsibilities:**
 - Renders `MudThemeProvider` with `IsDarkMode` bound to a local `_isDarkMode` field
@@ -183,7 +183,7 @@ public partial class Index : ComponentBase
 
 ### ApplicationTheme
 
-**Location:** `BlazorWebAppTemplate.UI/Theme/ApplicationTheme.cs`
+**Location:** `AspireWebAppTemplate.UI/Theme/ApplicationTheme.cs`
 
 **Responsibilities:**
 - Defines `PaletteLight` with corporate navy primary (`#003865`) on light backgrounds
@@ -193,7 +193,7 @@ public partial class Index : ComponentBase
 
 ### PillToggle\<T\> Component
 
-**Location:** `BlazorWebAppTemplate.UI/Components/Shared/PillToggle.razor`
+**Location:** `AspireWebAppTemplate.UI/Components/Shared/PillToggle.razor`
 
 A generic pill-shaped toggle component wrapping `MudToggleGroup<T>` with rounded pill appearance. No custom CSS file needed — styling is applied via inline styles and MudBlazor utility classes.
 
@@ -205,7 +205,7 @@ A generic pill-shaped toggle component wrapping `MudToggleGroup<T>` with rounded
 
 ### PillToggleItem\<T\> Component
 
-**Location:** `BlazorWebAppTemplate.UI/Components/Shared/PillToggleItem.razor`
+**Location:** `AspireWebAppTemplate.UI/Components/Shared/PillToggleItem.razor`
 
 A single item within a PillToggle, rendered as a circular button (36×36px) with accessibility attributes.
 
@@ -217,7 +217,7 @@ A single item within a PillToggle, rendered as a circular button (36×36px) with
 
 ### JS Interop Module
 
-**Location:** `BlazorWebAppTemplate/wwwroot/js/theme.js`
+**Location:** `AspireWebAppTemplate.Web/wwwroot/js/theme.js`
 
 **Exports:**
 - `getSystemPrefersDark()` — returns `boolean` from `window.matchMedia('(prefers-color-scheme: dark)').matches`
@@ -227,7 +227,7 @@ A single item within a PillToggle, rendered as a circular button (36×36px) with
 
 ### ThemePreference Enum
 
-**Location:** `BlazorWebAppTemplate.Core/Domain/Enums/ThemePreference.cs`
+**Location:** `AspireWebAppTemplate.Core/Domain/Enums/ThemePreference.cs`
 
 ```csharp
 public enum ThemePreference
@@ -242,7 +242,7 @@ Stored as a string in the database via EF Core `HasConversion`.
 
 ### DropdownProfile
 
-**Location:** `BlazorWebAppTemplate/Components/Layout/DropdownProfile.razor`
+**Location:** `AspireWebAppTemplate.Web/Components/Layout/DropdownProfile.razor`
 
 Menu order: Profile (`/profile`) → Settings (`/settings`) → Divider → Log Out. Navigation only, no theme logic.
 
@@ -375,4 +375,4 @@ public record TimeZoneOption(string Id, string DisplayName, TimeSpan BaseUtcOffs
 | Cancel restores DateTimeFormat | Superseded by instant-save (no Cancel button) |
 | Time zone display format | Property test for format pattern |
 
-Test files located in `BlazorWebAppTemplate.Tests/` using FsCheck 3.1.0 with `[Property(MaxTest = 100)]`.
+Test files located in `AspireWebAppTemplate.Tests/` using FsCheck 3.1.0 with `[Property(MaxTest = 100)]`.

@@ -1,12 +1,12 @@
-﻿# Design Document: User Profile
+# Design Document: User Profile
 
 ## Overview
 
-This design describes the technical implementation of a User Profile page that allows authenticated users to view and edit their personal information, preferences, and timezone settings. The page uses the standard `MainLayout` (with sidebar visible) and features a cover banner with overlapping avatar, followed by flat `MudPaper` containers (`Elevation="0"`) for section grouping â€” consistent with the container patterns used by UserManagement/Details and RoleManagement/Details pages.
+This design describes the technical implementation of a User Profile page that allows authenticated users to view and edit their personal information, preferences, and timezone settings. The page uses the standard `MainLayout` (with sidebar visible) and features a cover banner with overlapping avatar, followed by flat `MudPaper` containers (`Elevation="0"`) for section grouping — consistent with the container patterns used by UserManagement/Details and RoleManagement/Details pages.
 
-The page implements a **unified view/edit mode toggle**: it loads in read-only View Mode showing profile data as plain text, and transitions to Edit Mode with form inputs when the user clicks the edit icon. Both modes use **identical** `MudPaper` containers, section headers, and field positions â€” only the field interactivity changes (plain text vs. active input). No layout shift occurs between modes. Edit Mode uses `MudInputLabel` components above inputs (not the built-in `Label` prop on `MudTextField`).
+The page implements a **unified view/edit mode toggle**: it loads in read-only View Mode showing profile data as plain text, and transitions to Edit Mode with form inputs when the user clicks the edit icon. Both modes use **identical** `MudPaper` containers, section headers, and field positions — only the field interactivity changes (plain text vs. active input). No layout shift occurs between modes. Edit Mode uses `MudInputLabel` components above inputs (not the built-in `Label` prop on `MudTextField`).
 
-The edit action is a **pencil icon button** in the profile header card (next to the avatar, pushed right via `Justify.SpaceBetween`), not a text button inline with the name. The profile header follows a LinkedIn-style layout: cover banner â†’ overlapping avatar (bottom-left) â†’ name/username below avatar. Content sections span full page width (no column constraint).
+The edit action is a **pencil icon button** in the profile header card (next to the avatar, pushed right via `Justify.SpaceBetween`), not a text button inline with the name. The profile header follows a LinkedIn-style layout: cover banner → overlapping avatar (bottom-left) → name/username below avatar. Content sections span full page width (no column constraint).
 
 The design accounts for two user types: **Local** users who can edit all editable fields, and **LDAP** users whose identity fields are synced from Active Directory and therefore read-only.
 
@@ -18,7 +18,7 @@ The `DropdownProfile` component is updated to add a "Profile" link to `/profile`
 
 ## Architecture
 
-The feature follows the existing Blazor Server architecture with code-behind pattern. The profile page uses the standard `MainLayout` (with sidebar and topbar visible), consistent with all other authenticated pages. Timezone auto-detection runs directly in `MainLayout.razor.cs` on first render â€” it detects the browser timezone via JS interop and persists it to the user profile if `TimeZoneId` is null:
+The feature follows the existing Blazor Server architecture with code-behind pattern. The profile page uses the standard `MainLayout` (with sidebar and topbar visible), consistent with all other authenticated pages. Timezone auto-detection runs directly in `MainLayout.razor.cs` on first render — it detects the browser timezone via JS interop and persists it to the user profile if `TimeZoneId` is null:
 
 ```mermaid
 graph TD
@@ -48,23 +48,23 @@ graph TD
 
 **Key architectural decisions:**
 
-1. **Standard MainLayout** â€” The profile page uses the default `MainLayout` (with sidebar/drawer and topbar visible), just like all other authenticated pages. No custom layout is needed.
-2. **New page at `Components/Pages/Profile/`** â€” The profile page lives at `Components/Pages/Profile/Index.razor` with route `/profile`. Since `MainLayout` is the default layout, no explicit `@layout` directive is required.
-3. **InteractiveServer render mode** â€” Required for form interactions, JS interop, view/edit mode toggling, and real-time validation without full page reloads.
-4. **Unified view/edit layout** â€” Both modes use identical `MudPaper Class="pa-4 mb-4" Elevation="0"` containers and section headers. Only field content changes (plain text â†’ input). No container type change, no layout shift.
-5. **MudPaper consistency** â€” All section containers use `<MudPaper Class="pa-4 mb-4" Elevation="0">` matching UserManagement/Details and RoleManagement/Details. No `MudCard` components with non-zero elevation.
-6. **Profile Header Card with Edit button** â€” The banner and header card are visually connected (`rounded-t-lg` on banner, `rounded-b-lg` on header card). The header card uses `<MudPaper Class="pa-0 pb-4 px-5 mb-4 rounded-b-lg" Elevation="0" Square>` containing `<MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Start">` with avatar on left and Edit icon button on right. Name/summary info appears below the avatar row.
-7. **Timezone auto-detection in MainLayout** â€” `MainLayout.razor.cs` detects the browser timezone via JS interop on `OnAfterRenderAsync(firstRender)`. If the authenticated user's `TimeZoneId` is null, it auto-saves the detected timezone via `UserManager`. This runs once per Blazor circuit (first render only), ensuring correct date display from the first page load. No separate component is needed â€” the logic is ~15 lines added directly to MainLayout's code-behind.
-8. **UserManager for persistence** â€” Leverages ASP.NET Core Identity's `UserManager<ApplicationUser>` for user updates, consistent with the existing codebase.
-9. **Service in Core project** â€” The `ITimeZoneDisplayService` lives in `BlazorWebAppTemplate.Core` so it can be consumed by any layer needing timezone conversion.
-10. **JS interop module** â€” A small JavaScript file in `wwwroot/js` provides browser timezone detection via `Intl.DateTimeFormat().resolvedOptions().timeZone`.
-11. **DropdownProfile update** â€” A "Profile" menu item is added pointing to `/profile`, and "Manage Account" is renamed to "Settings". Both items are always visible.
+1. **Standard MainLayout** — The profile page uses the default `MainLayout` (with sidebar/drawer and topbar visible), just like all other authenticated pages. No custom layout is needed.
+2. **New page at `Components/Pages/Profile/`** — The profile page lives at `Components/Pages/Profile/Index.razor` with route `/profile`. Since `MainLayout` is the default layout, no explicit `@layout` directive is required.
+3. **InteractiveServer render mode** — Required for form interactions, JS interop, view/edit mode toggling, and real-time validation without full page reloads.
+4. **Unified view/edit layout** — Both modes use identical `MudPaper Class="pa-4 mb-4" Elevation="0"` containers and section headers. Only field content changes (plain text → input). No container type change, no layout shift.
+5. **MudPaper consistency** — All section containers use `<MudPaper Class="pa-4 mb-4" Elevation="0">` matching UserManagement/Details and RoleManagement/Details. No `MudCard` components with non-zero elevation.
+6. **Profile Header Card with Edit button** — The banner and header card are visually connected (`rounded-t-lg` on banner, `rounded-b-lg` on header card). The header card uses `<MudPaper Class="pa-0 pb-4 px-5 mb-4 rounded-b-lg" Elevation="0" Square>` containing `<MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Start">` with avatar on left and Edit icon button on right. Name/summary info appears below the avatar row.
+7. **Timezone auto-detection in MainLayout** — `MainLayout.razor.cs` detects the browser timezone via JS interop on `OnAfterRenderAsync(firstRender)`. If the authenticated user's `TimeZoneId` is null, it auto-saves the detected timezone via `UserManager`. This runs once per Blazor circuit (first render only), ensuring correct date display from the first page load. No separate component is needed — the logic is ~15 lines added directly to MainLayout's code-behind.
+8. **UserManager for persistence** — Leverages ASP.NET Core Identity's `UserManager<ApplicationUser>` for user updates, consistent with the existing codebase.
+9. **Service in Core project** — The `ITimeZoneDisplayService` lives in `AspireWebAppTemplate.Core` so it can be consumed by any layer needing timezone conversion.
+10. **JS interop module** — A small JavaScript file in `wwwroot/js` provides browser timezone detection via `Intl.DateTimeFormat().resolvedOptions().timeZone`.
+11. **DropdownProfile update** — A "Profile" menu item is added pointing to `/profile`, and "Manage Account" is renamed to "Settings". Both items are always visible.
 
 ## Components and Interfaces
 
 ### DropdownProfile Component (Updated)
 
-**Location:** `BlazorWebAppTemplate/Components/Layout/DropdownProfile.razor`
+**Location:** `AspireWebAppTemplate.Web/Components/Layout/DropdownProfile.razor`
 
 Change: Add a "Profile" menu item and rename "Manage Account" to "Settings". The menu uses `PopoverClass="mud-elevation-25 p-2 action-menu"` for rounded styling:
 
@@ -89,11 +89,11 @@ The "Log Out" item remains unchanged. Both "Profile" and "Settings" are always v
 
 ### Timezone Auto-Detection in MainLayout (New Logic)
 
-**Location:** `BlazorWebAppTemplate/Components/Layout/MainLayout.razor.cs`
+**Location:** `AspireWebAppTemplate.Web/Components/Layout/MainLayout.razor.cs`
 
 Timezone detection is performed directly in MainLayout's `OnAfterRenderAsync(firstRender)`. Since MainLayout uses InteractiveServer render mode, JS interop is available. The logic runs once per Blazor circuit (first render only).
 
-**MainLayout.razor.cs â€” Added logic:**
+**MainLayout.razor.cs — Added logic:**
 ```csharp
 // Additional injected services for timezone detection
 [Inject] private IJSRuntime JS { get; set; } = default!;
@@ -132,100 +132,100 @@ protected override async Task OnAfterRenderAsync(bool firstRender)
 
 **Key behaviors:**
 - Runs only on `firstRender` (once per Blazor circuit/session)
-- Checks authentication first â€” skips for unauthenticated users
-- If user's `TimeZoneId` is already set â†’ does nothing (no overwrite)
-- If user's `TimeZoneId` is null AND detected timezone is non-null â†’ saves via `UserManager.UpdateAsync`
-- JS interop failure â†’ logs warning, no user-facing error
-- No separate component needed â€” logic lives directly in MainLayout code-behind
-- No visible UI impact â€” this is purely background logic
+- Checks authentication first — skips for unauthenticated users
+- If user's `TimeZoneId` is already set → does nothing (no overwrite)
+- If user's `TimeZoneId` is null AND detected timezone is non-null → saves via `UserManager.UpdateAsync`
+- JS interop failure → logs warning, no user-facing error
+- No separate component needed — logic lives directly in MainLayout code-behind
+- No visible UI impact — this is purely background logic
 
 ### Profile Page Component
 
-**Location:** `BlazorWebAppTemplate/Components/Pages/Profile/Index.razor` + `Index.razor.cs`
+**Location:** `AspireWebAppTemplate.Web/Components/Pages/Profile/Index.razor` + `Index.razor.cs`
 
-Route: `/profile` â€” accessible to all authenticated users.
+Route: `/profile` — accessible to all authenticated users.
 Layout: Standard `MainLayout` (default, no explicit `@layout` directive needed).
 
 The page uses a cover banner with overlapping avatar, then flat `MudPaper` sections matching the app's detail page pattern:
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”â”‚
-â”‚  â”‚          COVER BANNER (gradient, rounded-t-lg)           â”‚â”‚
-â”‚  â”‚  height: 160px                                          â”‚â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜â”‚
-â”‚  â”Œâ”€ MudPaper: Profile Header Card (rounded-b-lg) â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
-â”‚  â”‚  <MudStack Row Justify="SpaceBetween" AlignItems="Start">â”‚
-â”‚  â”‚    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                                       â”‚ â”‚
-â”‚  â”‚    â”‚  Avatar   â”‚  â† margin-top: -48px (overlaps banner)â”‚ â”‚
-â”‚  â”‚    â”‚  (96px)   â”‚                          [âœï¸ Edit]    â”‚ â”‚
-â”‚  â”‚    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                                       â”‚ â”‚
-â”‚  â”‚  </MudStack>                                           â”‚ â”‚
-â”‚  â”‚                                                        â”‚ â”‚
-â”‚  â”‚  <MudStack Class="mt-2">                              â”‚ â”‚
-â”‚  â”‚    DisplayName (h5, font-weight: 600)                  â”‚ â”‚
-â”‚  â”‚    JobTitle Â· Department (body2)                        â”‚ â”‚
-â”‚  â”‚    Email (body2, Color.Secondary)                      â”‚ â”‚
-â”‚  â”‚  </MudStack>                                           â”‚ â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
-â”‚                                                             â”‚
-â”‚  â”Œâ”€ MudPaper: Personal Information (pa-4 mb-4 Elev=0) â”€â”€â”  â”‚
-â”‚  â”‚  <MudText Typo="Typo.h6" Class="mb-3">               â”‚  â”‚
-â”‚  â”‚    Personal Information                                â”‚  â”‚
-â”‚  â”‚  </MudText>                                           â”‚  â”‚
-â”‚  â”‚                                                       â”‚  â”‚
-â”‚  â”‚  VIEW MODE:                                           â”‚  â”‚
-â”‚  â”‚    Label (MudText caption)    Value (MudText body1)   â”‚  â”‚
-â”‚  â”‚    "Display Name"             "John Doe"              â”‚  â”‚
-â”‚  â”‚    "First Name"               "John"                  â”‚  â”‚
-â”‚  â”‚    "Last Name"                "Doe"                   â”‚  â”‚
-â”‚  â”‚    "Email"                    "john@example.com"      â”‚  â”‚
-â”‚  â”‚    "Phone"                    "+1234567890"           â”‚  â”‚
-â”‚  â”‚                                                       â”‚  â”‚
-â”‚  â”‚  EDIT MODE (same container, same header):             â”‚  â”‚
-â”‚  â”‚    <MudInputLabel>Display Name</MudInputLabel>        â”‚  â”‚
-â”‚  â”‚    <MudTextField @bind-Value="Input.DisplayName" />   â”‚  â”‚
-â”‚  â”‚    <MudInputLabel>First Name</MudInputLabel>          â”‚  â”‚
-â”‚  â”‚    <MudTextField @bind-Value="Input.FirstName" />     â”‚  â”‚
-â”‚  â”‚    ...                                                â”‚  â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
-â”‚  â”Œâ”€ MudPaper: Preferences (pa-4 mb-4 Elev=0) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
-â”‚  â”‚  <MudText Typo="Typo.h6" Class="mb-3">               â”‚  â”‚
-â”‚  â”‚    Preferences                                         â”‚  â”‚
-â”‚  â”‚  </MudText>                                           â”‚  â”‚
-â”‚  â”‚                                                       â”‚  â”‚
-â”‚  â”‚  VIEW MODE:                                           â”‚  â”‚
-â”‚  â”‚    "Time Zone"                "(UTC+08:00) Asia/KL"   â”‚  â”‚
-â”‚  â”‚    "Locale"                   "en-US"                 â”‚  â”‚
-â”‚  â”‚                                                       â”‚  â”‚
-â”‚  â”‚  EDIT MODE (same container, same header):             â”‚  â”‚
-â”‚  â”‚    <MudInputLabel>Time Zone</MudInputLabel>           â”‚  â”‚
-â”‚  â”‚    <MudAutocomplete ... />                            â”‚  â”‚
-â”‚  â”‚    <MudInputLabel>Locale</MudInputLabel>              â”‚  â”‚
-â”‚  â”‚    <MudTextField @bind-Value="Input.Locale" />        â”‚  â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
-â”‚  â”Œâ”€ MudPaper: Organization (pa-4 mb-4 Elev=0) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
-â”‚  â”‚  <MudText Typo="Typo.h6" Class="mb-3">               â”‚  â”‚
-â”‚  â”‚    Organization                                        â”‚  â”‚
-â”‚  â”‚  </MudText>                                           â”‚  â”‚
-â”‚  â”‚                                                       â”‚  â”‚
-â”‚  â”‚  (always read-only in both modes)                     â”‚  â”‚
-â”‚  â”‚    "Job Title"                "Software Engineer"      â”‚  â”‚
-â”‚  â”‚    "Department"               "Engineering"            â”‚  â”‚
-â”‚  â”‚    "Employee Number"          "EMP-001"                â”‚  â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
-â”‚                                                             â”‚
-â”‚  EDIT MODE ONLY:  [Save] [Cancel] buttons                   â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────────────┐
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │          COVER BANNER (gradient, rounded-t-lg)           ││
+│  │  height: 160px                                          ││
+│  └─────────────────────────────────────────────────────────┘│
+│  ┌─ MudPaper: Profile Header Card (rounded-b-lg) ────────┐ │
+│  │  <MudStack Row Justify="SpaceBetween" AlignItems="Start">│
+│  │    ┌───────────┐                                       │ │
+│  │    │  Avatar   │  ← margin-top: -48px (overlaps banner)│ │
+│  │    │  (96px)   │                          [✏️ Edit]    │ │
+│  │    └───────────┘                                       │ │
+│  │  </MudStack>                                           │ │
+│  │                                                        │ │
+│  │  <MudStack Class="mt-2">                              │ │
+│  │    DisplayName (h5, font-weight: 600)                  │ │
+│  │    JobTitle · Department (body2)                        │ │
+│  │    Email (body2, Color.Secondary)                      │ │
+│  │  </MudStack>                                           │ │
+│  └────────────────────────────────────────────────────────┘ │
+│                                                             │
+│  ┌─ MudPaper: Personal Information (pa-4 mb-4 Elev=0) ──┐  │
+│  │  <MudText Typo="Typo.h6" Class="mb-3">               │  │
+│  │    Personal Information                                │  │
+│  │  </MudText>                                           │  │
+│  │                                                       │  │
+│  │  VIEW MODE:                                           │  │
+│  │    Label (MudText caption)    Value (MudText body1)   │  │
+│  │    "Display Name"             "John Doe"              │  │
+│  │    "First Name"               "John"                  │  │
+│  │    "Last Name"                "Doe"                   │  │
+│  │    "Email"                    "john@example.com"      │  │
+│  │    "Phone"                    "+1234567890"           │  │
+│  │                                                       │  │
+│  │  EDIT MODE (same container, same header):             │  │
+│  │    <MudInputLabel>Display Name</MudInputLabel>        │  │
+│  │    <MudTextField @bind-Value="Input.DisplayName" />   │  │
+│  │    <MudInputLabel>First Name</MudInputLabel>          │  │
+│  │    <MudTextField @bind-Value="Input.FirstName" />     │  │
+│  │    ...                                                │  │
+│  └───────────────────────────────────────────────────────┘  │
+│  ┌─ MudPaper: Preferences (pa-4 mb-4 Elev=0) ───────────┐  │
+│  │  <MudText Typo="Typo.h6" Class="mb-3">               │  │
+│  │    Preferences                                         │  │
+│  │  </MudText>                                           │  │
+│  │                                                       │  │
+│  │  VIEW MODE:                                           │  │
+│  │    "Time Zone"                "(UTC+08:00) Asia/KL"   │  │
+│  │    "Locale"                   "en-US"                 │  │
+│  │                                                       │  │
+│  │  EDIT MODE (same container, same header):             │  │
+│  │    <MudInputLabel>Time Zone</MudInputLabel>           │  │
+│  │    <MudAutocomplete ... />                            │  │
+│  │    <MudInputLabel>Locale</MudInputLabel>              │  │
+│  │    <MudTextField @bind-Value="Input.Locale" />        │  │
+│  └───────────────────────────────────────────────────────┘  │
+│  ┌─ MudPaper: Organization (pa-4 mb-4 Elev=0) ──────────┐  │
+│  │  <MudText Typo="Typo.h6" Class="mb-3">               │  │
+│  │    Organization                                        │  │
+│  │  </MudText>                                           │  │
+│  │                                                       │  │
+│  │  (always read-only in both modes)                     │  │
+│  │    "Job Title"                "Software Engineer"      │  │
+│  │    "Department"               "Engineering"            │  │
+│  │    "Employee Number"          "EMP-001"                │  │
+│  └───────────────────────────────────────────────────────┘  │
+│                                                             │
+│  EDIT MODE ONLY:  [Save] [Cancel] buttons                   │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 **Key UI patterns:**
 - **Cover Banner**: A `<div>` wrapping a `MudPaper` with `Class="rounded-t-lg"`, a gradient background (`linear-gradient(135deg, #667eea 0%, #764ba2 100%)`), `Elevation="0"`, and `Square`. Fixed height (160px).
 - **Profile Header Card**: A `<MudPaper Class="pa-0 pb-4 px-5 mb-4 rounded-b-lg" Elevation="0" Square>` visually connected to the banner above. Contains the avatar row and name/summary info.
-- **Avatar overlap**: The `MudAvatar` (96Ã—96px, 4px solid white border) is positioned with `margin-top: -48px` so it straddles the banner's bottom edge.
+- **Avatar overlap**: The `MudAvatar` (96×96px, 4px solid white border) is positioned with `margin-top: -48px` so it straddles the banner's bottom edge.
 - **Edit button placement**: In View Mode, the Edit icon button (`MudIconButton` with `Icons.Material.Outlined.Edit`, `Size.Small`) is in the avatar row, pushed right via `MudStack Row Justify="Justify.SpaceBetween"`. It is NOT overlaid on the banner or placed below the avatar section.
-- **Name/summary info**: Below the avatar row, a `MudStack Class="mt-2"` displays DisplayName (h5, font-weight 600), JobTitle Â· Department (body2), and Email (body2, Color.Secondary).
-- **Section containers**: Each section (Personal Info, Preferences, Organization) is wrapped in `<MudPaper Class="pa-4 mb-4" Elevation="0">` â€” NOT `MudCard`. Section headers use `<MudText Typo="Typo.h6" Class="mb-3">`.
+- **Name/summary info**: Below the avatar row, a `MudStack Class="mt-2"` displays DisplayName (h5, font-weight 600), JobTitle · Department (body2), and Email (body2, Color.Secondary).
+- **Section containers**: Each section (Personal Info, Preferences, Organization) is wrapped in `<MudPaper Class="pa-4 mb-4" Elevation="0">` — NOT `MudCard`. Section headers use `<MudText Typo="Typo.h6" Class="mb-3">`.
 - **Unified layout**: Both View Mode and Edit Mode render inside the **same** `MudPaper` containers with the **same** section headers. Only the field content changes:
   - **View Mode**: Labels as `MudText Typo="Typo.caption"` + values as `MudText Typo="Typo.body1"`. Null/empty values display `"-"`.
   - **Edit Mode**: `MudInputLabel` component above each `MudTextField` (no `Label` prop on the text field). Fields use `Variant.Outlined` and `Margin.Dense`.
@@ -234,7 +234,7 @@ The page uses a cover banner with overlapping avatar, then flat `MudPaper` secti
 
 ### Code-Behind Structure
 
-**Location:** `BlazorWebAppTemplate/Components/Pages/Profile/Index.razor.cs`
+**Location:** `AspireWebAppTemplate.Web/Components/Pages/Profile/Index.razor.cs`
 
 ```csharp
 public partial class Index : ComponentBase
@@ -274,7 +274,7 @@ public partial class Index : ComponentBase
 
 ### ITimeZoneDisplayService
 
-**Location:** `BlazorWebAppTemplate.Core/Application/Abstractions/ITimeZoneDisplayService.cs`
+**Location:** `AspireWebAppTemplate.Core/Application/Abstractions/ITimeZoneDisplayService.cs`
 
 ```csharp
 /// <summary>
@@ -308,15 +308,15 @@ public record TimeZoneOption(string Id, string DisplayName, TimeSpan BaseUtcOffs
 
 ### TimeZoneDisplayService Implementation
 
-**Location:** `BlazorWebAppTemplate.Core/Application/Services/TimeZoneDisplayService.cs`
+**Location:** `AspireWebAppTemplate.Core/Application/Services/TimeZoneDisplayService.cs`
 
-Uses `TimeZoneInfo.FindSystemTimeZoneById` with IANA identifiers (supported natively on .NET 6+ cross-platform). The `GetAllTimeZones()` method returns all system timezones formatted as `"(UTCÂ±HH:mm) Area/Location"` and sorted by offset then name.
+Uses `TimeZoneInfo.FindSystemTimeZoneById` with IANA identifiers (supported natively on .NET 6+ cross-platform). The `GetAllTimeZones()` method returns all system timezones formatted as `"(UTC±HH:mm) Area/Location"` and sorted by offset then name.
 
 **XML Documentation:** The class has a `<summary>` on the class declaration and uses `<inheritdoc />` on public members (since the interface already documents the contract). Private members (`_allTimeZones`, `BuildTimeZoneList`, `FormatDisplayName`) do not have XML documentation.
 
 ### JavaScript Interop Module
 
-**Location:** `BlazorWebAppTemplate/wwwroot/js/timezone.js`
+**Location:** `AspireWebAppTemplate.Web/wwwroot/js/timezone.js`
 
 ```javascript
 export function getBrowserTimeZone() {
@@ -363,23 +363,23 @@ private sealed class ProfileFormModel
 
 ## Data Models
 
-### ApplicationUser (Existing â€” No Changes)
+### ApplicationUser (Existing — No Changes)
 
 The `ApplicationUser` entity already contains all required fields. No schema migration is needed:
 
 | Field | Type | Editable (Local) | Editable (LDAP) |
 |-------|------|:-----------------:|:----------------:|
-| DisplayName | string? | âœ“ | âœ— (LDAP-synced) |
-| FirstName | string? | âœ“ | âœ— (LDAP-synced) |
-| LastName | string? | âœ“ | âœ— (LDAP-synced) |
-| Email | string? | âœ— (read-only) | âœ— (LDAP-synced) |
-| PhoneNumber | string? | âœ“ | âœ“ |
-| TimeZoneId | string? | âœ“ | âœ“ |
-| Locale | string? | âœ“ | âœ“ |
-| JobTitle | string? | âœ— (read-only) | âœ— (read-only) |
-| Department | string? | âœ— (read-only) | âœ— (read-only) |
-| EmployeeNumber | string? | âœ— (read-only) | âœ— (read-only) |
-| AvatarUrl | string? | âœ— (display only) | âœ— (display only) |
+| DisplayName | string? | ✓ | ✗ (LDAP-synced) |
+| FirstName | string? | ✓ | ✗ (LDAP-synced) |
+| LastName | string? | ✓ | ✗ (LDAP-synced) |
+| Email | string? | ✗ (read-only) | ✗ (LDAP-synced) |
+| PhoneNumber | string? | ✓ | ✓ |
+| TimeZoneId | string? | ✓ | ✓ |
+| Locale | string? | ✓ | ✓ |
+| JobTitle | string? | ✗ (read-only) | ✗ (read-only) |
+| Department | string? | ✗ (read-only) | ✗ (read-only) |
+| EmployeeNumber | string? | ✗ (read-only) | ✗ (read-only) |
+| AvatarUrl | string? | ✗ (display only) | ✗ (display only) |
 
 ### TimeZoneOption (Value Object)
 
@@ -391,7 +391,7 @@ Represents a timezone entry for the searchable dropdown. `Id` is the IANA identi
 
 ## Correctness Properties
 
-*A property is a characteristic or behavior that should hold true across all valid executions of a system â€” essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
+*A property is a characteristic or behavior that should hold true across all valid executions of a system — essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
 
 ### Property 1: Profile save round-trip
 
@@ -407,7 +407,7 @@ Represents a timezone entry for the searchable dropdown. `Id` is the IANA identi
 
 ### Property 3: Timezone display format
 
-*For any* timezone returned by `GetAllTimeZones()`, the `DisplayName` property shall match the pattern `"(UTCÂ±HH:mm) Area/Location"` where the offset corresponds to the timezone's base UTC offset and the identifier is a valid IANA timezone name.
+*For any* timezone returned by `GetAllTimeZones()`, the `DisplayName` property shall match the pattern `"(UTC±HH:mm) Area/Location"` where the offset corresponds to the timezone's base UTC offset and the identifier is a valid IANA timezone name.
 
 **Validates: Requirements 9.3**
 
@@ -455,7 +455,7 @@ Represents a timezone entry for the searchable dropdown. `Id` is the IANA identi
 | `UserManager.UpdateAsync` fails | Display error message from `IdentityResult.Errors` in a `MudAlert` with `Severity.Error`; remain in Edit Mode |
 | JS interop for timezone detection throws (MainLayout) | Catch exception, log warning, no user-facing error, leave TimeZoneId unchanged |
 | JS interop returns unrecognized timezone ID | Validate against `TimeZoneInfo.FindSystemTimeZoneById`; if invalid, treat as null and leave field empty |
-| MainLayout timezone save fails (UserManager error) | Catch exception, log warning, no user-facing error â€” user can still set timezone manually on profile page |
+| MainLayout timezone save fails (UserManager error) | Catch exception, log warning, no user-facing error — user can still set timezone manually on profile page |
 | Network/database timeout during save | Catch `DbUpdateException` or `TaskCanceledException`, display generic "Save failed, please try again" message |
 | Concurrent modification (another admin updates user) | `UserManager.UpdateAsync` uses concurrency stamp; if stale, display "Profile was modified elsewhere, please reload" |
 | Invalid phone number format | `DataAnnotationsValidator` catches `[Phone]` attribute violation, displays inline validation error |
@@ -507,14 +507,14 @@ Property-based tests verify universal correctness properties using **FsCheck** (
 | Property | Test Target | What Varies |
 |----------|-------------|-------------|
 | Property 1: Save round-trip | `UserManager.UpdateAsync` + reload | Random valid field values |
-| Property 2: Field editability | `IsFieldDisabled` logic function | AuthSource Ã— field combinations |
+| Property 2: Field editability | `IsFieldDisabled` logic function | AuthSource × field combinations |
 | Property 3: Timezone format | `TimeZoneDisplayService.GetAllTimeZones()` | All system timezones |
 | Property 4: Timezone filtering | `SearchTimeZones` filter function | Random search strings |
 | Property 5: MaxLength validation | `ProfileFormModel` + `Validator` | Random strings > 100 chars |
 | Property 6: Fallback avatar | Avatar derivation logic | Random DisplayName/UserName combinations |
 | Property 7: Null placeholder | View Mode display rendering logic | Random null/non-null field combinations |
 | Property 8: Cancel discards | Edit/Cancel cycle | Random field modifications |
-| Property 9: Timezone auto-save | `TimeZoneDetector` logic | Random users with null/non-null TimeZoneId Ã— random detected timezones |
+| Property 9: Timezone auto-save | `TimeZoneDetector` logic | Random users with null/non-null TimeZoneId × random detected timezones |
 
 ### Integration Tests
 
@@ -529,7 +529,7 @@ Integration tests verify end-to-end behavior with the database:
 
 ### Test Project Setup
 
-A new test project `BlazorWebAppTemplate.Tests` using:
+A new test project `AspireWebAppTemplate.Tests` using:
 - **xUnit** as the test framework
 - **FsCheck.Xunit** for property-based testing (minimum 100 iterations)
 - **bUnit** for Blazor component rendering tests
@@ -559,17 +559,17 @@ Three visual and functional inconsistencies were identified and fixed:
 
 - **Bug 1**: Changed all 10 field value `<MudText>` elements in View Mode from `Typo="Typo.body1"` to `Typo="Typo.body2"`.
 - **Bug 2**: Replaced all 10 `<MudText Typo="Typo.caption">` label elements in View Mode with `<MudInputLabel>` elements.
-- **Bug 3**: Created `OptionalPhoneAttribute` at `BlazorWebAppTemplate.Core/Utilities/OptionalPhoneAttribute.cs` that allows null/empty/whitespace and validates non-empty values against regex `^\+?[\d\s\-\(\)\.]+$`. Applied to both Profile page and Account/Manage page.
+- **Bug 3**: Created `OptionalPhoneAttribute` at `AspireWebAppTemplate.Core/Utilities/OptionalPhoneAttribute.cs` that allows null/empty/whitespace and validates non-empty values against regex `^\+?[\d\s\-\(\)\.]+$`. Applied to both Profile page and Account/Manage page.
 
 ### Correctness Properties (Bugfix)
 
-**Property 10: View Mode Typography Consistency** — For any profile page render in View Mode, all field value `<MudText>` elements SHALL use `Typo="Typo.body2"`.
+**Property 10: View Mode Typography Consistency** � For any profile page render in View Mode, all field value `<MudText>` elements SHALL use `Typo="Typo.body2"`.
 
-**Property 11: View Mode Label Consistency** — For any profile page render in View Mode, all field labels SHALL use `<MudInputLabel>`.
+**Property 11: View Mode Label Consistency** � For any profile page render in View Mode, all field labels SHALL use `<MudInputLabel>`.
 
-**Property 12: Phone Number Clearing Allowed** — For any form submission where the phone number field is empty or null, validation SHALL pass.
+**Property 12: Phone Number Clearing Allowed** � For any form submission where the phone number field is empty or null, validation SHALL pass.
 
-**Property 13: Phone Validation for Non-Empty Values** — For any non-empty string, `OptionalPhoneAttribute` SHALL accept values matching the phone regex and reject values not matching it.
+**Property 13: Phone Validation for Non-Empty Values** � For any non-empty string, `OptionalPhoneAttribute` SHALL accept values matching the phone regex and reject values not matching it.
 
 ---
 
@@ -579,7 +579,7 @@ Three visual and functional inconsistencies were identified and fixed:
 
 Applied the `fw-bold` CSS class to all `<MudInputLabel>` elements on the Profile page in both View Mode and Edit Mode. This creates a clear visual hierarchy: labels appear in bold font weight while values appear in normal weight.
 
-- No custom CSS needed — `fw-bold` is a standard utility class applying `font-weight: bold`.
+- No custom CSS needed � `fw-bold` is a standard utility class applying `font-weight: bold`.
 - The same class is applied in both modes, ensuring no visual jarring when switching.
 - Labels use `Class="fw-bold"` for bold weight contrast against normal-weight values.
 
@@ -589,14 +589,14 @@ Applied the `fw-bold` CSS class to all `<MudInputLabel>` elements on the Profile
 
 > **Note:** The following changes were made after the original implementation of this spec. They are documented here for traceability.
 
-1. **Preferences section moved to Settings page** — The Preferences section (Time Zone, Locale) was extracted from the Profile page and moved to a new Settings page at `Components/Pages/Settings/`. The Profile page no longer contains Time Zone or Locale fields.
+1. **Preferences section moved to Settings page** � The Preferences section (Time Zone, Locale) was extracted from the Profile page and moved to a new Settings page at `Components/Pages/Settings/`. The Profile page no longer contains Time Zone or Locale fields.
 
-2. **`ITimeZoneDisplayService` renamed to `ITimeZoneService`** — The interface and implementation were renamed (`TimeZoneDisplayService` → `TimeZoneService`). The service now also includes `TryConvertWindowsIdToIanaId()` for Windows-to-IANA timezone ID conversion.
+2. **`ITimeZoneDisplayService` renamed to `ITimeZoneService`** � The interface and implementation were renamed (`TimeZoneDisplayService` ? `TimeZoneService`). The service now also includes `TryConvertWindowsIdToIanaId()` for Windows-to-IANA timezone ID conversion.
 
-3. **`ProfileFormModel` renamed to `InputModel`** — The nested form model class in the Profile page code-behind was renamed from `ProfileFormModel` to `InputModel` for consistency with all other pages.
+3. **`ProfileFormModel` renamed to `InputModel`** � The nested form model class in the Profile page code-behind was renamed from `ProfileFormModel` to `InputModel` for consistency with all other pages.
 
-4. **`IUserTimeZoneContext` added** — A new scoped service `IUserTimeZoneContext` (in `Abstractions/`) was created to provide user-aware datetime formatting throughout the application.
+4. **`IUserTimeZoneContext` added** � A new scoped service `IUserTimeZoneContext` (in `Abstractions/`) was created to provide user-aware datetime formatting throughout the application.
 
-5. **DropdownProfile menu updated** — The menu was simplified from "Profile → Preferences → Settings → Divider → Log Out" to "Profile → Settings → Divider → Log Out", where "Settings" now navigates to `/settings`.
+5. **DropdownProfile menu updated** � The menu was simplified from "Profile ? Preferences ? Settings ? Divider ? Log Out" to "Profile ? Settings ? Divider ? Log Out", where "Settings" now navigates to `/settings`.
 
-6. **Label counts reduced** — After Preferences extraction, the Profile page has 8 labels (5 Personal Information + 3 Organization) instead of the original 10.
+6. **Label counts reduced** � After Preferences extraction, the Profile page has 8 labels (5 Personal Information + 3 Organization) instead of the original 10.

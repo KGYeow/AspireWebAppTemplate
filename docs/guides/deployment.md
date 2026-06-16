@@ -3,7 +3,7 @@
 ## Build
 
 ```bash
-dotnet publish BlazorWebAppTemplate -c Release -o ./publish
+dotnet publish AspireWebAppTemplate.Web -c Release -o ./publish
 ```
 
 ## Environment Configuration
@@ -27,7 +27,7 @@ LdapSettings__Host=prod-ldap.company.com
 
 Apply migrations before first deployment:
 ```bash
-dotnet ef database update --project BlazorWebAppTemplate --connection "Server=prod-sql;..."
+dotnet ef database update --project AspireWebAppTemplate.ApiService --startup-project AspireWebAppTemplate.ApiService --connection "Server=prod-sql;..."
 ```
 
 Or use `MigrateAsync()` in Program.cs for automatic migration on startup (development only).

@@ -13,17 +13,17 @@
 
 ```bash
 git clone <repository-url>
-cd BlazorWebAppTemplate
+cd AspireWebAppTemplate
 ```
 
 ### 2. Configure the database
 
-Update `BlazorWebAppTemplate/appsettings.Development.json`:
+Update `AspireWebAppTemplate.ApiService/appsettings.Development.json`:
 
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=BlazorWebAppTemplate;Trusted_Connection=true;"
+    "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=AspireWebAppTemplate;Trusted_Connection=true;"
   }
 }
 ```
@@ -31,16 +31,16 @@ Update `BlazorWebAppTemplate/appsettings.Development.json`:
 ### 3. Apply migrations
 
 ```bash
-dotnet ef database update --project BlazorWebAppTemplate
+dotnet ef database update --project AspireWebAppTemplate.ApiService --startup-project AspireWebAppTemplate.ApiService
 ```
 
 ### 4. Run the application
 
 ```bash
-dotnet run --project BlazorWebAppTemplate
+dotnet run --project AspireWebAppTemplate.AppHost
 ```
 
-Navigate to `https://localhost:5001`
+The Aspire dashboard opens at `https://localhost:17024` with links to both the Web frontend and API service.
 
 ### 5. Default credentials
 
@@ -73,7 +73,7 @@ See [Architecture Overview](../architecture/overview.md) for detailed project la
 ## Running Tests
 
 ```bash
-dotnet test BlazorWebAppTemplate.Tests
+dotnet test AspireWebAppTemplate.Tests
 ```
 
 Tests use:

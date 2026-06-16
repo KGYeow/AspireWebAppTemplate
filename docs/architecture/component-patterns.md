@@ -6,7 +6,7 @@ All admin pages use `MudDataGrid<T>` with the `ServerData` callback pattern via 
 
 ### DataGridUtils<T>
 
-Located at `BlazorWebAppTemplate.UI/Utilities/DataGridUtils.cs`.
+Located at `AspireWebAppTemplate.UI/Utilities/DataGridUtils.cs`.
 
 Provides:
 - Server-side filtering (global search + per-column)

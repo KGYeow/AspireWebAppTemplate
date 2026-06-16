@@ -21,7 +21,7 @@ This feature provides a User Profile page where authenticated users can view and
 - **Cover_Banner**: A decorative gradient banner displayed at the top of the Profile_Page (160px height, `linear-gradient(135deg, #667eea 0%, #764ba2 100%)`), over which the avatar partially overlaps via negative margin-top.
 - **Profile_Header_Card**: The `MudPaper` section immediately below the Cover_Banner (visually connected via `rounded-b-lg`) that contains the overlapping avatar, the edit icon button, and the user's name/summary info.
 - **Login_Flow**: The post-authentication sequence where MainLayout's `OnAfterRenderAsync(firstRender)` executes timezone detection logic on the first authenticated page render.
-- **OptionalPhoneAttribute**: A custom validation attribute at `BlazorWebAppTemplate.Core/Utilities/OptionalPhoneAttribute.cs` that treats null, empty, and whitespace-only values as valid while validating non-empty values against a permissive phone number pattern.
+- **OptionalPhoneAttribute**: A custom validation attribute at `AspireWebAppTemplate.Core/Utilities/OptionalPhoneAttribute.cs` that treats null, empty, and whitespace-only values as valid while validating non-empty values against a permissive phone number pattern.
 - **MudInputLabel**: A MudBlazor component used to render label text above form fields or display values.
 - **fw-bold**: A CSS utility class that applies `font-weight: bold` to label text, creating visual distinction between labels and values through weight contrast rather than color contrast.
 - **Account_Manage_Page**: The Identity-scaffolded account management page located at `Components/Account/Pages/Manage/Index.razor.cs`, which contains a phone number input field.

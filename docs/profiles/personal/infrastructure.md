@@ -28,7 +28,7 @@ This is completely optional — the LDAP code doesn't interfere if unconfigured.
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=BlazorWebAppTemplate;Trusted_Connection=true;"
+    "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=AspireWebAppTemplate;Trusted_Connection=true;"
   }
 }
 ```

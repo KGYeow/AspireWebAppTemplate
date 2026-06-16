@@ -15,7 +15,7 @@ Components/Pages/{FeatureName}/
 
 ```razor
 @page "/{route}"
-@using BlazorWebAppTemplate.Core.Common.Defaults
+@using AspireWebAppTemplate.Core.Common.Defaults
 @attribute [Authorize]  // or [Authorize(Roles = "Admin")]
 
 <PageTitle>Feature Name</PageTitle>
@@ -40,7 +40,7 @@ Components/Pages/{FeatureName}/
 ## Code-Behind Template
 
 ```csharp
-namespace BlazorWebAppTemplate.Components.Pages.{FeatureName};
+namespace AspireWebAppTemplate.Web.Components.Pages.{FeatureName};
 
 [Authorize]
 public partial class Index : ComponentBase

@@ -3,7 +3,7 @@
 ## Build
 
 ```bash
-dotnet publish BlazorWebAppTemplate -c Release -o ./publish
+dotnet publish AspireWebAppTemplate.Web -c Release -o ./publish
 ```
 
 ## Option 1: Azure App Service
@@ -30,7 +30,7 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
-      - run: dotnet publish BlazorWebAppTemplate -c Release -o ./publish
+      - run: dotnet publish AspireWebAppTemplate.Web -c Release -o ./publish
       - uses: azure/webapps-deploy@v3
         with:
           app-name: 'your-app-name'
@@ -50,12 +50,12 @@ EXPOSE 8080
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 COPY . .
-RUN dotnet publish BlazorWebAppTemplate -c Release -o /app/publish
+RUN dotnet publish AspireWebAppTemplate.Web -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
 COPY --from=build /app/publish .
-ENTRYPOINT ["dotnet", "BlazorWebAppTemplate.dll"]
+ENTRYPOINT ["dotnet", "AspireWebAppTemplate.Web.dll"]
 ```
 
 ### Run locally
@@ -84,7 +84,7 @@ ConnectionStrings__DefaultConnection=Server=...;Database=...;
 ## Database Migration
 
 ```bash
-dotnet ef database update --project BlazorWebAppTemplate
+dotnet ef database update --project AspireWebAppTemplate.ApiService --startup-project AspireWebAppTemplate.ApiService
 ```
 
 Or add automatic migration in `Program.cs` for simple deployments:

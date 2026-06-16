@@ -1,15 +1,15 @@
-# BlazorWebAppTemplate — Project Documentation
+# AspireWebAppTemplate — Project Documentation
 
-> **Jabil Internal Enterprise Application Template**  
-> Built with .NET 10.0 • Blazor Server • MudBlazor • Entity Framework Core
+> **Enterprise Web Application Template**  
+> Built with .NET 10.0 • .NET Aspire • Blazor Server • MudBlazor • Entity Framework Core
 
 ---
 
 ## Overview
 
-This documentation covers the design, requirements, and implementation history of the **BlazorWebAppTemplate** — an internal enterprise web application template developed at Jabil. The template provides a production-ready foundation for internal tools and admin portals, featuring user management, role-based access control, LDAP integration, and a modern responsive UI.
+This documentation covers the design, requirements, and implementation of the **AspireWebAppTemplate** — an enterprise web application template featuring a multi-tier architecture with separated frontend (Blazor Server) and backend (ASP.NET Core Web API), orchestrated by .NET Aspire.
 
-For brand guidelines and context-specific configuration, see [Deployment Profiles](./profiles/).
+The template provides a production-ready foundation for internal tools and admin portals, featuring user management, role-based access control, LDAP integration, audit logging, and a modern responsive UI.
 
 ---
 
@@ -20,12 +20,12 @@ docs/
 ├── architecture/       System-level technical documentation
 ├── guides/             Developer onboarding and reference guides
 ├── features/           Feature specifications (requirements, design, tasks)
-│   ├── audit-log/      Audit trail system (entity, service, QueryableDataGridUtils, UI, export)
+│   ├── audit-log/
 │   ├── role-management/
 │   ├── settings-page/
 │   ├── user-management/
 │   └── user-profile/
-├── profiles/           Context-specific deployment & branding (Jabil, personal, clients)
+├── profiles/           Context-specific deployment & branding
 └── logs/               Implementation session history
 ```
 
@@ -39,21 +39,21 @@ High-level system documentation and design decisions.
 |----------|-------------|
 | [Overview](./architecture/overview.md) | Solution structure, project responsibilities, key patterns |
 | [Technology Stack](./architecture/technology-stack.md) | Frameworks, packages, and versions |
-| [Authentication](./architecture/authentication.md) | Identity + LDAP flow, claims, role-based access |
+| [Authentication](./architecture/authentication.md) | Identity + LDAP flow, cookie auth, token exchange |
 | [Data Layer](./architecture/data-layer.md) | EF Core setup, entities, migrations |
-| [Component Patterns](./architecture/component-patterns.md) | MudDataGrid, View/Edit mode, instant-save, PillToggle |
-| [ADR-001: Blazor Server](./architecture/decisions/001-blazor-server-mode.md) | Why Blazor Server over WASM |
-| [ADR-002: MudBlazor](./architecture/decisions/002-mudblazor-ui-library.md) | UI library selection |
-| [ADR-003: Scoped Theme Service](./architecture/decisions/003-scoped-theme-service.md) | Real-time theme switching design |
+| [Component Patterns](./architecture/component-patterns.md) | MudDataGrid, View/Edit mode, instant-save |
 
 ### Key Patterns & Utilities
 
 | Utility | Location | Description |
 |---------|----------|-------------|
-| `DataGridUtils<T>` | BlazorWebAppTemplate.UI/Utilities | In-memory MudDataGrid filtering, sorting, pagination |
-| `QueryableDataGridUtils<T>` | BlazorWebAppTemplate.UI/Utilities | Database-level MudDataGrid operations via IQueryable → EF Core SQL |
-| `ExcelExportService` | BlazorWebAppTemplate/Services | Excel file generation using EPPlus |
-| `AuditLogService` | BlazorWebAppTemplate/Services | Audit trail recording with fire-and-forget error handling |
+| `DataGridUtils<T>` | AspireWebAppTemplate.UI/Utilities | In-memory MudDataGrid filtering, sorting, pagination |
+| `ExcelExportService` | AspireWebAppTemplate.ApiService/Services | Excel/CSV export using EPPlus with `[ExportColumn]` attribute |
+| `AuditLogService` | AspireWebAppTemplate.ApiService/Services | Audit trail recording with fire-and-forget error handling |
+| `BaseController` | AspireWebAppTemplate.ApiService/Controllers | Shared controller base with `CurrentUserId`, `ClientIpAddress` |
+| `InternalAuthenticationHandler` | AspireWebAppTemplate.ApiService/Authentication | Service-to-service auth via X-User-* headers |
+| `UserIdentityDelegatingHandler` | AspireWebAppTemplate.Web/Services | Forwards user identity from Web to API on outbound HTTP calls |
+| `ApiResult<T>` | AspireWebAppTemplate.Core/Common | Standard typed result wrapper for all API operations |
 
 ---
 
@@ -65,10 +65,9 @@ Developer onboarding and day-to-day reference.
 |-------|-------------|
 | [Getting Started](./guides/getting-started.md) | Setup, prerequisites, first run |
 | [Coding Standards](./guides/coding-standards.md) | Naming, patterns, MudBlazor conventions |
-| [Testing Strategy](./guides/testing-strategy.md) | xUnit, FsCheck, bUnit — when to use each |
+| [Testing Strategy](./guides/testing-strategy.md) | xUnit, FsCheck — when to use each |
 | [Adding a Feature](./guides/adding-a-feature.md) | Spec workflow: requirements → design → tasks |
 | [Adding a Page](./guides/adding-a-page.md) | Blazor page template with MudBlazor |
-| [Deployment](./guides/deployment.md) | Build, publish, environment config |
 
 ---
 
@@ -78,11 +77,11 @@ Each feature has requirements, technical design, and implementation tasks.
 
 | Feature | Status | Description |
 |---------|--------|-------------|
-| [User Management](./features/user-management/) | ✅ Complete | Admin CRUD, LDAP import, bulk actions, data grid |
+| [User Management](./features/user-management/) | ✅ Complete | Admin CRUD, LDAP import/sync, bulk actions, data grid |
 | [Role Management](./features/role-management/) | ✅ Complete | Role CRUD, user assignment, system role protection |
-| [User Profile](./features/user-profile/) | ✅ Complete | View/edit profile, avatar, LDAP restrictions, OptionalPhone, fw-bold labels |
-| [Settings Page](./features/settings-page/) | ✅ Complete | Time Zone, Locale, Date/Time Format, Theme switching, instant-save, PillToggle |
-| [Audit Log](./features/audit-log/) | ✅ Complete | Recording service, QueryableDataGridUtils, MudDataGrid page, CSV export, Excel export, retention, navigation integration |
+| [User Profile](./features/user-profile/) | ✅ Complete | View/edit profile, avatar, LDAP restrictions |
+| [Settings Page](./features/settings-page/) | ✅ Complete | Time Zone, Date/Time Format, Theme switching, instant-save |
+| [Audit Log](./features/audit-log/) | ✅ Complete | Recording service, DataGrid page, Excel export, retention |
 
 ---
 
@@ -92,26 +91,10 @@ This template supports multiple deployment contexts. Each profile documents cont
 
 | Profile | Context | Key Differences |
 |---------|---------|-----------------|
-| [Jabil](./profiles/jabil/) | Corporate internal apps | LDAP auth, corporate SMTP, Jabil branding, internal IIS |
-| [Personal](./profiles/personal/) | Personal / freelance projects | Local auth only, cloud hosting, custom branding, no LDAP |
+| [Jabil](./profiles/jabil/) | Corporate internal apps | LDAP auth, corporate branding, internal hosting |
+| [Personal](./profiles/personal/) | Personal / freelance projects | Local auth only, cloud hosting, custom branding |
 
-See [Profiles README](./profiles/README.md) for details on adding new profiles (e.g., for freelance clients).
-
----
-
-## Implementation Logs
-
-Session-by-session development history: [View Logs](./logs/sessions.md)
-
----
-
-## Dual-Purpose Template
-
-This template is designed for both **corporate** (Jabil) and **personal** (freelance, side projects) use. The core architecture, features, and guides are context-agnostic. Context-specific concerns (LDAP, branding, hosting) are isolated in [Deployment Profiles](./profiles/).
-
-- **Jabil profile**: LDAP integration, Jabil Blue (`#003B6B`) theme, internal IIS hosting
-- **Personal profile**: Local auth only, customizable theme, cloud hosting (Azure, Docker, VPS)
-- **Accessibility**: WCAG-compliant color contrast, `aria-label` on interactive elements (both profiles)
+See [Profiles README](./profiles/README.md) for details on adding new profiles.
 
 ---
 
@@ -120,9 +103,8 @@ This template is designed for both **corporate** (Jabil) and **personal** (freel
 | Resource | Location |
 |----------|----------|
 | Feature Ideas & Roadmap | [`docs/features/IDEAS.md`](./features/IDEAS.md) |
-| Brand Guidelines | [`docs/architecture/brand-guidelines.md`](./architecture/brand-guidelines.md) |
 | Project README | [`README.md`](../README.md) |
-| Active Specs | `.kiro/specs/` |
-| Test Project | `BlazorWebAppTemplate.Tests/` |
-| QueryableDataGridUtils | `BlazorWebAppTemplate.UI/Utilities/QueryableDataGridUtils.cs` |
-| ExcelExportService | `BlazorWebAppTemplate/Services/ExcelExportService.cs` |
+| Test Project | `AspireWebAppTemplate.Tests/` |
+| DataGridUtils | `AspireWebAppTemplate.UI/Utilities/DataGridUtils.cs` |
+| ExcelExportService | `AspireWebAppTemplate.ApiService/Services/ExcelExportService.cs` |
+| ApiResult | `AspireWebAppTemplate.Core/Common/ApiResult.cs` |

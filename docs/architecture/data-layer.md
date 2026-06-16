@@ -6,7 +6,7 @@ The application uses EF Core 10.0.3 with SQL Server as the database provider.
 
 ### ApplicationDbContext
 
-Located at `BlazorWebAppTemplate/Data/ApplicationDbContext.cs`, extends `IdentityDbContext<ApplicationUser, ApplicationRole, string>`.
+Located at `AspireWebAppTemplate.ApiService/Data/ApplicationDbContext.cs`, extends `IdentityDbContext<ApplicationUser, ApplicationRole, string>`.
 
 ### Key Entities
 
@@ -28,8 +28,8 @@ Located at `BlazorWebAppTemplate/Data/ApplicationDbContext.cs`, extends `Identit
 
 Run migrations with:
 ```bash
-dotnet ef migrations add MigrationName --project BlazorWebAppTemplate
-dotnet ef database update --project BlazorWebAppTemplate
+dotnet ef migrations add MigrationName --project AspireWebAppTemplate.ApiService --startup-project AspireWebAppTemplate.ApiService
+dotnet ef database update --project AspireWebAppTemplate.ApiService --startup-project AspireWebAppTemplate.ApiService
 ```
 
 ### Configuration (appsettings.json)
@@ -37,7 +37,7 @@ dotnet ef database update --project BlazorWebAppTemplate
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Server=...;Database=BlazorWebAppTemplate;..."
+    "DefaultConnection": "Server=...;Database=AspireWebAppTemplate;..."
   },
   "LdapSettings": { ... },
   "AuditLog": {

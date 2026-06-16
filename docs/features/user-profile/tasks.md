@@ -72,7 +72,7 @@ Complete implementation of the User Profile page with view/edit mode, timezone a
   - _Requirements: 15.1, 15.2, 15.3, 15.4_
 
 - [x] 13. Fix phone validation (OptionalPhoneAttribute)
-  - [x] 13.1 Create `OptionalPhoneAttribute` at `BlazorWebAppTemplate.Core/Utilities/OptionalPhoneAttribute.cs`
+  - [x] 13.1 Create `OptionalPhoneAttribute` at `AspireWebAppTemplate.Core/Utilities/OptionalPhoneAttribute.cs`
     - Inherit from ValidationAttribute
     - Return true for null, empty, or whitespace values
     - Validate non-empty values against phone regex `^\+?[\d\s\-\(\)\.]+$`
@@ -98,7 +98,7 @@ Complete implementation of the User Profile page with view/edit mode, timezone a
 - Build MSB3027 errors during development were from running dev server locking DLLs — not code issues
 - LinkedIn-style layout: cover banner → avatar overlapping bottom-left → name below → full-width sections
 - FsCheck 3.1.0 with FsCheck.Xunit is used for property-based tests
-- The `OptionalPhoneAttribute` is placed in `BlazorWebAppTemplate.Core/Utilities/` following the existing pattern
+- The `OptionalPhoneAttribute` is placed in `AspireWebAppTemplate.Core/Utilities/` following the existing pattern
 - Preferences section was later extracted to a dedicated Settings page (see `docs/settings-page/`)
 - `ProfileFormModel` was renamed to `InputModel` for consistency with all other pages
 - `TimeZoneDisplayService` was renamed to `TimeZoneService` with additional IANA conversion support

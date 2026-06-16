@@ -7,11 +7,11 @@ The Audit Log feature provides administrators with a centralized, searchable, an
 ## Glossary
 
 - **Audit_Log_Service**: The backend service responsible for recording audit entries into the database when significant actions occur in the application.
-- **Audit_Log_Page**: The Blazor Server UI page at `/audit-log` that displays audit entries in a filterable, searchable, paginated data grid. Located at `BlazorWebAppTemplate/Components/Pages/AuditLog/`.
-- **AuditLogEntry**: The EF Core entity representing a single audit record, stored in the `AuditLogEntries` table. Located at `BlazorWebAppTemplate/Data/Entities/AuditLogEntry.cs`.
-- **AuditActionType**: An enum defining the categories of auditable actions (e.g., UserCreated, UserUpdated, RoleAssigned, LoginSuccess, SettingsChanged). Located at `BlazorWebAppTemplate.Core/Domain/Enums/AuditActionType.cs`.
-- **AuditEntityType**: An enum defining the types of entities that can be audited (e.g., User, Role, Settings, System). Located at `BlazorWebAppTemplate.Core/Domain/Enums/AuditEntityType.cs`.
-- **IAuditLogService**: The service interface abstraction for the Audit_Log_Service. Located at `BlazorWebAppTemplate/Abstractions/IAuditLogService.cs`.
+- **Audit_Log_Page**: The Blazor Server UI page at `/audit-log` that displays audit entries in a filterable, searchable, paginated data grid. Located at `AspireWebAppTemplate.Web/Components/Pages/AuditLog/`.
+- **AuditLogEntry**: The EF Core entity representing a single audit record, stored in the `AuditLogEntries` table. Located at `AspireWebAppTemplate.ApiService/Data/Entities/AuditLogEntry.cs`.
+- **AuditActionType**: An enum defining the categories of auditable actions (e.g., UserCreated, UserUpdated, RoleAssigned, LoginSuccess, SettingsChanged). Located at `AspireWebAppTemplate.Core/Domain/Enums/AuditActionType.cs`.
+- **AuditEntityType**: An enum defining the types of entities that can be audited (e.g., User, Role, Settings, System). Located at `AspireWebAppTemplate.Core/Domain/Enums/AuditEntityType.cs`.
+- **IAuditLogService**: The service interface abstraction for the Audit_Log_Service. Located at `AspireWebAppTemplate.ApiService/Abstractions/IAuditLogService.cs`.
 - **Administrator**: A user assigned the "Admin" role who has access to the Audit_Log_Page.
 - **CSV_Export**: A comma-separated values file generated from filtered audit log data for offline analysis.
 
@@ -63,7 +63,7 @@ The Audit Log feature provides administrators with a centralized, searchable, an
 
 #### Acceptance Criteria
 
-1. THE QueryableDataGridUtils\<T\> utility SHALL be located at `BlazorWebAppTemplate.UI/Utilities/QueryableDataGridUtils.cs` alongside the existing `DataGridUtils<T>`
+1. THE QueryableDataGridUtils\<T\> utility SHALL be located at `AspireWebAppTemplate.UI/Utilities/QueryableDataGridUtils.cs` alongside the existing `DataGridUtils<T>`
 2. THE QueryableDataGridUtils\<T\> SHALL accept an `IQueryable<T>` source and a `GridState<T>` and translate column filters, global search, sorting, and pagination into EF Core expressions that execute at the database level
 3. THE QueryableDataGridUtils\<T\> SHALL use `Expression<Func<T, ...>>` (not `Func<T, ...>`) for property mappings so that EF Core can translate them to SQL
 4. THE QueryableDataGridUtils\<T\> SHALL support the same fluent MapString, MapInt, MapDateTime, MapBool pattern as the existing DataGridUtils\<T\>
@@ -178,7 +178,7 @@ The Audit Log feature provides administrators with a centralized, searchable, an
 ## Suggested Project Structure
 
 ```
-BlazorWebAppTemplate/
+AspireWebAppTemplate.ApiService/
 ├── Abstractions/
 │   └── IAuditLogService.cs                    (service interface - LogAsync + PurgeOldEntriesAsync)
 ├── Data/
@@ -186,25 +186,27 @@ BlazorWebAppTemplate/
 │       └── AuditLogEntry.cs                   (EF Core entity)
 ├── Services/
 │   └── AuditLogService.cs                     (service implementation)
+
+AspireWebAppTemplate.Web/
 ├── Components/
 │   └── Pages/
 │       └── AuditLog/
 │           ├── Index.razor                    (main page with MudDataGrid)
-│           ├── Index.razor.cs                 (code-behind, uses QueryableDataGridUtils)
+│           ├── Index.razor.cs                 (code-behind, calls API via HTTP client service)
 │           └── AuditLogDetailDialog.razor     (detail view dialog)
 
-BlazorWebAppTemplate.UI/
+AspireWebAppTemplate.UI/
 ├── Utilities/
 │   ├── DataGridUtils.cs                       (existing in-memory utility)
-│   └── QueryableDataGridUtils.cs              (new database-level utility)
+│   └── QueryableDataGridUtils.cs              (database-level utility, used by ApiService)
 
-BlazorWebAppTemplate.Core/
+AspireWebAppTemplate.Core/
 ├── Domain/
 │   └── Enums/
 │       ├── AuditActionType.cs                 (action type enum)
 │       └── AuditEntityType.cs                 (entity type enum)
 
-BlazorWebAppTemplate.Tests/
+AspireWebAppTemplate.Tests/
 └── AuditLog/
     └── ...                                    (property-based + unit tests)
 ```

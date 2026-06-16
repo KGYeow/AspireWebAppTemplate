@@ -44,7 +44,7 @@ Use for:
 ## Test File Organization
 
 ```
-BlazorWebAppTemplate.Tests/
+AspireWebAppTemplate.Tests/
 ├── Profile/                    (Profile page tests)
 │   ├── CancelDiscardsModificationsPropertyTests.cs
 │   ├── TimeZoneAutoSavePropertyTests.cs

@@ -10,7 +10,7 @@
 ## Build
 
 ```bash
-dotnet publish BlazorWebAppTemplate -c Release -o ./publish
+dotnet publish AspireWebAppTemplate.Web -c Release -o ./publish
 ```
 
 ## Configuration
@@ -22,7 +22,7 @@ Create `appsettings.Production.json` (or use environment variables):
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Server=PROD-SQL;Database=BlazorWebAppTemplate;Trusted_Connection=true;TrustServerCertificate=true;"
+    "DefaultConnection": "Server=PROD-SQL;Database=AspireWebAppTemplate;Trusted_Connection=true;TrustServerCertificate=true;"
   },
   "LdapSettings": {
     "Host": "ldap.jabil.com",
@@ -48,7 +48,7 @@ Store in environment variables or Windows Credential Manager — never commit to
 Apply before first deployment:
 
 ```bash
-dotnet ef database update --project BlazorWebAppTemplate --connection "Server=PROD-SQL;..."
+dotnet ef database update --project AspireWebAppTemplate.ApiService --startup-project AspireWebAppTemplate.ApiService --connection "Server=PROD-SQL;..."
 ```
 
 ## IIS Setup

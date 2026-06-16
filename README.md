@@ -6,8 +6,6 @@ A comprehensive .NET Aspire web application template built with .NET 10.0, featu
 
 This is a full-featured .NET Aspire application template designed to kickstart enterprise-level web applications with a clean 3-tier architecture. The frontend (Blazor Server) communicates with the backend (ASP.NET Core Web API) via HTTP, orchestrated by .NET Aspire for service discovery, health checks, and telemetry.
 
-Migrated from [BlazorWebAppTemplate](../BlazorWebAppTemplate/) (single-tier Blazor Server monolith) to demonstrate how to split a monolith into a scalable multi-service architecture.
-
 ## Architecture
 
 ```
@@ -57,7 +55,13 @@ Blazor Server frontend (Global InteractiveServer mode):
 ### 5. **AspireWebAppTemplate.Core** (Shared Domain)
 Shared between frontend and backend:
 - **Domain/Enums/** — Business enumerations (AuditActionType, AuthSource, ThemePreference)
-- **Contracts/** — DTOs shared between API and frontend (UserDto, RoleDto, LoginResult, etc.)
+- **Contracts/** — DTOs shared between API and frontend, organized by feature:
+  - `Auth/` — Login, Register, Password, 2FA, Passkeys, External Logins
+  - `Users/` — UserDto, CRUD requests, LDAP, Preferences, Profile
+  - `Roles/` — RoleDto, CreateRoleRequest
+  - `AuditLog/` — AuditLogEntryDto, QueryParams
+  - `PagedResult.cs` — Generic paged response wrapper
+- **Common/** — ApiResult<T>, ExportDefaults, NavModels, DateTimeFormatDefaults
 - **Application/** — Navigation provider, TimeZoneService
 - **Utilities/** — ExportColumnAttribute, SecureConnectionString, OptionalPhone
 

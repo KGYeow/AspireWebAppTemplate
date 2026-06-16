@@ -2,19 +2,19 @@
 
 ## Overview
 
-This plan implements a comprehensive audit trail system for the BlazorWebAppTemplate Blazor Server application. The implementation follows a bottom-up approach: enums → entity → database configuration → service → reusable grid utility → UI page → integration hooks → data retention → navigation. Each task builds on the previous ones, ensuring no orphaned code.
+This plan implements a comprehensive audit trail system for the AspireWebAppTemplate application. The implementation follows a bottom-up approach: enums → entity → database configuration → service → reusable grid utility → UI page → integration hooks → data retention → navigation. Each task builds on the previous ones, ensuring no orphaned code.
 
 ## Tasks
 
 - [x] 1. Define enums and entity model
   - [x] 1.1 Create AuditActionType and AuditEntityType enums
-    - Create `BlazorWebAppTemplate.Core/Domain/Enums/AuditActionType.cs` with values: UserCreated, UserUpdated, UserDeleted, UserActivated, UserDeactivated, RoleCreated, RoleUpdated, RoleDeleted, RoleAssigned, RoleUnassigned, LoginSuccess, LoginFailed, LogoutSuccess, SettingsChanged, PasswordChanged, ProfileUpdated
-    - Create `BlazorWebAppTemplate.Core/Domain/Enums/AuditEntityType.cs` with values: User, Role, Settings, System
+    - Create `AspireWebAppTemplate.Core/Domain/Enums/AuditActionType.cs` with values: UserCreated, UserUpdated, UserDeleted, UserActivated, UserDeactivated, RoleCreated, RoleUpdated, RoleDeleted, RoleAssigned, RoleUnassigned, LoginSuccess, LoginFailed, LogoutSuccess, SettingsChanged, PasswordChanged, ProfileUpdated
+    - Create `AspireWebAppTemplate.Core/Domain/Enums/AuditEntityType.cs` with values: User, Role, Settings, System
     - Include full XML `<summary>` documentation on each enum value explaining when it is used
     - _Requirements: 2.1, 2.2, 2.3, 11.4_
 
   - [x] 1.2 Create AuditLogEntry entity
-    - Create `BlazorWebAppTemplate/Data/Entities/AuditLogEntry.cs`
+    - Create `AspireWebAppTemplate.ApiService/Data/Entities/AuditLogEntry.cs`
     - Define properties: Id (Guid), UserId (string, max 450), UserDisplayName (string, max 256), ActionType (AuditActionType), EntityType (AuditEntityType), EntityId (string, max 450), EntityName (string, max 256), Description (string, max 1024), OldValues (string?, nullable JSON), NewValues (string?, nullable JSON), IpAddress (string?, max 45), Timestamp (DateTime, UTC)
     - Add navigation property `ApplicationUser? User`
     - Include full XML documentation on every property describing purpose, constraints, and format
@@ -32,14 +32,14 @@ This plan implements a comprehensive audit trail system for the BlazorWebAppTemp
 
 - [x] 2. Implement audit log service
   - [x] 2.1 Create IAuditLogService interface
-    - Create `BlazorWebAppTemplate/Abstractions/IAuditLogService.cs`
+    - Create `AspireWebAppTemplate.ApiService/Abstractions/IAuditLogService.cs`
     - Define `LogAsync` method accepting: userId (nullable), actionType, entityType, entityId, entityName, description, oldValues (optional), newValues (optional), ipAddress (optional)
     - Define `PurgeOldEntriesAsync` method returning `Task<int>`
     - Include full XML documentation on interface and every method with `<summary>`, `<param>`, `<returns>`, `<exception>` tags
     - _Requirements: 3.2, 10.3, 11.3_
 
   - [x] 2.2 Implement AuditLogService
-    - Create `BlazorWebAppTemplate/Services/AuditLogService.cs` implementing `IAuditLogService`
+    - Create `AspireWebAppTemplate.ApiService/Services/AuditLogService.cs` implementing `IAuditLogService`
     - Inject `ApplicationDbContext`, `UserManager<ApplicationUser>`, `ILogger<AuditLogService>`, `IConfiguration`
     - Implement `LogAsync`: resolve UserDisplayName (existing user → DisplayName, unknown userId → userId string, null → empty string), create and persist AuditLogEntry, swallow DB exceptions at Error level
     - Implement `PurgeOldEntriesAsync`: read `AuditLog:RetentionDays` from config (validate 1–3650, fallback to 365 with warning), delete entries older than retention period, log purged count at Information level, propagate DB exceptions
@@ -49,27 +49,27 @@ This plan implements a comprehensive audit trail system for the BlazorWebAppTemp
 
   - [x] 2.3 Write property test for entity persistence round-trip
     - **Property 1: Entity persistence round-trip**
-    - Create `BlazorWebAppTemplate.Tests/AuditLog/EntityPersistenceRoundTripPropertyTests.cs`
+    - Create `AspireWebAppTemplate.Tests/AuditLog/EntityPersistenceRoundTripPropertyTests.cs`
     - Use FsCheck.Xunit `[Property(MaxTest = 1)]` to verify that persisting and retrieving an AuditLogEntry produces identical property values with enums stored as PascalCase strings
     - Use EF Core InMemory or SQLite in-memory provider
     - **Validates: Requirements 1.1, 1.6, 2.3**
 
   - [x] 2.4 Write property test for user display name resolution
     - **Property 2: User display name resolution**
-    - Create `BlazorWebAppTemplate.Tests/AuditLog/UserDisplayNameResolutionPropertyTests.cs`
+    - Create `AspireWebAppTemplate.Tests/AuditLog/UserDisplayNameResolutionPropertyTests.cs`
     - Use FsCheck.Xunit `[Property(MaxTest = 1)]` to verify display name resolution: existing user → DisplayName, unknown userId → userId, null → empty string
     - Mock `UserManager<ApplicationUser>` for user lookup
     - **Validates: Requirements 3.4, 3.5, 3.6**
 
   - [x] 2.5 Write property test for retention configuration validation
     - **Property 10: Retention configuration validation**
-    - Create `BlazorWebAppTemplate.Tests/AuditLog/RetentionConfigPropertyTests.cs`
+    - Create `AspireWebAppTemplate.Tests/AuditLog/RetentionConfigPropertyTests.cs`
     - Use FsCheck.Xunit `[Property(MaxTest = 1)]` to verify: valid int 1–3650 → used as-is; missing/non-numeric/out-of-range → fallback to 365
     - **Validates: Requirements 10.1, 10.2**
 
   - [x] 2.6 Write property test for purge correctness
     - **Property 11: Purge correctness**
-    - Create `BlazorWebAppTemplate.Tests/AuditLog/PurgeCorrectnessPropertyTests.cs`
+    - Create `AspireWebAppTemplate.Tests/AuditLog/PurgeCorrectnessPropertyTests.cs`
     - Use FsCheck.Xunit `[Property(MaxTest = 1)]` to verify: after purge, no entries older than retention remain, all entries within retention window are preserved
     - **Validates: Requirements 10.4**
 
@@ -78,7 +78,7 @@ This plan implements a comprehensive audit trail system for the BlazorWebAppTemp
 
 - [x] 4. Implement QueryableDataGridUtils\<T\> reusable utility
   - [x] 4.1 Create QueryableDataGridUtils\<T\> class
-    - Create `BlazorWebAppTemplate.UI/Utilities/QueryableDataGridUtils.cs`
+    - Create `AspireWebAppTemplate.UI/Utilities/QueryableDataGridUtils.cs`
     - Implement fluent property mapping methods: `MapString`, `MapInt`, `MapDateTime`, `MapBool` using `Expression<Func<T, ...>>` for EF Core translation
     - Implement `ServerReloadAsync`: translate GridState column filters → WHERE, global search → OR across specified string fields (case-insensitive), sort definitions → ORDER BY (default Timestamp DESC when no sort), pagination → SKIP/TAKE, count via `CountAsync`, materialize via `ToListAsync`, line numbering (1-based, page-aware)
     - Implement `GetAllMatchingAsync`: apply filters and global search without pagination, cap at configurable maxRows (default 50,000)
@@ -88,31 +88,31 @@ This plan implements a comprehensive audit trail system for the BlazorWebAppTemp
 
   - [x] 4.2 Write property test for search text filtering correctness
     - **Property 3: Search text filtering correctness**
-    - Create `BlazorWebAppTemplate.Tests/AuditLog/SearchFilteringPropertyTests.cs`
+    - Create `AspireWebAppTemplate.Tests/AuditLog/SearchFilteringPropertyTests.cs`
     - Use FsCheck.Xunit `[Property(MaxTest = 1)]` to verify that global search results contain only entries where at least one of UserDisplayName, EntityName, Description contains the search text (case-insensitive), and no matching entries are excluded
     - **Validates: Requirements 4.9**
 
   - [x] 4.3 Write property test for single-field filter correctness
     - **Property 4: Single-field filter correctness**
-    - Create `BlazorWebAppTemplate.Tests/AuditLog/SingleFieldFilterPropertyTests.cs`
+    - Create `AspireWebAppTemplate.Tests/AuditLog/SingleFieldFilterPropertyTests.cs`
     - Use FsCheck.Xunit `[Property(MaxTest = 1)]` to verify that applying ActionType/EntityType filter returns only matching entries with no exclusions
     - **Validates: Requirements 5.6, 5.7, 5.8**
 
   - [x] 4.4 Write property test for date range filter correctness
     - **Property 5: Date range filter correctness**
-    - Create `BlazorWebAppTemplate.Tests/AuditLog/DateRangeFilterPropertyTests.cs`
+    - Create `AspireWebAppTemplate.Tests/AuditLog/DateRangeFilterPropertyTests.cs`
     - Use FsCheck.Xunit `[Property(MaxTest = 1)]` to verify that date range filtering (start only, end only, both) returns only entries within range (inclusive), no entries within range excluded
     - **Validates: Requirements 5.8**
 
   - [x] 4.5 Write property test for default sort order
     - **Property 6: Default sort order**
-    - Create `BlazorWebAppTemplate.Tests/AuditLog/DefaultSortOrderPropertyTests.cs`
+    - Create `AspireWebAppTemplate.Tests/AuditLog/DefaultSortOrderPropertyTests.cs`
     - Use FsCheck.Xunit `[Property(MaxTest = 1)]` to verify that with empty SortDefinitions, results are ordered by Timestamp descending
     - **Validates: Requirements 4.10**
 
   - [x] 4.6 Write property test for page overflow
     - **Property 7: Page overflow returns empty with correct total**
-    - Create `BlazorWebAppTemplate.Tests/AuditLog/PageOverflowPropertyTests.cs`
+    - Create `AspireWebAppTemplate.Tests/AuditLog/PageOverflowPropertyTests.cs`
     - Use FsCheck.Xunit `[Property(MaxTest = 1)]` to verify that requesting a page beyond available data returns empty items with correct total count
     - **Validates: Requirements 4.5**
 
@@ -121,7 +121,7 @@ This plan implements a comprehensive audit trail system for the BlazorWebAppTemp
 
 - [x] 6. Implement audit log UI page
   - [x] 6.1 Create AuditLog Index page with MudDataGrid
-    - Create `BlazorWebAppTemplate/Components/Pages/AuditLog/Index.razor` and `Index.razor.cs`
+    - Create `AspireWebAppTemplate.Web/Components/Pages/AuditLog/Index.razor` and `Index.razor.cs`
     - Set route to `/audit-log` with `[Authorize(Roles = "Admin")]`
     - Inject `ApplicationDbContext`, `IAuditLogService`, `IUserTimeZoneContext`, `IDialogService`, `IJSRuntime`
     - Configure `MudDataGrid<AuditLogViewModel>` with `ServerData` callback, default page size 10, default sort Timestamp descending
@@ -139,7 +139,7 @@ This plan implements a comprehensive audit trail system for the BlazorWebAppTemp
     - _Requirements: 5.4_
 
   - [x] 6.3 Create AuditLogDetailDialog
-    - Create `BlazorWebAppTemplate/Components/Pages/AuditLog/AuditLogDetailDialog.razor`
+    - Create `AspireWebAppTemplate.Web/Components/Pages/AuditLog/AuditLogDetailDialog.razor`
     - Receive `AuditLogEntry` as dialog parameter
     - Display: Timestamp (user timezone), UserDisplayName, ActionType, EntityType, EntityId, EntityName, Description, IpAddress, OldValues (pretty-printed JSON), NewValues (pretty-printed JSON)
     - Show "N/A" for null OldValues, NewValues, IpAddress
@@ -158,13 +158,13 @@ This plan implements a comprehensive audit trail system for the BlazorWebAppTemp
 
   - [x] 6.5 Write property test for CSV row format correctness
     - **Property 8: CSV row format correctness**
-    - Create `BlazorWebAppTemplate.Tests/AuditLog/CsvRowFormatPropertyTests.cs`
+    - Create `AspireWebAppTemplate.Tests/AuditLog/CsvRowFormatPropertyTests.cs`
     - Use FsCheck.Xunit `[Property(MaxTest = 1)]` to verify CSV row contains Timestamp (ISO 8601), UserDisplayName, ActionType, EntityType, EntityName, Description, IpAddress in correct column positions
     - **Validates: Requirements 7.3, 7.8**
 
   - [x] 6.6 Write property test for CSV export filter and row cap
     - **Property 9: CSV export respects filters and row cap**
-    - Create `BlazorWebAppTemplate.Tests/AuditLog/CsvExportFilterPropertyTests.cs`
+    - Create `AspireWebAppTemplate.Tests/AuditLog/CsvExportFilterPropertyTests.cs`
     - Use FsCheck.Xunit `[Property(MaxTest = 1)]` to verify exported entries match all active filters, limited to 50,000 rows, with no non-matching entries
     - **Validates: Requirements 7.2**
 
