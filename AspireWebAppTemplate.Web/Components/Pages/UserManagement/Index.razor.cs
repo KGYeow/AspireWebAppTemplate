@@ -155,6 +155,12 @@ public partial class Index : ComponentBase
     protected string? SyncMessage { get; set; }
 
     /// <summary>
+    /// Cancellation token source for the current LDAP sync operation.
+    /// Used to abort the streaming sync when the user clicks Cancel.
+    /// </summary>
+    private CancellationTokenSource? _ldapSyncCts;
+
+    /// <summary>
     /// All roles metadata fetched from the API.
     /// Used for position-based authority checks.
     /// </summary>
@@ -621,12 +627,13 @@ public partial class Index : ComponentBase
         TotalToSync = 0;
         SyncMessage = null;
         ErrorMessage = null;
+        _ldapSyncCts = new CancellationTokenSource();
 
         int updated = 0, failed = 0;
 
         try
         {
-            await foreach (var item in UserService.SyncLdapUsersStreamAsync())
+            await foreach (var item in UserService.SyncLdapUsersStreamAsync(_ldapSyncCts.Token))
             {
                 if (item is null) continue;
 
@@ -637,10 +644,17 @@ public partial class Index : ComponentBase
                 else if (item.Updated == null) failed++;
 
                 await InvokeAsync(StateHasChanged);
+
+                // Yield to allow pending UI events (e.g., Cancel button click) to be processed
+                await Task.Delay(1);
             }
 
             SyncMessage = $"Sync completed. Updated {updated} of {TotalToSync} users; {failed} failed.";
             await dataGrid.ReloadServerData();
+        }
+        catch (OperationCanceledException)
+        {
+            SyncMessage = $"Sync canceled. Processed {SyncedCount} of {TotalToSync} users before cancellation ({updated} updated, {failed} failed).";
         }
         catch (Exception ex)
         {
@@ -649,18 +663,19 @@ public partial class Index : ComponentBase
         finally
         {
             IsSyncing = false;
+            _ldapSyncCts?.Dispose();
+            _ldapSyncCts = null;
             await InvokeAsync(StateHasChanged);
         }
     }
 
     // [LDAP] Cancels the current sync operation — remove if LDAP is not needed
     /// <summary>
-    /// Cancels the current LDAP sync operation (no-op when using API-based sync).
+    /// Cancels the current LDAP sync operation by signaling the CancellationTokenSource.
     /// </summary>
     protected void CancelSync()
     {
-        // API-based sync is a single call — cancellation is not supported.
-        // This method exists to satisfy the razor markup binding.
+        _ldapSyncCts?.Cancel();
     }
 
     /// <summary>

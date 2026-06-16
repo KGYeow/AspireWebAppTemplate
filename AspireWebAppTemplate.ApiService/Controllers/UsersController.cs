@@ -218,7 +218,6 @@ public class UsersController : BaseController
         if (request.Email is not null)
         {
             user.Email = request.Email;
-            user.UserName = request.Email;
         }
         if (request.PhoneNumber is not null) user.PhoneNumber = request.PhoneNumber;
         if (request.JobTitle is not null) user.JobTitle = request.JobTitle;

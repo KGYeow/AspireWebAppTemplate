@@ -123,7 +123,7 @@ public class RolesController : BaseController
             DisplayName = request.DisplayName,
             Description = request.Description,
             Position = request.Position,
-            IsActive = true,
+            IsActive = request.IsActive,
             CreatedUtc = DateTime.UtcNow
         };
 
@@ -183,6 +183,7 @@ public class RolesController : BaseController
         role.DisplayName = request.DisplayName;
         role.Description = request.Description;
         role.Position = request.Position;
+        role.IsActive = request.IsActive;
         role.UpdatedUtc = DateTime.UtcNow;
 
         var result = await _roleManager.UpdateAsync(role);

@@ -94,7 +94,8 @@ public partial class AddRoleDialog : ComponentBase
                 Name = Input.Name,
                 DisplayName = Input.DisplayName,
                 Description = Input.Description,
-                Position = Input.Position
+                Position = Input.Position,
+                IsActive = Input.IsActive
             };
 
             var result = await RoleService.CreateRoleAsync(request);
