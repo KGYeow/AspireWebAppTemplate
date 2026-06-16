@@ -99,9 +99,9 @@ else
     </MudPaper>
 
     <!-- Users Section -->
-    <MudPaper Class="pt-4 px-4 pb-2" Elevation="0">
+    <MudPaper Class="pa-4" Elevation="0">
         <!-- Section title + Assign Users button on same row -->
-        <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-3">
+        <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
             <MudText Typo="Typo.h6">Assigned Users (@UsersInRoleCount)</MudText>
             <MudButton Color="Color.Primary"
                        Variant="Variant.Filled"
@@ -112,6 +112,40 @@ else
                 Assign Users
             </MudButton>
         </MudStack>
+
+        <!-- Search Filter -->
+        <MudStack Row Spacing="2" AlignItems="AlignItems.Center" Class="mb-4">
+            <MudTextField T="string"
+                          ValueChanged="@(s => OnUsersSearch(s))"
+                          Placeholder="Search users..."
+                          Variant="Variant.Outlined"
+                          Typo="Typo.body2"
+                          Margin="Margin.Dense"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Rounded.Search"
+                          IconSize="Size.Small"
+                          DebounceInterval="500" />
+        </MudStack>
+
+        <!-- Bulk actions — visible only when users are selected -->
+        @if (selectedUsers.Count > 0)
+        {
+            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-2">
+                <MudButton StartIcon="@Icons.Material.Rounded.Close"
+                           OnClick="ClearUserSelection"
+                           Size="Size.Small"
+                           Style="text-transform: none;">
+                    @selectedUsers.Count selected
+                </MudButton>
+
+                <MudTooltip Text="Remove selected from role">
+                    <MudIconButton Icon="@Icons.Material.Outlined.PersonRemove"
+                                   Color="Color.Error"
+                                   OnClick="BulkRemoveUsersAsync"
+                                   Size="Size.Small" />
+                </MudTooltip>
+            </MudStack>
+        }
 
         <MudDataGrid T="UserViewModel"
                      @ref="usersDataGrid"
@@ -124,40 +158,6 @@ else
                      Hover
                      Dense
                      Bordered>
-            <ToolBarContent>
-                <MudTextField T="string"
-                              ValueChanged="@(s => OnUsersSearch(s))"
-                              Placeholder="Search users..."
-                              Variant="Variant.Outlined"
-                              Typo="Typo.body2"
-                              Margin="Margin.Dense"
-                              Adornment="Adornment.Start"
-                              AdornmentIcon="@Icons.Material.Rounded.Search"
-                              IconSize="Size.Small"
-                              DebounceInterval="500" />
-                <MudSpacer />
-
-                @if (selectedUsers.Count > 0)
-                {
-                    <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                        <MudTooltip Text="Clear selection">
-                            <MudButton StartIcon="@Icons.Material.Rounded.Close"
-                                       OnClick="ClearUserSelection"
-                                       Size="Size.Small"
-                                       Style="text-transform: none;">
-                                @selectedUsers.Count selected
-                            </MudButton>
-                        </MudTooltip>
-
-                        <MudTooltip Text="Remove selected from role">
-                            <MudIconButton Icon="@Icons.Material.Outlined.PersonRemove"
-                                           Color="Color.Error"
-                                           OnClick="BulkRemoveUsersAsync"
-                                           Size="Size.Small" />
-                        </MudTooltip>
-                    </MudStack>
-                }
-            </ToolBarContent>
             <NoRecordsContent>
                 <MudText Typo="Typo.body2">No users are assigned to this role.</MudText>
             </NoRecordsContent>

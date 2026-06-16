@@ -1,5 +1,6 @@
 using AspireWebAppTemplate.Abstractions;
 using AspireWebAppTemplate.ApiService.Data;
+using AspireWebAppTemplate.Core.Common.Defaults;
 using AspireWebAppTemplate.Core.Contracts;
 using AspireWebAppTemplate.Core.Contracts.AuditLog;
 using Microsoft.AspNetCore.Authorization;
@@ -154,8 +155,6 @@ public class AuditLogController : BaseController
     [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
     public async Task<IActionResult> ExportAuditLog([FromQuery] AuditLogQueryParams queryParams)
     {
-        const int maxExportRows = 50_000;
-
         var query = _dbContext.AuditLogEntries.AsNoTracking().AsQueryable();
 
         // Apply same filters as GetAuditLog
@@ -191,7 +190,7 @@ public class AuditLogController : BaseController
 
         var entries = await query
             .OrderByDescending(e => e.Timestamp)
-            .Take(maxExportRows)
+            .Take(ExportDefaults.MaxExportRows)
             .Select(e => new AuditLogEntryDto
             {
                 Id = e.Id,
