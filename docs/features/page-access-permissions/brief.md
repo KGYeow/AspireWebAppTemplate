@@ -30,9 +30,19 @@ This is inflexible for enterprise environments where roles change frequently.
 ## Technical Approach (Suggested)
 
 ### Database
-- `PagePermission` entity: `Id`, `RoleId`, `PagePath`, `PageDisplayName`
-- Seed default permissions matching current `[Authorize]` attributes
+- `PagePermission` entity: `Id`, `RoleId` (FK → AspNetRoles), `PagePath`, `PageDisplayName`
+- If a row exists for RoleId + PagePath → that role can access that page
+- If no row exists → access denied (whitelist model)
+- Seed default permissions matching current `[Authorize]` attributes and `DefaultNavigationProvider.Roles` values
 - Migration to create the table
+
+### Relationship to DefaultNavigationProvider
+- Currently `NavItem.Roles` controls menu visibility (hardcoded in C#)
+- After implementation: `NavItem.Roles` is removed; visibility comes from `PagePermission` table
+- `NavItem.AuthorizedOnly` / `NotAuthorizedOnly` remain (controls "logged in vs anonymous", not role-specific)
+- The menu structure (text, icon, href, children, headers, dividers) stays in `DefaultNavigationProvider` — these are design decisions, not admin-configurable
+- Only the **visibility per role** moves to the database
+- The admin page-permissions UI reads the available pages list FROM `DefaultNavigationProvider` (no separate page registry needed) — it shows each nav item's path and display name as the "assignable pages"
 
 ### API
 - `GET /api/page-permissions` — Returns all page-permission mappings
