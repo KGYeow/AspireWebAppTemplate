@@ -332,9 +332,8 @@ public partial class Index : ComponentBase, IDisposable
             var base64 = Convert.ToBase64String(bytes);
             var mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-            await JSRuntime.InvokeVoidAsync(
-                "eval",
-                $"(function(){{var a=document.createElement('a');a.href='data:{mimeType};base64,{base64}';a.download='{fileName}';document.body.appendChild(a);a.click();document.body.removeChild(a);}})()");
+            var downloadModule = await JSRuntime.InvokeAsync<Microsoft.JSInterop.IJSObjectReference>("import", "./js/download.js");
+            await downloadModule.InvokeVoidAsync("downloadFile", fileName, mimeType, base64);
         }
         catch (Exception)
         {

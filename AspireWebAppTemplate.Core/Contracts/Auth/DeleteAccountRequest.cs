@@ -5,5 +5,8 @@ namespace AspireWebAppTemplate.Core.Contracts.Auth;
 /// </summary>
 public sealed class DeleteAccountRequest
 {
+    /// <summary>
+    /// The user's current password, required to authorize account deletion.
+    /// </summary>
     public string Password { get; set; } = "";
 }

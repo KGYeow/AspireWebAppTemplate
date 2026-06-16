@@ -5,5 +5,8 @@ namespace AspireWebAppTemplate.Core.Contracts.Auth;
 /// </summary>
 public sealed class ChangeEmailRequest
 {
+    /// <summary>
+    /// The new email address the user wants to change to.
+    /// </summary>
     public string NewEmail { get; set; } = "";
 }

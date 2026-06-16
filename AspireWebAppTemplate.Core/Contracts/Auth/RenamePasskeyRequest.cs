@@ -1,9 +1,12 @@
 namespace AspireWebAppTemplate.Core.Contracts.Auth;
 
 /// <summary>
-/// Request payload for renaming a passkey.
+/// Request payload for renaming a passkey's friendly name.
 /// </summary>
 public sealed class RenamePasskeyRequest
 {
+    /// <summary>
+    /// The new friendly name for the passkey.
+    /// </summary>
     public string Name { get; set; } = "";
 }

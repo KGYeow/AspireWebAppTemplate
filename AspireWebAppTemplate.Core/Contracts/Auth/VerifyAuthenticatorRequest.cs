@@ -5,5 +5,8 @@ namespace AspireWebAppTemplate.Core.Contracts.Auth;
 /// </summary>
 public sealed class VerifyAuthenticatorRequest
 {
+    /// <summary>
+    /// The six-digit TOTP code from the user's authenticator app.
+    /// </summary>
     public string Code { get; set; } = "";
 }

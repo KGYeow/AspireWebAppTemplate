@@ -6,5 +6,8 @@ namespace AspireWebAppTemplate.Core.Contracts.Auth;
 /// </summary>
 public sealed class SetPasswordRequest
 {
+    /// <summary>
+    /// The new local password to set for the account.
+    /// </summary>
     public string NewPassword { get; set; } = "";
 }
