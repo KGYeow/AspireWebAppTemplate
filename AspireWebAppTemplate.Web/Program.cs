@@ -35,13 +35,14 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.SlidingExpiration = true;
     });
 
-// Authorization: register the page permission handler and configure a fallback policy
-// that requires authentication AND evaluates the PagePermissionRequirement for all routes
-// without an explicit [Authorize] or [AllowAnonymous] attribute.
+// Authorization: register the page permission handler and add PagePermissionRequirement
+// to the default policy (triggered by [Authorize] in _Imports.razor).
+// We do NOT set FallbackPolicy because that would block Blazor's /_blazor/negotiate and
+// static asset endpoints for unauthenticated users, breaking the login page circuit.
 builder.Services.AddScoped<IAuthorizationHandler, PagePermissionHandler>();
 builder.Services.AddAuthorization(options =>
 {
-    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+    options.DefaultPolicy = new AuthorizationPolicyBuilder()
         .RequireAuthenticatedUser()
         .AddRequirements(new PagePermissionRequirement())
         .Build();

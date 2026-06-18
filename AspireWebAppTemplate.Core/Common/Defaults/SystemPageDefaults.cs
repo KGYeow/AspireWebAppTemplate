@@ -24,7 +24,7 @@ public static class SystemPageDefaults
     /// Includes authentication flow pages (Login, Register, ForgotPassword, ResetPassword,
     /// PerformLogin) and error/access-denied pages.
     /// </summary>
-    public static readonly IReadOnlySet<strin4g> Paths = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    public static readonly IReadOnlySet<string> Paths = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
         "/Account/Login",
         "/Account/Register",
