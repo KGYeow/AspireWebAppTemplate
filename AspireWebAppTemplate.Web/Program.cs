@@ -3,10 +3,12 @@ using AspireWebAppTemplate.Core.Application.Abstractions;
 using AspireWebAppTemplate.Core.Application.Services;
 using AspireWebAppTemplate.Web;
 using AspireWebAppTemplate.Web.Abstractions;
+using AspireWebAppTemplate.Web.Authorization;
 using AspireWebAppTemplate.Web.Components;
 using AspireWebAppTemplate.Web.Endpoints;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using MudBlazor.Services;
@@ -33,7 +35,17 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.SlidingExpiration = true;
     });
 
-builder.Services.AddAuthorization();
+// Authorization: register the page permission handler and configure a fallback policy
+// that requires authentication AND evaluates the PagePermissionRequirement for all routes
+// without an explicit [Authorize] or [AllowAnonymous] attribute.
+builder.Services.AddScoped<IAuthorizationHandler, PagePermissionHandler>();
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .AddRequirements(new PagePermissionRequirement())
+        .Build();
+});
 builder.Services.AddCascadingAuthenticationState();
 
 // Blazor Server auth state provider (reads from the cookie on the circuit)
@@ -61,12 +73,16 @@ builder.Services.AddHttpClient<ApiRoleService>(client =>
 builder.Services.AddHttpClient<ApiAuditLogService>(client =>
     client.BaseAddress = new("https+http://apiservice"))
     .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
+builder.Services.AddHttpClient<ApiPagePermissionService>(client =>
+    client.BaseAddress = new("https+http://apiservice"))
+    .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
 
 // Application services (frontend-only, no API calls)
 builder.Services.AddSingleton<INavigationProvider, DefaultNavigationProvider>();
 builder.Services.AddSingleton<ITimeZoneService, TimeZoneService>();
 builder.Services.AddScoped<IUserTimeZoneContext, UserTimeZoneContext>();
 builder.Services.AddScoped<IThemeStateService, ThemeStateService>();
+builder.Services.AddScoped<IPagePermissionContext, PagePermissionContext>();
 
 // MudBlazor
 builder.Services.AddMudServices(config =>

@@ -1,15 +1,40 @@
 @using AspireWebAppTemplate.Core.Common
 
-<MudNavMenu
-    Color="Color.Info"
-    Margin="Margin.Dense"
-    Class="@NavMenuClass"
-    Rounded="DrawerOpen"
-    Style="@NavMenuStyle"
->
-    <!-- Render each top-level item (recursively handles children for groups) -->
-    @foreach (var item in Items ?? Array.Empty<NavItem>())
-    {
-        @RenderItem(item, isRoot: true)
-    }
-</MudNavMenu>
+@* 
+    Filtering pipeline:
+    1. Loading state check — show skeleton placeholder while PagePermissionContext.IsLoaded is false
+    2. Auth-based filtering — AuthorizedOnly/NotAuthorizedOnly/Roles via AuthorizeView wrapping
+    3. Permission-based filtering — PagePermissionContext.CanAccess for page-level access control
+    System_Pages (login, register, error, etc.) always bypass permission checks.
+*@
+
+@if (!PagePermissionContext.IsLoaded)
+{
+    <!-- Loading skeleton placeholder while permissions are being loaded.
+         Prevents flash of unauthorized nav items before the permission cache is populated. -->
+    <div class="pa-4">
+        <MudSkeleton Width="80%" Height="28px" Class="mb-2" />
+        <MudSkeleton Width="60%" Height="28px" Class="mb-2" />
+        <MudSkeleton Width="70%" Height="28px" Class="mb-2" />
+        <MudSkeleton Width="50%" Height="28px" Class="mb-2" />
+        <MudSkeleton Width="65%" Height="28px" />
+    </div>
+}
+else
+{
+    <MudNavMenu
+        Color="Color.Info"
+        Margin="Margin.Dense"
+        Class="@NavMenuClass"
+        Rounded="DrawerOpen"
+        Style="@NavMenuStyle"
+    >
+        <!-- Render each top-level item (recursively handles children for groups).
+             Items are filtered by ShouldShowItem (Links) and HasVisibleChildren (Groups)
+             inside RenderItem, after auth-based wrapping. -->
+        @foreach (var item in Items ?? Array.Empty<NavItem>())
+        {
+            @RenderItem(item, isRoot: true)
+        }
+    </MudNavMenu>
+}

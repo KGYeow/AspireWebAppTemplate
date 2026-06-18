@@ -49,6 +49,13 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
     /// </summary>
     [Inject] private IThemeStateService ThemeState { get; set; } = default!;
 
+    /// <summary>
+    /// Per-circuit page permission context. Initialized once during circuit startup so that
+    /// the <see cref="PagePermissionHandler"/> and NavMenu have cached permissions available
+    /// for zero-latency authorization checks.
+    /// </summary>
+    [Inject] private IPagePermissionContext PagePermissionContext { get; set; } = default!;
+
     #endregion
 
     #region Cascading Parameters
@@ -119,6 +126,10 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
 
             // Initialize the scoped user time zone context for this circuit (before children render)
             await UserTimeZone.InitializeAsync(userResult.Data.Id);
+
+            // Initialize the per-circuit page permission cache so that the PagePermissionHandler
+            // and NavMenu have cached permissions available before any navigation check occurs.
+            await PagePermissionContext.InitializeAsync();
         }
         catch (Exception ex)
         {

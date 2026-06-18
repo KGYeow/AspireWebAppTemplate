@@ -14,7 +14,6 @@ namespace AspireWebAppTemplate.ApiService.Controllers;
 /// <summary>
 /// Manages user accounts including CRUD operations, activation, and role assignment.
 /// </summary>
-[ApiController]
 [Route("api/[controller]")]
 [Authorize(Roles = "Admin")]
 public class UsersController : BaseController

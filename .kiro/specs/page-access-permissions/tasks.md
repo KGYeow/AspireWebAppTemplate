@@ -6,8 +6,8 @@ Replace hardcoded `[Authorize(Roles = "...")]` attributes with a database-driven
 
 ## Tasks
 
-- [ ] 1. Create shared DTOs and PagePermission entity
-  - [ ] 1.1 Create page permission DTOs in AspireWebAppTemplate.Core
+- [x] 1. Create shared DTOs and PagePermission entity
+  - [x] 1.1 Create page permission DTOs in AspireWebAppTemplate.Core
     - Create `Contracts/PagePermissions/` directory
     - Add `RolePermissionsDto` record: `(string RoleId, string RoleName, List<PagePermissionDto> Pages)`
     - Add `PagePermissionDto` record: `(string PagePath, string PageDisplayName)`
@@ -15,13 +15,13 @@ Replace hardcoded `[Authorize(Roles = "...")]` attributes with a database-driven
     - Include full XML documentation comments on all types and properties
     - _Requirements: 3.1, 3.2, 14.1_
 
-  - [ ] 1.2 Create PagePermission entity in ApiService
+  - [x] 1.2 Create PagePermission entity in ApiService
     - Create `Data/Entities/PagePermission.cs` with Id, RoleId, PagePath, PageDisplayName properties
     - Add navigation property `ApplicationRole Role`
     - Add XML documentation comments on entity class and all properties
     - _Requirements: 1.1, 14.1_
 
-  - [ ] 1.3 Configure PagePermission in ApplicationDbContext
+  - [x] 1.3 Configure PagePermission in ApplicationDbContext
     - Register `DbSet<PagePermission>` in `ApplicationDbContext`
     - Configure table name "PagePermissions", primary key, max lengths (RoleId: 450, PagePath: 256, PageDisplayName: 256)
     - Configure unique composite index on `(RoleId, PagePath)`
@@ -29,19 +29,19 @@ Replace hardcoded `[Authorize(Roles = "...")]` attributes with a database-driven
     - Add inline comments explaining design rationale for index and cascade behavior
     - _Requirements: 1.2, 1.3, 1.4, 14.2_
 
-  - [ ] 1.4 Create and apply EF Core migration
+  - [x] 1.4 Create and apply EF Core migration
     - Run `dotnet ef migrations add AddPagePermissions` in ApiService project
     - Verify generated migration creates the PagePermissions table with correct schema
     - _Requirements: 1.1, 1.2, 1.3, 1.4_
 
-- [ ] 2. Implement Page Permission Service in ApiService
-  - [ ] 2.1 Create IPagePermissionService interface
+- [x] 2. Implement Page Permission Service in ApiService
+  - [x] 2.1 Create IPagePermissionService interface
     - Create `Abstractions/IPagePermissionService.cs`
     - Define methods: `GetAllPermissionsAsync()`, `GetMyPagesAsync(string userId)`, `UpdateRolePermissionsAsync(string roleId, List<string> pagePaths)`
     - Include XML documentation on interface and all methods with `<summary>`, `<param>`, `<returns>` tags
     - _Requirements: 3.1, 3.2, 3.3, 14.1_
 
-  - [ ] 2.2 Implement PagePermissionService
+  - [x] 2.2 Implement PagePermissionService
     - Create `Services/PagePermissionService.cs` implementing `IPagePermissionService`
     - Inject `ApplicationDbContext`, `UserManager<ApplicationUser>`, `RoleManager<ApplicationRole>`, and `INavigationProvider`
     - `GetAllPermissionsAsync`: Query all PagePermissions grouped by role, include role name
@@ -50,38 +50,38 @@ Replace hardcoded `[Authorize(Roles = "...")]` attributes with a database-driven
     - Add inline comments explaining whitelist model, full-replacement strategy, and validation logic
     - _Requirements: 1.5, 1.6, 1.7, 3.1, 3.2, 3.3, 3.4, 3.7, 3.8, 4.1, 4.4, 14.3_
 
-  - [ ]* 2.3 Write property test: Whitelist Model (Property 1)
+  - [x] 2.3 Write property test: Whitelist Model (Property 1)
     - **Property 1: Access If and Only If Record Exists**
     - Test with random role-page combinations and random DB states using FsCheck
     - Verify CanAccess ↔ record exists equivalence with case-insensitive comparison
     - **Validates: Requirements 1.5, 1.6**
 
-  - [ ]* 2.4 Write property test: Validation Rejects Invalid PagePaths (Property 2)
+  - [x] 2.4 Write property test: Validation Rejects Invalid PagePaths (Property 2)
     - **Property 2: Validation Rejects Invalid PagePaths**
     - Generate random strings (missing "/", >256 chars, query strings, fragments)
     - Verify system rejects creation with appropriate validation errors
     - **Validates: Requirements 1.7**
 
-  - [ ]* 2.5 Write property test: PUT Idempotent Full Replacement (Property 7)
+  - [x] 2.5 Write property test: PUT Idempotent Full Replacement (Property 7)
     - **Property 7: PUT Idempotent Full Replacement**
     - Generate random valid path lists, call UpdateRolePermissionsAsync, verify result matches exactly
     - Repeat call and verify identical outcome
     - **Validates: Requirements 3.2**
 
-  - [ ]* 2.6 Write property test: PUT Rejects Unregistered Paths (Property 8)
+  - [x] 2.6 Write property test: PUT Rejects Unregistered Paths (Property 8)
     - **Property 8: PUT Rejects Unregistered Paths**
     - Generate random strings not matching registered pages
     - Verify service returns 400 identifying invalid paths
     - **Validates: Requirements 3.8**
 
-  - [ ]* 2.7 Write property test: Permission Union Across Roles (Property 6)
+  - [x] 2.7 Write property test: Permission Union Across Roles (Property 6)
     - **Property 6: Permission Union Across Roles**
     - Generate random users with multiple roles and varying permission sets
     - Verify GetMyPagesAsync returns exact union of all role permissions
     - **Validates: Requirements 3.3**
 
-- [ ] 3. Implement PagePermissions API Controller
-  - [ ] 3.1 Create PagePermissionsController
+- [x] 3. Implement PagePermissions API Controller
+  - [x] 3.1 Create PagePermissionsController
     - Create `Controllers/PagePermissionsController.cs` extending `BaseController`
     - Route: `[Route("api/page-permissions")]`
     - `GET /api/page-permissions` — Admin only, returns all permissions grouped by role
@@ -93,21 +93,21 @@ Replace hardcoded `[Authorize(Roles = "...")]` attributes with a database-driven
     - Add XML documentation comments on controller class and all action methods
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 14.1_
 
-  - [ ] 3.2 Register PagePermissionService in DI
+  - [x] 3.2 Register PagePermissionService in DI
     - Register `IPagePermissionService` → `PagePermissionService` as scoped in `Program.cs`
     - _Requirements: 3.1_
 
-- [ ] 4. Checkpoint - Ensure API layer builds and tests pass
+- [x] 4. Checkpoint - Ensure API layer builds and tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 5. Implement PagePermissionContext in Web project
-  - [ ] 5.1 Create IPagePermissionContext interface
+- [x] 5. Implement PagePermissionContext in Web project
+  - [x] 5.1 Create IPagePermissionContext interface
     - Create `Abstractions/IPagePermissionContext.cs` in Web project
     - Define: `bool IsLoaded`, `bool CanAccess(string pagePath)`, `IReadOnlyList<string> GetAccessiblePages()`, `Task InitializeAsync()`
     - Include XML documentation on interface and all members
     - _Requirements: 5.1, 5.3, 5.4, 14.1_
 
-  - [ ] 5.2 Create ApiPagePermissionService HttpClient wrapper
+  - [x] 5.2 Create ApiPagePermissionService HttpClient wrapper
     - Create `Services/ApiPagePermissionService.cs` in Web project
     - Inject `HttpClient` configured with Aspire service discovery ("https+http://apiservice")
     - Implement method to call `GET /api/page-permissions/my-pages` and return `List<string>`
@@ -117,7 +117,7 @@ Replace hardcoded `[Authorize(Roles = "...")]` attributes with a database-driven
     - Include XML documentation on class and all methods
     - _Requirements: 5.2, 8.6, 8.7, 14.1_
 
-  - [ ] 5.3 Implement PagePermissionContext
+  - [x] 5.3 Implement PagePermissionContext
     - Create `Services/PagePermissionContext.cs` implementing `IPagePermissionContext`
     - Maintain `HashSet<string>` with `StringComparer.OrdinalIgnoreCase` for O(1) lookups
     - Define static `SystemPages` set containing all System_Page paths
@@ -128,24 +128,24 @@ Replace hardcoded `[Authorize(Roles = "...")]` attributes with a database-driven
     - Add inline comments explaining per-circuit caching strategy, O(1) lookup rationale, and System_Pages bypass
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 12.1, 12.6, 14.3_
 
-  - [ ] 5.4 Register PagePermissionContext in DI as scoped
+  - [x] 5.4 Register PagePermissionContext in DI as scoped
     - Register `IPagePermissionContext` → `PagePermissionContext` as scoped in Web `Program.cs`
     - Register `ApiPagePermissionService` HttpClient with Aspire service discovery and `UserIdentityDelegatingHandler`
     - _Requirements: 5.1, 12.2_
 
-  - [ ]* 5.5 Write property test: Case-Insensitive Permission Lookup (Property 5)
+  - [x] 5.5 Write property test: Case-Insensitive Permission Lookup (Property 5)
     - **Property 5: Case-Insensitive Permission Lookup**
     - Generate random page paths, store in context, verify CanAccess with random case mutations
     - **Validates: Requirements 5.3, 6.6, 12.1**
 
-  - [ ]* 5.6 Write property test: System Pages Always Accessible (Property 4)
+  - [x] 5.6 Write property test: System Pages Always Accessible (Property 4)
     - **Property 4: System Pages Always Accessible**
     - Test with empty, partial, and full cache states
     - Verify all System_Page paths return true from CanAccess regardless of cache content
     - **Validates: Requirements 5.6, 6.4**
 
-- [ ] 6. Implement PagePermissionHandler for authorization enforcement
-  - [ ] 6.1 Create PagePermissionRequirement and PagePermissionHandler
+- [x] 6. Implement PagePermissionHandler for authorization enforcement
+  - [x] 6.1 Create PagePermissionRequirement and PagePermissionHandler
     - Create `Authorization/PagePermissionRequirement.cs` — empty requirement class implementing `IAuthorizationRequirement`
     - Create `Authorization/PagePermissionHandler.cs` implementing `AuthorizationHandler<PagePermissionRequirement>`
     - Inject `IPagePermissionContext`
@@ -154,23 +154,23 @@ Replace hardcoded `[Authorize(Roles = "...")]` attributes with a database-driven
     - Add XML documentation and inline comments explaining evaluation order
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 12.3, 14.3, 14.4_
 
-  - [ ] 6.2 Register authorization handler and policy in Web Program.cs
+  - [x] 6.2 Register authorization handler and policy in Web Program.cs
     - Register `PagePermissionHandler` as `IAuthorizationHandler` in DI
     - Add `PagePermissionRequirement` as a fallback policy or apply to route authorization
     - Ensure PagePermissionContext.InitializeAsync is called during circuit initialization (e.g., in MainLayout or App component OnInitializedAsync)
     - _Requirements: 6.1, 12.2_
 
-  - [ ]* 6.3 Write property test: Admin Immutable Full Access (Property 3)
+  - [x] 6.3 Write property test: Admin Immutable Full Access (Property 3)
     - **Property 3: Admin Immutable Full Access**
     - Generate random page paths and random cache states
     - Verify handler always succeeds for Admin role without consulting cache
     - **Validates: Requirements 4.1, 4.3, 6.3**
 
-- [ ] 7. Checkpoint - Ensure authorization infrastructure builds and tests pass
+- [x] 7. Checkpoint - Ensure authorization infrastructure builds and tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 8. Implement NavMenu permission filtering
-  - [ ] 8.1 Modify NavMenu to filter by PagePermissionContext
+- [x] 8. Implement NavMenu permission filtering
+  - [x] 8.1 Modify NavMenu to filter by PagePermissionContext
     - Inject `IPagePermissionContext` into `NavMenu.razor.cs`
     - For each NavItem of type Link: show only if `CanAccess(Href)` returns true (after auth-based filtering)
     - For Group items: hide group if all children are hidden after combined filtering
@@ -181,20 +181,20 @@ Replace hardcoded `[Authorize(Roles = "...")]` attributes with a database-driven
     - Add inline comments explaining the filtering pipeline order
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 11.1, 11.5, 14.3_
 
-  - [ ]* 8.2 Write property test: NavMenu Filters Inaccessible Items (Property 9)
+  - [x] 8.2 Write property test: NavMenu Filters Inaccessible Items (Property 9)
     - **Property 9: NavMenu Filters Inaccessible Items**
     - Generate random NavItem sets and random permission states
     - Verify only accessible Link items (or System_Pages) are rendered
     - **Validates: Requirements 7.1**
 
-  - [ ]* 8.3 Write property test: Empty Groups Hidden (Property 10)
+  - [x] 8.3 Write property test: Empty Groups Hidden (Property 10)
     - **Property 10: Empty Groups Hidden**
     - Generate random group structures with various child visibility combinations
     - Verify groups with zero visible children are hidden
     - **Validates: Requirements 7.2**
 
-- [ ] 9. Implement Admin Page Permission Matrix UI
-  - [ ] 9.1 Create Page Permissions admin page component
+- [x] 9. Implement Admin Page Permission Matrix UI
+  - [x] 9.1 Create Page Permissions admin page component
     - Create `Components/Pages/Admin/PagePermissions/PagePermissions.razor` and `.razor.cs`
     - Route: `/admin/page-permissions`, require Admin role via `[Authorize(Roles = "Admin")]`
     - Inject `ApiPagePermissionService`, `INavigationProvider`
@@ -205,39 +205,39 @@ Replace hardcoded `[Authorize(Roles = "...")]` attributes with a database-driven
     - Add XML documentation and inline comments
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.10, 8.11, 9.5, 14.1, 14.3_
 
-  - [ ] 9.2 Implement permission toggle save logic
+  - [x] 9.2 Implement permission toggle save logic
     - On toggle: call `PUT /api/page-permissions/{roleId}` with complete updated page list
     - Show loading indicator on affected cell, disable toggles for that role during save
     - On failure: revert toggle to previous state, show error snackbar (auto-dismiss 5 seconds)
     - On success: update local state to reflect change
     - _Requirements: 8.7, 8.8, 8.9, 9.1_
 
-  - [ ]* 9.3 Write property test: System Pages Excluded From Admin Matrix (Property 11)
+  - [x] 9.3 Write property test: System Pages Excluded From Admin Matrix (Property 11)
     - **Property 11: System Pages Excluded From Admin Matrix**
     - Verify all System_Page paths are absent from the matrix page list
     - **Validates: Requirements 8.10**
 
-- [ ] 10. Update DefaultNavigationProvider and remove hardcoded attributes
-  - [ ] 10.1 Add Page Permissions NavItem to DefaultNavigationProvider
+- [x] 10. Update DefaultNavigationProvider and remove hardcoded attributes
+  - [x] 10.1 Add Page Permissions NavItem to DefaultNavigationProvider
     - Add Link NavItem: Text "Page Permissions", Href "admin/page-permissions", Icon "material-symbols-rounded/lock"
     - Place after existing items in Administration group's Children
     - Set `AuthorizedOnly = true`
     - _Requirements: 13.1, 13.2_
 
-  - [ ] 10.2 Remove Roles property values from DefaultNavigationProvider
+  - [x] 10.2 Remove Roles property values from DefaultNavigationProvider
     - Remove all `Roles = "Admin"` assignments from NavItem definitions
     - Preserve `AuthorizedOnly = true` on items that previously had Roles set
     - Retain the `Roles` property definition on NavItem model (do not delete the property)
     - _Requirements: 11.2, 11.3, 11.4_
 
-  - [ ] 10.3 Remove hardcoded [Authorize(Roles = "...")] from page components
+  - [x] 10.3 Remove hardcoded [Authorize(Roles = "...")] from page components
     - Remove `[Authorize(Roles = "Admin")]` attributes from Admin pages (AuditLog, RoleManagement, UserManagement, etc.)
     - Keep global `[Authorize]` in `_Imports.razor`
     - Keep `[AllowAnonymous]` on System_Pages (Login, Register, AccessDenied, Error, etc.)
     - _Requirements: 10.1, 10.2, 10.3, 10.4_
 
-- [ ] 11. Implement seed data for default permissions
-  - [ ] 11.1 Extend SeedData to seed PagePermission records
+- [x] 11. Implement seed data for default permissions
+  - [x] 11.1 Extend SeedData to seed PagePermission records
     - Modify `Data/SeedData.cs` in ApiService
     - Query `DefaultNavigationProvider.GetMainMenuItems()` to get all Link NavItems
     - For pages that previously had `Roles = "Admin"`: insert PagePermission grants for Admin role
@@ -247,7 +247,7 @@ Replace hardcoded `[Authorize(Roles = "...")]` attributes with a database-driven
     - Add inline comments explaining seed strategy
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 14.3_
 
-- [ ] 12. Final checkpoint - Ensure full solution builds and all tests pass
+- [x] 12. Final checkpoint - Ensure full solution builds and all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes

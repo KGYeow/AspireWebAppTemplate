@@ -1,8 +1,11 @@
 using AspireWebAppTemplate.Abstractions;
+using AspireWebAppTemplate.ApiService.Abstractions;
 using AspireWebAppTemplate.ApiService.Authentication;
 using AspireWebAppTemplate.ApiService.Data;
 using AspireWebAppTemplate.ApiService.Data.Entities;
 using AspireWebAppTemplate.ApiService.Services;
+using AspireWebAppTemplate.Core.Application.Abstractions;
+using AspireWebAppTemplate.Core.Application.Services;
 using AspireWebAppTemplate.Options;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
@@ -51,10 +54,12 @@ builder.Services.AddMemoryCache();
 builder.Services.AddControllers();
 
 // Application services
+builder.Services.AddSingleton<INavigationProvider, DefaultNavigationProvider>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 builder.Services.AddScoped<IExcelExportService, ExcelExportService>();
 builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<IRegisterService, RegisterService>();
+builder.Services.AddScoped<IPagePermissionService, PagePermissionService>();
 builder.Services.AddScoped<ILdapAuthService, LdapAuthService>();
 builder.Services.AddScoped<ILdapLoginService, LdapLoginService>();
 

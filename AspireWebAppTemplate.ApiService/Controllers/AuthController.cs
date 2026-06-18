@@ -4,10 +4,7 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using AspireWebAppTemplate.Abstractions;
 using AspireWebAppTemplate.ApiService.Data.Entities;
-using AspireWebAppTemplate.Core.Contracts;
 using AspireWebAppTemplate.Core.Contracts.Auth;
-using AspireWebAppTemplate.Core.Contracts.AuditLog;
-using AspireWebAppTemplate.Core.Contracts.Roles;
 using AspireWebAppTemplate.Core.Contracts.Users;
 using AspireWebAppTemplate.Core.Domain.Enums;
 using AspireWebAppTemplate.Options;
@@ -23,7 +20,6 @@ namespace AspireWebAppTemplate.ApiService.Controllers;
 /// <summary>
 /// Handles authentication operations including login, logout, registration, and password management.
 /// </summary>
-[ApiController]
 [Route("api/[controller]")]
 public class AuthController : BaseController
 {

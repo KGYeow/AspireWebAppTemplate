@@ -12,7 +12,6 @@ namespace AspireWebAppTemplate.ApiService.Controllers;
 /// <summary>
 /// Provides audit log querying and Excel export capabilities.
 /// </summary>
-[ApiController]
 [Route("api/audit-log")]
 [Authorize(Roles = "Admin")]
 public class AuditLogController : BaseController

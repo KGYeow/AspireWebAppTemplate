@@ -27,6 +27,12 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     public DbSet<AuditLogEntry> AuditLogEntries { get; set; } = null!;
 
     /// <summary>
+    /// Gets or sets the page permissions table, storing role-to-page access grants
+    /// for the database-driven authorization system.
+    /// </summary>
+    public DbSet<PagePermission> PagePermissions { get; set; } = null!;
+
+    /// <summary>
     /// Configures the entity mappings and table names for the database.
     /// </summary>
     /// <param name="modelBuilder">The model builder.</param>
@@ -93,6 +99,30 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
                   .WithMany()
                   .HasForeignKey(e => e.UserId)
                   .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // Configure PagePermission entity
+        modelBuilder.Entity<PagePermission>(entity =>
+        {
+            entity.ToTable("PagePermissions");
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.RoleId).IsRequired().HasMaxLength(450);
+            entity.Property(e => e.PagePath).IsRequired().HasMaxLength(256);
+            entity.Property(e => e.PageDisplayName).IsRequired().HasMaxLength(256);
+
+            // Unique composite index on (RoleId, PagePath) prevents duplicate permission
+            // grants for the same role-page combination and enforces the whitelist model's
+            // invariant that at most one record exists per role-page pair.
+            entity.HasIndex(e => new { e.RoleId, e.PagePath }).IsUnique();
+
+            // Cascade delete ensures that when a role is removed from the system,
+            // all associated page permission grants are automatically cleaned up,
+            // preventing orphaned records that reference a non-existent role.
+            entity.HasOne(e => e.Role)
+                  .WithMany()
+                  .HasForeignKey(e => e.RoleId)
+                  .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

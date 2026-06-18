@@ -5,7 +5,6 @@ namespace AspireWebAppTemplate.ApiService.Controllers;
 /// <summary>
 /// Example weather forecast controller demonstrating a simple API endpoint.
 /// </summary>
-[ApiController]
 [Route("[controller]")]
 public class WeatherForecastController : BaseController
 {

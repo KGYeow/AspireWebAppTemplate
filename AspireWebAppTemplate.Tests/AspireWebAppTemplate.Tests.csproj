@@ -25,6 +25,7 @@
     <ProjectReference Include="..\AspireWebAppTemplate.Core\AspireWebAppTemplate.Core.csproj" />
     <ProjectReference Include="..\AspireWebAppTemplate.UI\AspireWebAppTemplate.UI.csproj" />
     <ProjectReference Include="..\AspireWebAppTemplate.ApiService\AspireWebAppTemplate.ApiService.csproj" />
+    <ProjectReference Include="..\AspireWebAppTemplate.Web\AspireWebAppTemplate.Web.csproj" />
   </ItemGroup>
 
   <ItemGroup>
