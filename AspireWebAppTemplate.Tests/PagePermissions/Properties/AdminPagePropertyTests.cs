@@ -9,7 +9,7 @@ using Moq;
 using System.Reflection;
 using Gen = FsCheck.Fluent.Gen;
 using Property = FsCheck.Property;
-using AdminPagePermissions = AspireWebAppTemplate.Web.Components.Pages.Admin.PagePermissions.PagePermissions;
+using AdminPagePermissions = AspireWebAppTemplate.Web.Components.Pages.Admin.PagePermissions.Index;
 
 namespace AspireWebAppTemplate.Tests.PagePermissions.Properties;
 

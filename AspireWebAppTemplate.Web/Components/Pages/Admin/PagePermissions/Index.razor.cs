@@ -1,8 +1,7 @@
 using AspireWebAppTemplate.Core.Application.Abstractions;
-using AspireWebAppTemplate.Core.Common;
-using AspireWebAppTemplate.Core.Common.Defaults;
 using AspireWebAppTemplate.Core.Contracts.PagePermissions;
 using AspireWebAppTemplate.Core.Contracts.Roles;
+using AspireWebAppTemplate.Core.Extensions;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
@@ -16,7 +15,7 @@ namespace AspireWebAppTemplate.Web.Components.Pages.Admin.PagePermissions;
 /// The Admin role column is always fully checked and non-interactive.
 /// System_Pages are excluded from the matrix since they are always accessible.
 /// </summary>
-public partial class PagePermissions : ComponentBase
+public partial class Index : ComponentBase
 {
     #region Injected Services
 
@@ -38,7 +37,7 @@ public partial class PagePermissions : ComponentBase
     /// <summary>
     /// Structured logger for diagnostics.
     /// </summary>
-    [Inject] private ILogger<PagePermissions> Logger { get; set; } = default!;
+    [Inject] private ILogger<Index> Logger { get; set; } = default!;
 
     #endregion
 
@@ -161,53 +160,18 @@ public partial class PagePermissions : ComponentBase
 
     /// <summary>
     /// Extracts all Link-type NavItems from the navigation provider hierarchy,
-    /// excluding System_Pages. Recursively traverses groups to find nested links.
+    /// excluding System_Pages. Uses the shared extension method for consistency.
     /// </summary>
     /// <returns>A flat list of <see cref="PageRow"/> entries for the matrix.</returns>
     private List<PageRow> ExtractPageRows()
     {
-        var pages = new List<PageRow>();
-        var navItems = NavigationProvider.GetMainMenuItems();
-
-        // Recursively extract all Link items from the navigation tree
-        ExtractLinksRecursive(navItems, pages);
-
-        return pages;
-    }
-
-    /// <summary>
-    /// Recursively traverses the NavItem tree to find all Link items.
-    /// Group containers are traversed but not added as rows themselves.
-    /// Header and Divider items are skipped entirely.
-    /// </summary>
-    /// <param name="items">The nav items to traverse.</param>
-    /// <param name="pages">The accumulator list of page rows.</param>
-    private void ExtractLinksRecursive(IReadOnlyList<NavItem> items, List<PageRow> pages)
-    {
-        foreach (var item in items)
-        {
-            if (item.Type == NavItemType.Link && !string.IsNullOrEmpty(item.Href))
+        return NavigationProvider.GetAllLinkPages()
+            .Select(p => new PageRow
             {
-                // Normalize path: ensure it starts with "/"
-                var pagePath = item.Href.StartsWith('/') ? item.Href : $"/{item.Href}";
-
-                // Exclude System_Pages from the matrix — they are always accessible
-                if (!SystemPageDefaults.Paths.Contains(pagePath))
-                {
-                    pages.Add(new PageRow
-                    {
-                        PagePath = pagePath,
-                        DisplayName = item.Text,
-                        Icon = item.Icon
-                    });
-                }
-            }
-            else if (item.Type == NavItemType.Group && item.Children is not null)
-            {
-                // Recurse into group children to find nested Link items
-                ExtractLinksRecursive(item.Children, pages);
-            }
-        }
+                PagePath = p.PagePath,
+                DisplayName = p.DisplayName
+            })
+            .ToList();
     }
 
     #endregion
@@ -278,7 +242,7 @@ public partial class PagePermissions : ComponentBase
 
             // Build the full replacement list for the PUT request
             var updatedPaths = _permissionsByRole[roleId].ToList();
-            var request = new UpdateRolePermissionsRequest(updatedPaths);
+            var request = new UpdateRolePermissionsRequest { PagePaths = updatedPaths };
 
             // Call the API with the complete updated permission set
             var result = await PermissionService.UpdateRolePermissionsAsync(roleId, request);
@@ -341,11 +305,6 @@ public partial class PagePermissions : ComponentBase
         /// The human-readable display name of the page (e.g., "Audit Log").
         /// </summary>
         public string DisplayName { get; set; } = "";
-
-        /// <summary>
-        /// Optional icon for the page (e.g., "material-symbols-rounded/history").
-        /// </summary>
-        public string? Icon { get; set; }
     }
 
     #endregion

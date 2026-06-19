@@ -2,6 +2,7 @@ using AspireWebAppTemplate.ApiService.Data.Entities;
 using AspireWebAppTemplate.Core.Application.Abstractions;
 using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Core.Common.Defaults;
+using AspireWebAppTemplate.Core.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -210,9 +211,19 @@ public static class SeedData
         INavigationProvider navigationProvider,
         ILogger logger)
     {
+        // Only seed permissions if the table is completely empty (first-time setup).
+        // This prevents overwriting admin-configured permissions on every app restart.
+        // After initial seed, all permission management is done through the admin UI.
+        var hasAnyPermissions = await dbContext.PagePermissions.AnyAsync();
+        if (hasAnyPermissions)
+        {
+            logger.LogInformation("PagePermissions table already has data. Skipping seed.");
+            return;
+        }
+
         // Extract all Link NavItems from the navigation provider, including those nested in groups.
         // These represent the universe of configurable pages in the system.
-        var allPages = ExtractLinkPages(navigationProvider.GetMainMenuItems());
+        var allPages = navigationProvider.GetAllLinkPages();
 
         if (allPages.Count == 0)
         {
@@ -229,8 +240,6 @@ public static class SeedData
         var adminPages = allPages.Where(p => p.PagePath.StartsWith("/admin/", StringComparison.OrdinalIgnoreCase)).ToList();
         var nonAdminPages = allPages.Where(p => !p.PagePath.StartsWith("/admin/", StringComparison.OrdinalIgnoreCase)).ToList();
 
-        var seededCount = 0;
-
         foreach (var role in allRoles)
         {
             // Determine which pages this role should receive:
@@ -242,82 +251,17 @@ public static class SeedData
 
             foreach (var page in pagesToGrant)
             {
-                // Upsert logic: check existence before insert to maintain idempotency.
-                // This allows the seed to run multiple times without creating duplicates.
-                var exists = await dbContext.PagePermissions.AnyAsync(pp =>
-                    pp.RoleId == role.Id &&
-                    pp.PagePath == page.PagePath);
-
-                if (exists)
-                    continue;
-
                 dbContext.PagePermissions.Add(new PagePermission
                 {
                     RoleId = role.Id,
                     PagePath = page.PagePath,
-                    PageDisplayName = page.PageDisplayName
+                    PageDisplayName = page.DisplayName
                 });
-
-                seededCount++;
             }
         }
 
-        if (seededCount > 0)
-        {
-            await dbContext.SaveChangesAsync();
-            logger.LogInformation("Seeded {Count} PagePermission record(s) across {RoleCount} role(s).",
-                seededCount, allRoles.Count);
-        }
-        else
-        {
-            logger.LogInformation("All PagePermission records already exist. No seeding required.");
-        }
-    }
-
-    /// <summary>
-    /// Recursively extracts all Link-type <see cref="NavItem"/> entries from the navigation
-    /// hierarchy, returning their normalized path (with "/" prefix) and display name.
-    /// </summary>
-    /// <remarks>
-    /// Skips Header, Divider, and Group container items themselves, but recurses into
-    /// Group children. System_Pages are excluded because they bypass all permission checks.
-    /// </remarks>
-    private static List<(string PagePath, string PageDisplayName)> ExtractLinkPages(IReadOnlyList<NavItem> items)
-    {
-        // System pages are always accessible and should never appear in the permission matrix.
-        // They are handled at the PagePermissionContext and PagePermissionHandler level.
-        // Uses the centralized SystemPageDefaults.Paths from Common/Defaults for consistency.
-        var pages = new List<(string PagePath, string PageDisplayName)>();
-        ExtractLinksRecursive(items, pages);
-        return pages;
-    }
-
-    /// <summary>
-    /// Recursively walks the NavItem tree collecting Link items with their paths and display names.
-    /// </summary>
-    private static void ExtractLinksRecursive(
-        IReadOnlyList<NavItem> items,
-        List<(string PagePath, string PageDisplayName)> pages)
-    {
-        foreach (var item in items)
-        {
-            if (item.Type == NavItemType.Link && item.Href is not null)
-            {
-                // Normalize path: ensure it starts with "/" for consistent storage and lookup.
-                var pagePath = item.Href.StartsWith('/') ? item.Href : "/" + item.Href;
-
-                // Skip system pages — they always bypass permission checks.
-                if (SystemPageDefaults.Paths.Contains(pagePath))
-                    continue;
-
-                pages.Add((pagePath, item.Text));
-            }
-            else if (item.Type == NavItemType.Group && item.Children is not null)
-            {
-                // Recurse into group children to find nested Link items.
-                ExtractLinksRecursive(item.Children, pages);
-            }
-        }
+        await dbContext.SaveChangesAsync();
+        logger.LogInformation("Seeded initial PagePermission records for {RoleCount} role(s).", allRoles.Count);
     }
 
     /// <summary>

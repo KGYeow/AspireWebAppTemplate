@@ -3,6 +3,7 @@ using AspireWebAppTemplate.ApiService.Data;
 using AspireWebAppTemplate.ApiService.Data.Entities;
 using AspireWebAppTemplate.Core.Application.Abstractions;
 using AspireWebAppTemplate.Core.Common;
+using AspireWebAppTemplate.Core.Extensions;
 using AspireWebAppTemplate.Core.Contracts.PagePermissions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -76,10 +77,16 @@ public class PagePermissionService : IPagePermissionService
         // Each group becomes a RolePermissionsDto containing all granted pages for that role.
         var grouped = permissions
             .GroupBy(p => new { p.RoleId, RoleName = p.Role.Name ?? p.RoleId })
-            .Select(g => new RolePermissionsDto(
-                g.Key.RoleId,
-                g.Key.RoleName,
-                g.Select(p => new PagePermissionDto(p.PagePath, p.PageDisplayName)).ToList()))
+            .Select(g => new RolePermissionsDto
+            {
+                RoleId = g.Key.RoleId,
+                RoleName = g.Key.RoleName,
+                Pages = g.Select(p => new PagePermissionDto
+                {
+                    PagePath = p.PagePath,
+                    PageDisplayName = p.PageDisplayName
+                }).ToList()
+            })
             .ToList();
 
         return grouped;
@@ -159,9 +166,9 @@ public class PagePermissionService : IPagePermissionService
         // Step 4: Validate that all provided PagePaths exist in the DefaultNavigationProvider.
         // Only pages registered in the navigation provider are valid permission targets.
         // This prevents granting access to non-existent or decommissioned pages.
-        var validPages = GetAllValidPagePaths();
+        var validPages = _navigationProvider.GetAllValidPagePaths();
         var invalidPaths = pagePaths
-            .Where(path => !validPages.Contains(path, StringComparer.OrdinalIgnoreCase))
+            .Where(path => !validPages.Contains(path))
             .ToList();
 
         if (invalidPaths.Count > 0)
@@ -193,7 +200,7 @@ public class PagePermissionService : IPagePermissionService
 
                 // Insert new permission records for each provided page path.
                 // Look up display names from the navigation provider for consistency.
-                var pageDisplayNames = GetPageDisplayNameMap();
+                var pageDisplayNames = _navigationProvider.GetPageDisplayNameMap();
 
                 var newPermissions = pagePaths.Select(path => new PagePermission
                 {
@@ -224,90 +231,4 @@ public class PagePermissionService : IPagePermissionService
         });
     }
 
-    /// <summary>
-    /// Extracts all valid page paths (Href values) from the <see cref="INavigationProvider"/>,
-    /// including pages nested inside Group items. Paths are normalized with a leading "/".
-    /// </summary>
-    /// <returns>A set of valid page paths for permission assignment.</returns>
-    private HashSet<string> GetAllValidPagePaths()
-    {
-        var menuItems = _navigationProvider.GetMainMenuItems();
-        var paths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-        // Recursively extract all Link-type NavItem Href values from the navigation tree.
-        ExtractLinkPaths(menuItems, paths);
-
-        return paths;
-    }
-
-    /// <summary>
-    /// Builds a dictionary mapping normalized page paths to their display names from the
-    /// navigation provider. Used when inserting new <see cref="PagePermission"/> records
-    /// to populate the <see cref="PagePermission.PageDisplayName"/> field.
-    /// </summary>
-    /// <returns>A case-insensitive dictionary of page path → display name.</returns>
-    private Dictionary<string, string> GetPageDisplayNameMap()
-    {
-        var menuItems = _navigationProvider.GetMainMenuItems();
-        var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
-        ExtractLinkDisplayNames(menuItems, map);
-
-        return map;
-    }
-
-    /// <summary>
-    /// Recursively walks the navigation tree and collects Href values from Link-type items.
-    /// Normalizes each Href to start with "/" for consistent path comparison.
-    /// </summary>
-    /// <param name="items">The list of navigation items to process.</param>
-    /// <param name="paths">The set to populate with normalized page paths.</param>
-    private static void ExtractLinkPaths(IReadOnlyList<NavItem> items, HashSet<string> paths)
-    {
-        foreach (var item in items)
-        {
-            if (item.Type == NavItemType.Link && !string.IsNullOrEmpty(item.Href))
-            {
-                // Normalize: ensure path starts with "/" for consistent comparison.
-                var normalizedPath = item.Href.StartsWith('/')
-                    ? item.Href
-                    : "/" + item.Href;
-
-                paths.Add(normalizedPath);
-            }
-
-            // Recurse into group children to find nested Link items.
-            if (item.Children is not null)
-            {
-                ExtractLinkPaths(item.Children, paths);
-            }
-        }
-    }
-
-    /// <summary>
-    /// Recursively walks the navigation tree and builds a path → display name mapping
-    /// from Link-type items. Normalizes each Href to start with "/".
-    /// </summary>
-    /// <param name="items">The list of navigation items to process.</param>
-    /// <param name="map">The dictionary to populate with path → display name entries.</param>
-    private static void ExtractLinkDisplayNames(IReadOnlyList<NavItem> items, Dictionary<string, string> map)
-    {
-        foreach (var item in items)
-        {
-            if (item.Type == NavItemType.Link && !string.IsNullOrEmpty(item.Href))
-            {
-                var normalizedPath = item.Href.StartsWith('/')
-                    ? item.Href
-                    : "/" + item.Href;
-
-                // Use TryAdd to keep the first occurrence if duplicates exist.
-                map.TryAdd(normalizedPath, item.Text);
-            }
-
-            if (item.Children is not null)
-            {
-                ExtractLinkDisplayNames(item.Children, map);
-            }
-        }
-    }
 }

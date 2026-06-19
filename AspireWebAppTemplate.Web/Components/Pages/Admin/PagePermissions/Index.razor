@@ -1,0 +1,92 @@
+@page "/admin/page-permissions"
+
+@using AspireWebAppTemplate.Core.Contracts.PagePermissions
+@using AspireWebAppTemplate.Core.Contracts.Roles
+
+<PageTitle>Page Permissions</PageTitle>
+
+<PageHeader Title="Page Permissions" Subtitle="Configure which roles can access which pages." />
+
+<!-- Permanent notice: changes take effect on next refresh -->
+<MudAlert Severity="Severity.Info"
+          Class="mb-4 border-1"
+          Icon="@Icons.Material.Rounded.Info">
+    Permission changes take effect on the next page refresh or new session for affected users.
+</MudAlert>
+
+<!-- Error alert -->
+@if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <MudAlert Severity="Severity.Error"
+              Class="mb-4 border-1"
+              ShowCloseIcon
+              CloseIconClicked="() => ErrorMessage = null">
+        @ErrorMessage
+    </MudAlert>
+}
+
+<!-- Permission Matrix DataGrid -->
+<MudPaper Elevation="0" Class="pa-4">
+    <MudDataGrid T="PageRow"
+                 Items="_pageRows"
+                 Loading="IsLoading"
+                 Elevation="0"
+                 Hover
+                 Dense
+                 Bordered
+                 ColumnResizeMode="ResizeMode.None">
+        <NoRecordsContent>
+            <MudText Typo="Typo.body2">No configurable pages found.</MudText>
+        </NoRecordsContent>
+        <LoadingContent>
+            <MudText Typo="Typo.body2">Loading permissions matrix...</MudText>
+        </LoadingContent>
+        <Columns>
+            <!-- Page Column -->
+            <TemplateColumn Title="Page" StickyLeft Sortable="false">
+                <CellTemplate>
+                    @context.Item.DisplayName
+                </CellTemplate>
+            </TemplateColumn>
+
+            <!-- Role Columns -->
+            @foreach (var role in _roles)
+            {
+                var currentRole = role;
+                <TemplateColumn Title="@(currentRole.DisplayName ?? currentRole.Name)" Sortable="false">
+                    <HeaderTemplate>
+                        <MudText Typo="Typo.body2">@(currentRole.DisplayName ?? currentRole.Name)</MudText>
+                    </HeaderTemplate>
+                    <CellTemplate>
+                        <div class="d-flex justify-content-center">
+                            @if (IsAdminRole(currentRole))
+                            {
+                                <MudTooltip Text="Admin always has full access">
+                                    <MudCheckBox T="bool"
+                                                 Value="true"
+                                                 Disabled
+                                                 Dense
+                                                 Size="Size.Small"
+                                                 Color="Color.Primary" />
+                                </MudTooltip>
+                            }
+                            else if (IsRoleSaving(currentRole.Id))
+                            {
+                                <MudProgressCircular Size="Size.Small" Indeterminate Color="Color.Primary" Style="width:20px; height:20px;" />
+                            }
+                            else
+                            {
+                                <MudCheckBox T="bool"
+                                             Value="@IsPermissionGranted(currentRole.Id, context.Item.PagePath)"
+                                             ValueChanged="@((bool val) => OnTogglePermission(currentRole.Id, context.Item.PagePath, val))"
+                                             Dense
+                                             Size="Size.Small"
+                                             Color="Color.Primary" />
+                            }
+                        </div>
+                    </CellTemplate>
+                </TemplateColumn>
+            }
+        </Columns>
+    </MudDataGrid>
+</MudPaper>
