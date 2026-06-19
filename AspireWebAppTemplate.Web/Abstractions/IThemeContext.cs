@@ -12,7 +12,7 @@ namespace AspireWebAppTemplate.Abstractions;
 /// The Settings page calls <see cref="SetThemePreference"/> after persisting the user's choice,
 /// and the layout subscribes to <see cref="OnChange"/> to pick up the new value.
 /// </remarks>
-public interface IThemeStateService
+public interface IThemeContext
 {
     /// <summary>
     /// Gets the current dark mode state. When <c>true</c>, the UI renders with the dark palette.

@@ -83,7 +83,7 @@ public class PagePermissionHandler : AuthorizationHandler<PagePermissionRequirem
         // In Blazor Server, AuthorizeRouteView passes RouteData as the resource.
         var pagePath = ExtractPagePath(context.Resource);
 
-        // --- Step 4 (early exit): Path undetermined ---
+        // --- Step 2 (early exit): Path undetermined ---
         // If we cannot determine the page path from the resource, succeed the requirement
         // to avoid blocking non-page resources (static assets, layout components, etc.).
         if (string.IsNullOrEmpty(pagePath))
@@ -92,7 +92,7 @@ public class PagePermissionHandler : AuthorizationHandler<PagePermissionRequirem
             return Task.CompletedTask;
         }
 
-        // --- Step 2: System_Page check ---
+        // --- Step 3: System_Page check ---
         // System pages (Login, Register, AccessDenied, Error, etc.) are always accessible
         // regardless of permission state. These pages are essential for authentication flow
         // and error handling — blocking them would break the application.
@@ -102,7 +102,20 @@ public class PagePermissionHandler : AuthorizationHandler<PagePermissionRequirem
             return Task.CompletedTask;
         }
 
-        // --- Step 3: Cached permission check ---
+        // --- Step 4: Cache not yet loaded check ---
+        // If the permission cache has not completed initialization (e.g., during circuit startup
+        // when MainLayout.OnInitializedAsync hasn't finished yet), succeed the requirement to
+        // avoid blocking authenticated users before permissions are available. The NavMenu will
+        // show a loading skeleton until the cache is populated, providing visual feedback.
+        // Denying here would cause a redirect loop: user is authenticated but gets sent to
+        // AccessDenied, which redirects back, creating a broken experience on page refresh.
+        if (!_permissionContext.IsLoaded)
+        {
+            context.Succeed(requirement);
+            return Task.CompletedTask;
+        }
+
+        // --- Step 5: Cached permission check ---
         // Consult the per-circuit permission cache for an O(1) case-insensitive lookup.
         // If the cache indicates access is granted, succeed; otherwise fail the requirement
         // which causes Blazor to redirect to the AccessDenied view.

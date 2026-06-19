@@ -23,8 +23,10 @@
 <body>
     <Routes @rendermode="InteractiveServer" />
     <ReconnectModal />
-    <script src="@Assets["_framework/blazor.web.js"]"></script>
+
+    <script src="@Assets["_framework/blazor.web.js"]" autostart="false"></script>
     <script src="@Assets["_content/MudBlazor/MudBlazor.min.js"]"></script>
+    <script src="js/circuit-recovery.js"></script>
 </body>
 
 </html>

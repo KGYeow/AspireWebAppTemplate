@@ -12,7 +12,7 @@ namespace AspireWebAppTemplate.Web.Services;
 /// Because Blazor Server uses scoped DI per SignalR circuit, each user session
 /// gets its own instance — no cross-user interference.
 /// </remarks>
-public sealed class ThemeStateService : IThemeStateService
+public sealed class ThemeContext : IThemeContext
 {
     /// <inheritdoc />
     public bool IsDarkMode { get; private set; }

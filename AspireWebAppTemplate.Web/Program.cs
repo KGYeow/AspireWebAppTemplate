@@ -82,8 +82,9 @@ builder.Services.AddHttpClient<ApiPagePermissionService>(client =>
 builder.Services.AddSingleton<INavigationProvider, DefaultNavigationProvider>();
 builder.Services.AddSingleton<ITimeZoneService, TimeZoneService>();
 builder.Services.AddScoped<IUserTimeZoneContext, UserTimeZoneContext>();
-builder.Services.AddScoped<IThemeStateService, ThemeStateService>();
+builder.Services.AddScoped<IThemeContext, ThemeContext>();
 builder.Services.AddScoped<IPagePermissionContext, PagePermissionContext>();
+builder.Services.AddScoped<CircuitUserContext>();
 
 // MudBlazor
 builder.Services.AddMudServices(config =>

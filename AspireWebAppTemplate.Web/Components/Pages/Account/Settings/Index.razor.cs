@@ -48,9 +48,9 @@ public partial class Index : ComponentBase
     [Inject] private ITimeZoneService TimeZoneService { get; set; } = default!;
 
     /// <summary>
-    /// Scoped theme state service for notifying the layout of theme changes.
+    /// Scoped theme context for notifying the layout of theme changes.
     /// </summary>
-    [Inject] private IThemeStateService ThemeState { get; set; } = default!;
+    [Inject] private IThemeContext ThemeState { get; set; } = default!;
 
     /// <summary>
     /// JavaScript runtime for detecting OS dark mode preference.

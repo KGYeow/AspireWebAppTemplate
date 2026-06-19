@@ -47,7 +47,7 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
     /// <summary>
     /// Scoped theme state service for communicating dark mode changes across components.
     /// </summary>
-    [Inject] private IThemeStateService ThemeState { get; set; } = default!;
+    [Inject] private IThemeContext ThemeState { get; set; } = default!;
 
     /// <summary>
     /// Per-circuit page permission context. Initialized once during circuit startup so that
@@ -55,6 +55,13 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
     /// for zero-latency authorization checks.
     /// </summary>
     [Inject] private IPagePermissionContext PagePermissionContext { get; set; } = default!;
+
+    /// <summary>
+    /// Circuit-scoped user identity cache. Captures the authenticated user's claims early
+    /// in the circuit lifecycle so that <see cref="UserIdentityDelegatingHandler"/> can
+    /// propagate identity even after HttpContext becomes null (post-SSR).
+    /// </summary>
+    [Inject] private CircuitUserContext CircuitUserContext { get; set; } = default!;
 
     #endregion
 
@@ -97,6 +104,12 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
     /// </summary>
     private bool _isDarkMode;
 
+    /// <summary>
+    /// User profile loaded during initialization, reused by OnAfterRenderAsync
+    /// to avoid duplicate API calls and reduce render thrashing during circuit startup.
+    /// </summary>
+    private UserDto? _currentUser;
+
     #endregion
 
     #region Lifecycle
@@ -121,19 +134,28 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
             var authState = await AuthStateTask;
             if (authState.User.Identity?.IsAuthenticated != true) return;
 
+            // Capture the authenticated user's claims into the circuit-scoped context.
+            // This MUST happen before any API calls so that UserIdentityDelegatingHandler
+            // can propagate identity headers even after HttpContext becomes null.
+            CircuitUserContext.Initialize(authState.User);
+
+            // Initialize the per-circuit page permission cache early so that the
+            // PagePermissionHandler and NavMenu have cached permissions available.
+            // This runs independently of the user profile fetch below.
+            await PagePermissionContext.InitializeAsync();
+
             var userResult = await AuthService.GetCurrentUserAsync();
             if (!userResult.Succeeded || userResult.Data is null) return;
 
+            // Cache the user profile so OnAfterRenderAsync doesn't need another API call
+            _currentUser = userResult.Data;
+
             // Initialize the scoped user time zone context for this circuit (before children render)
             await UserTimeZone.InitializeAsync(userResult.Data.Id);
-
-            // Initialize the per-circuit page permission cache so that the PagePermissionHandler
-            // and NavMenu have cached permissions available before any navigation check occurs.
-            await PagePermissionContext.InitializeAsync();
         }
         catch (Exception ex)
         {
-            Logger.LogWarning(ex, "Failed to initialize user timezone context.");
+            Logger.LogWarning(ex, "Failed to initialize circuit services.");
         }
     }
 
@@ -148,13 +170,11 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
 
         try
         {
-            var authState = await AuthStateTask;
-            if (authState.User.Identity?.IsAuthenticated != true) return;
-
-            var userResult = await AuthService.GetCurrentUserAsync();
-            if (!userResult.Succeeded || userResult.Data is null) return;
-
-            var user = userResult.Data;
+            // Use the cached user from OnInitializedAsync to avoid a duplicate API call.
+            // This reduces render thrashing during circuit startup (fewer async state changes
+            // means fewer render batches, reducing the risk of DOM desync on rapid refresh).
+            var user = _currentUser;
+            if (user is null) return;
 
             // Initialize theme based on user preference
             await ApplyThemePreferenceAsync(user.Theme);
@@ -184,7 +204,7 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
 
     /// <summary>
     /// Resolves the effective dark mode state from the user's theme preference
-    /// and applies it to both the local field and the shared <see cref="IThemeStateService"/>.
+    /// and applies it to both the local field and the shared <see cref="IThemeContext"/>.
     /// </summary>
     private async Task ApplyThemePreferenceAsync(ThemePreference preference)
     {
