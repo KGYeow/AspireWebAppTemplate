@@ -1,0 +1,14 @@
+<MudDrawerHeader Dense="Dense" Class="d-flex align-center justify-center">
+    <MudLink Href="@LogoHref" Class="d-flex align-center justify-center" Underline="Underline.None">
+        @if (DrawerOpen)
+        {
+            <!-- Full logo shown when the sidebar is expanded -->
+            <MudImage Src="@LogoSrc" Height="@LogoHeight" Class="drawer-header-logo" Alt="@Alt" />
+        }
+        else
+        {
+            <!-- Compact/icon logo shown when the sidebar is minimized -->
+            <MudImage Src="@ResolvedMiniLogoSrc" Height="@MiniLogoHeight" Class="drawer-header-logo-mini" Alt="@Alt" />
+        }
+    </MudLink>
+</MudDrawerHeader>

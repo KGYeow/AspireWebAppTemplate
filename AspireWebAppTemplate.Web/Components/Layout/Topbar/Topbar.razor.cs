@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components;
 
-namespace AspireWebAppTemplate.Web.Components.Layout;
+namespace AspireWebAppTemplate.Web.Components.Layout.Topbar;
 
 public partial class Topbar : ComponentBase
 {

@@ -8,7 +8,7 @@
 
 <MudLayout>
         <!-- Topbar -->
-        <Topbar Title="Aspire Web App Template" LogoSrc="images/logos/jabil-white-skyblue.svg" LogoHeight="22">
+        <Topbar Title="Aspire Web App Template">
             <LeftContent>
                 <MudToggleIconButton
                     Icon="@Icons.Material.Rounded.Menu"
@@ -24,7 +24,14 @@
         </Topbar>
 
         <!-- Sidebar -->
-        <MudDrawer Variant="CurrentBreakpoint >= Breakpoint.Md ? DrawerVariant.Mini : DrawerVariant.Responsive" @bind-Open="@DrawerOpen" ClipMode="DrawerClipMode.Docked">
+        <MudDrawer Variant="CurrentBreakpoint >= Breakpoint.Md ? DrawerVariant.Mini : DrawerVariant.Responsive" @bind-Open="@DrawerOpen">
+            <DrawerHeader
+                DrawerOpen="DrawerOpen"
+                LogoSrc="images/logos/jabil-white-skyblue.svg"
+                LogoHeight="22"
+                MiniLogoSrc="images/logos/jabil-blue.svg"
+                MiniLogoHeight="24"
+            />
             <NavMenu Items="NavItems" DrawerOpen="DrawerOpen" />
         </MudDrawer>
 

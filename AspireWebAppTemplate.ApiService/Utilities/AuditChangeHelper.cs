@@ -8,6 +8,31 @@ namespace AspireWebAppTemplate.ApiService.Utilities;
 /// </summary>
 public static class AuditChangeHelper
 {
+    /// <summary>
+    /// Shared <see cref="JsonSerializerOptions"/> instance configured for audit log JSON output.
+    /// </summary>
+    /// <remarks>
+    /// <list type="bullet">
+    ///   <item>
+    ///     <term>CamelCase naming</term>
+    ///     <description>
+    ///       Uses <see cref="JsonNamingPolicy.CamelCase"/> so that PascalCase C# property names
+    ///       (e.g., <c>IsActive</c>, <c>DisplayName</c>) are serialized as camelCase JSON keys
+    ///       (e.g., <c>isActive</c>, <c>displayName</c>). Note: this policy applies only to
+    ///       typed object properties — dictionary keys are passed through unchanged.
+    ///     </description>
+    ///   </item>
+    ///   <item>
+    ///     <term>Never ignore nulls</term>
+    ///     <description>
+    ///       Uses <see cref="System.Text.Json.Serialization.JsonIgnoreCondition.Never"/> to ensure
+    ///       null property values are serialized as the JSON literal <c>null</c> rather than being
+    ///       omitted from the output. This makes it possible to distinguish "field was cleared to null"
+    ///       from "field was not part of the change set".
+    ///     </description>
+    ///   </item>
+    /// </list>
+    /// </remarks>
     private static readonly JsonSerializerOptions CamelCaseOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,

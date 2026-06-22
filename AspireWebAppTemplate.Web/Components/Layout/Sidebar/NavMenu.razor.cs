@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Routing;
 using MudBlazor;
 
-namespace AspireWebAppTemplate.Web.Components.Layout;
+namespace AspireWebAppTemplate.Web.Components.Layout.Sidebar;
 
 /// <summary>
 /// Renders a navigation menu (headers, links, dividers, and groups) from a single, unified model
