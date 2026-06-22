@@ -3,12 +3,12 @@
         @if (DrawerOpen)
         {
             <!-- Full logo shown when the sidebar is expanded -->
-            <MudImage Src="@LogoSrc" Height="@LogoHeight" Class="drawer-header-logo" Alt="@Alt" />
+            <MudImage Src="@LogoSrc" Height="@LogoHeight" Alt="@Alt" />
         }
         else
         {
             <!-- Compact/icon logo shown when the sidebar is minimized -->
-            <MudImage Src="@ResolvedMiniLogoSrc" Height="@MiniLogoHeight" Class="drawer-header-logo-mini" Alt="@Alt" />
+            <MudImage Src="@ResolvedMiniLogoSrc" Height="@MiniLogoHeight" Alt="@Alt" />
         }
     </MudLink>
 </MudDrawerHeader>

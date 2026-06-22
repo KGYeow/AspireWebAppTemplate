@@ -7,44 +7,44 @@
 <MudBreakpointProvider OnBreakpointChanged="HandleBreakpointChanged" />
 
 <MudLayout>
-        <!-- Topbar -->
-        <Topbar Title="Aspire Web App Template">
-            <LeftContent>
-                <MudToggleIconButton
-                    Icon="@Icons.Material.Rounded.Menu"
-                    ToggledIcon="@Icons.Material.Rounded.MenuOpen"
-                    Color="Color.Inherit"
-                    Edge="Edge.Start"
-                    @bind-Toggled="DrawerOpen"
-                />
-            </LeftContent>
-            <RightContent>
-                <DropdownProfile />
-            </RightContent>
-        </Topbar>
-
-        <!-- Sidebar -->
-        <MudDrawer Variant="CurrentBreakpoint >= Breakpoint.Md ? DrawerVariant.Mini : DrawerVariant.Responsive" @bind-Open="@DrawerOpen">
-            <DrawerHeader
-                DrawerOpen="DrawerOpen"
-                LogoSrc="images/logos/jabil-white-skyblue.svg"
-                LogoHeight="22"
-                MiniLogoSrc="images/logos/jabil-blue.svg"
-                MiniLogoHeight="24"
+    <!-- Topbar -->
+    <Topbar Title="Aspire Web App Template">
+        <LeftContent>
+            <MudToggleIconButton
+                Icon="@Icons.Material.Rounded.Menu"
+                ToggledIcon="@Icons.Material.Rounded.MenuOpen"
+                Color="Color.Inherit"
+                Edge="Edge.Start"
+                @bind-Toggled="DrawerOpen"
             />
-            <NavMenu Items="NavItems" DrawerOpen="DrawerOpen" />
-        </MudDrawer>
+        </LeftContent>
+        <RightContent>
+            <DropdownProfile />
+        </RightContent>
+    </Topbar>
 
-        <!-- Main Content -->
-        <MudMainContent Class="min-vh-100">
-            <!-- Page Content -->
-            <MudContainer Class="py-6" MaxWidth="MaxWidth.Large">
-                <CascadingValue Value="CurrentBreakpoint">
-                    @Body
-                </CascadingValue>
-            </MudContainer>
-        </MudMainContent>
+    <!-- Sidebar -->
+    <MudDrawer Variant="CurrentBreakpoint >= Breakpoint.Md ? DrawerVariant.Mini : DrawerVariant.Responsive" @bind-Open="@DrawerOpen">
+        <DrawerHeader
+            DrawerOpen="DrawerOpen"
+            LogoSrc="images/logos/jabil-white-skyblue.svg"
+            LogoHeight="24"
+            MiniLogoSrc="favicon-jabil.png"
+            MiniLogoHeight="24"
+        />
+        <NavMenu Items="NavItems" DrawerOpen="DrawerOpen" />
+    </MudDrawer>
 
-        <!-- Footer -->
-        <Footer />
-    </MudLayout>
+    <!-- Main Content -->
+    <MudMainContent Class="min-vh-100">
+        <!-- Page Content -->
+        <MudContainer Class="py-6" MaxWidth="MaxWidth.Large">
+            <CascadingValue Value="CurrentBreakpoint">
+                @Body
+            </CascadingValue>
+        </MudContainer>
+    </MudMainContent>
+
+    <!-- Footer -->
+    <Footer />
+</MudLayout>
