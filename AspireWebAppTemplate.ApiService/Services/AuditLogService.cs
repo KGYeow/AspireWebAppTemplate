@@ -1,7 +1,7 @@
 using AspireWebAppTemplate.Abstractions;
 using AspireWebAppTemplate.ApiService.Data;
 using AspireWebAppTemplate.ApiService.Data.Entities;
-using AspireWebAppTemplate.Core.Domain.Enums;
+using AspireWebAppTemplate.Core.Contracts.AuditLog;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -45,35 +45,26 @@ public class AuditLogService : IAuditLogService
     }
 
     /// <inheritdoc />
-    public async Task LogAsync(
-        string? userId,
-        AuditActionType actionType,
-        AuditEntityType entityType,
-        string entityId,
-        string entityName,
-        string description,
-        string? oldValues = null,
-        string? newValues = null,
-        string? ipAddress = null)
+    public async Task LogAsync(AuditLogRequest request)
     {
         try
         {
             // Resolve user display name: existing user → DisplayName, unknown → userId, null → empty string
-            var displayName = await ResolveDisplayNameAsync(userId);
+            var displayName = await ResolveDisplayNameAsync(request.UserId);
 
             var entry = new AuditLogEntry
             {
                 Id = Guid.NewGuid(),
-                UserId = userId ?? string.Empty,
+                UserId = request.UserId ?? string.Empty,
                 UserDisplayName = displayName,
-                ActionType = actionType,
-                EntityType = entityType,
-                EntityId = entityId,
-                EntityName = entityName,
-                Description = description,
-                OldValues = oldValues,
-                NewValues = newValues,
-                IpAddress = ipAddress,
+                ActionType = request.ActionType,
+                EntityType = request.EntityType,
+                EntityId = request.EntityId,
+                EntityName = request.EntityName,
+                Description = request.Description,
+                OldValues = request.OldValues,
+                NewValues = request.NewValues,
+                IpAddress = request.IpAddress,
                 Timestamp = DateTime.UtcNow
             };
 
@@ -87,9 +78,9 @@ public class AuditLogService : IAuditLogService
             _logger.LogError(
                 ex,
                 "Failed to persist audit log entry. ActionType: {ActionType}, EntityType: {EntityType}, EntityId: {EntityId}",
-                actionType,
-                entityType,
-                entityId);
+                request.ActionType,
+                request.EntityType,
+                request.EntityId);
         }
     }
 

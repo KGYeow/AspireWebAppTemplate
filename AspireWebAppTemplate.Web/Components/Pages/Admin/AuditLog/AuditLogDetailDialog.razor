@@ -1,76 +1,77 @@
-@using AspireWebAppTemplate.Abstractions
-@using AspireWebAppTemplate.Core.Contracts
-@using AspireWebAppTemplate.Core.Contracts.Auth
 @using AspireWebAppTemplate.Core.Contracts.AuditLog
-@using AspireWebAppTemplate.Core.Contracts.Roles
-@using AspireWebAppTemplate.Core.Contracts.Users
 
-<MudDialog TitleClass="px-4 pt-5 pb-2" ContentClass="px-4" ActionsClass="px-4 pb-5">
-    <TitleContent>
-        <MudText Typo="Typo.h6" Class="pb-2 fw-bold">Audit Log Entry Details</MudText>
-        <MudDivider />
-    </TitleContent>
+<ModalDialog Title="Audit Log Entry Details">
+    <ContentArea>
+        <MudSimpleTable Dense Bordered Elevation="0" Class="mb-3">
+            <tbody>
+                <tr>
+                    <td class="fw-bold" style="width: 140px;">Timestamp</td>
+                    <td>@TimeZoneContext.FormatDateTime(Entry.Timestamp)</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold">User</td>
+                    <td>@Entry.UserDisplayName</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold">Action Type</td>
+                    <td>@Entry.ActionType.ToString()</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold">Entity Type</td>
+                    <td>@Entry.EntityType.ToString()</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold">Entity ID</td>
+                    <td>@Entry.EntityId</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold">Entity Name</td>
+                    <td>@Entry.EntityName</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold">Description</td>
+                    <td>@Entry.Description</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold">IP Address</td>
+                    <td>@(Entry.IpAddress ?? "N/A")</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold">Old Values</td>
+                    <td>
+                        @if (string.IsNullOrEmpty(Entry.OldValues))
+                        {
+                            <span class="mud-text-secondary">N/A</span>
+                        }
+                        else
+                        {
+                            <pre class="mud-typography-body2" style="white-space: pre-wrap; word-break: break-word; margin: 0;">@FormatJson(Entry.OldValues)</pre>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td class="fw-bold">New Values</td>
+                    <td>
+                        @if (string.IsNullOrEmpty(Entry.NewValues))
+                        {
+                            <span class="mud-text-secondary">N/A</span>
+                        }
+                        else
+                        {
+                            <pre class="mud-typography-body2" style="white-space: pre-wrap; word-break: break-word; margin: 0;">@FormatJson(Entry.NewValues)</pre>
+                        }
+                    </td>
+                </tr>
+            </tbody>
+        </MudSimpleTable>
+    </ContentArea>
 
-    <DialogContent>
-        <MudStack Spacing="3">
-            <!-- Timestamp formatted in the user's configured timezone -->
-            <MudField Label="Timestamp" Variant="Variant.Text">
-                @TimeZoneContext.FormatDateTime(Entry.Timestamp)
-            </MudField>
-
-            <!-- User who performed the action -->
-            <MudField Label="User" Variant="Variant.Text">
-                @Entry.UserDisplayName
-            </MudField>
-
-            <!-- Category of audited action -->
-            <MudField Label="Action Type" Variant="Variant.Text">
-                @Entry.ActionType.ToString()
-            </MudField>
-
-            <!-- Type of entity affected -->
-            <MudField Label="Entity Type" Variant="Variant.Text">
-                @Entry.EntityType.ToString()
-            </MudField>
-
-            <!-- Identifier of the affected entity -->
-            <MudField Label="Entity ID" Variant="Variant.Text">
-                @Entry.EntityId
-            </MudField>
-
-            <!-- Human-readable name of the affected entity -->
-            <MudField Label="Entity Name" Variant="Variant.Text">
-                @Entry.EntityName
-            </MudField>
-
-            <!-- Action description -->
-            <MudField Label="Description" Variant="Variant.Text">
-                @Entry.Description
-            </MudField>
-
-            <!-- IP Address with N/A fallback for null values -->
-            <MudField Label="IP Address" Variant="Variant.Text">
-                @(Entry.IpAddress ?? "N/A")
-            </MudField>
-
-            <!-- Old Values: pretty-printed JSON or N/A when null -->
-            <MudField Label="Old Values" Variant="Variant.Text">
-                <pre class="mud-typography-body2" style="white-space: pre-wrap; word-break: break-word; margin: 0;">@FormatJson(Entry.OldValues)</pre>
-            </MudField>
-
-            <!-- New Values: pretty-printed JSON or N/A when null -->
-            <MudField Label="New Values" Variant="Variant.Text">
-                <pre class="mud-typography-body2" style="white-space: pre-wrap; word-break: break-word; margin: 0;">@FormatJson(Entry.NewValues)</pre>
-            </MudField>
-        </MudStack>
-    </DialogContent>
-
-    <DialogActions>
+    <ActionsTemplate>
         <MudButton Variant="Variant.Filled"
                    Color="Color.Default"
-                   OnClick="Close"
+                   OnClick="() => MudDialog.Cancel()"
                    DropShadow="false">
             Close
         </MudButton>
-    </DialogActions>
-</MudDialog>
+    </ActionsTemplate>
+</ModalDialog>

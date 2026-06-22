@@ -1,6 +1,12 @@
+using AspireWebAppTemplate.Abstractions;
 using AspireWebAppTemplate.ApiService.Abstractions;
+using AspireWebAppTemplate.ApiService.Data.Entities;
+using AspireWebAppTemplate.ApiService.Utilities;
+using AspireWebAppTemplate.Core.Contracts.AuditLog;
 using AspireWebAppTemplate.Core.Contracts.PagePermissions;
+using AspireWebAppTemplate.Core.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AspireWebAppTemplate.ApiService.Controllers;
@@ -27,18 +33,26 @@ public class PagePermissionsController : BaseController
     #region Constructor
 
     private readonly IPagePermissionService _pagePermissionService;
+    private readonly IAuditLogService _auditLogService;
+    private readonly RoleManager<ApplicationRole> _roleManager;
     private readonly ILogger<PagePermissionsController> _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PagePermissionsController"/> class.
     /// </summary>
     /// <param name="pagePermissionService">The page permission service for managing role-page grants.</param>
+    /// <param name="auditLogService">The audit log service for recording permission changes.</param>
+    /// <param name="roleManager">The role manager for looking up role details.</param>
     /// <param name="logger">The logger instance for recording controller-level events.</param>
     public PagePermissionsController(
         IPagePermissionService pagePermissionService,
+        IAuditLogService auditLogService,
+        RoleManager<ApplicationRole> roleManager,
         ILogger<PagePermissionsController> logger)
     {
         _pagePermissionService = pagePermissionService;
+        _auditLogService = auditLogService;
+        _roleManager = roleManager;
         _logger = logger;
     }
 
@@ -94,7 +108,33 @@ public class PagePermissionsController : BaseController
     {
         try
         {
+            // Look up the role to get display name for the audit entry
+            var role = await _roleManager.FindByIdAsync(roleId);
+            if (role is null)
+                return NotFound($"Role with ID '{roleId}' was not found.");
+
+            // Capture previous page paths for the role before the update
+            var allPermissions = await _pagePermissionService.GetAllPermissionsAsync();
+            var rolePermissions = allPermissions.FirstOrDefault(rp => rp.RoleId == roleId);
+            var previousPaths = rolePermissions?.Pages.Select(p => p.PagePath).ToList() ?? new List<string>();
+
+            // Perform the update
             await _pagePermissionService.UpdateRolePermissionsAsync(roleId, request.PagePaths);
+
+            // Log the audit entry with old/new values
+            await _auditLogService.LogAsync(new AuditLogRequest
+            {
+                UserId = CurrentUserId,
+                ActionType = AuditActionType.SettingsChanged,
+                EntityType = AuditEntityType.Role,
+                EntityId = roleId,
+                EntityName = role.DisplayName ?? role.Name ?? "",
+                Description = $"Page permissions for role '{role.DisplayName ?? role.Name}' were updated.",
+                OldValues = AuditChangeHelper.Serialize(new { PagePaths = previousPaths }),
+                NewValues = AuditChangeHelper.Serialize(new { PagePaths = request.PagePaths }),
+                IpAddress = ClientIpAddress
+            });
+
             return Ok();
         }
         catch (KeyNotFoundException ex)

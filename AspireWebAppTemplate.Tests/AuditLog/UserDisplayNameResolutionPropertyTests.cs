@@ -1,6 +1,7 @@
 using AspireWebAppTemplate.ApiService.Data;
 using AspireWebAppTemplate.ApiService.Data.Entities;
 using AspireWebAppTemplate.ApiService.Services;
+using AspireWebAppTemplate.Core.Contracts.AuditLog;
 using AspireWebAppTemplate.Core.Domain.Enums;
 using FsCheck;
 using FsCheck.Xunit;
@@ -88,13 +89,15 @@ public class UserDisplayNameResolutionPropertyTests : IDisposable
         var service = CreateService(mockUserManager.Object);
 
         // Act: Log an audit entry with the existing user's ID
-        await service.LogAsync(
-            userId,
-            AuditActionType.UserCreated,
-            AuditEntityType.User,
-            "entity-1",
-            "Test Entity",
-            "Test description");
+        await service.LogAsync(new AuditLogRequest
+        {
+            UserId = userId,
+            ActionType = AuditActionType.UserCreated,
+            EntityType = AuditEntityType.User,
+            EntityId = "entity-1",
+            EntityName = "Test Entity",
+            Description = "Test description"
+        });
 
         // Assert: The persisted entry should have the user's DisplayName
         var entry = await _dbContext.AuditLogEntries
@@ -121,13 +124,15 @@ public class UserDisplayNameResolutionPropertyTests : IDisposable
         var service = CreateService(mockUserManager.Object);
 
         // Act: Log an audit entry with an unknown userId
-        await service.LogAsync(
-            userIdValue,
-            AuditActionType.LoginFailed,
-            AuditEntityType.System,
-            "entity-2",
-            "Test Entity",
-            "Test description");
+        await service.LogAsync(new AuditLogRequest
+        {
+            UserId = userIdValue,
+            ActionType = AuditActionType.LoginFailed,
+            EntityType = AuditEntityType.System,
+            EntityId = "entity-2",
+            EntityName = "Test Entity",
+            Description = "Test description"
+        });
 
         // Assert: The persisted entry should have the userId as UserDisplayName
         var entry = await _dbContext.AuditLogEntries
@@ -152,13 +157,15 @@ public class UserDisplayNameResolutionPropertyTests : IDisposable
         var entityId = Guid.NewGuid().ToString();
 
         // Act: Log an audit entry with null userId
-        await service.LogAsync(
-            null,
-            AuditActionType.SettingsChanged,
-            AuditEntityType.Settings,
-            entityId,
-            "System Settings",
-            "System event");
+        await service.LogAsync(new AuditLogRequest
+        {
+            UserId = null,
+            ActionType = AuditActionType.SettingsChanged,
+            EntityType = AuditEntityType.Settings,
+            EntityId = entityId,
+            EntityName = "System Settings",
+            Description = "System event"
+        });
 
         // Assert: The persisted entry should have empty string as UserDisplayName
         var entry = await _dbContext.AuditLogEntries

@@ -1,6 +1,8 @@
 using AspireWebAppTemplate.Abstractions;
 using AspireWebAppTemplate.ApiService.Data.Entities;
+using AspireWebAppTemplate.ApiService.Utilities;
 using AspireWebAppTemplate.Core.Contracts;
+using AspireWebAppTemplate.Core.Contracts.AuditLog;
 using AspireWebAppTemplate.Core.Contracts.Roles;
 using AspireWebAppTemplate.Core.Contracts.Users;
 using AspireWebAppTemplate.Core.Domain.Enums;
@@ -36,6 +38,22 @@ public class UsersController : BaseController
         _auditLogService = auditLogService;
         _ldapAuthService = ldapAuthService;
     }
+
+    #endregion
+
+    #region Audit Fields
+
+    private static readonly (string, Func<ApplicationUser, object?>)[] UserAuditFields =
+    [
+        ("DisplayName", u => u.DisplayName),
+        ("FirstName", u => u.FirstName),
+        ("LastName", u => u.LastName),
+        ("Email", u => u.Email),
+        ("PhoneNumber", u => u.PhoneNumber),
+        ("JobTitle", u => u.JobTitle),
+        ("Department", u => u.Department),
+        ("EmployeeNumber", u => u.EmployeeNumber),
+    ];
 
     #endregion
 
@@ -173,14 +191,16 @@ public class UsersController : BaseController
 
         var currentUserId = CurrentUserId;
         var ipAddress = ClientIpAddress;
-        await _auditLogService.LogAsync(
-            currentUserId,
-            AuditActionType.UserCreated,
-            AuditEntityType.User,
-            user.Id,
-            user.DisplayName ?? user.UserName ?? "",
-            $"User '{user.DisplayName ?? user.Email}' was created.",
-            ipAddress: ipAddress);
+        await _auditLogService.LogAsync(new AuditLogRequest
+        {
+            UserId = currentUserId,
+            ActionType = AuditActionType.UserCreated,
+            EntityType = AuditEntityType.User,
+            EntityId = user.Id,
+            EntityName = user.DisplayName ?? user.UserName ?? "",
+            Description = $"User '{user.DisplayName ?? user.Email}' was created.",
+            IpAddress = ipAddress
+        });
 
         var roles = await _userManager.GetRolesAsync(user);
         var dto = new UserDto
@@ -211,19 +231,21 @@ public class UsersController : BaseController
         if (user is null)
             return NotFound();
 
+        var before = AuditChangeHelper.Snapshot(user, UserAuditFields);
+
         if (request.DisplayName is not null) user.DisplayName = request.DisplayName;
         if (request.FirstName is not null) user.FirstName = request.FirstName;
         if (request.LastName is not null) user.LastName = request.LastName;
-        if (request.Email is not null)
-        {
-            user.Email = request.Email;
-        }
+        if (request.Email is not null) user.Email = request.Email;
         if (request.PhoneNumber is not null) user.PhoneNumber = request.PhoneNumber;
         if (request.JobTitle is not null) user.JobTitle = request.JobTitle;
         if (request.Department is not null) user.Department = request.Department;
         if (request.EmployeeNumber is not null) user.EmployeeNumber = request.EmployeeNumber;
 
         user.UpdatedUtc = DateTime.UtcNow;
+
+        var after = AuditChangeHelper.Snapshot(user, UserAuditFields);
+        var (oldValues, newValues) = AuditChangeHelper.ComputeChanges(before, after);
 
         var result = await _userManager.UpdateAsync(user);
         if (!result.Succeeded)
@@ -234,14 +256,18 @@ public class UsersController : BaseController
 
         var currentUserId = CurrentUserId;
         var ipAddress = ClientIpAddress;
-        await _auditLogService.LogAsync(
-            currentUserId,
-            AuditActionType.UserUpdated,
-            AuditEntityType.User,
-            user.Id,
-            user.DisplayName ?? user.UserName ?? "",
-            $"User '{user.DisplayName ?? user.UserName}' was updated.",
-            ipAddress: ipAddress);
+        await _auditLogService.LogAsync(new AuditLogRequest
+        {
+            UserId = currentUserId,
+            ActionType = AuditActionType.UserUpdated,
+            EntityType = AuditEntityType.User,
+            EntityId = user.Id,
+            EntityName = user.DisplayName ?? user.UserName ?? "",
+            Description = $"User '{user.DisplayName ?? user.UserName}' was updated.",
+            OldValues = oldValues,
+            NewValues = newValues,
+            IpAddress = ipAddress
+        });
 
         return Ok();
     }
@@ -272,14 +298,16 @@ public class UsersController : BaseController
         }
 
         var ipAddress = ClientIpAddress;
-        await _auditLogService.LogAsync(
-            currentUserId,
-            AuditActionType.UserDeleted,
-            AuditEntityType.User,
-            id,
-            displayName,
-            $"User '{displayName}' was deleted.",
-            ipAddress: ipAddress);
+        await _auditLogService.LogAsync(new AuditLogRequest
+        {
+            UserId = currentUserId,
+            ActionType = AuditActionType.UserDeleted,
+            EntityType = AuditEntityType.User,
+            EntityId = id,
+            EntityName = displayName,
+            Description = $"User '{displayName}' was deleted.",
+            IpAddress = ipAddress
+        });
 
         return Ok();
     }
@@ -306,14 +334,18 @@ public class UsersController : BaseController
 
         var currentUserId = CurrentUserId;
         var ipAddress = ClientIpAddress;
-        await _auditLogService.LogAsync(
-            currentUserId,
-            AuditActionType.UserActivated,
-            AuditEntityType.User,
-            user.Id,
-            user.DisplayName ?? user.UserName ?? "",
-            $"User '{user.DisplayName ?? user.UserName}' was activated.",
-            ipAddress: ipAddress);
+        await _auditLogService.LogAsync(new AuditLogRequest
+        {
+            UserId = currentUserId,
+            ActionType = AuditActionType.UserActivated,
+            EntityType = AuditEntityType.User,
+            EntityId = user.Id,
+            EntityName = user.DisplayName ?? user.UserName ?? "",
+            Description = $"User '{user.DisplayName ?? user.UserName}' was activated.",
+            OldValues = AuditChangeHelper.Serialize(new { IsActive = false }),
+            NewValues = AuditChangeHelper.Serialize(new { IsActive = true }),
+            IpAddress = ipAddress
+        });
 
         return Ok();
     }
@@ -340,14 +372,18 @@ public class UsersController : BaseController
         await _userManager.UpdateAsync(user);
 
         var ipAddress = ClientIpAddress;
-        await _auditLogService.LogAsync(
-            currentUserId,
-            AuditActionType.UserDeactivated,
-            AuditEntityType.User,
-            user.Id,
-            user.DisplayName ?? user.UserName ?? "",
-            $"User '{user.DisplayName ?? user.UserName}' was deactivated.",
-            ipAddress: ipAddress);
+        await _auditLogService.LogAsync(new AuditLogRequest
+        {
+            UserId = currentUserId,
+            ActionType = AuditActionType.UserDeactivated,
+            EntityType = AuditEntityType.User,
+            EntityId = user.Id,
+            EntityName = user.DisplayName ?? user.UserName ?? "",
+            Description = $"User '{user.DisplayName ?? user.UserName}' was deactivated.",
+            OldValues = AuditChangeHelper.Serialize(new { IsActive = true }),
+            NewValues = AuditChangeHelper.Serialize(new { IsActive = false }),
+            IpAddress = ipAddress
+        });
 
         return Ok();
     }
@@ -389,14 +425,18 @@ public class UsersController : BaseController
 
         var currentUserId = CurrentUserId;
         var ipAddress = ClientIpAddress;
-        await _auditLogService.LogAsync(
-            currentUserId,
-            AuditActionType.RoleAssigned,
-            AuditEntityType.User,
-            user.Id,
-            user.DisplayName ?? user.UserName ?? "",
-            $"Roles for user '{user.DisplayName ?? user.UserName}' set to: {string.Join(", ", roleNames)}.",
-            ipAddress: ipAddress);
+        await _auditLogService.LogAsync(new AuditLogRequest
+        {
+            UserId = currentUserId,
+            ActionType = AuditActionType.RoleAssigned,
+            EntityType = AuditEntityType.User,
+            EntityId = user.Id,
+            EntityName = user.DisplayName ?? user.UserName ?? "",
+            Description = $"Roles for user '{user.DisplayName ?? user.UserName}' set to: {string.Join(", ", roleNames)}.",
+            OldValues = AuditChangeHelper.Serialize(new { Roles = currentRoles }),
+            NewValues = AuditChangeHelper.Serialize(new { Roles = roleNames }),
+            IpAddress = ipAddress
+        });
 
         return Ok();
     }
@@ -471,14 +511,16 @@ public class UsersController : BaseController
 
         var currentUserId = CurrentUserId;
         var ipAddress = ClientIpAddress;
-        await _auditLogService.LogAsync(
-            currentUserId,
-            AuditActionType.UserCreated,
-            AuditEntityType.User,
-            user.Id,
-            user.DisplayName ?? user.UserName ?? "",
-            $"LDAP user '{user.DisplayName ?? user.UserName}' was created.",
-            ipAddress: ipAddress);
+        await _auditLogService.LogAsync(new AuditLogRequest
+        {
+            UserId = currentUserId,
+            ActionType = AuditActionType.UserCreated,
+            EntityType = AuditEntityType.User,
+            EntityId = user.Id,
+            EntityName = user.DisplayName ?? user.UserName ?? "",
+            Description = $"LDAP user '{user.DisplayName ?? user.UserName}' was created.",
+            IpAddress = ipAddress
+        });
 
         var roles = await _userManager.GetRolesAsync(user);
         var dto = new UserDto

@@ -4,6 +4,8 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using AspireWebAppTemplate.Abstractions;
 using AspireWebAppTemplate.ApiService.Data.Entities;
+using AspireWebAppTemplate.ApiService.Utilities;
+using AspireWebAppTemplate.Core.Contracts.AuditLog;
 using AspireWebAppTemplate.Core.Contracts.Auth;
 using AspireWebAppTemplate.Core.Contracts.Users;
 using AspireWebAppTemplate.Core.Domain.Enums;
@@ -24,6 +26,13 @@ namespace AspireWebAppTemplate.ApiService.Controllers;
 public class AuthController : BaseController
 {
     #region Constructor
+
+    private static readonly (string, Func<ApplicationUser, object?>)[] PreferenceAuditFields =
+    [
+        ("Theme", u => u.Theme),
+        ("TimeZoneId", u => u.TimeZoneId),
+        ("DateTimeFormat", u => u.DateTimeFormat),
+    ];
 
     private readonly ILoginService _loginService;
     private readonly ILdapLoginService _ldapLoginService;
@@ -88,25 +97,29 @@ public class AuthController : BaseController
 
         if (result.Succeeded)
         {
-            await _auditLogService.LogAsync(
-                result.UserId,
-                AuditActionType.LoginSuccess,
-                AuditEntityType.User,
-                result.UserId ?? "",
-                request.Email,
-                $"User '{request.Email}' logged in successfully.",
-                ipAddress: ipAddress);
+            await _auditLogService.LogAsync(new AuditLogRequest
+            {
+                UserId = result.UserId,
+                ActionType = AuditActionType.LoginSuccess,
+                EntityType = AuditEntityType.User,
+                EntityId = result.UserId ?? "",
+                EntityName = request.Email,
+                Description = $"User '{request.Email}' logged in successfully.",
+                IpAddress = ipAddress
+            });
         }
         else
         {
-            await _auditLogService.LogAsync(
-                null,
-                AuditActionType.LoginFailed,
-                AuditEntityType.User,
-                request.Email,
-                request.Email,
-                $"Failed login attempt for '{request.Email}'. Reason: {result.ErrorMessage}",
-                ipAddress: ipAddress);
+            await _auditLogService.LogAsync(new AuditLogRequest
+            {
+                UserId = null,
+                ActionType = AuditActionType.LoginFailed,
+                EntityType = AuditEntityType.User,
+                EntityId = request.Email,
+                EntityName = request.Email,
+                Description = $"Failed login attempt for '{request.Email}'. Reason: {result.ErrorMessage}",
+                IpAddress = ipAddress
+            });
         }
 
         return Ok(result);
@@ -175,14 +188,16 @@ public class AuthController : BaseController
 
         await _signInManager.SignOutAsync();
 
-        await _auditLogService.LogAsync(
-            userId,
-            AuditActionType.LogoutSuccess,
-            AuditEntityType.User,
-            userId ?? "",
-            userName,
-            $"User '{userName}' logged out.",
-            ipAddress: ipAddress);
+        await _auditLogService.LogAsync(new AuditLogRequest
+        {
+            UserId = userId,
+            ActionType = AuditActionType.LogoutSuccess,
+            EntityType = AuditEntityType.User,
+            EntityId = userId ?? "",
+            EntityName = userName,
+            Description = $"User '{userName}' logged out.",
+            IpAddress = ipAddress
+        });
 
         return Ok();
     }
@@ -220,14 +235,17 @@ public class AuthController : BaseController
         await _userManager.UpdateAsync(user);
 
         var ipAddress = ClientIpAddress;
-        await _auditLogService.LogAsync(
-            userId,
-            AuditActionType.PasswordChanged,
-            AuditEntityType.User,
-            userId,
-            user.DisplayName ?? user.UserName ?? "Unknown",
-            $"User '{user.DisplayName ?? user.UserName}' changed their password.",
-            ipAddress: ipAddress);
+        await _auditLogService.LogAsync(new AuditLogRequest
+        {
+            UserId = userId,
+            ActionType = AuditActionType.PasswordChanged,
+            EntityType = AuditEntityType.User,
+            EntityId = userId,
+            EntityName = user.DisplayName ?? user.UserName ?? "Unknown",
+            Description = $"User '{user.DisplayName ?? user.UserName}' changed their password.",
+            NewValues = AuditChangeHelper.Serialize(new { PasswordChanged = true }),
+            IpAddress = ipAddress
+        });
 
         return Ok();
     }
@@ -293,6 +311,8 @@ public class AuthController : BaseController
         if (user is null)
             return NotFound("User not found.");
 
+        var before = AuditChangeHelper.Snapshot(user, PreferenceAuditFields);
+
         if (request.Theme.HasValue)
             user.Theme = request.Theme.Value;
         if (request.TimeZoneId is not null)
@@ -305,6 +325,22 @@ public class AuthController : BaseController
 
         if (!result.Succeeded)
             return BadRequest(string.Join("; ", result.Errors.Select(e => e.Description)));
+
+        var after = AuditChangeHelper.Snapshot(user, PreferenceAuditFields);
+        var (oldValues, newValues) = AuditChangeHelper.ComputeChanges(before, after);
+
+        await _auditLogService.LogAsync(new AuditLogRequest
+        {
+            UserId = userId,
+            ActionType = AuditActionType.SettingsChanged,
+            EntityType = AuditEntityType.User,
+            EntityId = userId,
+            EntityName = user.DisplayName ?? user.UserName ?? "",
+            Description = $"User '{user.DisplayName ?? user.UserName}' updated preferences.",
+            OldValues = oldValues,
+            NewValues = newValues,
+            IpAddress = ClientIpAddress
+        });
 
         return Ok();
     }
@@ -336,6 +372,14 @@ public class AuthController : BaseController
         return Ok();
     }
 
+    private static readonly (string, Func<ApplicationUser, object?>)[] ProfileAuditFields =
+    [
+        ("DisplayName", u => u.DisplayName),
+        ("FirstName", u => u.FirstName),
+        ("LastName", u => u.LastName),
+        ("PhoneNumber", u => u.PhoneNumber),
+    ];
+
     /// <summary>
     /// Updates the current user's profile information (phone number, etc.).
     /// </summary>
@@ -352,6 +396,8 @@ public class AuthController : BaseController
         var user = await _userManager.FindByIdAsync(userId);
         if (user is null)
             return NotFound("User not found.");
+
+        var before = AuditChangeHelper.Snapshot(user, ProfileAuditFields);
 
         if (request.DisplayName is not null)
             user.DisplayName = request.DisplayName;
@@ -371,6 +417,22 @@ public class AuthController : BaseController
         var result = await _userManager.UpdateAsync(user);
         if (!result.Succeeded)
             return BadRequest(string.Join("; ", result.Errors.Select(e => e.Description)));
+
+        var after = AuditChangeHelper.Snapshot(user, ProfileAuditFields);
+        var (oldValues, newValues) = AuditChangeHelper.ComputeChanges(before, after);
+
+        await _auditLogService.LogAsync(new AuditLogRequest
+        {
+            UserId = userId,
+            ActionType = AuditActionType.ProfileUpdated,
+            EntityType = AuditEntityType.User,
+            EntityId = userId,
+            EntityName = user.DisplayName ?? user.UserName ?? "",
+            Description = $"User '{user.DisplayName ?? user.UserName}' updated their profile.",
+            OldValues = oldValues,
+            NewValues = newValues,
+            IpAddress = ClientIpAddress
+        });
 
         return Ok();
     }
@@ -603,14 +665,16 @@ public class AuthController : BaseController
         await _signInManager.SignOutAsync();
 
         var ipAddress = ClientIpAddress;
-        await _auditLogService.LogAsync(
-            userId,
-            AuditActionType.UserDeleted,
-            AuditEntityType.User,
-            userId,
-            user.DisplayName ?? user.UserName ?? "Unknown",
-            $"User '{user.DisplayName ?? user.UserName}' deleted their account.",
-            ipAddress: ipAddress);
+        await _auditLogService.LogAsync(new AuditLogRequest
+        {
+            UserId = userId,
+            ActionType = AuditActionType.UserDeleted,
+            EntityType = AuditEntityType.User,
+            EntityId = userId,
+            EntityName = user.DisplayName ?? user.UserName ?? "Unknown",
+            Description = $"User '{user.DisplayName ?? user.UserName}' deleted their account.",
+            IpAddress = ipAddress
+        });
 
         return Ok();
     }

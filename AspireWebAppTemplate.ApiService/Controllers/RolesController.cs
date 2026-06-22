@@ -1,5 +1,6 @@
 using AspireWebAppTemplate.Abstractions;
 using AspireWebAppTemplate.ApiService.Data.Entities;
+using AspireWebAppTemplate.ApiService.Utilities;
 using AspireWebAppTemplate.Core.Contracts;
 using AspireWebAppTemplate.Core.Contracts.Auth;
 using AspireWebAppTemplate.Core.Contracts.AuditLog;
@@ -25,6 +26,15 @@ public class RolesController : BaseController
     private readonly RoleManager<ApplicationRole> _roleManager;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IAuditLogService _auditLogService;
+
+    private static readonly (string, Func<ApplicationRole, object?>)[] RoleAuditFields =
+    [
+        ("Name", r => r.Name),
+        ("DisplayName", r => r.DisplayName),
+        ("Description", r => r.Description),
+        ("Position", r => r.Position),
+        ("IsActive", r => r.IsActive),
+    ];
 
     public RolesController(
         RoleManager<ApplicationRole> roleManager,
@@ -133,16 +143,16 @@ public class RolesController : BaseController
             return BadRequest(errors);
         }
 
-        var currentUserId = CurrentUserId;
-        var ipAddress = ClientIpAddress;
-        await _auditLogService.LogAsync(
-            currentUserId,
-            AuditActionType.RoleCreated,
-            AuditEntityType.Role,
-            role.Id,
-            role.DisplayName ?? role.Name ?? "",
-            $"Role '{role.DisplayName ?? role.Name}' was created.",
-            ipAddress: ipAddress);
+        await _auditLogService.LogAsync(new AuditLogRequest
+        {
+            UserId = CurrentUserId,
+            ActionType = AuditActionType.RoleCreated,
+            EntityType = AuditEntityType.Role,
+            EntityId = role.Id,
+            EntityName = role.DisplayName ?? role.Name ?? "",
+            Description = $"Role '{role.DisplayName ?? role.Name}' was created.",
+            IpAddress = ClientIpAddress
+        });
 
         var dto = new RoleDto
         {
@@ -178,6 +188,8 @@ public class RolesController : BaseController
         if (role.IsSystem)
             return BadRequest("System roles cannot be modified.");
 
+        var before = AuditChangeHelper.Snapshot(role, RoleAuditFields);
+
         role.Name = request.Name;
         role.DisplayName = request.DisplayName;
         role.Description = request.Description;
@@ -192,16 +204,21 @@ public class RolesController : BaseController
             return BadRequest(errors);
         }
 
-        var currentUserId = CurrentUserId;
-        var ipAddress = ClientIpAddress;
-        await _auditLogService.LogAsync(
-            currentUserId,
-            AuditActionType.RoleUpdated,
-            AuditEntityType.Role,
-            role.Id,
-            role.DisplayName ?? role.Name ?? "",
-            $"Role '{role.DisplayName ?? role.Name}' was updated.",
-            ipAddress: ipAddress);
+        var after = AuditChangeHelper.Snapshot(role, RoleAuditFields);
+        var (oldValues, newValues) = AuditChangeHelper.ComputeChanges(before, after);
+
+        await _auditLogService.LogAsync(new AuditLogRequest
+        {
+            UserId = CurrentUserId,
+            ActionType = AuditActionType.RoleUpdated,
+            EntityType = AuditEntityType.Role,
+            EntityId = role.Id,
+            EntityName = role.DisplayName ?? role.Name ?? "",
+            Description = $"Role '{role.DisplayName ?? role.Name}' was updated.",
+            OldValues = oldValues,
+            NewValues = newValues,
+            IpAddress = ClientIpAddress
+        });
 
         return Ok();
     }
@@ -234,16 +251,16 @@ public class RolesController : BaseController
             return BadRequest(errors);
         }
 
-        var currentUserId = CurrentUserId;
-        var ipAddress = ClientIpAddress;
-        await _auditLogService.LogAsync(
-            currentUserId,
-            AuditActionType.RoleDeleted,
-            AuditEntityType.Role,
-            id,
-            displayName,
-            $"Role '{displayName}' was deleted.",
-            ipAddress: ipAddress);
+        await _auditLogService.LogAsync(new AuditLogRequest
+        {
+            UserId = CurrentUserId,
+            ActionType = AuditActionType.RoleDeleted,
+            EntityType = AuditEntityType.Role,
+            EntityId = id,
+            EntityName = displayName,
+            Description = $"Role '{displayName}' was deleted.",
+            IpAddress = ClientIpAddress
+        });
 
         return Ok();
     }
@@ -320,26 +337,32 @@ public class RolesController : BaseController
             return NotFound();
 
         int success = 0, failed = 0;
+        var successfullyAssignedIds = new List<string>();
         foreach (var userId in userIds)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user is null) { failed++; continue; }
 
             var result = await _userManager.AddToRoleAsync(user, role.Name!);
-            if (result.Succeeded) success++;
+            if (result.Succeeded)
+            {
+                success++;
+                successfullyAssignedIds.Add(userId);
+            }
             else failed++;
         }
 
-        var currentUserId = CurrentUserId;
-        var ipAddress = ClientIpAddress;
-        await _auditLogService.LogAsync(
-            currentUserId,
-            AuditActionType.RoleAssigned,
-            AuditEntityType.Role,
-            role.Id,
-            role.DisplayName ?? role.Name ?? "",
-            $"{success} user(s) assigned to role '{role.Name}'.",
-            ipAddress: ipAddress);
+        await _auditLogService.LogAsync(new AuditLogRequest
+        {
+            UserId = CurrentUserId,
+            ActionType = AuditActionType.RoleAssigned,
+            EntityType = AuditEntityType.Role,
+            EntityId = role.Id,
+            EntityName = role.DisplayName ?? role.Name ?? "",
+            Description = $"{success} user(s) assigned to role '{role.Name}'.",
+            NewValues = AuditChangeHelper.Serialize(new { UserIds = successfullyAssignedIds }),
+            IpAddress = ClientIpAddress
+        });
 
         if (failed > 0)
             return Ok(new { success, failed });
@@ -376,16 +399,17 @@ public class RolesController : BaseController
         if (!result.Succeeded)
             return BadRequest(string.Join("; ", result.Errors.Select(e => e.Description)));
 
-        var currentUserId = CurrentUserId;
-        var ipAddress = ClientIpAddress;
-        await _auditLogService.LogAsync(
-            currentUserId,
-            AuditActionType.RoleUnassigned,
-            AuditEntityType.Role,
-            entityId: userId,
-            entityName: role.Name!,
-            description: $"Role '{role.Name}' removed from user '{user.DisplayName ?? user.UserName}'.",
-            ipAddress: ipAddress);
+        await _auditLogService.LogAsync(new AuditLogRequest
+        {
+            UserId = CurrentUserId,
+            ActionType = AuditActionType.RoleUnassigned,
+            EntityType = AuditEntityType.Role,
+            EntityId = userId,
+            EntityName = role.Name!,
+            Description = $"Role '{role.Name}' removed from user '{user.DisplayName ?? user.UserName}'.",
+            OldValues = AuditChangeHelper.Serialize(new { UserId = userId, RoleName = role.Name }),
+            IpAddress = ClientIpAddress
+        });
 
         return Ok();
     }

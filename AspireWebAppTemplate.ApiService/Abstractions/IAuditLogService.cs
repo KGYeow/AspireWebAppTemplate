@@ -1,4 +1,4 @@
-using AspireWebAppTemplate.Core.Domain.Enums;
+using AspireWebAppTemplate.Core.Contracts.AuditLog;
 
 namespace AspireWebAppTemplate.Abstractions;
 
@@ -14,55 +14,21 @@ namespace AspireWebAppTemplate.Abstractions;
 public interface IAuditLogService
 {
     /// <summary>
-    /// Records a single audit log entry into the database.
+    /// Records a single audit log entry into the database using the provided request object.
     /// Failures are logged at Error level but never propagated to the caller,
     /// ensuring audit failures do not disrupt the primary user operation.
     /// </summary>
-    /// <param name="userId">
-    /// The identifier of the acting user, or <c>null</c> for system-generated events
-    /// where no authenticated user context exists.
-    /// </param>
-    /// <param name="actionType">The category of action being recorded (e.g., UserCreated, LoginSuccess).</param>
-    /// <param name="entityType">The type of entity affected by the action (e.g., User, Role, Settings).</param>
-    /// <param name="entityId">
-    /// The unique identifier of the affected entity (e.g., user ID, role ID).
-    /// Maximum 450 characters.
-    /// </param>
-    /// <param name="entityName">
-    /// A human-readable name for the affected entity (e.g., user display name, role name).
-    /// Maximum 256 characters.
-    /// </param>
-    /// <param name="description">
-    /// A brief human-readable summary of what occurred.
-    /// Maximum 1024 characters.
-    /// </param>
-    /// <param name="oldValues">
-    /// JSON-serialized representation of the entity's previous state before the action,
-    /// or <c>null</c> if not applicable (e.g., for creation or login events).
-    /// </param>
-    /// <param name="newValues">
-    /// JSON-serialized representation of the entity's new state after the action,
-    /// or <c>null</c> if not applicable (e.g., for deletion or login events).
-    /// </param>
-    /// <param name="ipAddress">
-    /// The source IP address of the HTTP request that triggered the action,
-    /// or <c>null</c> if not available. Maximum 45 characters (supports IPv6).
+    /// <param name="request">
+    /// An <see cref="AuditLogRequest"/> instance containing all parameters for the audit entry,
+    /// including the acting user, action type, affected entity details, optional old/new values,
+    /// and the source IP address.
     /// </param>
     /// <returns>A task representing the asynchronous logging operation.</returns>
     /// <exception cref="System.Exception">
     /// This method does not throw exceptions. Any database errors encountered during
     /// persistence are caught, logged at Error level via <c>ILogger</c>, and swallowed.
     /// </exception>
-    Task LogAsync(
-        string? userId,
-        AuditActionType actionType,
-        AuditEntityType entityType,
-        string entityId,
-        string entityName,
-        string description,
-        string? oldValues = null,
-        string? newValues = null,
-        string? ipAddress = null);
+    Task LogAsync(AuditLogRequest request);
 
     /// <summary>
     /// Purges audit log entries older than the configured retention period

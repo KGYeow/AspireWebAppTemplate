@@ -1,9 +1,5 @@
 using System.Text.Json;
-using AspireWebAppTemplate.Core.Contracts;
-using AspireWebAppTemplate.Core.Contracts.Auth;
 using AspireWebAppTemplate.Core.Contracts.AuditLog;
-using AspireWebAppTemplate.Core.Contracts.Roles;
-using AspireWebAppTemplate.Core.Contracts.Users;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using AspireWebAppTemplate.Web.Abstractions;
@@ -12,10 +8,16 @@ namespace AspireWebAppTemplate.Web.Components.Pages.Admin.AuditLog;
 
 /// <summary>
 /// Dialog component that displays the full details of a single audit log entry.
-/// Shows all entry fields including pretty-printed JSON for OldValues/NewValues.
+/// Shows all entry fields in a key-value table with pretty-printed JSON for OldValues/NewValues.
 /// </summary>
 public partial class AuditLogDetailDialog : ComponentBase
 {
+    #region Injected Services
+
+    [Inject] private IUserTimeZoneContext TimeZoneContext { get; set; } = default!;
+
+    #endregion
+
     #region Cascading Parameters
 
     [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
@@ -28,12 +30,6 @@ public partial class AuditLogDetailDialog : ComponentBase
     /// The audit log entry DTO to display in the detail view.
     /// </summary>
     [Parameter] public AuditLogEntryDto Entry { get; set; } = default!;
-
-    #endregion
-
-    #region Injected Services
-
-    [Inject] private IUserTimeZoneContext TimeZoneContext { get; set; } = default!;
 
     #endregion
 
@@ -54,8 +50,6 @@ public partial class AuditLogDetailDialog : ComponentBase
             return json;
         }
     }
-
-    private void Close() => MudDialog.Cancel();
 
     #endregion
 }
