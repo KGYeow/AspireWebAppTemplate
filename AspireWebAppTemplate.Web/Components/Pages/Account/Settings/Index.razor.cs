@@ -18,10 +18,14 @@ namespace AspireWebAppTemplate.Web.Components.Pages.Account.Settings;
 
 /// <summary>
 /// Settings page allowing authenticated users to view and edit their
-/// preferences (Time Zone, Locale, Date/Time Format) and appearance (Theme).
+/// preferences (Time Zone, Date/Time Format) and appearance (Theme).
 /// All fields use instant-save on value change — no Save button or EditForm.
 /// Delegates persistence to the API via <see cref="ApiAuthService"/>.
 /// </summary>
+/// <remarks>
+/// Each preference field uses a property setter pattern that captures the previous
+/// value before saving, enabling automatic rollback on API failure.
+/// </remarks>
 [Authorize]
 public partial class Index : ComponentBase
 {
@@ -33,27 +37,27 @@ public partial class Index : ComponentBase
     [Inject] private ApiAuthService AuthService { get; set; } = default!;
 
     /// <summary>
-    /// Provides navigation actions.
+    /// Provides navigation actions (e.g., redirecting to InvalidUser on load failure).
     /// </summary>
     [Inject] private NavigationManager NavigationManager { get; set; } = default!;
 
     /// <summary>
-    /// Structured logger for recording events.
+    /// Structured logger for recording warnings and errors during preference saves.
     /// </summary>
     [Inject] private ILogger<Index> Logger { get; set; } = default!;
 
     /// <summary>
-    /// Provides timezone conversion and display utilities.
+    /// Provides timezone list and conversion utilities for the timezone autocomplete.
     /// </summary>
     [Inject] private ITimeZoneService TimeZoneService { get; set; } = default!;
 
     /// <summary>
-    /// Scoped theme context for notifying the layout of theme changes.
+    /// Scoped theme context for notifying the layout of theme changes in real time.
     /// </summary>
     [Inject] private IThemeContext ThemeState { get; set; } = default!;
 
     /// <summary>
-    /// JavaScript runtime for detecting OS dark mode preference.
+    /// JavaScript runtime for detecting OS dark mode preference when applying theme changes.
     /// </summary>
     [Inject] private IJSRuntime JS { get; set; } = default!;
 
@@ -62,13 +66,29 @@ public partial class Index : ComponentBase
     #region State
 
     /// <summary>
-    /// Status message displayed after save.
+    /// Status message displayed after a save operation (success or error).
     /// </summary>
     protected string? StatusMessage { get; set; }
 
+    /// <summary>
+    /// Whether the page is loading initial data. Controls the <see cref="UI.Components.Shared.PageContent"/> wrapper.
+    /// </summary>
+    private bool _isLoading = true;
+
+    /// <summary>
+    /// The current theme preference value bound to the PillToggle component.
+    /// </summary>
     private ThemePreference _themeValue;
+
+    /// <summary>
+    /// The previous theme value before the latest change, used for rollback on save failure.
+    /// </summary>
     private ThemePreference _previousThemeValue;
 
+    /// <summary>
+    /// Theme preference property with instant-save on change.
+    /// Captures the previous value before firing the async save operation.
+    /// </summary>
     private ThemePreference ThemeValue
     {
         get => _themeValue;
@@ -81,9 +101,20 @@ public partial class Index : ComponentBase
         }
     }
 
+    /// <summary>
+    /// The current timezone ID value bound to the autocomplete component.
+    /// </summary>
     private string? _timeZoneValue;
+
+    /// <summary>
+    /// The previous timezone value before the latest change, used for rollback on save failure.
+    /// </summary>
     private string? _previousTimeZoneValue;
 
+    /// <summary>
+    /// Timezone preference property with instant-save on change.
+    /// Captures the previous value before firing the async save operation.
+    /// </summary>
     private string? TimeZoneValue
     {
         get => _timeZoneValue;
@@ -96,9 +127,20 @@ public partial class Index : ComponentBase
         }
     }
 
+    /// <summary>
+    /// The current date/time format string value bound to the select component.
+    /// </summary>
     private string? _dateTimeFormatValue;
+
+    /// <summary>
+    /// The previous date/time format value before the latest change, used for rollback on save failure.
+    /// </summary>
     private string? _previousDateTimeFormatValue;
 
+    /// <summary>
+    /// Date/time format preference property with instant-save on change.
+    /// Captures the previous value before firing the async save operation.
+    /// </summary>
     private string? DateTimeFormatValue
     {
         get => _dateTimeFormatValue;
@@ -115,6 +157,10 @@ public partial class Index : ComponentBase
 
     #region Lifecycle
 
+    /// <summary>
+    /// Loads the current user's preferences from the API on page initialization.
+    /// Redirects to InvalidUser page if the user cannot be resolved.
+    /// </summary>
     protected override async Task OnInitializedAsync()
     {
         var result = await AuthService.GetCurrentUserAsync();
@@ -129,12 +175,18 @@ public partial class Index : ComponentBase
         _timeZoneValue = user.TimeZoneId;
         _dateTimeFormatValue = user.DateTimeFormat;
         _themeValue = user.Theme;
+        _isLoading = false;
     }
 
     #endregion
 
     #region Event Handlers
 
+    /// <summary>
+    /// Persists the theme preference to the API and updates the layout's theme context.
+    /// Reverts to the previous value and shows an error message on failure.
+    /// </summary>
+    /// <param name="theme">The new theme preference to save.</param>
     private async Task SaveThemeAsync(ThemePreference theme)
     {
         try
@@ -148,6 +200,7 @@ public partial class Index : ComponentBase
                 return;
             }
 
+            // Apply the theme change immediately by detecting OS preference and notifying the layout
             var themeModule = await JS.InvokeAsync<IJSObjectReference>("import", "./js/theme.js");
             var systemPrefersDark = await themeModule.InvokeAsync<bool>("getSystemPrefersDark");
             ThemeState.SetThemePreference(theme, systemPrefersDark);
@@ -160,6 +213,11 @@ public partial class Index : ComponentBase
         }
     }
 
+    /// <summary>
+    /// Persists the timezone preference to the API.
+    /// Reverts to the previous value and shows an error message on failure.
+    /// </summary>
+    /// <param name="timeZoneId">The IANA timezone ID to save, or empty string to clear.</param>
     private async Task SaveTimeZoneAsync(string? timeZoneId)
     {
         try
@@ -185,6 +243,11 @@ public partial class Index : ComponentBase
         }
     }
 
+    /// <summary>
+    /// Persists the date/time format preference to the API.
+    /// Reverts to the previous value and shows an error message on failure.
+    /// </summary>
+    /// <param name="format">The date/time format string to save, or empty string to clear.</param>
     private async Task SaveDateTimeFormatAsync(string? format)
     {
         try
@@ -214,11 +277,21 @@ public partial class Index : ComponentBase
 
     #region Helpers
 
+    /// <summary>
+    /// Provides the timezone autocomplete search function.
+    /// Filters the full timezone list by matching display name or ID against the search value.
+    /// Also handles alias/legacy timezone IDs that may not appear in the standard list.
+    /// </summary>
+    /// <param name="value">The search text entered by the user.</param>
+    /// <param name="token">Cancellation token (unused but required by MudAutocomplete).</param>
+    /// <returns>Filtered enumerable of timezone IDs matching the search criteria.</returns>
     private Task<IEnumerable<string>> SearchTimeZones(string value, CancellationToken token)
     {
         var allTimeZones = TimeZoneService.GetAllTimeZones();
         IEnumerable<TimeZoneOption> source = allTimeZones;
 
+        // If the user's saved timezone is a legacy/alias not in the standard list,
+        // include it as an extra option so it appears in the dropdown
         if (!string.IsNullOrEmpty(_timeZoneValue)
             && !allTimeZones.Any(tz => tz.Id == _timeZoneValue))
         {
@@ -238,6 +311,12 @@ public partial class Index : ComponentBase
         return Task.FromResult(filtered);
     }
 
+    /// <summary>
+    /// Builds a <see cref="TimeZoneOption"/> for a timezone ID that may be a legacy alias
+    /// not present in the standard list. Returns null if the ID is completely invalid.
+    /// </summary>
+    /// <param name="id">The timezone ID to resolve.</param>
+    /// <returns>A constructed timezone option, or null if the ID cannot be resolved.</returns>
     private static TimeZoneOption? BuildTimeZoneOptionForAlias(string id)
     {
         try
@@ -255,6 +334,12 @@ public partial class Index : ComponentBase
         }
     }
 
+    /// <summary>
+    /// Maps a date/time format string to its human-readable label for display purposes.
+    /// Returns the raw format string if no matching label is defined.
+    /// </summary>
+    /// <param name="format">The format string to look up.</param>
+    /// <returns>A human-readable label describing the format.</returns>
     private static string GetFormatLabel(string? format) => format switch
     {
         null or "" => DateTimeFormatDefaults.Label,
@@ -272,6 +357,13 @@ public partial class Index : ComponentBase
         _ => format
     };
 
+    /// <summary>
+    /// Converts a timezone ID to its display name for the autocomplete's display function.
+    /// Falls back to building a display name from <see cref="TimeZoneInfo"/> if not found
+    /// in the standard list, or returns the raw ID if resolution fails entirely.
+    /// </summary>
+    /// <param name="id">The timezone ID to display.</param>
+    /// <returns>A formatted display string like "(UTC+08:00) Asia/Singapore".</returns>
     private string TimeZoneToString(string? id)
     {
         if (string.IsNullOrEmpty(id))

@@ -6,88 +6,90 @@
 
 <PageHeader Title="Settings" />
 
-<!-- Alert area -->
-@if (!string.IsNullOrEmpty(StatusMessage))
-{
-    <MudAlert Severity="@(StatusMessage.StartsWith("Error") ? Severity.Error : Severity.Success)"
-              Class="mb-4 border-1"
-              ShowCloseIcon
-              CloseIconClicked="() => StatusMessage = null">
-        @StatusMessage
-    </MudAlert>
-}
+<PageContent IsLoading="_isLoading">
+    <!-- Alert area -->
+    @if (!string.IsNullOrEmpty(StatusMessage))
+    {
+        <MudAlert Severity="@(StatusMessage.StartsWith("Error") ? Severity.Error : Severity.Success)"
+                  Class="mb-4 border-1"
+                  ShowCloseIcon
+                  CloseIconClicked="() => StatusMessage = null">
+            @StatusMessage
+        </MudAlert>
+    }
 
-<MudPaper Class="pa-4" Elevation="0">
-    <!-- Section 1: Preferences -->
-    <MudGrid>
-        <MudItem xs="12" md="5">
-            <MudText Typo="Typo.h6">Preferences</MudText>
-            <MudText Typo="Typo.body2" Class="mud-text-secondary">
-                Set your time zone and date/time format preferences
-            </MudText>
-        </MudItem>
-        <MudItem xs="12" md="7">
-            <MudGrid>
-                <MudItem xs="12" sm="6">
-                    <MudInputLabel>Time Zone</MudInputLabel>
-                    <MudAutocomplete T="string"
-                                     @bind-Value="TimeZoneValue"
-                                     SearchFunc="SearchTimeZones"
-                                     ToStringFunc="TimeZoneToString"
-                                     Variant="Variant.Outlined"
-                                     Margin="Margin.Dense"
-                                     Typo="Typo.body2"
-                                     MaxItems="null"
-                                     Dense />
-                </MudItem>
-                <MudItem xs="12" sm="6">
-                    <MudInputLabel>Date/Time Format</MudInputLabel>
-                    <MudSelect T="string"
-                               @bind-Value="DateTimeFormatValue"
-                               Variant="Variant.Outlined"
-                               Margin="Margin.Dense"
-                               Typo="Typo.body2"
-                               Dense>
-                        <MudSelectItem T="string" Value="@((string?)null)">@DateTimeFormatDefaults.Label</MudSelectItem>
-                        <MudSelectItem Value="@("yyyy-MM-dd HH:mm")">ISO (2026-11-03 14:30)</MudSelectItem>
-                        <MudSelectItem Value="@("yyyy-MM-dd HH:mm:ss")">ISO with seconds (2026-11-03 14:30:00)</MudSelectItem>
-                        <MudSelectItem Value="@("dd/MM/yyyy HH:mm")">Day first (03/11/2026 14:30)</MudSelectItem>
-                        <MudSelectItem Value="@("MM/dd/yyyy h:mm tt")">US (11/03/2026 2:30 PM)</MudSelectItem>
-                        <MudSelectItem Value="@("dd-MM-yyyy HH:mm")">Day first with dashes (03-11-2026 14:30)</MudSelectItem>
-                        <MudSelectItem Value="@("dd.MM.yyyy HH:mm")">European with dots (03.11.2026 14:30)</MudSelectItem>
-                        <MudSelectItem Value="@("yyyy/MM/dd HH:mm")">East Asian (2026/11/03 14:30)</MudSelectItem>
-                        <MudSelectItem Value="@("dd MMM yyyy HH:mm")">Short month (03 Nov 2026 14:30)</MudSelectItem>
-                        <MudSelectItem Value="@("d MMMM yyyy HH:mm")">Long month (3 November 2026 14:30)</MudSelectItem>
-                        <MudSelectItem Value="@("d MMM yyyy h:mm tt")">Short month 12h (3 Nov 2026 2:30 PM)</MudSelectItem>
-                        <MudSelectItem Value="@("MMMM d, yyyy h:mm tt")">US long (November 3, 2026 2:30 PM)</MudSelectItem>
-                    </MudSelect>
-                </MudItem>
-            </MudGrid>
-        </MudItem>
-    </MudGrid>
+    <MudPaper Class="pa-4" Elevation="0">
+        <!-- Section 1: Preferences -->
+        <MudGrid>
+            <MudItem xs="12" md="5">
+                <MudText Typo="Typo.h6">Preferences</MudText>
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">
+                    Set your time zone and date/time format preferences
+                </MudText>
+            </MudItem>
+            <MudItem xs="12" md="7">
+                <MudGrid>
+                    <MudItem xs="12" sm="6">
+                        <MudInputLabel>Time Zone</MudInputLabel>
+                        <MudAutocomplete T="string"
+                                         @bind-Value="TimeZoneValue"
+                                         SearchFunc="SearchTimeZones"
+                                         ToStringFunc="TimeZoneToString"
+                                         Variant="Variant.Outlined"
+                                         Margin="Margin.Dense"
+                                         Typo="Typo.body2"
+                                         MaxItems="null"
+                                         Dense />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudInputLabel>Date/Time Format</MudInputLabel>
+                        <MudSelect T="string"
+                                   @bind-Value="DateTimeFormatValue"
+                                   Variant="Variant.Outlined"
+                                   Margin="Margin.Dense"
+                                   Typo="Typo.body2"
+                                   Dense>
+                            <MudSelectItem T="string" Value="@((string?)null)">@DateTimeFormatDefaults.Label</MudSelectItem>
+                            <MudSelectItem Value="@("yyyy-MM-dd HH:mm")">ISO (2026-11-03 14:30)</MudSelectItem>
+                            <MudSelectItem Value="@("yyyy-MM-dd HH:mm:ss")">ISO with seconds (2026-11-03 14:30:00)</MudSelectItem>
+                            <MudSelectItem Value="@("dd/MM/yyyy HH:mm")">Day first (03/11/2026 14:30)</MudSelectItem>
+                            <MudSelectItem Value="@("MM/dd/yyyy h:mm tt")">US (11/03/2026 2:30 PM)</MudSelectItem>
+                            <MudSelectItem Value="@("dd-MM-yyyy HH:mm")">Day first with dashes (03-11-2026 14:30)</MudSelectItem>
+                            <MudSelectItem Value="@("dd.MM.yyyy HH:mm")">European with dots (03.11.2026 14:30)</MudSelectItem>
+                            <MudSelectItem Value="@("yyyy/MM/dd HH:mm")">East Asian (2026/11/03 14:30)</MudSelectItem>
+                            <MudSelectItem Value="@("dd MMM yyyy HH:mm")">Short month (03 Nov 2026 14:30)</MudSelectItem>
+                            <MudSelectItem Value="@("d MMMM yyyy HH:mm")">Long month (3 November 2026 14:30)</MudSelectItem>
+                            <MudSelectItem Value="@("d MMM yyyy h:mm tt")">Short month 12h (3 Nov 2026 2:30 PM)</MudSelectItem>
+                            <MudSelectItem Value="@("MMMM d, yyyy h:mm tt")">US long (November 3, 2026 2:30 PM)</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                </MudGrid>
+            </MudItem>
+        </MudGrid>
 
-    <MudDivider Class="my-6" />
+        <MudDivider Class="my-6" />
 
-    <!-- Section 2: Appearance -->
-    <MudGrid>
-        <MudItem xs="12" md="5">
-            <MudText Typo="Typo.h6">Appearance</MudText>
-            <MudText Typo="Typo.body2" Class="mud-text-secondary">
-                Choose your preferred theme
-            </MudText>
-        </MudItem>
-        <MudItem xs="12" md="7">
-            <PillToggle T="ThemePreference" @bind-Value="ThemeValue">
-                <PillToggleItem T="ThemePreference" Value="ThemePreference.Light" Title="Light">
-                    <MudIcon Icon="@Icons.Material.Outlined.LightMode" Size="Size.Small" />
-                </PillToggleItem>
-                <PillToggleItem T="ThemePreference" Value="ThemePreference.Dark" Title="Dark">
-                    <MudIcon Icon="@Icons.Material.Outlined.DarkMode" Size="Size.Small" />
-                </PillToggleItem>
-                <PillToggleItem T="ThemePreference" Value="ThemePreference.System" Title="System">
-                    <MudIcon Icon="@Icons.Material.Outlined.SettingsBrightness" Size="Size.Small" />
-                </PillToggleItem>
-            </PillToggle>
-        </MudItem>
-    </MudGrid>
-</MudPaper>
+        <!-- Section 2: Appearance -->
+        <MudGrid>
+            <MudItem xs="12" md="5">
+                <MudText Typo="Typo.h6">Appearance</MudText>
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">
+                    Choose your preferred theme
+                </MudText>
+            </MudItem>
+            <MudItem xs="12" md="7">
+                <PillToggle T="ThemePreference" @bind-Value="ThemeValue">
+                    <PillToggleItem T="ThemePreference" Value="ThemePreference.Light" Title="Light">
+                        <MudIcon Icon="@Icons.Material.Outlined.LightMode" Size="Size.Small" />
+                    </PillToggleItem>
+                    <PillToggleItem T="ThemePreference" Value="ThemePreference.Dark" Title="Dark">
+                        <MudIcon Icon="@Icons.Material.Outlined.DarkMode" Size="Size.Small" />
+                    </PillToggleItem>
+                    <PillToggleItem T="ThemePreference" Value="ThemePreference.System" Title="System">
+                        <MudIcon Icon="@Icons.Material.Outlined.SettingsBrightness" Size="Size.Small" />
+                    </PillToggleItem>
+                </PillToggle>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+</PageContent>
