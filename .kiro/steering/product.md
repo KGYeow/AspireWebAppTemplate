@@ -1,0 +1,30 @@
+# Product
+
+## What Is This?
+
+An enterprise Blazor Server web application template built on .NET Aspire. It provides a production-ready starting point for internal business applications with built-in admin features.
+
+## Who Is It For?
+
+- Enterprise development teams at Jabil building internal web applications
+- Developers who need a pre-built admin dashboard with user/role management
+- Teams needing a Blazor Server template with .NET Aspire service orchestration
+
+## Core Features
+
+- **User Management** — CRUD, activation/deactivation, LDAP sync, role assignment
+- **Role Management** — custom roles with position ordering, system role protection
+- **Audit Logging** — comprehensive action tracking with old/new value change capture
+- **Page-Level Permissions** — database-driven, role-based page access (whitelist model)
+- **Settings & Preferences** — per-user theme, timezone, date/time format
+- **Profile Management** — user profile viewing and editing
+- **Authentication** — local Identity + optional LDAP/Active Directory integration
+- **CSV Export** — audit log export with server-side filtering
+
+## Design Principles
+
+- **Template-first**: code should be easy to understand, extend, and strip down
+- **Convention over configuration**: follow established patterns rather than inventing new ones
+- **Comprehensive documentation**: all code includes XML docs and inline comments
+- **Testable**: property-based tests for correctness properties, unit tests for specific cases
+- **Separation of concerns**: clear boundaries between Core, API, Web, and UI projects

@@ -31,28 +31,6 @@
 - Audit logging: swallow database exceptions, log at Error level, never disrupt the primary operation.
 - UI save operations: show error via Snackbar or inline alert, revert state on failure.
 
-## Project Structure
-
-### Layout Folder (Web project)
-```
-Components/Layout/
-├── MainLayout.razor (+.cs)     ← Entry-point layouts at root
-├── AuthLayout.razor (+.cs)
-├── ManageLayout.razor
-├── Topbar/                     ← Topbar region components
-├── Sidebar/                    ← Drawer header, nav menu, etc.
-├── Footer/                     ← Footer component
-└── Shared/                     ← Cross-layout utilities (ReconnectModal, etc.)
-```
-
-### Shared Components
-- `AspireWebAppTemplate.UI/Components/Shared/` — reusable, project-agnostic components (PageContent, LoadingOverlay, PageHeader, ConfirmationDialog, etc.)
-- `AspireWebAppTemplate.Web/Components/Shared/` — web-project-specific shared components
-
-### Specs & Docs
-- `.kiro/specs/{feature-name}/` — active spec documents (requirements.md, design.md, tasks.md)
-- `docs/features/{feature-name}/` — archived/completed feature documentation
-
 ## Conventions
 
 ### Naming
@@ -70,6 +48,10 @@ Components/Layout/
 - Unit tests: xUnit + Moq
 - Database tests: Microsoft.EntityFrameworkCore.Sqlite in-memory
 - Test tag format: `// Feature: {feature-name}, Property {N}: {title}`
+
+### Specs & Docs
+- `.kiro/specs/{feature-name}/` — active spec documents (requirements.md, design.md, tasks.md)
+- `docs/features/{feature-name}/` — archived/completed feature documentation
 
 ## Before Writing Code
 - Read relevant existing code to match the project's style, conventions, and libraries.

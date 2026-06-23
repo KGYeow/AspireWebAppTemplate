@@ -1,0 +1,84 @@
+@using AspireWebAppTemplate.Core.Contracts.Notifications
+@using AspireWebAppTemplate.Core.Domain.Enums
+
+<MudBadge Content="@_unreadCount" Visible="@(_unreadCount > 0)" Color="Color.Error" Overlap>
+    <MudIconButton Icon="@Icons.Material.Outlined.Notifications"
+                   Color="Color.Inherit"
+                   OnClick="TogglePopover" />
+</MudBadge>
+
+<MudPopover Open="@_popoverOpen"
+            AnchorOrigin="Origin.BottomRight"
+            TransformOrigin="Origin.TopRight"
+            Class="notification-bell-popover"
+            Style="width: 360px;">
+    <MudPaper Elevation="4">
+        <!-- Header -->
+        <MudStack Row AlignItems="AlignItems.Center" Class="px-4 py-2">
+            <MudText Typo="Typo.subtitle1" Class="fw-bold">Notifications</MudText>
+            <MudSpacer />
+            <MudIconButton Icon="@Icons.Material.Rounded.Close"
+                           Size="Size.Small"
+                           OnClick="ClosePopover" />
+        </MudStack>
+
+        <MudDivider />
+
+        <!-- Notification List -->
+        @if (_recentNotifications is null || _isLoadingRecent)
+        {
+            <MudStack Class="pa-4" AlignItems="AlignItems.Center">
+                <MudProgressCircular Size="Size.Small" Indeterminate />
+            </MudStack>
+        }
+        else if (_recentNotifications.Count == 0)
+        {
+            <MudStack Class="pa-4" AlignItems="AlignItems.Center">
+                <MudIcon Icon="@Icons.Material.Outlined.NotificationsNone"
+                         Size="Size.Large"
+                         Color="Color.Default" />
+                <MudText Typo="Typo.body2" Color="Color.Secondary">No notifications</MudText>
+            </MudStack>
+        }
+        else
+        {
+            <MudList T="NotificationDto" Dense Class="py-0">
+                @foreach (var notification in _recentNotifications)
+                {
+                    <MudListItem T="NotificationDto"
+                                 OnClick="() => HandleNotificationClick(notification)"
+                                 Class="@(notification.IsRead ? "" : "notification-unread")">
+                        <MudStack Row AlignItems="AlignItems.Start" Spacing="2">
+                            <MudIcon Icon="@GetCategoryIcon(notification.Category)"
+                                     Size="Size.Small"
+                                     Color="@GetCategoryColor(notification.Category)"
+                                     Class="mt-1" />
+                            <MudStack Spacing="0" Class="overflow-hidden">
+                                <MudText Typo="Typo.body2"
+                                         Class="@(notification.IsRead ? "" : "fw-bold")"
+                                         Style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    @notification.Title
+                                </MudText>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                    @FormatRelativeTime(notification.CreatedAtUtc)
+                                </MudText>
+                            </MudStack>
+                        </MudStack>
+                    </MudListItem>
+                }
+            </MudList>
+        }
+
+        <MudDivider />
+
+        <!-- View All Link -->
+        <MudStack Row Class="pa-2" Justify="Justify.Center">
+            <MudButton Variant="Variant.Text"
+                       Color="Color.Primary"
+                       Size="Size.Small"
+                       OnClick="NavigateToNotifications">
+                View All
+            </MudButton>
+        </MudStack>
+    </MudPaper>
+</MudPopover>

@@ -1,7 +1,7 @@
 // Feature: page-access-permissions, Property 9: NavMenu Filters Inaccessible Items
 using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Web.Abstractions;
-using AspireWebAppTemplate.Web.Components.Layout;
+using AspireWebAppTemplate.Web.Components.Layout.Sidebar;
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;

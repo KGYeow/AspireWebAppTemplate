@@ -1,18 +1,14 @@
 using AspireWebAppTemplate.Abstractions;
 using AspireWebAppTemplate.Core.Application.Abstractions;
-using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Core.Common.Defaults;
-using AspireWebAppTemplate.Core.Contracts;
-using AspireWebAppTemplate.Core.Contracts.Auth;
-using AspireWebAppTemplate.Core.Contracts.AuditLog;
-using AspireWebAppTemplate.Core.Contracts.Roles;
+using AspireWebAppTemplate.Core.Contracts.Notifications;
 using AspireWebAppTemplate.Core.Contracts.Users;
 using AspireWebAppTemplate.Core.Domain.Enums;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
+using MudBlazor;
 
 namespace AspireWebAppTemplate.Web.Components.Pages.Account.Settings;
 
@@ -60,6 +56,11 @@ public partial class Index : ComponentBase
     /// JavaScript runtime for detecting OS dark mode preference when applying theme changes.
     /// </summary>
     [Inject] private IJSRuntime JS { get; set; } = default!;
+
+    /// <summary>
+    /// Typed HttpClient service for notification preference operations (get/update).
+    /// </summary>
+    [Inject] private ApiNotificationService NotificationService { get; set; } = default!;
 
     #endregion
 
@@ -153,6 +154,16 @@ public partial class Index : ComponentBase
         }
     }
 
+    /// <summary>
+    /// The list of notification preferences for all categories, loaded from the API.
+    /// </summary>
+    private List<NotificationPreferenceDto> _notificationPreferences = [];
+
+    /// <summary>
+    /// Whether the notification preferences section is loading its data.
+    /// </summary>
+    private bool _isLoadingPreferences = true;
+
     #endregion
 
     #region Lifecycle
@@ -160,6 +171,7 @@ public partial class Index : ComponentBase
     /// <summary>
     /// Loads the current user's preferences from the API on page initialization.
     /// Redirects to InvalidUser page if the user cannot be resolved.
+    /// Also loads notification delivery preferences for the Notifications section.
     /// </summary>
     protected override async Task OnInitializedAsync()
     {
@@ -176,6 +188,9 @@ public partial class Index : ComponentBase
         _dateTimeFormatValue = user.DateTimeFormat;
         _themeValue = user.Theme;
         _isLoading = false;
+
+        // Load notification preferences in parallel (non-blocking for the main page content)
+        await LoadNotificationPreferencesAsync();
     }
 
     #endregion
@@ -273,9 +288,127 @@ public partial class Index : ComponentBase
         }
     }
 
+    /// <summary>
+    /// Handles the In-App notification toggle change for a specific category.
+    /// Immediately persists the new value via the API. On failure, reverts the toggle
+    /// to its previous state and displays a Snackbar error.
+    /// </summary>
+    /// <param name="pref">The preference DTO being toggled.</param>
+    /// <param name="newValue">The new In-App enabled value.</param>
+    private async Task HandleInAppToggle(NotificationPreferenceDto pref, bool newValue)
+    {
+        var previousValue = pref.InAppEnabled;
+        pref.InAppEnabled = newValue;
+
+        var request = new UpdateNotificationPreferenceRequest
+        {
+            Category = pref.Category,
+            InAppEnabled = newValue,
+            EmailEnabled = pref.EmailEnabled
+        };
+
+        try
+        {
+            var result = await NotificationService.UpdatePreferenceAsync(request);
+            if (!result.Succeeded)
+            {
+                pref.InAppEnabled = previousValue;
+                Snackbar.Add("Failed to save notification preference. Please try again.", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Error saving In-App notification preference for {Category}.", pref.Category);
+            pref.InAppEnabled = previousValue;
+            Snackbar.Add("Failed to save notification preference. Please try again.", Severity.Error);
+        }
+    }
+
+    /// <summary>
+    /// Handles the Email notification toggle change for a specific category.
+    /// Immediately persists the new value via the API. On failure, reverts the toggle
+    /// to its previous state and displays a Snackbar error.
+    /// </summary>
+    /// <param name="pref">The preference DTO being toggled.</param>
+    /// <param name="newValue">The new Email enabled value.</param>
+    private async Task HandleEmailToggle(NotificationPreferenceDto pref, bool newValue)
+    {
+        var previousValue = pref.EmailEnabled;
+        pref.EmailEnabled = newValue;
+
+        var request = new UpdateNotificationPreferenceRequest
+        {
+            Category = pref.Category,
+            InAppEnabled = pref.InAppEnabled,
+            EmailEnabled = newValue
+        };
+
+        try
+        {
+            var result = await NotificationService.UpdatePreferenceAsync(request);
+            if (!result.Succeeded)
+            {
+                pref.EmailEnabled = previousValue;
+                Snackbar.Add("Failed to save notification preference. Please try again.", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Error saving Email notification preference for {Category}.", pref.Category);
+            pref.EmailEnabled = previousValue;
+            Snackbar.Add("Failed to save notification preference. Please try again.", Severity.Error);
+        }
+    }
+
     #endregion
 
     #region Helpers
+
+    /// <summary>
+    /// Loads notification delivery preferences for all categories from the API.
+    /// On failure, logs a warning and leaves the list empty (non-blocking).
+    /// </summary>
+    private async Task LoadNotificationPreferencesAsync()
+    {
+        try
+        {
+            var result = await NotificationService.GetPreferencesAsync();
+            if (result.Succeeded && result.Data is not null)
+            {
+                _notificationPreferences = result.Data;
+            }
+            else
+            {
+                Logger.LogWarning("Failed to load notification preferences.");
+                Snackbar.Add("Failed to load notification preferences.", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Error loading notification preferences.");
+            Snackbar.Add("Failed to load notification preferences.", Severity.Error);
+        }
+        finally
+        {
+            _isLoadingPreferences = false;
+            StateHasChanged();
+        }
+    }
+
+    /// <summary>
+    /// Converts a <see cref="NotificationCategory"/> enum value to a human-readable display name.
+    /// Inserts spaces before uppercase letters in multi-word enum names (e.g., "UserManagement" → "User Management").
+    /// </summary>
+    /// <param name="category">The notification category to format.</param>
+    /// <returns>A human-readable category name.</returns>
+    private static string FormatCategoryName(NotificationCategory category)
+    {
+        return category switch
+        {
+            NotificationCategory.UserManagement => "User Management",
+            _ => category.ToString()
+        };
+    }
 
     /// <summary>
     /// Provides the timezone autocomplete search function.

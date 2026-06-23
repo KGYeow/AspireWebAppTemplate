@@ -1,5 +1,6 @@
 @page "/settings"
 @using AspireWebAppTemplate.Core.Common.Defaults
+@using AspireWebAppTemplate.Core.Contracts.Notifications
 @using AspireWebAppTemplate.Core.Domain.Enums
 
 <PageTitle>Settings</PageTitle>
@@ -89,6 +90,43 @@
                         <MudIcon Icon="@Icons.Material.Outlined.SettingsBrightness" Size="Size.Small" />
                     </PillToggleItem>
                 </PillToggle>
+            </MudItem>
+        </MudGrid>
+
+        <MudDivider Class="my-6" />
+
+        <!-- Section 3: Notifications -->
+        <MudGrid>
+            <MudItem xs="12" md="5">
+                <MudText Typo="Typo.h6">Notifications</MudText>
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">
+                    Configure which notifications you receive and through which channels
+                </MudText>
+            </MudItem>
+            <MudItem xs="12" md="7">
+                @if (_isLoadingPreferences)
+                {
+                    <MudProgressCircular Indeterminate Size="Size.Small" Class="my-4" />
+                }
+                else
+                {
+                    @foreach (var pref in _notificationPreferences)
+                    {
+                        <MudStack Row AlignItems="AlignItems.Center" Class="mb-2">
+                            <MudText Style="min-width: 150px;">@FormatCategoryName(pref.Category)</MudText>
+                            <MudSwitch T="bool"
+                                       Value="pref.InAppEnabled"
+                                       ValueChanged="(val) => HandleInAppToggle(pref, val)"
+                                       Label="In-App"
+                                       Color="Color.Primary" />
+                            <MudSwitch T="bool"
+                                       Value="pref.EmailEnabled"
+                                       ValueChanged="(val) => HandleEmailToggle(pref, val)"
+                                       Label="Email"
+                                       Color="Color.Primary" />
+                        </MudStack>
+                    }
+                }
             </MudItem>
         </MudGrid>
     </MudPaper>

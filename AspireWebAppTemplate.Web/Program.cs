@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using MudBlazor.Services;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add service defaults & Aspire client integrations.
@@ -77,6 +78,9 @@ builder.Services.AddHttpClient<ApiAuditLogService>(client =>
 builder.Services.AddHttpClient<ApiPagePermissionService>(client =>
     client.BaseAddress = new("https+http://apiservice"))
     .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
+builder.Services.AddHttpClient<ApiNotificationService>(client =>
+    client.BaseAddress = new("https+http://apiservice"))
+    .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
 
 // Application services (frontend-only, no API calls)
 builder.Services.AddSingleton<INavigationProvider, DefaultNavigationProvider>();
@@ -84,6 +88,7 @@ builder.Services.AddSingleton<ITimeZoneService, TimeZoneService>();
 builder.Services.AddScoped<IUserTimeZoneContext, UserTimeZoneContext>();
 builder.Services.AddScoped<IThemeContext, ThemeContext>();
 builder.Services.AddScoped<IPagePermissionContext, PagePermissionContext>();
+builder.Services.AddScoped<INotificationContext, NotificationContext>();
 builder.Services.AddScoped<CircuitUserContext>();
 
 // MudBlazor

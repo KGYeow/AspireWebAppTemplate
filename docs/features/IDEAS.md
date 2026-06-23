@@ -13,7 +13,8 @@ A curated list of pages and features that would complement the existing template
 | Settings (theme, timezone, date format) | `/settings` (instant-save) |
 | User Management (CRUD, LDAP import/sync, bulk operations) | `/user-management` |
 | Role Management (CRUD, user assignment, position hierarchy) | `/role-management` |
-| Audit Log (searchable, filterable, paginated, Excel export) | `/audit-log` |
+| Audit Log (searchable, filterable, paginated, CSV export, old/new value tracking) | `/audit-log` |
+| Page Access Permissions (role × page matrix, per-circuit cache, nav filtering) | `/admin/page-permissions` |
 | Full Auth flow (login, register, 2FA, passkeys, password reset, lockout) | `/Account/*` |
 | Theme Switching (light/dark/system, real-time) | Built into layout + settings |
 | Example pages (counter, weather, auth status) | `/counter`, `/weather`, `/auth` |
@@ -22,12 +23,12 @@ A curated list of pages and features that would complement the existing template
 
 ## High Priority — Common in Every Internal/Enterprise App
 
-### 1. Page Access Permissions (Role-Based Page Authorization)
-- Admin UI to configure which roles can access which pages
-- Database-driven — no code changes needed when adding new roles
-- Permissions cached per-circuit for zero performance impact
-- Navigation menu auto-filters based on role permissions
-- See [`docs/features/page-access-permissions/brief.md`](./page-access-permissions/brief.md) for full context
+### ~~1. Page Access Permissions~~ ✅ IMPLEMENTED
+- ~~Admin UI to configure which roles can access which pages~~
+- ~~Database-driven — no code changes needed when adding new roles~~
+- ~~Permissions cached per-circuit for zero performance impact~~
+- ~~Navigation menu auto-filters based on role permissions~~
+- See [`docs/features/page-access-permissions/`](./page-access-permissions/) for full spec
 - Route: `/admin/page-permissions`
 
 ### 2. Notification System

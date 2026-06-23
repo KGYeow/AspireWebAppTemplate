@@ -62,6 +62,7 @@ builder.Services.AddScoped<IRegisterService, RegisterService>();
 builder.Services.AddScoped<IPagePermissionService, PagePermissionService>();
 builder.Services.AddScoped<ILdapAuthService, LdapAuthService>();
 builder.Services.AddScoped<ILdapLoginService, LdapLoginService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 // [LDAP] LDAP configuration — remove this block if LDAP is not needed
 builder.Services.Configure<LdapSettings>(builder.Configuration.GetSection("LDAP"));

@@ -1,0 +1,5 @@
+/* Subtle background highlight for unread notification items */
+::deep .notification-unread {
+    background-color: var(--mud-palette-primary-lighten);
+    opacity: 0.95;
+}

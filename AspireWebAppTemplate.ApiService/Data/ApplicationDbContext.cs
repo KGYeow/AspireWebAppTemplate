@@ -33,6 +33,18 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     public DbSet<PagePermission> PagePermissions { get; set; } = null!;
 
     /// <summary>
+    /// Gets or sets the notifications table, containing in-app notification records
+    /// delivered to users based on significant system events.
+    /// </summary>
+    public DbSet<Notification> Notifications { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the notification preferences table, storing per-user delivery
+    /// channel preferences for each notification category.
+    /// </summary>
+    public DbSet<NotificationPreference> NotificationPreferences { get; set; } = null!;
+
+    /// <summary>
     /// Configures the entity mappings and table names for the database.
     /// </summary>
     /// <param name="modelBuilder">The model builder.</param>
@@ -122,6 +134,74 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
             entity.HasOne(e => e.Role)
                   .WithMany()
                   .HasForeignKey(e => e.RoleId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Configure Notification entity
+        modelBuilder.Entity<Notification>(entity =>
+        {
+            entity.ToTable("Notifications");
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.UserId).HasMaxLength(450);
+
+            // Store enum as PascalCase string for readability in raw SQL queries
+            // and to prevent data corruption if enum integer values are reordered in the future.
+            entity.Property(e => e.Category).HasConversion<string>();
+
+            entity.Property(e => e.Title).HasMaxLength(256);
+            entity.Property(e => e.Message).HasMaxLength(1024);
+
+            // Default to unread — new notifications are always created as unread.
+            entity.Property(e => e.IsRead).HasDefaultValue(false);
+
+            // Default to current UTC time at the database level as a safety net;
+            // the application service also explicitly sets CreatedAtUtc on creation.
+            entity.Property(e => e.CreatedAtUtc).HasDefaultValueSql("GETUTCDATE()");
+
+            // Composite index on (UserId, IsRead) enables efficient unread count queries
+            // by allowing the database to seek directly to a user's unread notifications
+            // without scanning the entire table.
+            entity.HasIndex(e => new { e.UserId, e.IsRead });
+
+            // Composite index on (UserId, CreatedAtUtc) supports efficient paginated
+            // retrieval of a user's notifications in descending chronological order,
+            // which is the default sort for the notification page and bell dropdown.
+            entity.HasIndex(e => new { e.UserId, e.CreatedAtUtc });
+
+            // Cascade delete ensures that when a user is removed from the system,
+            // all their notification records are automatically cleaned up.
+            // Unlike audit log entries (which must be preserved for compliance),
+            // notifications have no retention requirement beyond the user's lifetime.
+            entity.HasOne(e => e.User)
+                  .WithMany()
+                  .HasForeignKey(e => e.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Configure NotificationPreference entity
+        modelBuilder.Entity<NotificationPreference>(entity =>
+        {
+            entity.ToTable("NotificationPreferences");
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.UserId).HasMaxLength(450);
+
+            // Store enum as PascalCase string for readability in raw SQL queries
+            // and to prevent data corruption if enum integer values are reordered in the future.
+            entity.Property(e => e.Category).HasConversion<string>();
+
+            // Unique composite index on (UserId, Category) enforces the business rule
+            // that at most one preference record exists per user-category pair.
+            // This prevents duplicate preferences and allows upsert logic in the service.
+            entity.HasIndex(e => new { e.UserId, e.Category }).IsUnique();
+
+            // Cascade delete ensures that when a user is removed from the system,
+            // all their notification preference records are automatically cleaned up.
+            // Preferences are user-specific configuration with no value beyond the user's lifetime.
+            entity.HasOne(e => e.User)
+                  .WithMany()
+                  .HasForeignKey(e => e.UserId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
     }
