@@ -34,13 +34,13 @@ AspireWebAppTemplate.Core/
 ## ApiService Project
 ```
 AspireWebAppTemplate.ApiService/
-├── Abstractions/               ← Service interfaces (IAuditLogService, etc.)
-├── Controllers/                ← REST API controllers (extend BaseController)
+├── Abstractions/               ← Service interfaces (IAuditLogService, IUserService, IRoleService, etc.)
+├── Controllers/                ← THIN REST API controllers (extend BaseController, delegate to services)
 ├── Data/
 │   ├── Entities/               ← EF Core entities (ApplicationUser, AuditLogEntry, etc.)
 │   ├── ApplicationDbContext.cs
 │   └── SeedData.cs
-├── Services/                   ← Business logic implementations
+├── Services/                   ← Full service implementations (all business logic lives here)
 └── Utilities/                  ← AuditChangeHelper, etc.
 ```
 

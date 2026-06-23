@@ -27,8 +27,9 @@
 - Static pages: no loading state needed.
 
 ### Error Handling
-- API service methods: swallow exceptions and return result objects (success/error pattern).
-- Audit logging: swallow database exceptions, log at Error level, never disrupt the primary operation.
+- API service methods (Web project): swallow exceptions and return result objects (success/error pattern).
+- Service layer (ApiService): throw typed exceptions for business rule violations; swallow only in audit logging.
+- Controllers: map service exceptions to HTTP status codes via try/catch (see api-patterns.md).
 - UI save operations: show error via Snackbar or inline alert, revert state on failure.
 
 ## Conventions
