@@ -63,6 +63,12 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
     /// </summary>
     [Inject] private CircuitUserContext CircuitUserContext { get; set; } = default!;
 
+    /// <summary>
+    /// Provides access to the current HTTP context for reading the client's remote IP address
+    /// during circuit initialization (before HttpContext becomes null post-SSR).
+    /// </summary>
+    [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = default!;
+
     #endregion
 
     #region Cascading Parameters
@@ -134,10 +140,11 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
             var authState = await AuthStateTask;
             if (authState.User.Identity?.IsAuthenticated != true) return;
 
-            // Capture the authenticated user's claims into the circuit-scoped context.
+            // Capture the authenticated user's claims and client IP into the circuit-scoped context.
             // This MUST happen before any API calls so that UserIdentityDelegatingHandler
             // can propagate identity headers even after HttpContext becomes null.
-            CircuitUserContext.Initialize(authState.User);
+            var clientIp = HttpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString();
+            CircuitUserContext.Initialize(authState.User, clientIp);
 
             // Initialize the per-circuit page permission cache early so that the
             // PagePermissionHandler and NavMenu have cached permissions available.

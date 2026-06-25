@@ -1,63 +1,70 @@
-using System.Globalization;
-using System.Text;
-using System.Text.Encodings.Web;
-using System.Text.Json;
 using AspireWebAppTemplate.Abstractions;
+using AspireWebAppTemplate.ApiService.Abstractions;
 using AspireWebAppTemplate.ApiService.Data.Entities;
-using AspireWebAppTemplate.ApiService.Utilities;
-using AspireWebAppTemplate.Core.Contracts.AuditLog;
 using AspireWebAppTemplate.Core.Contracts.Auth;
+using AspireWebAppTemplate.Core.Contracts.AuditLog;
 using AspireWebAppTemplate.Core.Contracts.Users;
 using AspireWebAppTemplate.Core.Domain.Enums;
 using AspireWebAppTemplate.Options;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Text;
 
 namespace AspireWebAppTemplate.ApiService.Controllers;
 
 /// <summary>
-/// Handles authentication operations including login, logout, registration, and password management.
+/// Handles authentication and account self-management operations.
+/// This controller is intentionally thin — it handles HTTP concerns only (request parsing,
+/// status code mapping) and delegates all business logic to dedicated services.
 /// </summary>
+/// <remarks>
+/// <para>
+/// Endpoint delegation:
+/// <list type="bullet">
+///   <item>Login/Register/Logout/2FA-login/Recovery-login/Validate-token/Forgot-password/Reset-password/Confirm-email → <see cref="ILoginService"/> / <see cref="IRegisterService"/></item>
+///   <item>Profile/Preferences/Password/Email/2FA-setup/Data/External-logins/Passkeys → <see cref="IAuthService"/></item>
+/// </list>
+/// </para>
+/// </remarks>
 [Route("api/[controller]")]
 public class AuthController : BaseController
 {
     #region Constructor
 
-    private static readonly (string, Func<ApplicationUser, object?>)[] PreferenceAuditFields =
-    [
-        ("Theme", u => u.Theme),
-        ("TimeZoneId", u => u.TimeZoneId),
-        ("DateTimeFormat", u => u.DateTimeFormat),
-    ];
-
+    private readonly IAuthService _authService;
     private readonly ILoginService _loginService;
     private readonly ILdapLoginService _ldapLoginService;
     private readonly IRegisterService _registerService;
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IAuditLogService _auditLogService;
     private readonly LdapSettings _ldapSettings;
+    private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly UserManager<ApplicationUser> _userManager;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AuthController"/> class.
+    /// </summary>
     public AuthController(
+        IAuthService authService,
         ILoginService loginService,
         ILdapLoginService ldapLoginService,
         IRegisterService registerService,
-        UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signInManager,
         IAuditLogService auditLogService,
-        IOptions<LdapSettings> ldapSettings)
+        IOptions<LdapSettings> ldapSettings,
+        SignInManager<ApplicationUser> signInManager,
+        UserManager<ApplicationUser> userManager)
     {
+        _authService = authService;
         _loginService = loginService;
         _ldapLoginService = ldapLoginService;
         _registerService = registerService;
-        _userManager = userManager;
-        _signInManager = signInManager;
         _auditLogService = auditLogService;
         _ldapSettings = ldapSettings.Value;
+        _signInManager = signInManager;
+        _userManager = userManager;
     }
 
     #endregion
@@ -148,15 +155,15 @@ public class AuthController : BaseController
                 var loginData = new LoginTokenData
                 {
                     UserId = user.Id,
-                    RememberMe = false,
+                    RememberMe = false ,
                     ReturnUrl = request.ReturnUrl ?? "/"
                 };
 
-                var memoryCache = HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Caching.Memory.IMemoryCache>();
+                var memoryCache = HttpContext.RequestServices.GetRequiredService<IMemoryCache>();
                 memoryCache.Set(
                     $"LoginToken:{token}",
                     loginData,
-                    new Microsoft.Extensions.Caching.Memory.MemoryCacheEntryOptions
+                    new MemoryCacheEntryOptions
                     {
                         AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2)
                     });
@@ -204,51 +211,7 @@ public class AuthController : BaseController
 
     #endregion
 
-    #region User Profile + Password
-
-    /// <summary>
-    /// Changes the password for the currently authenticated user.
-    /// </summary>
-    [HttpPost("change-password")]
-    [Authorize]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
-    {
-        var userId = CurrentUserId;
-        if (userId is null)
-            return Unauthorized();
-
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user is null)
-            return NotFound("User not found.");
-
-        var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
-        if (!result.Succeeded)
-        {
-            var errors = string.Join("; ", result.Errors.Select(e => e.Description));
-            return BadRequest(errors);
-        }
-
-        user.LastPasswordChangeUtc = DateTime.UtcNow;
-        user.UpdatedUtc = DateTime.UtcNow;
-        await _userManager.UpdateAsync(user);
-
-        var ipAddress = ClientIpAddress;
-        await _auditLogService.LogAsync(new AuditLogRequest
-        {
-            UserId = userId,
-            ActionType = AuditActionType.PasswordChanged,
-            EntityType = AuditEntityType.User,
-            EntityId = userId,
-            EntityName = user.DisplayName ?? user.UserName ?? "Unknown",
-            Description = $"User '{user.DisplayName ?? user.UserName}' changed their password.",
-            NewValues = AuditChangeHelper.Serialize(new { PasswordChanged = true }),
-            IpAddress = ipAddress
-        });
-
-        return Ok();
-    }
+    #region Profile & Preferences
 
     /// <summary>
     /// Returns the currently authenticated user's profile information.
@@ -256,42 +219,33 @@ public class AuthController : BaseController
     [HttpGet("me")]
     [Authorize]
     [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<UserDto>> Me()
     {
-        var userId = CurrentUserId;
-        if (userId is null)
-            return Unauthorized();
-
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user is null)
-            return NotFound();
-
-        var roles = await _userManager.GetRolesAsync(user);
-
-        var dto = new UserDto
+        try
         {
-            Id = user.Id,
-            UserName = user.UserName ?? "",
-            DisplayName = user.DisplayName,
-            Email = user.Email,
-            FirstName = user.FirstName,
-            LastName = user.LastName,
-            JobTitle = user.JobTitle,
-            Department = user.Department,
-            EmployeeNumber = user.EmployeeNumber,
-            PhoneNumber = user.PhoneNumber,
-            IsActive = user.IsActive,
-            AuthSource = user.AuthSource.ToString(),
-            Roles = roles.ToList(),
-            CreatedUtc = user.CreatedUtc,
-            UpdatedUtc = user.UpdatedUtc,
-            Theme = user.Theme,
-            TimeZoneId = user.TimeZoneId,
-            DateTimeFormat = user.DateTimeFormat
-        };
+            var profile = await _authService.GetProfileAsync();
+            return Ok(profile);
+        }
+        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+    }
 
-        return Ok(dto);
+    /// <summary>
+    /// Updates the current user's profile information (display name, first name, last name, phone number).
+    /// </summary>
+    [HttpPut("profile")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
+    {
+        try
+        {
+            await _authService.UpdateProfileAsync(request);
+            return Ok();
+        }
+        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
     }
 
     /// <summary>
@@ -303,46 +257,35 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdatePreferences([FromBody] UpdatePreferencesRequest request)
     {
-        var userId = CurrentUserId;
-        if (userId is null)
-            return Unauthorized();
-
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user is null)
-            return NotFound("User not found.");
-
-        var before = AuditChangeHelper.Snapshot(user, PreferenceAuditFields);
-
-        if (request.Theme.HasValue)
-            user.Theme = request.Theme.Value;
-        if (request.TimeZoneId is not null)
-            user.TimeZoneId = request.TimeZoneId;
-        if (request.DateTimeFormat is not null)
-            user.DateTimeFormat = request.DateTimeFormat;
-
-        user.UpdatedUtc = DateTime.UtcNow;
-        var result = await _userManager.UpdateAsync(user);
-
-        if (!result.Succeeded)
-            return BadRequest(string.Join("; ", result.Errors.Select(e => e.Description)));
-
-        var after = AuditChangeHelper.Snapshot(user, PreferenceAuditFields);
-        var (oldValues, newValues) = AuditChangeHelper.ComputeChanges(before, after);
-
-        await _auditLogService.LogAsync(new AuditLogRequest
+        try
         {
-            UserId = userId,
-            ActionType = AuditActionType.SettingsChanged,
-            EntityType = AuditEntityType.User,
-            EntityId = userId,
-            EntityName = user.DisplayName ?? user.UserName ?? "",
-            Description = $"User '{user.DisplayName ?? user.UserName}' updated preferences.",
-            OldValues = oldValues,
-            NewValues = newValues,
-            IpAddress = ClientIpAddress
-        });
+            await _authService.UpdatePreferencesAsync(request);
+            return Ok();
+        }
+        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+    }
 
-        return Ok();
+    #endregion
+
+    #region Password & Account Security
+
+    /// <summary>
+    /// Changes the password for the currently authenticated user.
+    /// </summary>
+    [HttpPost("change-password")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+    {
+        try
+        {
+            await _authService.ChangePasswordAsync(request);
+            return Ok();
+        }
+        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
     }
 
     /// <summary>
@@ -354,87 +297,13 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> SetPassword([FromBody] SetPasswordRequest request)
     {
-        var userId = CurrentUserId;
-        if (userId is null)
-            return Unauthorized();
-
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user is null)
-            return NotFound("User not found.");
-
-        if (await _userManager.HasPasswordAsync(user))
-            return BadRequest("User already has a password. Use change-password instead.");
-
-        var result = await _userManager.AddPasswordAsync(user, request.NewPassword);
-        if (!result.Succeeded)
-            return BadRequest(string.Join("; ", result.Errors.Select(e => e.Description)));
-
-        return Ok();
-    }
-
-    private static readonly (string, Func<ApplicationUser, object?>)[] ProfileAuditFields =
-    [
-        ("DisplayName", u => u.DisplayName),
-        ("FirstName", u => u.FirstName),
-        ("LastName", u => u.LastName),
-        ("PhoneNumber", u => u.PhoneNumber),
-    ];
-
-    /// <summary>
-    /// Updates the current user's profile information (phone number, etc.).
-    /// </summary>
-    [HttpPut("profile")]
-    [Authorize]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
-    {
-        var userId = CurrentUserId;
-        if (userId is null)
-            return Unauthorized();
-
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user is null)
-            return NotFound("User not found.");
-
-        var before = AuditChangeHelper.Snapshot(user, ProfileAuditFields);
-
-        if (request.DisplayName is not null)
-            user.DisplayName = request.DisplayName;
-        if (request.FirstName is not null)
-            user.FirstName = request.FirstName;
-        if (request.LastName is not null)
-            user.LastName = request.LastName;
-
-        if (request.PhoneNumber is not null)
+        try
         {
-            var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, request.PhoneNumber);
-            if (!setPhoneResult.Succeeded)
-                return BadRequest(string.Join("; ", setPhoneResult.Errors.Select(e => e.Description)));
+            await _authService.SetPasswordAsync(request);
+            return Ok();
         }
-
-        user.UpdatedUtc = DateTime.UtcNow;
-        var result = await _userManager.UpdateAsync(user);
-        if (!result.Succeeded)
-            return BadRequest(string.Join("; ", result.Errors.Select(e => e.Description)));
-
-        var after = AuditChangeHelper.Snapshot(user, ProfileAuditFields);
-        var (oldValues, newValues) = AuditChangeHelper.ComputeChanges(before, after);
-
-        await _auditLogService.LogAsync(new AuditLogRequest
-        {
-            UserId = userId,
-            ActionType = AuditActionType.ProfileUpdated,
-            EntityType = AuditEntityType.User,
-            EntityId = userId,
-            EntityName = user.DisplayName ?? user.UserName ?? "",
-            Description = $"User '{user.DisplayName ?? user.UserName}' updated their profile.",
-            OldValues = oldValues,
-            NewValues = newValues,
-            IpAddress = ClientIpAddress
-        });
-
-        return Ok();
+        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
     }
 
     /// <summary>
@@ -478,9 +347,7 @@ public class AuthController : BaseController
 
         var result = await _userManager.ResetPasswordAsync(user, request.Code, request.NewPassword);
         if (result.Succeeded)
-        {
             return Ok();
-        }
 
         return BadRequest(string.Join(" ", result.Errors.Select(e => e.Description)));
     }
@@ -496,23 +363,19 @@ public class AuthController : BaseController
     {
         var user = await _userManager.FindByIdAsync(request.UserId);
         if (user is null)
-        {
             return NotFound("User not found.");
-        }
 
         var code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(request.Code));
         var result = await _userManager.ConfirmEmailAsync(user, code);
         if (result.Succeeded)
-        {
             return Ok();
-        }
 
         return BadRequest("Error confirming email.");
     }
 
     #endregion
 
-    #region Email Management + Personal Data
+    #region Email Management
 
     /// <summary>
     /// Returns the current user's email and confirmation status.
@@ -522,17 +385,13 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(EmailInfoDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<EmailInfoDto>> GetEmail()
     {
-        var userId = CurrentUserId;
-        if (userId is null) return Unauthorized();
-
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user is null) return NotFound();
-
-        return Ok(new EmailInfoDto
+        try
         {
-            Email = user.Email ?? "",
-            IsEmailConfirmed = user.EmailConfirmed
-        });
+            var emailInfo = await _authService.GetEmailAsync();
+            return Ok(emailInfo);
+        }
+        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
     }
 
     /// <summary>
@@ -544,29 +403,13 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ChangeEmail([FromBody] ChangeEmailRequest request)
     {
-        var userId = CurrentUserId;
-        if (userId is null) return Unauthorized();
-
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user is null) return NotFound();
-
-        if (string.Equals(user.Email, request.NewEmail, StringComparison.OrdinalIgnoreCase))
-            return BadRequest("The new email is the same as the current email.");
-
-        var code = await _userManager.GenerateChangeEmailTokenAsync(user, request.NewEmail);
-        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-
-        // TODO: Send email change confirmation email with the code
-        // For now, apply the change directly (in production, confirm via email link)
-        var decodedCode = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
-        var result = await _userManager.ChangeEmailAsync(user, request.NewEmail, decodedCode);
-        if (!result.Succeeded)
-            return BadRequest(string.Join("; ", result.Errors.Select(e => e.Description)));
-
-        // Also update username to match email
-        await _userManager.SetUserNameAsync(user, request.NewEmail);
-
-        return Ok();
+        try
+        {
+            await _authService.ChangeEmailAsync(request);
+            return Ok();
+        }
+        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
     }
 
     /// <summary>
@@ -577,19 +420,18 @@ public class AuthController : BaseController
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> SendVerificationEmail()
     {
-        var userId = CurrentUserId;
-        if (userId is null) return Unauthorized();
-
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user is null) return NotFound();
-
-        var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-
-        // TODO: Send the verification email with the code
-        // For now, just return success
-        return Ok();
+        try
+        {
+            await _authService.SendVerificationEmailAsync();
+            return Ok();
+        }
+        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
     }
+
+    #endregion
+
+    #region Personal Data & Account
 
     /// <summary>
     /// Downloads the user's personal data as a JSON file.
@@ -599,39 +441,13 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
     public async Task<IActionResult> DownloadPersonalData()
     {
-        var userId = CurrentUserId;
-        if (userId is null) return Unauthorized();
-
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user is null) return NotFound();
-
-        // Collect all personal data
-        var personalData = new Dictionary<string, string>();
-        var personalDataProps = typeof(ApplicationUser).GetProperties()
-            .Where(prop => Attribute.IsDefined(prop, typeof(PersonalDataAttribute)));
-
-        foreach (var p in personalDataProps)
+        try
         {
-            personalData.Add(p.Name, p.GetValue(user)?.ToString() ?? "null");
+            var jsonBytes = await _authService.DownloadPersonalDataAsync();
+            return File(jsonBytes, "application/json", "PersonalData.json");
         }
-
-        // Add Identity-specific data
-        personalData.Add("Id", user.Id);
-        personalData.Add("UserName", user.UserName ?? "");
-        personalData.Add("Email", user.Email ?? "");
-        personalData.Add("EmailConfirmed", user.EmailConfirmed.ToString());
-        personalData.Add("PhoneNumber", user.PhoneNumber ?? "");
-        personalData.Add("PhoneNumberConfirmed", user.PhoneNumberConfirmed.ToString());
-        personalData.Add("TwoFactorEnabled", user.TwoFactorEnabled.ToString());
-
-        var logins = await _userManager.GetLoginsAsync(user);
-        foreach (var login in logins)
-        {
-            personalData.Add($"{login.LoginProvider} external login provider key", login.ProviderKey);
-        }
-
-        var jsonBytes = JsonSerializer.SerializeToUtf8Bytes(personalData, new JsonSerializerOptions { WriteIndented = true });
-        return File(jsonBytes, "application/json", "PersonalData.json");
+        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
     }
 
     /// <summary>
@@ -643,40 +459,13 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteAccount([FromBody] DeleteAccountRequest request)
     {
-        var userId = CurrentUserId;
-        if (userId is null) return Unauthorized();
-
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user is null) return NotFound();
-
-        if (await _userManager.HasPasswordAsync(user))
+        try
         {
-            if (string.IsNullOrEmpty(request.Password))
-                return BadRequest("Password is required.");
-
-            if (!await _userManager.CheckPasswordAsync(user, request.Password))
-                return BadRequest("Incorrect password.");
+            await _authService.DeleteAccountAsync(request);
+            return Ok();
         }
-
-        var result = await _userManager.DeleteAsync(user);
-        if (!result.Succeeded)
-            return BadRequest(string.Join("; ", result.Errors.Select(e => e.Description)));
-
-        await _signInManager.SignOutAsync();
-
-        var ipAddress = ClientIpAddress;
-        await _auditLogService.LogAsync(new AuditLogRequest
-        {
-            UserId = userId,
-            ActionType = AuditActionType.UserDeleted,
-            EntityType = AuditEntityType.User,
-            EntityId = userId,
-            EntityName = user.DisplayName ?? user.UserName ?? "Unknown",
-            Description = $"User '{user.DisplayName ?? user.UserName}' deleted their account.",
-            IpAddress = ipAddress
-        });
-
-        return Ok();
+        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
     }
 
     #endregion
@@ -691,21 +480,13 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(TwoFactorStatusDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<TwoFactorStatusDto>> Get2faStatus()
     {
-        var userId = CurrentUserId;
-        if (userId is null) return Unauthorized();
-
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user is null) return NotFound();
-
-        var dto = new TwoFactorStatusDto
+        try
         {
-            HasAuthenticator = await _userManager.GetAuthenticatorKeyAsync(user) is not null,
-            Is2faEnabled = await _userManager.GetTwoFactorEnabledAsync(user),
-            IsMachineRemembered = await _signInManager.IsTwoFactorClientRememberedAsync(user),
-            RecoveryCodesLeft = await _userManager.CountRecoveryCodesAsync(user)
-        };
-
-        return Ok(dto);
+            var status = await _authService.Get2faStatusAsync();
+            return Ok(status);
+        }
+        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
     }
 
     /// <summary>
@@ -716,28 +497,13 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(AuthenticatorSetupDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<AuthenticatorSetupDto>> GetAuthenticatorSetup()
     {
-        var userId = CurrentUserId;
-        if (userId is null) return Unauthorized();
-
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user is null) return NotFound();
-
-        var unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
-        if (string.IsNullOrEmpty(unformattedKey))
+        try
         {
-            await _userManager.ResetAuthenticatorKeyAsync(user);
-            unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
+            var setup = await _authService.GetAuthenticatorSetupAsync();
+            return Ok(setup);
         }
-
-        var sharedKey = FormatKey(unformattedKey!);
-        var email = await _userManager.GetEmailAsync(user);
-        var authenticatorUri = GenerateQrCodeUri(email!, unformattedKey!);
-
-        return Ok(new AuthenticatorSetupDto
-        {
-            SharedKey = sharedKey,
-            AuthenticatorUri = authenticatorUri
-        });
+        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
     }
 
     /// <summary>
@@ -749,30 +515,13 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<VerifyAuthenticatorResult>> VerifyAuthenticator([FromBody] VerifyAuthenticatorRequest request)
     {
-        var userId = CurrentUserId;
-        if (userId is null) return Unauthorized();
-
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user is null) return NotFound();
-
-        var verificationCode = request.Code.Replace(" ", string.Empty).Replace("-", string.Empty);
-
-        var is2faTokenValid = await _userManager.VerifyTwoFactorTokenAsync(
-            user, _userManager.Options.Tokens.AuthenticatorTokenProvider, verificationCode);
-
-        if (!is2faTokenValid)
+        try
         {
-            return Ok(new VerifyAuthenticatorResult { Succeeded = false });
+            var result = await _authService.VerifyAuthenticatorAsync(request);
+            return Ok(result);
         }
-
-        await _userManager.SetTwoFactorEnabledAsync(user, true);
-        var recoveryCodes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
-
-        return Ok(new VerifyAuthenticatorResult
-        {
-            Succeeded = true,
-            RecoveryCodes = recoveryCodes?.ToArray()
-        });
+        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
     }
 
     /// <summary>
@@ -784,20 +533,13 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Disable2fa()
     {
-        var userId = CurrentUserId;
-        if (userId is null) return Unauthorized();
-
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user is null) return NotFound();
-
-        if (!await _userManager.GetTwoFactorEnabledAsync(user))
-            return BadRequest("Cannot disable 2FA as it is not currently enabled.");
-
-        var result = await _userManager.SetTwoFactorEnabledAsync(user, false);
-        if (!result.Succeeded)
-            return BadRequest(string.Join("; ", result.Errors.Select(e => e.Description)));
-
-        return Ok();
+        try
+        {
+            await _authService.Disable2faAsync();
+            return Ok();
+        }
+        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
     }
 
     /// <summary>
@@ -809,17 +551,13 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GenerateRecoveryCodes()
     {
-        var userId = CurrentUserId;
-        if (userId is null) return Unauthorized();
-
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user is null) return NotFound();
-
-        if (!await _userManager.GetTwoFactorEnabledAsync(user))
-            return BadRequest("Cannot generate recovery codes as 2FA is not enabled.");
-
-        var recoveryCodes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
-        return Ok(recoveryCodes?.ToArray() ?? []);
+        try
+        {
+            var codes = await _authService.GenerateRecoveryCodesAsync();
+            return Ok(codes);
+        }
+        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
     }
 
     /// <summary>
@@ -830,18 +568,13 @@ public class AuthController : BaseController
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> ResetAuthenticator()
     {
-        var userId = CurrentUserId;
-        if (userId is null) return Unauthorized();
-
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user is null) return NotFound();
-
-        await _userManager.SetTwoFactorEnabledAsync(user, false);
-        await _userManager.ResetAuthenticatorKeyAsync(user);
-
-        await _signInManager.RefreshSignInAsync(user);
-
-        return Ok();
+        try
+        {
+            await _authService.ResetAuthenticatorAsync();
+            return Ok();
+        }
+        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
     }
 
     /// <summary>
@@ -853,44 +586,26 @@ public class AuthController : BaseController
     {
         var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
         if (user is null)
-        {
             return Ok(new LoginResult { Succeeded = false, ErrorMessage = "Unable to load two-factor authentication user." });
-        }
 
         var authenticatorCode = request.Code.Replace(" ", string.Empty).Replace("-", string.Empty);
-
         var result = await _signInManager.TwoFactorAuthenticatorSignInAsync(authenticatorCode, request.RememberMe, request.RememberMachine);
 
         if (result.Succeeded)
         {
             // Generate a single-use login token for the Web project to create a cookie
             var token = Guid.NewGuid().ToString("N");
-            var loginData = new LoginTokenData
-            {
-                UserId = user.Id,
-                RememberMe = request.RememberMe,
-                ReturnUrl = "/"
-            };
-
-            var memoryCache = HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Caching.Memory.IMemoryCache>();
-            memoryCache.Set(
-                $"LoginToken:{token}",
-                loginData,
-                new Microsoft.Extensions.Caching.Memory.MemoryCacheEntryOptions
-                {
-                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2)
-                });
-
+            var memoryCache = HttpContext.RequestServices.GetRequiredService<IMemoryCache>();
+            memoryCache.Set($"LoginToken:{token}",
+                new LoginTokenData { UserId = user.Id, RememberMe = request.RememberMe, ReturnUrl = "/" },
+                new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2) });
             return Ok(new LoginResult { Succeeded = true, Token = token, UserId = user.Id });
         }
-        else if (result.IsLockedOut)
-        {
+
+        if (result.IsLockedOut)
             return Ok(new LoginResult { Succeeded = false, IsLockedOut = true, ErrorMessage = "Account locked out." });
-        }
-        else
-        {
-            return Ok(new LoginResult { Succeeded = false, ErrorMessage = "Invalid authenticator code." });
-        }
+
+        return Ok(new LoginResult { Succeeded = false, ErrorMessage = "Invalid authenticator code." });
     }
 
     /// <summary>
@@ -902,48 +617,30 @@ public class AuthController : BaseController
     {
         var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
         if (user is null)
-        {
             return Ok(new LoginResult { Succeeded = false, ErrorMessage = "Unable to load two-factor authentication user." });
-        }
 
         var recoveryCode = request.RecoveryCode.Replace(" ", string.Empty);
         var result = await _signInManager.TwoFactorRecoveryCodeSignInAsync(recoveryCode);
 
         if (result.Succeeded)
         {
-            // Generate a single-use login token for the Web project to create a cookie
             var token = Guid.NewGuid().ToString("N");
-            var loginData = new LoginTokenData
-            {
-                UserId = user.Id,
-                RememberMe = false,
-                ReturnUrl = "/"
-            };
-
-            var memoryCache = HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Caching.Memory.IMemoryCache>();
-            memoryCache.Set(
-                $"LoginToken:{token}",
-                loginData,
-                new Microsoft.Extensions.Caching.Memory.MemoryCacheEntryOptions
-                {
-                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2)
-                });
-
+            var memoryCache = HttpContext.RequestServices.GetRequiredService<IMemoryCache>();
+            memoryCache.Set($"LoginToken:{token}",
+                new LoginTokenData { UserId = user.Id, RememberMe = false, ReturnUrl = "/" },
+                new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2) });
             return Ok(new LoginResult { Succeeded = true, Token = token, UserId = user.Id });
         }
-        else if (result.IsLockedOut)
-        {
+
+        if (result.IsLockedOut)
             return Ok(new LoginResult { Succeeded = false, IsLockedOut = true, ErrorMessage = "Account locked out." });
-        }
-        else
-        {
-            return Ok(new LoginResult { Succeeded = false, ErrorMessage = "Invalid recovery code." });
-        }
+
+        return Ok(new LoginResult { Succeeded = false, ErrorMessage = "Invalid recovery code." });
     }
 
     #endregion
 
-    #region Passkeys + External Logins
+    #region Passkeys & External Logins
 
     /// <summary>
     /// Lists the user's registered passkeys.
@@ -953,15 +650,13 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(List<PasskeyInfoDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<List<PasskeyInfoDto>>> GetPasskeys()
     {
-        var userId = CurrentUserId;
-        if (userId is null) return Unauthorized();
-
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user is null) return NotFound();
-
-        // Passkey support requires WebAuthn credential storage.
-        // Return empty list as stub — full WebAuthn integration to be wired later.
-        return Ok(new List<PasskeyInfoDto>());
+        try
+        {
+            var passkeys = await _authService.GetPasskeysAsync();
+            return Ok(passkeys);
+        }
+        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
     }
 
     /// <summary>
@@ -973,15 +668,13 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeletePasskey(string credentialId)
     {
-        var userId = CurrentUserId;
-        if (userId is null) return Unauthorized();
-
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user is null) return NotFound();
-
-        // Stub: Passkey deletion requires WebAuthn credential storage.
-        // Full implementation to be added when WebAuthn storage is available.
-        return Ok();
+        try
+        {
+            await _authService.DeletePasskeyAsync(credentialId);
+            return Ok();
+        }
+        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
     }
 
     /// <summary>
@@ -993,15 +686,13 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RenamePasskey(string credentialId, [FromBody] RenamePasskeyRequest request)
     {
-        var userId = CurrentUserId;
-        if (userId is null) return Unauthorized();
-
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user is null) return NotFound();
-
-        // Stub: Passkey rename requires WebAuthn credential storage.
-        // Full implementation to be added when WebAuthn storage is available.
-        return Ok();
+        try
+        {
+            await _authService.RenamePasskeyAsync(credentialId, request);
+            return Ok();
+        }
+        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
     }
 
     /// <summary>
@@ -1012,27 +703,13 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(ExternalLoginsDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<ExternalLoginsDto>> GetExternalLogins()
     {
-        var userId = CurrentUserId;
-        if (userId is null) return Unauthorized();
-
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user is null) return NotFound();
-
-        var currentLogins = await _userManager.GetLoginsAsync(user);
-        var hasPassword = await _userManager.HasPasswordAsync(user);
-
-        var dto = new ExternalLoginsDto
+        try
         {
-            CurrentLogins = currentLogins.Select(l => new ExternalLoginInfoDto
-            {
-                LoginProvider = l.LoginProvider,
-                ProviderDisplayName = l.ProviderDisplayName ?? l.LoginProvider,
-                ProviderKey = l.ProviderKey
-            }).ToList(),
-            ShowRemoveButton = hasPassword || currentLogins.Count > 1
-        };
-
-        return Ok(dto);
+            var externalLogins = await _authService.GetExternalLoginsAsync();
+            return Ok(externalLogins);
+        }
+        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
     }
 
     /// <summary>
@@ -1044,18 +721,13 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RemoveExternalLogin([FromBody] RemoveExternalLoginRequest request)
     {
-        var userId = CurrentUserId;
-        if (userId is null) return Unauthorized();
-
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user is null) return NotFound();
-
-        var result = await _userManager.RemoveLoginAsync(user, request.LoginProvider, request.ProviderKey);
-        if (!result.Succeeded)
-            return BadRequest(string.Join("; ", result.Errors.Select(e => e.Description)));
-
-        await _signInManager.RefreshSignInAsync(user);
-        return Ok();
+        try
+        {
+            await _authService.RemoveExternalLoginAsync(request);
+            return Ok();
+        }
+        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
     }
 
     #endregion
@@ -1074,13 +746,12 @@ public class AuthController : BaseController
         if (string.IsNullOrEmpty(request.Token))
             return BadRequest("Token is required.");
 
-        var memoryCache = HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Caching.Memory.IMemoryCache>();
+        var memoryCache = HttpContext.RequestServices.GetRequiredService<IMemoryCache>();
         var cacheKey = $"LoginToken:{request.Token}";
 
         if (!memoryCache.TryGetValue(cacheKey, out LoginTokenData? loginData) || loginData is null)
             return BadRequest("Invalid or expired token.");
 
-        // Remove the token (single-use)
         memoryCache.Remove(cacheKey);
 
         var user = await _userManager.FindByIdAsync(loginData.UserId);
@@ -1099,37 +770,6 @@ public class AuthController : BaseController
             RememberMe = loginData.RememberMe,
             ReturnUrl = loginData.ReturnUrl
         });
-    }
-
-    #endregion
-
-    #region Helpers
-
-    private static string FormatKey(string unformattedKey)
-    {
-        var result = new StringBuilder();
-        var currentPosition = 0;
-        while (currentPosition + 4 < unformattedKey.Length)
-        {
-            result.Append(unformattedKey.AsSpan(currentPosition, 4)).Append(' ');
-            currentPosition += 4;
-        }
-        if (currentPosition < unformattedKey.Length)
-        {
-            result.Append(unformattedKey.AsSpan(currentPosition));
-        }
-        return result.ToString().ToLowerInvariant();
-    }
-
-    private static string GenerateQrCodeUri(string email, string unformattedKey)
-    {
-        const string authenticatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
-        return string.Format(
-            CultureInfo.InvariantCulture,
-            authenticatorUriFormat,
-            UrlEncoder.Default.Encode("AspireWebAppTemplate"),
-            UrlEncoder.Default.Encode(email),
-            unformattedKey);
     }
 
     #endregion

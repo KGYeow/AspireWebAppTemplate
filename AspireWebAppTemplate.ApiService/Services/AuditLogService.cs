@@ -1,6 +1,8 @@
 using AspireWebAppTemplate.Abstractions;
 using AspireWebAppTemplate.ApiService.Data;
 using AspireWebAppTemplate.ApiService.Data.Entities;
+using AspireWebAppTemplate.Core.Common.Defaults;
+using AspireWebAppTemplate.Core.Contracts;
 using AspireWebAppTemplate.Core.Contracts.AuditLog;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -83,6 +85,106 @@ public class AuditLogService : IAuditLogService
                 request.EntityId);
         }
     }
+
+    #region Query Operations
+
+    /// <inheritdoc />
+    public async Task<PagedResult<AuditLogEntryDto>> SearchAsync(AuditLogQueryParams queryParams)
+    {
+        var query = _dbContext.AuditLogEntries.AsNoTracking().AsQueryable();
+
+        query = ApplyFilters(query, queryParams);
+
+        var totalCount = await query.CountAsync();
+
+        var entries = await query
+            .OrderByDescending(e => e.Timestamp)
+            .Skip(queryParams.Page * queryParams.PageSize)
+            .Take(queryParams.PageSize)
+            .Select(e => new AuditLogEntryDto
+            {
+                Id = e.Id,
+                UserId = e.UserId,
+                UserDisplayName = e.UserDisplayName,
+                ActionType = e.ActionType,
+                EntityType = e.EntityType,
+                EntityId = e.EntityId,
+                EntityName = e.EntityName,
+                Description = e.Description,
+                OldValues = e.OldValues,
+                NewValues = e.NewValues,
+                IpAddress = e.IpAddress,
+                Timestamp = e.Timestamp
+            })
+            .ToListAsync();
+
+        return new PagedResult<AuditLogEntryDto>
+        {
+            Items = entries,
+            TotalCount = totalCount,
+            Page = queryParams.Page,
+            PageSize = queryParams.PageSize
+        };
+    }
+
+    /// <inheritdoc />
+    public async Task<AuditLogEntryDto> GetByIdAsync(Guid id)
+    {
+        var entry = await _dbContext.AuditLogEntries
+            .AsNoTracking()
+            .Where(e => e.Id == id)
+            .Select(e => new AuditLogEntryDto
+            {
+                Id = e.Id,
+                UserId = e.UserId,
+                UserDisplayName = e.UserDisplayName,
+                ActionType = e.ActionType,
+                EntityType = e.EntityType,
+                EntityId = e.EntityId,
+                EntityName = e.EntityName,
+                Description = e.Description,
+                OldValues = e.OldValues,
+                NewValues = e.NewValues,
+                IpAddress = e.IpAddress,
+                Timestamp = e.Timestamp
+            })
+            .FirstOrDefaultAsync();
+
+        if (entry is null)
+            throw new KeyNotFoundException($"Audit log entry with ID '{id}' was not found.");
+
+        return entry;
+    }
+
+    /// <inheritdoc />
+    public async Task<List<AuditLogEntryDto>> GetForExportAsync(AuditLogQueryParams queryParams)
+    {
+        var query = _dbContext.AuditLogEntries.AsNoTracking().AsQueryable();
+
+        query = ApplyFilters(query, queryParams);
+
+        return await query
+            .OrderByDescending(e => e.Timestamp)
+            .Take(ExportDefaults.MaxExportRows)
+            .Select(e => new AuditLogEntryDto
+            {
+                Id = e.Id,
+                UserId = e.UserId,
+                UserDisplayName = e.UserDisplayName,
+                ActionType = e.ActionType,
+                EntityType = e.EntityType,
+                EntityId = e.EntityId,
+                EntityName = e.EntityName,
+                Description = e.Description,
+                OldValues = e.OldValues,
+                NewValues = e.NewValues,
+                IpAddress = e.IpAddress,
+                Timestamp = e.Timestamp
+            })
+            .ToListAsync();
+    }
+
+    #endregion
 
     /// <inheritdoc />
     public async Task<int> PurgeOldEntriesAsync()
@@ -182,5 +284,40 @@ public class AuditLogService : IAuditLogService
         }
 
         return retentionDays;
+    }
+
+    /// <summary>
+    /// Applies all optional filter criteria from <paramref name="queryParams"/> to the query.
+    /// Consolidates search term (case-insensitive partial match against UserDisplayName, EntityName,
+    /// Description, and EntityId), action type, entity type, and date range filters into a single method.
+    /// </summary>
+    /// <param name="query">The base queryable to apply filters to.</param>
+    /// <param name="queryParams">The query parameters containing optional filter criteria.</param>
+    /// <returns>The filtered queryable with all applicable predicates applied.</returns>
+    private static IQueryable<AuditLogEntry> ApplyFilters(IQueryable<AuditLogEntry> query, AuditLogQueryParams queryParams)
+    {
+        if (!string.IsNullOrWhiteSpace(queryParams.SearchTerm))
+        {
+            var term = queryParams.SearchTerm.ToLower();
+            query = query.Where(e =>
+                e.UserDisplayName.ToLower().Contains(term) ||
+                e.EntityName.ToLower().Contains(term) ||
+                e.Description.ToLower().Contains(term) ||
+                e.EntityId.ToLower().Contains(term));
+        }
+
+        if (queryParams.ActionType.HasValue)
+            query = query.Where(e => e.ActionType == queryParams.ActionType.Value);
+
+        if (queryParams.EntityType.HasValue)
+            query = query.Where(e => e.EntityType == queryParams.EntityType.Value);
+
+        if (queryParams.DateStart.HasValue)
+            query = query.Where(e => e.Timestamp >= queryParams.DateStart.Value);
+
+        if (queryParams.DateEnd.HasValue)
+            query = query.Where(e => e.Timestamp <= queryParams.DateEnd.Value);
+
+        return query;
     }
 }

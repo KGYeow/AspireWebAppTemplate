@@ -1,59 +1,49 @@
+using System.Text.Json;
 using AspireWebAppTemplate.Abstractions;
-using AspireWebAppTemplate.ApiService.Data.Entities;
-using AspireWebAppTemplate.ApiService.Utilities;
+using AspireWebAppTemplate.ApiService.Abstractions;
 using AspireWebAppTemplate.Core.Contracts;
-using AspireWebAppTemplate.Core.Contracts.AuditLog;
 using AspireWebAppTemplate.Core.Contracts.Roles;
 using AspireWebAppTemplate.Core.Contracts.Users;
-using AspireWebAppTemplate.Core.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace AspireWebAppTemplate.ApiService.Controllers;
 
 /// <summary>
-/// Manages user accounts including CRUD operations, activation, and role assignment.
+/// Provides user management endpoints including CRUD operations, activation/deactivation,
+/// role assignment, and LDAP synchronization. This controller is intentionally thin — it
+/// handles HTTP concerns only (request parsing, status code mapping) and delegates all
+/// business logic to <see cref="IUserService"/>.
 /// </summary>
+/// <remarks>
+/// <para>
+/// Exception-to-HTTP-status mapping:
+/// <list type="bullet">
+///   <item><see cref="KeyNotFoundException"/> → 404 Not Found</item>
+///   <item><see cref="InvalidOperationException"/> → 400 Bad Request</item>
+///   <item><see cref="ArgumentException"/> → 400 Bad Request</item>
+/// </list>
+/// </para>
+/// </remarks>
 [Route("api/[controller]")]
 [Authorize(Roles = "Admin")]
 public class UsersController : BaseController
 {
     #region Constructor
 
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly RoleManager<ApplicationRole> _roleManager;
-    private readonly IAuditLogService _auditLogService;
+    private readonly IUserService _userService;
     private readonly ILdapAuthService _ldapAuthService;
 
-    public UsersController(
-        UserManager<ApplicationUser> userManager,
-        RoleManager<ApplicationRole> roleManager,
-        IAuditLogService auditLogService,
-        ILdapAuthService ldapAuthService)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UsersController"/> class.
+    /// </summary>
+    /// <param name="userService">The user service for managing user lifecycle operations.</param>
+    /// <param name="ldapAuthService">The LDAP auth service for directory attribute lookups.</param>
+    public UsersController(IUserService userService, ILdapAuthService ldapAuthService)
     {
-        _userManager = userManager;
-        _roleManager = roleManager;
-        _auditLogService = auditLogService;
+        _userService = userService;
         _ldapAuthService = ldapAuthService;
     }
-
-    #endregion
-
-    #region Audit Fields
-
-    private static readonly (string, Func<ApplicationUser, object?>)[] UserAuditFields =
-    [
-        ("DisplayName", u => u.DisplayName),
-        ("FirstName", u => u.FirstName),
-        ("LastName", u => u.LastName),
-        ("Email", u => u.Email),
-        ("PhoneNumber", u => u.PhoneNumber),
-        ("JobTitle", u => u.JobTitle),
-        ("Department", u => u.Department),
-        ("EmployeeNumber", u => u.EmployeeNumber),
-    ];
 
     #endregion
 
@@ -63,6 +53,11 @@ public class UsersController : BaseController
     /// Returns a list of users with their assigned roles.
     /// When page/pageSize are provided, returns a paged subset; otherwise returns all users.
     /// </summary>
+    /// <param name="page">The zero-based page index. Defaults to null (return all).</param>
+    /// <param name="pageSize">The maximum number of items per page. Defaults to null (return all).</param>
+    /// <param name="searchTerm">Optional search term for filtering users by username, display name, email, first name, last name, or department.</param>
+    /// <returns>A paged result containing matching users and total count metadata.</returns>
+    /// <response code="200">Returns the paged user list.</response>
     [HttpGet]
     [ProducesResponseType(typeof(PagedResult<UserDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<PagedResult<UserDto>>> GetUsers(
@@ -70,246 +65,100 @@ public class UsersController : BaseController
         [FromQuery] int? pageSize = null,
         [FromQuery] string? searchTerm = null)
     {
-        var query = _userManager.Users.AsNoTracking();
-
-        if (!string.IsNullOrWhiteSpace(searchTerm))
-        {
-            var term = searchTerm.ToLower();
-            query = query.Where(u =>
-                (u.UserName != null && u.UserName.ToLower().Contains(term)) ||
-                (u.DisplayName != null && u.DisplayName.ToLower().Contains(term)) ||
-                (u.Email != null && u.Email.ToLower().Contains(term)) ||
-                (u.FirstName != null && u.FirstName.ToLower().Contains(term)) ||
-                (u.LastName != null && u.LastName.ToLower().Contains(term)) ||
-                (u.Department != null && u.Department.ToLower().Contains(term)));
-        }
-
-        var totalCount = await query.CountAsync();
-
-        // Apply pagination only when both page and pageSize are provided
-        var orderedQuery = query.OrderBy(u => u.UserName);
-        var users = (page.HasValue && pageSize.HasValue)
-            ? await orderedQuery.Skip(page.Value * pageSize.Value).Take(pageSize.Value).ToListAsync()
-            : await orderedQuery.ToListAsync();
-
-        var userDtos = new List<UserDto>();
-        foreach (var user in users)
-        {
-            var roles = await _userManager.GetRolesAsync(user);
-            userDtos.Add(new UserDto
-            {
-                Id = user.Id,
-                UserName = user.UserName ?? "",
-                DisplayName = user.DisplayName,
-                Email = user.Email,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                JobTitle = user.JobTitle,
-                Department = user.Department,
-                EmployeeNumber = user.EmployeeNumber,
-                PhoneNumber = user.PhoneNumber,
-                IsActive = user.IsActive,
-                AuthSource = user.AuthSource.ToString(),
-                Roles = roles.ToList(),
-                CreatedUtc = user.CreatedUtc,
-                UpdatedUtc = user.UpdatedUtc
-            });
-        }
-
-        return Ok(new PagedResult<UserDto>
-        {
-            Items = userDtos,
-            TotalCount = totalCount,
-            Page = page ?? 0,
-            PageSize = pageSize ?? totalCount
-        });
+        var result = await _userService.SearchAsync(page, pageSize, searchTerm);
+        return Ok(result);
     }
 
     /// <summary>
-    /// Returns a single user by ID.
+    /// Returns a single user by ID, including roles and all profile fields.
     /// </summary>
+    /// <param name="id">The unique identifier of the user to retrieve.</param>
+    /// <returns>The user's full profile as a <see cref="UserDto"/>.</returns>
+    /// <response code="200">Returns the user profile.</response>
+    /// <response code="404">No user exists with the specified ID.</response>
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<UserDto>> GetUser(string id)
     {
-        var user = await _userManager.FindByIdAsync(id);
-        if (user is null)
-            return NotFound();
-
-        var roles = await _userManager.GetRolesAsync(user);
-
-        return Ok(new UserDto
+        try
         {
-            Id = user.Id,
-            UserName = user.UserName ?? "",
-            DisplayName = user.DisplayName,
-            Email = user.Email,
-            FirstName = user.FirstName,
-            LastName = user.LastName,
-            JobTitle = user.JobTitle,
-            Department = user.Department,
-            EmployeeNumber = user.EmployeeNumber,
-            PhoneNumber = user.PhoneNumber,
-            IsActive = user.IsActive,
-            AuthSource = user.AuthSource.ToString(),
-            Roles = roles.ToList(),
-            CreatedUtc = user.CreatedUtc,
-            UpdatedUtc = user.UpdatedUtc
-        });
+            var user = await _userService.GetByIdAsync(id);
+            return Ok(user);
+        }
+        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
     }
 
     /// <summary>
-    /// Creates a new user account.
+    /// Creates a new user account with the specified email, display name, password, and optional role.
     /// </summary>
+    /// <param name="request">The user creation request containing email, display name, password, and optional role.</param>
+    /// <returns>The newly created user as a <see cref="UserDto"/>.</returns>
+    /// <response code="201">The user was created successfully.</response>
+    /// <response code="400">Validation failed (duplicate email, password policy violation, etc.).</response>
     [HttpPost]
     [ProducesResponseType(typeof(UserDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<UserDto>> CreateUser([FromBody] CreateUserRequest request)
     {
-        var user = new ApplicationUser
+        try
         {
-            UserName = request.Email,
-            Email = request.Email,
-            DisplayName = request.DisplayName,
-            EmailConfirmed = true,
-            IsActive = true,
-            CreatedUtc = DateTime.UtcNow
-        };
-
-        var result = await _userManager.CreateAsync(user, request.Password);
-        if (!result.Succeeded)
-        {
-            var errors = string.Join("; ", result.Errors.Select(e => e.Description));
-            return BadRequest(errors);
+            var user = await _userService.CreateAsync(request);
+            return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
         }
-
-        if (!string.IsNullOrWhiteSpace(request.Role))
-        {
-            await _userManager.AddToRoleAsync(user, request.Role);
-        }
-
-        var currentUserId = CurrentUserId;
-        var ipAddress = ClientIpAddress;
-        await _auditLogService.LogAsync(new AuditLogRequest
-        {
-            UserId = currentUserId,
-            ActionType = AuditActionType.UserCreated,
-            EntityType = AuditEntityType.User,
-            EntityId = user.Id,
-            EntityName = user.DisplayName ?? user.UserName ?? "",
-            Description = $"User '{user.DisplayName ?? user.Email}' was created.",
-            IpAddress = ipAddress
-        });
-
-        var roles = await _userManager.GetRolesAsync(user);
-        var dto = new UserDto
-        {
-            Id = user.Id,
-            UserName = user.UserName ?? "",
-            DisplayName = user.DisplayName,
-            Email = user.Email,
-            IsActive = user.IsActive,
-            AuthSource = user.AuthSource.ToString(),
-            Roles = roles.ToList(),
-            CreatedUtc = user.CreatedUtc
-        };
-
-        return CreatedAtAction(nameof(GetUser), new { id = user.Id }, dto);
+        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+        catch (ArgumentException ex) { return BadRequest(ex.Message); }
     }
 
     /// <summary>
-    /// Updates an existing user's profile information.
+    /// Updates an existing user's profile information (display name, email, phone, etc.).
+    /// Only non-null fields in the request are applied.
     /// </summary>
+    /// <param name="id">The unique identifier of the user to update.</param>
+    /// <param name="request">The update request containing the fields to modify.</param>
+    /// <returns>200 OK on success.</returns>
+    /// <response code="200">The user was updated successfully.</response>
+    /// <response code="400">Validation failed (duplicate email, etc.).</response>
+    /// <response code="404">No user exists with the specified ID.</response>
     [HttpPut("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUserRequest request)
     {
-        var user = await _userManager.FindByIdAsync(id);
-        if (user is null)
-            return NotFound();
-
-        var before = AuditChangeHelper.Snapshot(user, UserAuditFields);
-
-        if (request.DisplayName is not null) user.DisplayName = request.DisplayName;
-        if (request.FirstName is not null) user.FirstName = request.FirstName;
-        if (request.LastName is not null) user.LastName = request.LastName;
-        if (request.Email is not null) user.Email = request.Email;
-        if (request.PhoneNumber is not null) user.PhoneNumber = request.PhoneNumber;
-        if (request.JobTitle is not null) user.JobTitle = request.JobTitle;
-        if (request.Department is not null) user.Department = request.Department;
-        if (request.EmployeeNumber is not null) user.EmployeeNumber = request.EmployeeNumber;
-
-        user.UpdatedUtc = DateTime.UtcNow;
-
-        var after = AuditChangeHelper.Snapshot(user, UserAuditFields);
-        var (oldValues, newValues) = AuditChangeHelper.ComputeChanges(before, after);
-
-        var result = await _userManager.UpdateAsync(user);
-        if (!result.Succeeded)
+        try
         {
-            var errors = string.Join("; ", result.Errors.Select(e => e.Description));
-            return BadRequest(errors);
+            await _userService.UpdateAsync(id, request);
+            return Ok();
         }
-
-        var currentUserId = CurrentUserId;
-        var ipAddress = ClientIpAddress;
-        await _auditLogService.LogAsync(new AuditLogRequest
-        {
-            UserId = currentUserId,
-            ActionType = AuditActionType.UserUpdated,
-            EntityType = AuditEntityType.User,
-            EntityId = user.Id,
-            EntityName = user.DisplayName ?? user.UserName ?? "",
-            Description = $"User '{user.DisplayName ?? user.UserName}' was updated.",
-            OldValues = oldValues,
-            NewValues = newValues,
-            IpAddress = ipAddress
-        });
-
-        return Ok();
+        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+        catch (ArgumentException ex) { return BadRequest(ex.Message); }
     }
 
     /// <summary>
-    /// Deletes a user account.
+    /// Permanently deletes a user account. Cannot delete the currently authenticated user
+    /// or the last active administrator.
     /// </summary>
+    /// <param name="id">The unique identifier of the user to delete.</param>
+    /// <returns>200 OK on success.</returns>
+    /// <response code="200">The user was deleted successfully.</response>
+    /// <response code="400">Deletion blocked (self-deletion, last admin, etc.).</response>
+    /// <response code="404">No user exists with the specified ID.</response>
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteUser(string id)
     {
-        var user = await _userManager.FindByIdAsync(id);
-        if (user is null)
-            return NotFound();
-
-        var currentUserId = CurrentUserId;
-        if (user.Id == currentUserId)
-            return BadRequest("You cannot delete your own account.");
-
-        var displayName = user.DisplayName ?? user.UserName ?? "";
-        var result = await _userManager.DeleteAsync(user);
-        if (!result.Succeeded)
+        try
         {
-            var errors = string.Join("; ", result.Errors.Select(e => e.Description));
-            return BadRequest(errors);
+            await _userService.DeleteAsync(id);
+            return Ok();
         }
-
-        var ipAddress = ClientIpAddress;
-        await _auditLogService.LogAsync(new AuditLogRequest
-        {
-            UserId = currentUserId,
-            ActionType = AuditActionType.UserDeleted,
-            EntityType = AuditEntityType.User,
-            EntityId = id,
-            EntityName = displayName,
-            Description = $"User '{displayName}' was deleted.",
-            IpAddress = ipAddress
-        });
-
-        return Ok();
+        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+        catch (ArgumentException ex) { return BadRequest(ex.Message); }
     }
 
     #endregion
@@ -317,75 +166,47 @@ public class UsersController : BaseController
     #region Activation
 
     /// <summary>
-    /// Activates a user account.
+    /// Activates a user account, allowing the user to sign in.
     /// </summary>
+    /// <param name="id">The unique identifier of the user to activate.</param>
+    /// <returns>200 OK on success.</returns>
+    /// <response code="200">The user was activated successfully.</response>
+    /// <response code="404">No user exists with the specified ID.</response>
     [HttpPost("{id}/activate")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ActivateUser(string id)
     {
-        var user = await _userManager.FindByIdAsync(id);
-        if (user is null)
-            return NotFound();
-
-        user.IsActive = true;
-        user.UpdatedUtc = DateTime.UtcNow;
-        await _userManager.UpdateAsync(user);
-
-        var currentUserId = CurrentUserId;
-        var ipAddress = ClientIpAddress;
-        await _auditLogService.LogAsync(new AuditLogRequest
+        try
         {
-            UserId = currentUserId,
-            ActionType = AuditActionType.UserActivated,
-            EntityType = AuditEntityType.User,
-            EntityId = user.Id,
-            EntityName = user.DisplayName ?? user.UserName ?? "",
-            Description = $"User '{user.DisplayName ?? user.UserName}' was activated.",
-            OldValues = AuditChangeHelper.Serialize(new { IsActive = false }),
-            NewValues = AuditChangeHelper.Serialize(new { IsActive = true }),
-            IpAddress = ipAddress
-        });
-
-        return Ok();
+            await _userService.ActivateAsync(id);
+            return Ok();
+        }
+        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
     }
 
     /// <summary>
-    /// Deactivates a user account.
+    /// Deactivates a user account, preventing the user from signing in.
+    /// Cannot deactivate the currently authenticated user.
     /// </summary>
+    /// <param name="id">The unique identifier of the user to deactivate.</param>
+    /// <returns>200 OK on success.</returns>
+    /// <response code="200">The user was deactivated successfully.</response>
+    /// <response code="400">Deactivation blocked (self-deactivation).</response>
+    /// <response code="404">No user exists with the specified ID.</response>
     [HttpPost("{id}/deactivate")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeactivateUser(string id)
     {
-        var currentUserId = CurrentUserId;
-        if (id == currentUserId)
-            return BadRequest("You cannot deactivate your own account.");
-
-        var user = await _userManager.FindByIdAsync(id);
-        if (user is null)
-            return NotFound();
-
-        user.IsActive = false;
-        user.UpdatedUtc = DateTime.UtcNow;
-        await _userManager.UpdateAsync(user);
-
-        var ipAddress = ClientIpAddress;
-        await _auditLogService.LogAsync(new AuditLogRequest
+        try
         {
-            UserId = currentUserId,
-            ActionType = AuditActionType.UserDeactivated,
-            EntityType = AuditEntityType.User,
-            EntityId = user.Id,
-            EntityName = user.DisplayName ?? user.UserName ?? "",
-            Description = $"User '{user.DisplayName ?? user.UserName}' was deactivated.",
-            OldValues = AuditChangeHelper.Serialize(new { IsActive = true }),
-            NewValues = AuditChangeHelper.Serialize(new { IsActive = false }),
-            IpAddress = ipAddress
-        });
-
-        return Ok();
+            await _userService.DeactivateAsync(id);
+            return Ok();
+        }
+        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
     }
 
     #endregion
@@ -393,52 +214,42 @@ public class UsersController : BaseController
     #region Roles
 
     /// <summary>
-    /// Sets the roles for a user, replacing all existing role assignments.
+    /// Sets the roles for a user, replacing all existing role assignments with the provided set.
     /// </summary>
+    /// <param name="id">The unique identifier of the user whose roles are being updated.</param>
+    /// <param name="roleNames">The complete set of role names to assign. An empty array removes all role assignments.</param>
+    /// <returns>200 OK on success.</returns>
+    /// <response code="200">The user's roles were updated successfully.</response>
+    /// <response code="400">Role assignment failed (invalid role name, etc.).</response>
+    /// <response code="404">No user exists with the specified ID.</response>
     [HttpPost("{id}/roles")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> SetRoles(string id, [FromBody] string[] roleNames)
     {
-        var user = await _userManager.FindByIdAsync(id);
-        if (user is null)
-            return NotFound();
-
-        var currentRoles = await _userManager.GetRolesAsync(user);
-        var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
-        if (!removeResult.Succeeded)
+        try
         {
-            var errors = string.Join("; ", removeResult.Errors.Select(e => e.Description));
-            return BadRequest(errors);
+            await _userService.SetRolesAsync(id, roleNames);
+            return Ok();
         }
+        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+        catch (ArgumentException ex) { return BadRequest(ex.Message); }
+    }
 
-        if (roleNames.Length > 0)
-        {
-            var addResult = await _userManager.AddToRolesAsync(user, roleNames);
-            if (!addResult.Succeeded)
-            {
-                var errors = string.Join("; ", addResult.Errors.Select(e => e.Description));
-                return BadRequest(errors);
-            }
-        }
-
-        var currentUserId = CurrentUserId;
-        var ipAddress = ClientIpAddress;
-        await _auditLogService.LogAsync(new AuditLogRequest
-        {
-            UserId = currentUserId,
-            ActionType = AuditActionType.RoleAssigned,
-            EntityType = AuditEntityType.User,
-            EntityId = user.Id,
-            EntityName = user.DisplayName ?? user.UserName ?? "",
-            Description = $"Roles for user '{user.DisplayName ?? user.UserName}' set to: {string.Join(", ", roleNames)}.",
-            OldValues = AuditChangeHelper.Serialize(new { Roles = currentRoles }),
-            NewValues = AuditChangeHelper.Serialize(new { Roles = roleNames }),
-            IpAddress = ipAddress
-        });
-
-        return Ok();
+    /// <summary>
+    /// Returns all roles with metadata for use in role pickers and user management UI.
+    /// Roles are ordered by position descending, then by name ascending.
+    /// </summary>
+    /// <returns>A list of role metadata DTOs.</returns>
+    /// <response code="200">Returns the roles metadata list.</response>
+    [HttpGet("roles-metadata")]
+    [ProducesResponseType(typeof(List<RoleDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<List<RoleDto>>> GetRolesMetadata()
+    {
+        var roles = await _userService.GetRolesMetadataAsync();
+        return Ok(roles);
     }
 
     #endregion
@@ -446,8 +257,13 @@ public class UsersController : BaseController
     #region LDAP Operations
 
     /// <summary>
-    /// [LDAP] Looks up a user from Active Directory by NTID or email.
+    /// Looks up a user in Active Directory by NTID or email and returns their directory attributes.
     /// </summary>
+    /// <param name="identifier">The LDAP identifier to search for (NTID or email address).</param>
+    /// <returns>The user's LDAP attributes if found.</returns>
+    /// <response code="200">Returns the LDAP user attributes.</response>
+    /// <response code="400">Identifier is missing or empty.</response>
+    /// <response code="404">User not found in corporate directory.</response>
     [HttpGet("ldap-lookup")]
     [ProducesResponseType(typeof(LdapUserAttributes), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -464,84 +280,33 @@ public class UsersController : BaseController
     }
 
     /// <summary>
-    /// [LDAP] Creates a local user account from LDAP attributes.
+    /// Creates a local user account from LDAP/Active Directory attributes.
+    /// The user is created with the LDAP auth source and no local password.
     /// </summary>
+    /// <param name="attributes">The LDAP attributes to use for account creation.</param>
+    /// <returns>The newly created LDAP user as a <see cref="UserDto"/>.</returns>
+    /// <response code="201">The LDAP user was created successfully.</response>
+    /// <response code="400">Creation failed (duplicate username or email, identity error).</response>
     [HttpPost("ldap-create")]
     [ProducesResponseType(typeof(UserDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<UserDto>> CreateLdapUser([FromBody] LdapUserAttributes attributes)
     {
-        // Check for duplicate by username
-        var existingByName = await _userManager.FindByNameAsync(attributes.Ntid);
-        if (existingByName is not null)
-            return BadRequest($"User '{attributes.Ntid}' already exists.");
-
-        // Check for duplicate by email
-        if (!string.IsNullOrEmpty(attributes.Email))
+        try
         {
-            var existingByEmail = await _userManager.FindByEmailAsync(attributes.Email);
-            if (existingByEmail is not null)
-                return BadRequest($"A user with email '{attributes.Email}' already exists.");
+            var user = await _userService.CreateLdapUserAsync(attributes);
+            return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
         }
-
-        var user = new ApplicationUser
-        {
-            UserName = attributes.Ntid,
-            Email = attributes.Email,
-            EmailConfirmed = true,
-            DisplayName = attributes.DisplayName,
-            FirstName = attributes.FirstName,
-            LastName = attributes.LastName,
-            JobTitle = attributes.JobTitle,
-            Department = attributes.Department,
-            EmployeeNumber = attributes.EmployeeNumber,
-            IsActive = true,
-            AuthSource = AuthSource.LDAP,
-            CreatedUtc = DateTime.UtcNow
-        };
-
-        var createResult = await _userManager.CreateAsync(user);
-        if (!createResult.Succeeded)
-            return BadRequest("Failed to create user: " + string.Join(", ", createResult.Errors.Select(e => e.Description)));
-
-        // Assign the default role
-        var defaultRole = await _roleManager.Roles.FirstOrDefaultAsync(r => r.IsDefault);
-        var defaultRoleName = defaultRole?.Name ?? "User";
-        await _userManager.AddToRoleAsync(user, defaultRoleName);
-
-        var currentUserId = CurrentUserId;
-        var ipAddress = ClientIpAddress;
-        await _auditLogService.LogAsync(new AuditLogRequest
-        {
-            UserId = currentUserId,
-            ActionType = AuditActionType.UserCreated,
-            EntityType = AuditEntityType.User,
-            EntityId = user.Id,
-            EntityName = user.DisplayName ?? user.UserName ?? "",
-            Description = $"LDAP user '{user.DisplayName ?? user.UserName}' was created.",
-            IpAddress = ipAddress
-        });
-
-        var roles = await _userManager.GetRolesAsync(user);
-        var dto = new UserDto
-        {
-            Id = user.Id,
-            UserName = user.UserName ?? "",
-            DisplayName = user.DisplayName,
-            Email = user.Email,
-            IsActive = user.IsActive,
-            AuthSource = user.AuthSource.ToString(),
-            Roles = roles.ToList(),
-            CreatedUtc = user.CreatedUtc
-        };
-
-        return CreatedAtAction(nameof(GetUser), new { id = user.Id }, dto);
+        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+        catch (ArgumentException ex) { return BadRequest(ex.Message); }
     }
 
     /// <summary>
-    /// [LDAP] Syncs all LDAP-sourced users with Active Directory attributes.
+    /// Syncs all LDAP-sourced users with Active Directory attributes.
     /// Streams progress per-user as NDJSON (newline-delimited JSON) for real-time UI updates.
+    /// Each line contains a JSON object with total, current, userName, and updated fields.
     /// </summary>
+    /// <response code="200">Streams NDJSON progress items until sync completes.</response>
     [HttpPost("ldap-sync")]
     public async Task SyncLdapUsers()
     {
@@ -549,109 +314,12 @@ public class UsersController : BaseController
         Response.Headers["Cache-Control"] = "no-cache";
         Response.Headers["X-Content-Type-Options"] = "nosniff";
 
-        var ldapUsers = await _userManager.Users
-            .Where(u => u.AuthSource == AuthSource.LDAP)
-            .OrderBy(u => u.UserName)
-            .ToListAsync();
-
-        var total = ldapUsers.Count;
-
-        for (var i = 0; i < ldapUsers.Count; i++)
+        await foreach (var item in _userService.SyncLdapUsersAsync())
         {
-            var user = ldapUsers[i];
-            bool? updated = null;
-
-            try
-            {
-                var attrs = await _ldapAuthService.FetchUserAttributesAsync(user.UserName ?? "");
-                if (attrs is null)
-                {
-                    updated = null; // failed
-                }
-                else
-                {
-                    bool changed = false;
-                    if (!string.Equals(user.DisplayName, attrs.DisplayName, StringComparison.Ordinal))
-                    { user.DisplayName = attrs.DisplayName; changed = true; }
-                    if (!string.Equals(user.FirstName, attrs.FirstName, StringComparison.Ordinal))
-                    { user.FirstName = attrs.FirstName; changed = true; }
-                    if (!string.Equals(user.LastName, attrs.LastName, StringComparison.Ordinal))
-                    { user.LastName = attrs.LastName; changed = true; }
-                    if (!string.Equals(user.Email, attrs.Email, StringComparison.OrdinalIgnoreCase))
-                    { user.Email = attrs.Email; changed = true; }
-                    if (!string.Equals(user.JobTitle, attrs.JobTitle, StringComparison.Ordinal))
-                    { user.JobTitle = attrs.JobTitle; changed = true; }
-                    if (!string.Equals(user.Department, attrs.Department, StringComparison.Ordinal))
-                    { user.Department = attrs.Department; changed = true; }
-                    if (!string.Equals(user.EmployeeNumber, attrs.EmployeeNumber, StringComparison.Ordinal))
-                    { user.EmployeeNumber = attrs.EmployeeNumber; changed = true; }
-
-                    if (changed)
-                    {
-                        user.UpdatedUtc = DateTime.UtcNow;
-                        var updateResult = await _userManager.UpdateAsync(user);
-                        updated = updateResult.Succeeded;
-                    }
-                    else
-                    {
-                        updated = false; // no changes needed
-                    }
-                }
-            }
-            catch
-            {
-                updated = null; // failed
-            }
-
-            var item = new LdapSyncProgressItem
-            {
-                Total = total,
-                Current = i + 1,
-                UserName = user.UserName ?? "",
-                Updated = updated
-            };
-
-            // Write as NDJSON (one JSON object per line) and flush immediately
-            var json = System.Text.Json.JsonSerializer.Serialize(item);
+            var json = JsonSerializer.Serialize(item);
             await Response.WriteAsync(json + "\n");
             await Response.Body.FlushAsync();
         }
-    }
-
-    #endregion
-
-    #region Roles
-
-    /// <summary>
-    /// Returns all roles with metadata (for frontend to use in authority checks and role pickers).
-    /// Duplicates the roles endpoint but scoped to user context needs.
-    /// </summary>
-    [HttpGet("roles-metadata")]
-    [ProducesResponseType(typeof(List<RoleDto>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<List<RoleDto>>> GetRolesMetadata()
-    {
-        var roles = await _roleManager.Roles
-            .AsNoTracking()
-            .OrderByDescending(r => r.Position)
-            .ThenBy(r => r.Name)
-            .ToListAsync();
-
-        var roleDtos = roles.Select(r => new RoleDto
-        {
-            Id = r.Id,
-            Name = r.Name ?? "",
-            DisplayName = r.DisplayName,
-            Description = r.Description,
-            IsActive = r.IsActive,
-            IsSystem = r.IsSystem,
-            IsDefault = r.IsDefault,
-            RequiresMinimumUser = r.RequiresMinimumUser,
-            Position = r.Position,
-            CreatedUtc = r.CreatedUtc,
-            UpdatedUtc = r.UpdatedUtc
-        }).ToList();
-
-        return Ok(roleDtos);
     }
 
     #endregion

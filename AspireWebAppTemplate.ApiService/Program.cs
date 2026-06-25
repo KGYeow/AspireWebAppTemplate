@@ -53,7 +53,11 @@ builder.Services.AddMemoryCache();
 // Controllers
 builder.Services.AddControllers();
 
+// HttpContext accessor (required for ICurrentUserAccessor)
+builder.Services.AddHttpContextAccessor();
+
 // Application services
+builder.Services.AddScoped<ICurrentUserAccessor, CurrentUserAccessor>();
 builder.Services.AddSingleton<INavigationProvider, DefaultNavigationProvider>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 builder.Services.AddScoped<IExcelExportService, ExcelExportService>();
@@ -63,6 +67,9 @@ builder.Services.AddScoped<IPagePermissionService, PagePermissionService>();
 builder.Services.AddScoped<ILdapAuthService, LdapAuthService>();
 builder.Services.AddScoped<ILdapLoginService, LdapLoginService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 // [LDAP] LDAP configuration — remove this block if LDAP is not needed
 builder.Services.Configure<LdapSettings>(builder.Configuration.GetSection("LDAP"));

@@ -1,16 +1,15 @@
 using AspireWebAppTemplate.Abstractions;
-using AspireWebAppTemplate.ApiService.Data;
-using AspireWebAppTemplate.Core.Common.Defaults;
 using AspireWebAppTemplate.Core.Contracts;
 using AspireWebAppTemplate.Core.Contracts.AuditLog;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace AspireWebAppTemplate.ApiService.Controllers;
 
 /// <summary>
 /// Provides audit log querying and Excel export capabilities.
+/// Delegates all data retrieval to <see cref="IAuditLogService"/> and
+/// export formatting to <see cref="IExcelExportService"/>.
 /// </summary>
 [Route("api/audit-log")]
 [Authorize(Roles = "Admin")]
@@ -18,18 +17,18 @@ public class AuditLogController : BaseController
 {
     #region Constructor
 
-    private readonly ApplicationDbContext _dbContext;
-    private readonly IExcelExportService _excelExportService;
     private readonly IAuditLogService _auditLogService;
+    private readonly IExcelExportService _excelExportService;
 
-    public AuditLogController(
-        ApplicationDbContext dbContext,
-        IExcelExportService excelExportService,
-        IAuditLogService auditLogService)
+    /// <summary>
+    /// Initializes a new instance of <see cref="AuditLogController"/>.
+    /// </summary>
+    /// <param name="auditLogService">Service for querying and filtering audit log entries.</param>
+    /// <param name="excelExportService">Service for generating Excel export files.</param>
+    public AuditLogController(IAuditLogService auditLogService, IExcelExportService excelExportService)
     {
-        _dbContext = dbContext;
-        _excelExportService = excelExportService;
         _auditLogService = auditLogService;
+        _excelExportService = excelExportService;
     }
 
     #endregion
@@ -39,107 +38,35 @@ public class AuditLogController : BaseController
     /// <summary>
     /// Returns a paged list of audit log entries with optional filtering.
     /// </summary>
+    /// <param name="queryParams">Pagination and filter criteria.</param>
+    /// <returns>A paged result containing matching audit log entries.</returns>
     [HttpGet]
     [ProducesResponseType(typeof(PagedResult<AuditLogEntryDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<PagedResult<AuditLogEntryDto>>> GetAuditLog([FromQuery] AuditLogQueryParams queryParams)
     {
-        var query = _dbContext.AuditLogEntries.AsNoTracking().AsQueryable();
-
-        // Apply filters
-        if (!string.IsNullOrWhiteSpace(queryParams.SearchTerm))
-        {
-            var term = queryParams.SearchTerm.ToLower();
-            query = query.Where(e =>
-                e.UserDisplayName.ToLower().Contains(term) ||
-                e.EntityName.ToLower().Contains(term) ||
-                e.Description.ToLower().Contains(term) ||
-                e.EntityId.ToLower().Contains(term));
-        }
-
-        if (queryParams.ActionType.HasValue)
-        {
-            query = query.Where(e => e.ActionType == queryParams.ActionType.Value);
-        }
-
-        if (queryParams.EntityType.HasValue)
-        {
-            query = query.Where(e => e.EntityType == queryParams.EntityType.Value);
-        }
-
-        if (queryParams.DateStart.HasValue)
-        {
-            query = query.Where(e => e.Timestamp >= queryParams.DateStart.Value);
-        }
-
-        if (queryParams.DateEnd.HasValue)
-        {
-            query = query.Where(e => e.Timestamp <= queryParams.DateEnd.Value);
-        }
-
-        var totalCount = await query.CountAsync();
-
-        var entries = await query
-            .OrderByDescending(e => e.Timestamp)
-            .Skip(queryParams.Page * queryParams.PageSize)
-            .Take(queryParams.PageSize)
-            .Select(e => new AuditLogEntryDto
-            {
-                Id = e.Id,
-                UserId = e.UserId,
-                UserDisplayName = e.UserDisplayName,
-                ActionType = e.ActionType,
-                EntityType = e.EntityType,
-                EntityId = e.EntityId,
-                EntityName = e.EntityName,
-                Description = e.Description,
-                OldValues = e.OldValues,
-                NewValues = e.NewValues,
-                IpAddress = e.IpAddress,
-                Timestamp = e.Timestamp
-            })
-            .ToListAsync();
-
-        return Ok(new PagedResult<AuditLogEntryDto>
-        {
-            Items = entries,
-            TotalCount = totalCount,
-            Page = queryParams.Page,
-            PageSize = queryParams.PageSize
-        });
+        var result = await _auditLogService.SearchAsync(queryParams);
+        return Ok(result);
     }
 
     /// <summary>
     /// Returns a single audit log entry by ID.
     /// </summary>
+    /// <param name="id">The unique identifier of the audit log entry.</param>
+    /// <returns>The audit log entry matching the specified ID.</returns>
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(AuditLogEntryDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<AuditLogEntryDto>> GetAuditLogEntry(Guid id)
     {
-        var entry = await _dbContext.AuditLogEntries
-            .AsNoTracking()
-            .Where(e => e.Id == id)
-            .Select(e => new AuditLogEntryDto
-            {
-                Id = e.Id,
-                UserId = e.UserId,
-                UserDisplayName = e.UserDisplayName,
-                ActionType = e.ActionType,
-                EntityType = e.EntityType,
-                EntityId = e.EntityId,
-                EntityName = e.EntityName,
-                Description = e.Description,
-                OldValues = e.OldValues,
-                NewValues = e.NewValues,
-                IpAddress = e.IpAddress,
-                Timestamp = e.Timestamp
-            })
-            .FirstOrDefaultAsync();
-
-        if (entry is null)
-            return NotFound();
-
-        return Ok(entry);
+        try
+        {
+            var entry = await _auditLogService.GetByIdAsync(id);
+            return Ok(entry);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
     }
 
     #endregion
@@ -150,63 +77,13 @@ public class AuditLogController : BaseController
     /// Exports audit log entries matching the query to an Excel file.
     /// Capped at 50,000 rows.
     /// </summary>
+    /// <param name="queryParams">Filter criteria for the export.</param>
+    /// <returns>An Excel file containing the matching audit log entries.</returns>
     [HttpGet("export")]
     [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
     public async Task<IActionResult> ExportAuditLog([FromQuery] AuditLogQueryParams queryParams)
     {
-        var query = _dbContext.AuditLogEntries.AsNoTracking().AsQueryable();
-
-        // Apply same filters as GetAuditLog
-        if (!string.IsNullOrWhiteSpace(queryParams.SearchTerm))
-        {
-            var term = queryParams.SearchTerm.ToLower();
-            query = query.Where(e =>
-                e.UserDisplayName.ToLower().Contains(term) ||
-                e.EntityName.ToLower().Contains(term) ||
-                e.Description.ToLower().Contains(term) ||
-                e.EntityId.ToLower().Contains(term));
-        }
-
-        if (queryParams.ActionType.HasValue)
-        {
-            query = query.Where(e => e.ActionType == queryParams.ActionType.Value);
-        }
-
-        if (queryParams.EntityType.HasValue)
-        {
-            query = query.Where(e => e.EntityType == queryParams.EntityType.Value);
-        }
-
-        if (queryParams.DateStart.HasValue)
-        {
-            query = query.Where(e => e.Timestamp >= queryParams.DateStart.Value);
-        }
-
-        if (queryParams.DateEnd.HasValue)
-        {
-            query = query.Where(e => e.Timestamp <= queryParams.DateEnd.Value);
-        }
-
-        var entries = await query
-            .OrderByDescending(e => e.Timestamp)
-            .Take(ExportDefaults.MaxExportRows)
-            .Select(e => new AuditLogEntryDto
-            {
-                Id = e.Id,
-                UserId = e.UserId,
-                UserDisplayName = e.UserDisplayName,
-                ActionType = e.ActionType,
-                EntityType = e.EntityType,
-                EntityId = e.EntityId,
-                EntityName = e.EntityName,
-                Description = e.Description,
-                OldValues = e.OldValues,
-                NewValues = e.NewValues,
-                IpAddress = e.IpAddress,
-                Timestamp = e.Timestamp
-            })
-            .ToListAsync();
-
+        var entries = await _auditLogService.GetForExportAsync(queryParams);
         var fileBytes = _excelExportService.ExportToExcel(entries, "Audit Log");
         var fileName = $"AuditLog_{DateTime.UtcNow:yyyyMMdd_HHmmss}.xlsx";
 
