@@ -14,6 +14,8 @@ namespace AspireWebAppTemplate.ApiService.Abstractions;
 /// </remarks>
 public interface IPagePermissionService
 {
+    #region Query Operations
+
     /// <summary>
     /// Retrieves all page permission records grouped by role, including each role's
     /// identifier, display name, and the list of granted page paths with their display names.
@@ -37,6 +39,10 @@ public interface IPagePermissionService
     /// </returns>
     Task<List<string>> GetMyPagesAsync(string userId);
 
+    #endregion
+
+    #region Write Operations
+
     /// <summary>
     /// Replaces all existing page permission records for the specified role with the provided
     /// list of page paths. An empty list removes all page permissions for that role.
@@ -52,4 +58,6 @@ public interface IPagePermissionService
     /// </param>
     /// <returns>A task representing the asynchronous update operation.</returns>
     Task UpdateRolePermissionsAsync(string roleId, List<string> pagePaths);
+
+    #endregion
 }

@@ -25,6 +25,8 @@ namespace AspireWebAppTemplate.ApiService.Services;
 /// </remarks>
 public class CurrentUserAccessor : ICurrentUserAccessor
 {
+    #region Constructor
+
     /// <summary>
     /// Provides access to the current HTTP context for reading user claims and connection info.
     /// </summary>
@@ -40,6 +42,10 @@ public class CurrentUserAccessor : ICurrentUserAccessor
     {
         _httpContextAccessor = httpContextAccessor;
     }
+
+    #endregion
+
+    #region Implementation
 
     /// <inheritdoc />
     public string? UserId =>
@@ -59,4 +65,6 @@ public class CurrentUserAccessor : ICurrentUserAccessor
     public string? IpAddress =>
         _httpContextAccessor.HttpContext?.Request?.Headers["X-Client-Ip"].FirstOrDefault()
         ?? _httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString();
+
+    #endregion
 }

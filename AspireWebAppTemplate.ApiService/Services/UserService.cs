@@ -35,13 +35,13 @@ namespace AspireWebAppTemplate.ApiService.Services;
 /// </remarks>
 public class UserService : IUserService
 {
+    #region Constructor
+
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<ApplicationRole> _roleManager;
     private readonly IAuditLogService _auditLogService;
     private readonly ICurrentUserAccessor _currentUser;
     private readonly ILdapAuthService _ldapAuthService;
-
-    #region Audit Fields
 
     /// <summary>
     /// Static field definitions used by <see cref="AuditChangeHelper.Snapshot{T}"/> to capture
@@ -58,8 +58,6 @@ public class UserService : IUserService
         ("Department", u => u.Department),
         ("EmployeeNumber", u => u.EmployeeNumber),
     ];
-
-    #endregion
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UserService"/> class.
@@ -82,6 +80,8 @@ public class UserService : IUserService
         _currentUser = currentUser;
         _ldapAuthService = ldapAuthService;
     }
+
+    #endregion
 
     #region CRUD Operations
 

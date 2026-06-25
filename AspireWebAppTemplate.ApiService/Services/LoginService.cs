@@ -14,6 +14,8 @@ namespace AspireWebAppTemplate.ApiService.Services;
 /// </summary>
 public sealed class LoginService : ILoginService
 {
+    #region Constructor
+
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IMemoryCache _memoryCache;
@@ -33,6 +35,10 @@ public sealed class LoginService : ILoginService
         _memoryCache = memoryCache;
         _logger = logger;
     }
+
+    #endregion
+
+    #region Operations
 
     /// <inheritdoc />
     public async Task<LoginResult> ValidateAndGenerateTokenAsync(string email, string password, bool rememberMe, string returnUrl)
@@ -107,6 +113,10 @@ public sealed class LoginService : ILoginService
         return new LoginResult { Succeeded = true, Token = token, UserId = user.Id };
     }
 
+    #endregion
+
+    #region Private Helpers
+
     /// <summary>
     /// Updates <see cref="ApplicationUser.LastLoginUtc"/> to the current UTC time.
     /// Failures are logged but do not interrupt the login flow.
@@ -125,4 +135,6 @@ public sealed class LoginService : ILoginService
                 string.Join(", ", result.Errors.Select(e => e.Description)));
         }
     }
+
+    #endregion
 }

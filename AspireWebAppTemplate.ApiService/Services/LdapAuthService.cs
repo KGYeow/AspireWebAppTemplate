@@ -17,6 +17,8 @@ namespace AspireWebAppTemplate.ApiService.Services;
 /// </remarks>
 public sealed class LdapAuthService : ILdapAuthService
 {
+    #region Constructor
+
     private readonly LdapSettings _settings;
     private readonly ILogger<LdapAuthService> _logger;
 
@@ -30,6 +32,10 @@ public sealed class LdapAuthService : ILdapAuthService
         _settings = settings.Value;
         _logger = logger;
     }
+
+    #endregion
+
+    #region Operations
 
     /// <inheritdoc />
     public Task<LdapAuthResult> AuthenticateAsync(string identifier, string password)
@@ -188,7 +194,9 @@ public sealed class LdapAuthService : ILdapAuthService
         return Task.FromResult<LdapUserAttributes?>(null);
     }
 
-    #region Helpers
+    #endregion
+
+    #region Private Helpers
 
     /// <summary>
     /// Gets an attribute value from an LDAP search response entry.

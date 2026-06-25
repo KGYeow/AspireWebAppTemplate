@@ -21,6 +21,8 @@ namespace AspireWebAppTemplate.ApiService.Services;
 /// </remarks>
 public class ExcelExportService : IExcelExportService
 {
+    #region Export Operations
+
     /// <inheritdoc />
     public byte[] ExportToExcel<T>(IEnumerable<T> data, string? sheetName = null) where T : class
     {
@@ -91,6 +93,8 @@ public class ExcelExportService : IExcelExportService
 
         return package.GetAsByteArray();
     }
+
+    #endregion
 
     #region Column Discovery
 

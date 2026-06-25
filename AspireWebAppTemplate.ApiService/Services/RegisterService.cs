@@ -21,6 +21,8 @@ namespace AspireWebAppTemplate.ApiService.Services;
 /// </summary>
 public sealed class RegisterService : IRegisterService
 {
+    #region Constructor
+
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<ApplicationRole> _roleManager;
     private readonly IUserStore<ApplicationUser> _userStore;
@@ -43,6 +45,10 @@ public sealed class RegisterService : IRegisterService
         _emailSender = emailSender;
         _logger = logger;
     }
+
+    #endregion
+
+    #region Operations
 
     /// <inheritdoc />
     public async Task<RegisterResult> RegisterUserAsync(string email, string password, string confirmEmailBaseUri, string? returnUrl)
@@ -91,6 +97,10 @@ public sealed class RegisterService : IRegisterService
             Email = email
         };
     }
+
+    #endregion
+
+    #region Private Helpers
 
     /// <summary>
     /// Builds the email confirmation callback URL with query parameters.
@@ -146,4 +156,6 @@ public sealed class RegisterService : IRegisterService
         }
         return (IUserEmailStore<ApplicationUser>)_userStore;
     }
+
+    #endregion
 }

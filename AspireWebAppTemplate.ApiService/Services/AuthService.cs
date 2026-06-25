@@ -28,6 +28,8 @@ namespace AspireWebAppTemplate.ApiService.Services;
 /// </remarks>
 public class AuthService : IAuthService
 {
+    #region Constructor
+
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IAuditLogService _auditLogService;
@@ -51,6 +53,8 @@ public class AuthService : IAuthService
         _auditLogService = auditLogService;
         _currentUser = currentUser;
     }
+
+    #endregion
 
     #region Profile
 

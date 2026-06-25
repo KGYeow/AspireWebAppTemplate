@@ -12,6 +12,8 @@ namespace AspireWebAppTemplate.Abstractions;
 /// </summary>
 public interface IRegisterService
 {
+    #region Operations
+
     /// <summary>
     /// Creates a new user account, assigns the default "User" role, generates an email
     /// confirmation token, and sends the confirmation email.
@@ -25,4 +27,6 @@ public interface IRegisterService
     /// <param name="returnUrl">Optional return URL passed through to the confirmation link.</param>
     /// <returns>A <see cref="RegisterResult"/> indicating the outcome of the registration.</returns>
     Task<RegisterResult> RegisterUserAsync(string email, string password, string confirmEmailBaseUri, string? returnUrl);
+
+    #endregion
 }

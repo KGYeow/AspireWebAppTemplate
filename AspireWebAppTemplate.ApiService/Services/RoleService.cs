@@ -23,6 +23,8 @@ namespace AspireWebAppTemplate.ApiService.Services;
 /// </remarks>
 public class RoleService : IRoleService
 {
+    #region Constructor
+
     private readonly RoleManager<ApplicationRole> _roleManager;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IAuditLogService _auditLogService;
@@ -59,6 +61,10 @@ public class RoleService : IRoleService
         _auditLogService = auditLogService;
         _currentUser = currentUser;
     }
+
+    #endregion
+
+    #region CRUD Operations
 
     /// <inheritdoc/>
     /// <summary>
@@ -236,6 +242,10 @@ public class RoleService : IRoleService
         });
     }
 
+    #endregion
+
+    #region Activation
+
     /// <inheritdoc/>
     /// <summary>
     /// Activates a role by setting its IsActive status to true. System roles cannot be modified.
@@ -317,6 +327,10 @@ public class RoleService : IRoleService
             IpAddress = _currentUser.IpAddress
         });
     }
+
+    #endregion
+
+    #region User-Role Assignment
 
     /// <inheritdoc/>
     /// <summary>
@@ -430,6 +444,10 @@ public class RoleService : IRoleService
         return users.Select(MapToUserDto).ToList();
     }
 
+    #endregion
+
+    #region Private Helpers
+
     /// <summary>
     /// Maps an <see cref="ApplicationRole"/> entity to a <see cref="RoleDto"/>.
     /// </summary>
@@ -493,4 +511,6 @@ public class RoleService : IRoleService
             DateTimeFormat = user.DateTimeFormat
         };
     }
+
+    #endregion
 }

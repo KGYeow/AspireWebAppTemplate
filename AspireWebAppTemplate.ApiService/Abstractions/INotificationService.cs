@@ -16,6 +16,8 @@ namespace AspireWebAppTemplate.ApiService.Abstractions;
 /// </remarks>
 public interface INotificationService
 {
+    #region Creation
+
     /// <summary>
     /// Creates a new notification for the specified user, respecting their delivery preferences.
     /// If the user does not exist or has InAppEnabled=false for the category, no entity is created.
@@ -33,6 +35,10 @@ public interface INotificationService
     /// logged at Error level via <c>ILogger</c>. The caller is never interrupted.
     /// </remarks>
     Task CreateNotificationAsync(CreateNotificationRequest request);
+
+    #endregion
+
+    #region Retrieval
 
     /// <summary>
     /// Retrieves a paginated list of notifications for the specified user,
@@ -80,6 +86,10 @@ public interface INotificationService
     /// </remarks>
     Task<List<NotificationDto>> GetRecentAsync(string userId, int count = 5);
 
+    #endregion
+
+    #region Status Management
+
     /// <summary>
     /// Marks a single notification as read. Sets IsRead=true and ReadAtUtc to the current UTC time.
     /// Returns true if the notification was found and belongs to the user; false otherwise.
@@ -111,6 +121,10 @@ public interface INotificationService
     /// </remarks>
     Task<int> MarkAllAsReadAsync(string userId);
 
+    #endregion
+
+    #region Bulk Operations
+
     /// <summary>
     /// Deletes the specified notifications that belong to the user.
     /// IDs that do not exist or do not belong to the user are silently ignored.
@@ -129,6 +143,10 @@ public interface INotificationService
     /// ignored — no exception is thrown and no error is reported for those IDs.
     /// </remarks>
     Task<int> BulkDismissAsync(string userId, List<Guid> notificationIds);
+
+    #endregion
+
+    #region Preferences
 
     /// <summary>
     /// Retrieves notification preferences for all categories for the specified user.
@@ -158,4 +176,6 @@ public interface INotificationService
     /// user-category pair, or updates the existing record's toggle values.
     /// </remarks>
     Task UpdatePreferenceAsync(string userId, UpdateNotificationPreferenceRequest request);
+
+    #endregion
 }

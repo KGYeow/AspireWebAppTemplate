@@ -18,6 +18,8 @@ namespace AspireWebAppTemplate.ApiService.Services;
 /// </remarks>
 public sealed class LdapLoginService : ILdapLoginService
 {
+    #region Constructor
+
     private readonly ILdapAuthService _ldapAuth;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<ApplicationRole> _roleManager;
@@ -35,6 +37,10 @@ public sealed class LdapLoginService : ILdapLoginService
         _memoryCache = memoryCache;
         _logger = logger;
     }
+
+    #endregion
+
+    #region Operations
 
     /// <inheritdoc />
     public async Task<LoginResult> ValidateAndGenerateTokenAsync(string identifier, string password, bool rememberMe, string returnUrl)
@@ -128,7 +134,9 @@ public sealed class LdapLoginService : ILdapLoginService
         return new LoginResult { Succeeded = true, Token = token, UserId = user.Id };
     }
 
-    #region Helpers
+    #endregion
+
+    #region Private Helpers
 
     /// <summary>
     /// Syncs user attributes from LDAP to the local Identity user if any have changed.

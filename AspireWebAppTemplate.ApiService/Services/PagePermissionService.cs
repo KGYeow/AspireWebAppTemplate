@@ -35,6 +35,8 @@ namespace AspireWebAppTemplate.ApiService.Services;
 /// </remarks>
 public class PagePermissionService : IPagePermissionService
 {
+    #region Constructor
+
     private readonly ApplicationDbContext _dbContext;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<ApplicationRole> _roleManager;
@@ -62,6 +64,10 @@ public class PagePermissionService : IPagePermissionService
         _navigationProvider = navigationProvider;
         _logger = logger;
     }
+
+    #endregion
+
+    #region Query Operations
 
     /// <inheritdoc />
     public async Task<List<RolePermissionsDto>> GetAllPermissionsAsync()
@@ -134,6 +140,10 @@ public class PagePermissionService : IPagePermissionService
 
         return pagePaths;
     }
+
+    #endregion
+
+    #region Write Operations
 
     /// <inheritdoc />
     public async Task UpdateRolePermissionsAsync(string roleId, List<string> pagePaths)
@@ -231,4 +241,5 @@ public class PagePermissionService : IPagePermissionService
         });
     }
 
+    #endregion
 }

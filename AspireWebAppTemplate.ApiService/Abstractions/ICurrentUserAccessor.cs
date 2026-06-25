@@ -13,6 +13,8 @@ namespace AspireWebAppTemplate.ApiService.Abstractions;
 /// </remarks>
 public interface ICurrentUserAccessor
 {
+    #region Operations
+
     /// <summary>The authenticated user's ID from ClaimTypes.NameIdentifier.</summary>
     string? UserId { get; }
 
@@ -21,4 +23,6 @@ public interface ICurrentUserAccessor
 
     /// <summary>The client's IP address from HttpContext.Connection.RemoteIpAddress.</summary>
     string? IpAddress { get; }
+
+    #endregion
 }

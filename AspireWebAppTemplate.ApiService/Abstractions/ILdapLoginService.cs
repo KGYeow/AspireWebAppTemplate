@@ -15,6 +15,8 @@ namespace AspireWebAppTemplate.Abstractions;
 /// </remarks>
 public interface ILdapLoginService
 {
+    #region Operations
+
     /// <summary>
     /// Authenticates a user via LDAP, auto-provisions them in the local Identity
     /// database if needed, syncs their attributes, and generates a single-use login
@@ -26,4 +28,6 @@ public interface ILdapLoginService
     /// <param name="returnUrl">The URL to redirect to after sign-in.</param>
     /// <returns>A <see cref="LoginResult"/> indicating the outcome.</returns>
     Task<LoginResult> ValidateAndGenerateTokenAsync(string identifier, string password, bool rememberMe, string returnUrl);
+
+    #endregion
 }

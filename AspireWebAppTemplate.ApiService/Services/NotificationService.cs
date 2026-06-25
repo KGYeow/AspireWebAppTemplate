@@ -35,6 +35,8 @@ namespace AspireWebAppTemplate.ApiService.Services;
 /// </remarks>
 public class NotificationService : INotificationService
 {
+    #region Constructor
+
     private readonly ApplicationDbContext _dbContext;
     private readonly ILogger<NotificationService> _logger;
 
@@ -48,6 +50,8 @@ public class NotificationService : INotificationService
         _dbContext = dbContext;
         _logger = logger;
     }
+
+    #endregion
 
     #region Creation
 
@@ -319,7 +323,7 @@ public class NotificationService : INotificationService
 
     #endregion
 
-    #region Helpers
+    #region Private Helpers
 
     /// <summary>
     /// Maps a <see cref="Notification"/> entity to a <see cref="NotificationDto"/> response object.

@@ -12,6 +12,8 @@ namespace AspireWebAppTemplate.Abstractions;
 /// </remarks>
 public interface IExcelExportService
 {
+    #region Operations
+
     /// <summary>
     /// Exports a collection of data to an Excel (.xlsx) file as a byte array.
     /// Only properties decorated with <c>[Exportable]</c> are included as columns.
@@ -39,4 +41,6 @@ public interface IExcelExportService
     /// <param name="sheets">A dictionary mapping sheet names to data collections.</param>
     /// <returns>A byte array containing the Excel file content.</returns>
     byte[] ExportToExcelMultiSheet(Dictionary<string, IEnumerable<object>> sheets);
+
+    #endregion
 }

@@ -14,6 +14,8 @@ namespace AspireWebAppTemplate.Abstractions;
 /// </remarks>
 public interface ILdapAuthService
 {
+    #region Operations
+
     /// <summary>
     /// Authenticates a user against the corporate Active Directory and retrieves
     /// their attributes on success.
@@ -30,4 +32,6 @@ public interface ILdapAuthService
     /// <param name="identifier">The user's NTID (sAMAccountName) or email address.</param>
     /// <returns>The user's attributes, or <c>null</c> if not found.</returns>
     Task<LdapUserAttributes?> FetchUserAttributesAsync(string identifier);
+
+    #endregion
 }

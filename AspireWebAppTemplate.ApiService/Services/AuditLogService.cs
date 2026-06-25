@@ -22,6 +22,8 @@ namespace AspireWebAppTemplate.ApiService.Services;
 /// </remarks>
 public class AuditLogService : IAuditLogService
 {
+    #region Constructor
+
     private readonly ApplicationDbContext _dbContext;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly ILogger<AuditLogService> _logger;
@@ -45,6 +47,10 @@ public class AuditLogService : IAuditLogService
         _logger = logger;
         _configuration = configuration;
     }
+
+    #endregion
+
+    #region Write Operations
 
     /// <inheritdoc />
     public async Task LogAsync(AuditLogRequest request)
@@ -85,6 +91,32 @@ public class AuditLogService : IAuditLogService
                 request.EntityId);
         }
     }
+
+    /// <inheritdoc />
+    public async Task<int> PurgeOldEntriesAsync()
+    {
+        // Read retention days from configuration with validation (1–3650 range, fallback to 365)
+        var retentionDays = GetValidatedRetentionDays();
+
+        // Calculate the cutoff date: entries older than this will be purged
+        var cutoffDate = DateTime.UtcNow - TimeSpan.FromDays(retentionDays);
+
+        // Delete all entries with a Timestamp older than the retention cutoff.
+        // Unlike LogAsync, database exceptions are propagated so the caller can handle retry logic.
+        var purgedCount = await _dbContext.AuditLogEntries
+            .Where(e => e.Timestamp < cutoffDate)
+            .ExecuteDeleteAsync();
+
+        _logger.LogInformation(
+            "Purged {PurgedCount} audit log entries older than {RetentionDays} days (cutoff: {CutoffDate:O})",
+            purgedCount,
+            retentionDays,
+            cutoffDate);
+
+        return purgedCount;
+    }
+
+    #endregion
 
     #region Query Operations
 
@@ -186,29 +218,7 @@ public class AuditLogService : IAuditLogService
 
     #endregion
 
-    /// <inheritdoc />
-    public async Task<int> PurgeOldEntriesAsync()
-    {
-        // Read retention days from configuration with validation (1–3650 range, fallback to 365)
-        var retentionDays = GetValidatedRetentionDays();
-
-        // Calculate the cutoff date: entries older than this will be purged
-        var cutoffDate = DateTime.UtcNow - TimeSpan.FromDays(retentionDays);
-
-        // Delete all entries with a Timestamp older than the retention cutoff.
-        // Unlike LogAsync, database exceptions are propagated so the caller can handle retry logic.
-        var purgedCount = await _dbContext.AuditLogEntries
-            .Where(e => e.Timestamp < cutoffDate)
-            .ExecuteDeleteAsync();
-
-        _logger.LogInformation(
-            "Purged {PurgedCount} audit log entries older than {RetentionDays} days (cutoff: {CutoffDate:O})",
-            purgedCount,
-            retentionDays,
-            cutoffDate);
-
-        return purgedCount;
-    }
+    #region Private Helpers
 
     /// <summary>
     /// Resolves the display name for the given user ID.
@@ -320,4 +330,6 @@ public class AuditLogService : IAuditLogService
 
         return query;
     }
+
+    #endregion
 }
