@@ -1,4 +1,4 @@
-@page "/notifications"
+@page "/account/notifications"
 @using AspireWebAppTemplate.Core.Contracts.Notifications
 @using AspireWebAppTemplate.Core.Domain.Enums
 
@@ -19,8 +19,8 @@
                                 SelectedValueChanged="OnCategoryFilterChanged"
                                 SelectionMode="SelectionMode.SingleSelection">
                         <MudChip T="NotificationCategory?" Value="@((NotificationCategory?)null)" Variant="Variant.Text">All</MudChip>
-                        <MudChip T="NotificationCategory?" Value="@((NotificationCategory?)NotificationCategory.Security)" Variant="Variant.Text" Icon="@Icons.Material.Outlined.Security">Security</MudChip>
-                        <MudChip T="NotificationCategory?" Value="@((NotificationCategory?)NotificationCategory.UserManagement)" Variant="Variant.Text" Icon="@Icons.Material.Outlined.People">Users</MudChip>
+                        <MudChip T="NotificationCategory?" Value="@((NotificationCategory?)NotificationCategory.Account)" Variant="Variant.Text" Icon="@Icons.Material.Outlined.Security">Account</MudChip>
+                        <MudChip T="NotificationCategory?" Value="@((NotificationCategory?)NotificationCategory.Activity)" Variant="Variant.Text" Icon="@Icons.Material.Outlined.People">Activity</MudChip>
                         <MudChip T="NotificationCategory?" Value="@((NotificationCategory?)NotificationCategory.System)" Variant="Variant.Text" Icon="@Icons.Material.Outlined.Info">System</MudChip>
                     </MudChipSet>
                 </MudStack>

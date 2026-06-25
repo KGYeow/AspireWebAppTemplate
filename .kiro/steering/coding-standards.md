@@ -14,12 +14,50 @@
 - Complex logic: annotate the algorithm or business rule being implemented.
 - Non-obvious patterns: explain the "why" not just the "what".
 
-## Coding Patterns
+## Code Organization
+
+### Region Structure (Services & Controllers)
+All service implementations and controllers use consistent `#region` grouping:
+
+**Service pattern:**
+```csharp
+public class FooService : IFooService
+{
+    #region Constructor       // fields (instance + static) + constructor
+    #region [Domain Group]    // public methods grouped by domain area
+    #region Private Helpers   // private utility methods (mapping, validation)
+}
+```
+
+**Controller pattern:**
+```csharp
+public class FooController : BaseController
+{
+    #region Constructor       // service field + constructor
+    #region [Domain Group]    // endpoints grouped by domain area (CRUD, Activation, etc.)
+}
+```
+
+**Interface pattern:**
+```csharp
+public interface IFooService
+{
+    #region [Domain Group]    // method signatures grouped by domain area
+}
+```
+
+Rules:
+- Every field, constructor, and method lives inside a region — nothing is left loose.
+- The first region is always `#region Constructor`.
+- Domain groups use descriptive names: "CRUD Operations", "Activation", "Query Operations", "Write Operations", etc.
+- Private helpers are always the last region in service files.
 
 ### Blazor Code-Behind
 - Use partial class pattern (`.razor.cs`) for all page components — no `@code` blocks in `.razor`.
 - Organize with `#region` blocks: Injected Services → State → Lifecycle → Event Handlers → Helpers.
 - Use `[Inject]` attribute on properties (not constructor injection) for Blazor components.
+
+## Coding Patterns
 
 ### Loading States
 - Grid-dominant pages (MudDataGrid): rely on the grid's built-in `Loading` property — do NOT add `PageContent` wrapper.

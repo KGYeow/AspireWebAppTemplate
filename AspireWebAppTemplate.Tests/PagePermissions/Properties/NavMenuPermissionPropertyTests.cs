@@ -140,7 +140,7 @@ public class NavMenuPermissionPropertyTests
         var regularHrefGen = Gen.Elements(
             "counter", "weather", "admin/audit-log", "admin/user-management",
             "admin/role-management", "admin/page-permissions", "dashboard",
-            "reports", "settings", "profile");
+            "reports", "account/settings", "account/profile");
 
         // Generator for system page Href values (without leading "/")
         var systemHrefGen = Gen.Elements(
@@ -162,7 +162,7 @@ public class NavMenuPermissionPropertyTests
         {
             "/counter", "/weather", "/admin/audit-log", "/admin/user-management",
             "/admin/role-management", "/admin/page-permissions", "/dashboard",
-            "/reports", "/settings", "/profile"
+            "/reports", "/account/settings", "/account/profile"
         }).Select(pages => new HashSet<string>(pages, StringComparer.OrdinalIgnoreCase));
 
         // Combine generators
@@ -271,7 +271,7 @@ public class NavMenuPermissionPropertyTests
         var regularHrefGen = Gen.Elements(
             "counter", "weather", "admin/audit-log", "admin/user-management",
             "admin/role-management", "admin/page-permissions", "dashboard",
-            "reports", "settings", "profile");
+            "reports", "account/settings", "account/profile");
 
         // Generator for system page Href values (without leading "/")
         var systemHrefGen = Gen.Elements(
@@ -313,7 +313,7 @@ public class NavMenuPermissionPropertyTests
         {
             "/counter", "/weather", "/admin/audit-log", "/admin/user-management",
             "/admin/role-management", "/admin/page-permissions", "/dashboard",
-            "/reports", "/settings", "/profile"
+            "/reports", "/account/settings", "/account/profile"
         }).Select(pages => new HashSet<string>(pages, StringComparer.OrdinalIgnoreCase));
 
         // Combine generators
@@ -357,7 +357,7 @@ public class NavMenuPermissionPropertyTests
         var regularHrefGen = Gen.Elements(
             "counter", "weather", "admin/audit-log", "admin/user-management",
             "admin/role-management", "admin/page-permissions", "dashboard",
-            "reports", "settings", "profile");
+            "reports", "account/settings", "account/profile");
 
         // Generate only Link children with non-system Hrefs
         var linkChildGen = regularHrefGen.Select(href =>
@@ -406,7 +406,7 @@ public class NavMenuPermissionPropertyTests
         var regularHrefGen = Gen.Elements(
             "counter", "weather", "admin/audit-log", "admin/user-management",
             "admin/role-management", "admin/page-permissions", "dashboard",
-            "reports", "settings", "profile");
+            "reports", "account/settings", "account/profile");
 
         // Generator for system page Href values
         var systemHrefGen = Gen.Elements(

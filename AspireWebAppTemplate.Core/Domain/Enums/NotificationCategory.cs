@@ -7,17 +7,17 @@ namespace AspireWebAppTemplate.Core.Domain.Enums;
 public enum NotificationCategory
 {
     /// <summary>
-    /// Security-related notifications such as password resets and login alerts.
+    /// System-wide announcements such as maintenance windows, platform updates, and downtime notices.
     /// </summary>
-    Security,
+    System,
 
     /// <summary>
-    /// User management notifications such as role changes and account activation/deactivation.
+    /// Account-related notifications such as password expiry reminders and login alerts.
     /// </summary>
-    UserManagement,
+    Account,
 
     /// <summary>
-    /// System-level notifications such as maintenance windows and platform updates.
+    /// Activity notifications such as task assignments, mentions, and workflow updates.
     /// </summary>
-    System
+    Activity
 }

@@ -16,7 +16,7 @@ MudLayout
 ### Sidebar
 - `DrawerHeader` — shows full logo when open, mini logo when collapsed. Uses `MudDrawerHeader`.
 - `NavMenu` — permission-filtered navigation using `PagePermissionContext.CanAccess()`.
-- No CSS transitions on logo swap — simple `@if/@else` (industry standard for drawer logos).
+- Simple `@if/@else` for logo swap between open/collapsed states (no CSS transitions).
 
 ## Loading States
 

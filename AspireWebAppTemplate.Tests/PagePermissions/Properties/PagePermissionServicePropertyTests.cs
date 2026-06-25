@@ -106,7 +106,7 @@ public class PagePermissionServicePropertyTests
         "/admin/page-permissions",
         "/dashboard",
         "/reports",
-        "/settings"
+        "/account/settings"
     ];
 
     /// <summary>
@@ -239,7 +239,7 @@ public class PagePermissionServicePropertyTests
         var allPagePaths = new[]
         {
             "/dashboard", "/counter", "/admin/audit-log", "/admin/users",
-            "/admin/roles", "/settings", "/profile", "/reports",
+            "/admin/roles", "/account/settings", "/account/profile", "/reports",
             "/admin/page-permissions", "/weather"
         };
 

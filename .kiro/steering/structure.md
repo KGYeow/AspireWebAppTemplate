@@ -34,10 +34,10 @@ AspireWebAppTemplate.Core/
 ## ApiService Project
 ```
 AspireWebAppTemplate.ApiService/
-├── Abstractions/               ← Service interfaces (IAuditLogService, IUserService, IRoleService, etc.)
-├── Controllers/                ← THIN REST API controllers (extend BaseController, delegate to services)
+├── Abstractions/               ← Service interfaces (IAuditLogService, IRoleService, IUserService, IAuthService, etc.)
+├── Controllers/                ← Thin REST API controllers (extend BaseController, delegate to services)
 ├── Data/
-│   ├── Entities/               ← EF Core entities (ApplicationUser, AuditLogEntry, etc.)
+│   ├── Entities/               ← EF Core entities (ApplicationUser, ApplicationRole, AuditLogEntry, etc.)
 │   ├── ApplicationDbContext.cs
 │   └── SeedData.cs
 ├── Services/                   ← Full service implementations (all business logic lives here)
@@ -78,6 +78,7 @@ AspireWebAppTemplate.UI/
 ## Tests Project
 ```
 AspireWebAppTemplate.Tests/
+├── ControllerServiceRefactor/  ← Property + unit tests for service layer
 ├── AuditLog/                   ← Property + unit tests for audit features
 ├── PagePermissions/            ← Property + unit tests for page permissions
 ├── Services/                   ← Service-level unit tests
@@ -89,6 +90,7 @@ AspireWebAppTemplate.Tests/
 docs/
 ├── features/                   ← Completed feature specs (requirements, design, tasks)
 │   ├── audit-log/
+│   ├── controller-service-refactor/
 │   ├── page-access-permissions/
 │   ├── role-management/
 │   └── ...

@@ -235,7 +235,7 @@ public class PagePermissionContextPropertyTests
         {
             "/counter", "/weather", "/dashboard", "/admin/audit-log",
             "/admin/user-management", "/admin/role-management",
-            "/admin/page-permissions", "/reports", "/settings", "/profile"
+            "/admin/page-permissions", "/reports", "/account/settings", "/account/profile"
         };
 
         // Generate a random system page and a random non-empty subset of non-system pages
@@ -277,7 +277,7 @@ public class PagePermissionContextPropertyTests
         {
             "/counter", "/weather", "/dashboard", "/admin/audit-log",
             "/admin/user-management", "/admin/role-management",
-            "/admin/page-permissions", "/reports", "/settings", "/profile"
+            "/admin/page-permissions", "/reports", "/account/settings", "/account/profile"
         };
 
         // Generate a random system page; full cache means all non-system pages are loaded

@@ -405,7 +405,7 @@ public partial class Index : ComponentBase
     {
         return category switch
         {
-            NotificationCategory.UserManagement => "User Management",
+            NotificationCategory.Activity => "Activity",
             _ => category.ToString()
         };
     }

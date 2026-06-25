@@ -320,8 +320,8 @@ public partial class Notifications : ComponentBase
     /// <returns>A MudBlazor icon string.</returns>
     private static string GetCategoryIcon(NotificationCategory category) => category switch
     {
-        NotificationCategory.Security => Icons.Material.Outlined.Security,
-        NotificationCategory.UserManagement => Icons.Material.Outlined.People,
+        NotificationCategory.Account => Icons.Material.Outlined.Security,
+        NotificationCategory.Activity => Icons.Material.Outlined.People,
         NotificationCategory.System => Icons.Material.Outlined.Info,
         _ => Icons.Material.Outlined.Notifications
     };
@@ -333,8 +333,8 @@ public partial class Notifications : ComponentBase
     /// <returns>A MudBlazor Color value.</returns>
     private static Color GetCategoryColor(NotificationCategory category) => category switch
     {
-        NotificationCategory.Security => Color.Error,
-        NotificationCategory.UserManagement => Color.Primary,
+        NotificationCategory.Account => Color.Error,
+        NotificationCategory.Activity => Color.Primary,
         NotificationCategory.System => Color.Info,
         _ => Color.Default
     };

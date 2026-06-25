@@ -282,8 +282,8 @@ public class NotificationControllerTests
         // Arrange
         var preferences = new List<NotificationPreferenceDto>
         {
-            new() { Category = NotificationCategory.Security, InAppEnabled = true, EmailEnabled = true },
-            new() { Category = NotificationCategory.UserManagement, InAppEnabled = false, EmailEnabled = true }
+            new() { Category = NotificationCategory.Account, InAppEnabled = true, EmailEnabled = true },
+            new() { Category = NotificationCategory.Activity, InAppEnabled = false, EmailEnabled = true }
         };
 
         _mockService
@@ -315,7 +315,7 @@ public class NotificationControllerTests
         // Arrange
         var request = new UpdateNotificationPreferenceRequest
         {
-            Category = NotificationCategory.Security,
+            Category = NotificationCategory.Account,
             InAppEnabled = true,
             EmailEnabled = false
         };
@@ -369,7 +369,7 @@ public class NotificationControllerTests
         // Arrange
         var request = new UpdateNotificationPreferenceRequest
         {
-            Category = NotificationCategory.Security,
+            Category = NotificationCategory.Account,
             InAppEnabled = true,
             EmailEnabled = true
         };

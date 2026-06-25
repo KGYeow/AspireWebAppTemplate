@@ -43,7 +43,7 @@ public class PagePermissionsControllerAuditTests
     public void PagePermissions_OldValuesContainsPagePathsArray()
     {
         // Arrange — simulate old permissions for a role
-        var oldPaths = new[] { "/settings", "/users" };
+        var oldPaths = new[] { "/account/settings", "/users" };
 
         // Act
         var oldValues = AuditChangeHelper.Serialize(new { PagePaths = oldPaths });
@@ -56,7 +56,7 @@ public class PagePermissionsControllerAuditTests
         Assert.True(root.TryGetProperty("pagePaths", out var pagePathsElement));
         Assert.Equal(JsonValueKind.Array, pagePathsElement.ValueKind);
         Assert.Equal(2, pagePathsElement.GetArrayLength());
-        Assert.Equal("/settings", pagePathsElement[0].GetString());
+        Assert.Equal("/account/settings", pagePathsElement[0].GetString());
         Assert.Equal("/users", pagePathsElement[1].GetString());
     }
 
@@ -68,7 +68,7 @@ public class PagePermissionsControllerAuditTests
     public void PagePermissions_NewValuesContainsPagePathsArray()
     {
         // Arrange — simulate new permissions for a role
-        var newPaths = new[] { "/settings", "/users", "/reports" };
+        var newPaths = new[] { "/account/settings", "/users", "/reports" };
 
         // Act
         var newValues = AuditChangeHelper.Serialize(new { PagePaths = newPaths });
@@ -81,7 +81,7 @@ public class PagePermissionsControllerAuditTests
         Assert.True(root.TryGetProperty("pagePaths", out var pagePathsElement));
         Assert.Equal(JsonValueKind.Array, pagePathsElement.ValueKind);
         Assert.Equal(3, pagePathsElement.GetArrayLength());
-        Assert.Equal("/settings", pagePathsElement[0].GetString());
+        Assert.Equal("/account/settings", pagePathsElement[0].GetString());
         Assert.Equal("/users", pagePathsElement[1].GetString());
         Assert.Equal("/reports", pagePathsElement[2].GetString());
     }

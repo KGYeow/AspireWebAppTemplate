@@ -40,7 +40,7 @@ public class CamelCaseNamingPropertyTests
         var isActiveGen = Gen.Elements(true, false);
         var pagePathsGen = Gen.Elements(
             new[] { "/admin", "/dashboard" },
-            new[] { "/settings" },
+            new[] { "/account/settings" },
             Array.Empty<string>());
         var positionGen = Gen.Choose(0, 100);
         var descriptionGen = Gen.OneOf(

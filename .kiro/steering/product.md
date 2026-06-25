@@ -14,12 +14,12 @@ An enterprise Blazor Server web application template built on .NET Aspire. It pr
 
 - **User Management** — CRUD, activation/deactivation, LDAP sync, role assignment
 - **Role Management** — custom roles with position ordering, system role protection
-- **Audit Logging** — comprehensive action tracking with old/new value change capture
+- **Audit Logging** — security-event tracking with old/new value change capture
 - **Page-Level Permissions** — database-driven, role-based page access (whitelist model)
 - **Settings & Preferences** — per-user theme, timezone, date/time format
 - **Profile Management** — user profile viewing and editing
 - **Authentication** — local Identity + optional LDAP/Active Directory integration
-- **CSV Export** — audit log export with server-side filtering
+- **Excel Export** — audit log export with server-side filtering
 
 ## Design Principles
 
@@ -28,3 +28,4 @@ An enterprise Blazor Server web application template built on .NET Aspire. It pr
 - **Comprehensive documentation**: all code includes XML docs and inline comments
 - **Testable**: property-based tests for correctness properties, unit tests for specific cases
 - **Separation of concerns**: clear boundaries between Core, API, Web, and UI projects
+- **Privacy by design**: only security-sensitive operations are audited; personal preferences and profile edits are not logged

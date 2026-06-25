@@ -1,6 +1,6 @@
 # API & Service Layer Patterns
 
-## Thin Controller / Full Service Layer (Industry Standard)
+## Thin Controller / Full Service Layer
 
 The project follows a strict **thin controller + full service layer** architecture. Controllers handle ONLY HTTP concerns; all business logic lives in service implementations.
 
@@ -8,7 +8,7 @@ The project follows a strict **thin controller + full service layer** architectu
 1. Receive HTTP request and extract route/query/body parameters
 2. Read `CurrentUserId` / `CurrentUserName` / `ClientIpAddress` from `BaseController`
 3. Perform input-format validation (e.g., max ID count checks)
-4. Call the appropriate service method, passing userId and request data
+4. Call the appropriate service method
 5. Map the service result (or exception) to an HTTP status code
 6. Return the response
 
@@ -23,14 +23,14 @@ The project follows a strict **thin controller + full service layer** architectu
 
 ### Service Responsibilities
 - All business logic: validation, guards, conditional flows
-- All database access via `ApplicationDbContext`
+- All database access via `ApplicationDbContext` or Identity managers
 - All entity-to-DTO mapping/projection
-- Audit logging (snapshot, mutate, compute changes, log)
+- Audit logging for security-sensitive operations
 - Cross-cutting concerns (e.g., notification creation after user events)
 - Interaction with `UserManager`, `RoleManager`, `SignInManager`
 
 ### Reference Implementation
-`NotificationController` → `INotificationService` / `NotificationService` is the reference pattern. Every controller should look like this.
+`NotificationController` → `INotificationService` / `NotificationService` is the reference pattern.
 
 ```csharp
 // GOOD: Thin controller — delegates everything to service
@@ -41,20 +41,6 @@ public async Task<IActionResult> MarkAsRead(Guid id)
     if (!found) return NotFound();
     return Ok();
 }
-
-// BAD: Fat controller — business logic inline
-[HttpPut("{id:guid}/read")]
-public async Task<IActionResult> MarkAsRead(Guid id)
-{
-    var notification = await _dbContext.Notifications
-        .FirstOrDefaultAsync(n => n.Id == id && n.UserId == CurrentUserId);
-    if (notification is null) return NotFound();
-    if (notification.IsRead) return Ok(); // business logic leak
-    notification.IsRead = true;
-    notification.ReadAtUtc = DateTime.UtcNow;
-    await _dbContext.SaveChangesAsync();
-    return Ok();
-}
 ```
 
 ## Controller Conventions
@@ -63,7 +49,7 @@ public async Task<IActionResult> MarkAsRead(Guid id)
 All controllers extend `BaseController` which provides:
 - `CurrentUserId` — authenticated user's ID from claims
 - `CurrentUserName` — authenticated user's name from claims
-- `ClientIpAddress` — source IP from `HttpContext.Connection`
+- `ClientIpAddress` — client IP from `X-Client-Ip` header (forwarded by Web project)
 
 ### Route Conventions
 ```csharp
@@ -73,7 +59,7 @@ All controllers extend `BaseController` which provides:
 
 ### Authorization
 - Admin-only endpoints: `[Authorize(Roles = "Admin")]`
-- Authenticated users: `[Authorize]` (global via _Imports.razor for pages)
+- Authenticated users: `[Authorize]`
 - Public endpoints: `[AllowAnonymous]`
 
 ### Response Patterns
@@ -83,11 +69,11 @@ All controllers extend `BaseController` which provides:
 - Server error: let middleware handle (500).
 
 ### Exception-to-Status Mapping
-Every controller action that delegates to a service should use this pattern:
+Every controller action that delegates to a service uses this pattern:
 ```csharp
 try
 {
-    var result = await _service.DoSomethingAsync(CurrentUserId!, request);
+    var result = await _service.DoSomethingAsync(request);
     return Ok(result);
 }
 catch (KeyNotFoundException ex)      { return NotFound(ex.Message); }
@@ -98,7 +84,7 @@ catch (ArgumentException ex)         { return BadRequest(ex.Message); }
 ## Service Layer
 
 ### Interface Location
-- Service interfaces: `ApiService/Abstractions/` (e.g., `IAuditLogService`, `IPagePermissionService`, `INotificationService`)
+- Service interfaces: `ApiService/Abstractions/` (e.g., `IAuditLogService`, `IRoleService`, `IUserService`, `IAuthService`)
 - Shared interfaces: `Core/Application/Abstractions/` (e.g., `INavigationProvider`)
 
 ### Implementation Location
@@ -109,31 +95,21 @@ catch (ArgumentException ex)         { return BadRequest(ex.Message); }
 - Register in `Program.cs`.
 
 ### Service Method Signatures
-- For **user-scoped queries** (e.g., "get MY notifications"): accept `userId` as a parameter since the service needs to know whose data to fetch. The controller passes `CurrentUserId`.
-- For **admin operations** (e.g., "update user X"): accept the target entity ID as a parameter. The acting user's identity comes from `ICurrentUserAccessor` (for audit logging), not a method parameter.
-- Accept request DTOs for mutations, query param DTOs for queries
-- Return DTOs or `PagedResult<TDto>` for queries
-- Return `bool` for found/not-found operations (e.g., MarkAsRead)
-- Return `int` for count-of-affected operations (e.g., BulkDismiss, MarkAllAsRead)
-- Throw `KeyNotFoundException` when entity not found
-- Throw `InvalidOperationException` / `ArgumentException` for business rule violations
+- For **user-scoped queries** (e.g., "get MY notifications"): accept `userId` as a parameter. The controller passes `CurrentUserId`.
+- For **self-management operations** (e.g., "update MY profile"): no userId parameter needed. The service resolves the current user via `ICurrentUserAccessor`.
+- For **admin operations** (e.g., "update user X"): accept the target entity ID as a parameter. The acting user's identity comes from `ICurrentUserAccessor` for audit logging.
+- Accept request DTOs for mutations, query param DTOs for queries.
+- Return DTOs or `PagedResult<TDto>` for queries.
+- Return `bool` for found/not-found operations.
+- Return `int` for count-of-affected operations.
+- Throw `KeyNotFoundException` when entity not found.
+- Throw `InvalidOperationException` / `ArgumentException` for business rule violations.
+- Always check Identity operation results: `if (!result.Succeeded)` → throw with concatenated error descriptions.
 
-## Audit Logging
-
-### Where Audit Logging Lives
-Audit logging is a **service-layer responsibility**, NOT a controller responsibility. The service performs the full audit cycle:
-
-1. Snapshot entity state before mutation
-2. Apply the mutation
-3. Snapshot entity state after mutation
-4. Compute the diff
-5. Call `IAuditLogService.LogAsync(...)` with the diff
-
-### Current User Context via ICurrentUserAccessor
-Services that need the authenticated user's identity (for audit logging, ownership checks, etc.) inject `ICurrentUserAccessor` — a scoped service backed by `IHttpContextAccessor`:
+### ICurrentUserAccessor
+A scoped service that provides the authenticated user's identity to service-layer components:
 
 ```csharp
-// Interface in ApiService/Abstractions/
 public interface ICurrentUserAccessor
 {
     string? UserId { get; }
@@ -142,31 +118,28 @@ public interface ICurrentUserAccessor
 }
 ```
 
-This eliminates passing `userId` and `ipAddress` through every method signature. Services read the current user from the accessor directly:
+- Reads `UserId` from `ClaimTypes.NameIdentifier`
+- Reads `UserName` from `Identity.Name`
+- Reads `IpAddress` from `X-Client-Ip` header (forwarded by Web project), falling back to `Connection.RemoteIpAddress`
+- Returns null for all properties when no HTTP context or authenticated user is available
 
-```csharp
-// Inside service implementation
-public class UserService : IUserService
-{
-    private readonly ICurrentUserAccessor _currentUser;
-    private readonly IAuditLogService _auditLogService;
+## Audit Logging
 
-    public async Task UpdateUserAsync(string targetUserId, UpdateUserRequest request)
-    {
-        // ... business logic ...
+### Scope
+Audit logging covers **security-sensitive operations only**:
+- Admin actions: user/role CRUD, activation/deactivation, role assignment
+- Authentication events: login success/failure, logout
+- Account security: password change, email change, 2FA enable/disable/reset, account deletion
 
-        await _auditLogService.LogAsync(new AuditLogRequest
-        {
-            UserId = _currentUser.UserId,       // from accessor, not parameter
-            IpAddress = _currentUser.IpAddress,  // from accessor, not parameter
-            ActionType = AuditActionType.UserUpdated,
-            // ...
-        });
-    }
-}
-```
+Personal actions (profile edits, preference changes) are **not audited** — these are privacy-respecting user choices.
 
-**Unit testing:** Mock `ICurrentUserAccessor` to return a fixed user identity in tests.
+### Where Audit Logging Lives
+Audit logging is a **service-layer responsibility**. The service performs:
+1. Snapshot entity state before mutation
+2. Apply the mutation
+3. Snapshot entity state after mutation
+4. Compute the diff
+5. Call `IAuditLogService.LogAsync(...)` with the diff
 
 ### AuditChangeHelper Methods
 - `Snapshot<T>(entity, fields)` — creates dictionary of field values
@@ -174,9 +147,9 @@ public class UserService : IUserService
 - `Serialize(object)` — camelCase JSON serialization (null-preserving)
 
 ### Audit Field Arrays
-Define once per entity as a static field in the **service** (not controller):
+Define once per entity as a static field in the service's `#region Constructor`:
 ```csharp
-private static readonly (string, Func<ApplicationUser, object?>)[] UserAuditFields = [...];
+private static readonly (string Key, Func<ApplicationUser, object?> Getter)[] UserAuditFields = [...];
 ```
 
 ### Rules
@@ -201,8 +174,8 @@ private static readonly (string, Func<ApplicationUser, object?>)[] UserAuditFiel
 ### Service Level
 - Business rule violations: throw `InvalidOperationException` or `ArgumentException` with clear messages
 - Entity not found: throw `KeyNotFoundException`
+- Identity operation failures: throw `InvalidOperationException` with concatenated error descriptions
 - Audit logging failures: swallow + log at Error level (never disrupt primary operation)
-- Database exceptions in business operations: let propagate to controller for standard error handling
 
 ### Controller Level
 - Map service exceptions to HTTP status codes (see Exception-to-Status Mapping above)
@@ -219,8 +192,10 @@ public class ApiUserService(HttpClient http)
 }
 ```
 
-### Auth Propagation
-`UserIdentityDelegatingHandler` forwards the authenticated user's identity headers to the API service on every request.
+### Identity & IP Propagation
+`UserIdentityDelegatingHandler` forwards:
+- Authenticated user's claims (identity headers)
+- Client IP address via `X-Client-Ip` header (read from the Web project's `HttpContext.Connection.RemoteIpAddress`)
 
 ### Service Discovery
 Registered with Aspire: `"https+http://apiservice"` base address.
