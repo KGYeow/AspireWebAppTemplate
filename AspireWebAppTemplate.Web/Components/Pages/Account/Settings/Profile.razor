@@ -1,0 +1,108 @@
+@page "/account/settings"
+@page "/account/settings/profile"
+@layout SettingsLayout
+
+<PageContent IsLoading="_isLoading">
+    <MudText Typo="Typo.h6" Class="fw-bold">Profile</MudText>
+    <MudText Typo="Typo.body2" Class="mud-text-secondary mb-4">Update your personal information</MudText>
+    <MudDivider />
+
+    <MudStack Row Justify="Justify.SpaceBetween" Class="my-4" Wrap="Wrap.Wrap">
+        <MudItem xs="12" sm="6">
+            <MudText Typo="Typo.body2" Class="fw-bold">Display Name</MudText>
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">The name displayed to other users</MudText>
+        </MudItem>
+        <MudItem xs="12" sm="4" Class="d-flex justify-end">
+            <MudTextField T="string"
+                          @bind-Value="_displayName"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Typo="Typo.body2"
+                          Disabled="@_isLdapUser"
+                          HelperText="@(_isLdapUser ? "Managed by Active Directory" : null)"
+                          OnBlur="@(() => SaveProfileFieldAsync("DisplayName", _displayName))" />
+        </MudItem>
+    </MudStack>
+
+    <MudDivider />
+
+    <MudStack Row Justify="Justify.SpaceBetween" Class="my-4" Wrap="Wrap.Wrap">
+        <MudItem xs="12" sm="6">
+            <MudText Typo="Typo.body2" Class="fw-bold">First Name</MudText>
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">Your given name</MudText>
+        </MudItem>
+        <MudItem xs="12" sm="4" Class="d-flex justify-end">
+            <MudTextField T="string"
+                          @bind-Value="_firstName"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Typo="Typo.body2"
+                          Disabled="@_isLdapUser"
+                          HelperText="@(_isLdapUser ? "Managed by Active Directory" : null)"
+                          OnBlur="@(() => SaveProfileFieldAsync("FirstName", _firstName))" />
+        </MudItem>
+    </MudStack>
+
+    <MudDivider />
+
+    <MudStack Row Justify="Justify.SpaceBetween" Class="my-4" Wrap="Wrap.Wrap">
+        <MudItem xs="12" sm="6">
+            <MudText Typo="Typo.body2" Class="fw-bold">Last Name</MudText>
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">Your family name</MudText>
+        </MudItem>
+        <MudItem xs="12" sm="4" Class="d-flex justify-end">
+            <MudTextField T="string"
+                          @bind-Value="_lastName"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Typo="Typo.body2"
+                          Disabled="@_isLdapUser"
+                          HelperText="@(_isLdapUser ? "Managed by Active Directory" : null)"
+                          OnBlur="@(() => SaveProfileFieldAsync("LastName", _lastName))" />
+        </MudItem>
+    </MudStack>
+
+    <MudDivider />
+
+    <MudStack Row Justify="Justify.SpaceBetween" Class="my-4" Wrap="Wrap.Wrap">
+        <MudItem xs="12" sm="6">
+            <MudText Typo="Typo.body2" Class="fw-bold">Email</MudText>
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">Your account email address</MudText>
+        </MudItem>
+        <MudItem xs="12" sm="4" Class="d-flex justify-end">
+            <MudTextField T="string"
+                          Value="_email"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Typo="Typo.body2"
+                          Disabled
+                          ReadOnly />
+        </MudItem>
+    </MudStack>
+
+    <MudDivider />
+
+    <MudStack Row Justify="Justify.SpaceBetween" Class="my-4" Wrap="Wrap.Wrap">
+        <MudItem xs="12" sm="6">
+            <MudText Typo="Typo.body2" Class="fw-bold">Phone Number</MudText>
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">Contact phone number</MudText>
+        </MudItem>
+        <MudItem xs="12" sm="4" Class="d-flex justify-end">
+            <MudTextField T="string"
+                          @bind-Value="_phoneNumber"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Typo="Typo.body2"
+                          OnBlur="@(() => SaveProfileFieldAsync("PhoneNumber", _phoneNumber))" />
+        </MudItem>
+    </MudStack>
+</PageContent>
+
+
+
+
+
+
+
+
+

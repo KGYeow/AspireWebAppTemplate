@@ -1,0 +1,43 @@
+@inherits LayoutComponentBase
+@layout MainLayout
+
+<PageTitle>Settings</PageTitle>
+
+<PageContent IsLoading="_isLoading">
+    <PageHeader Title="Settings" />
+
+    <MudPaper Class="pa-4" Elevation="0">
+        <MudGrid>
+            <!-- Left Navigation -->
+            <MudItem xs="12" md="3">
+                <MudNavMenu Rounded>
+                    <MudNavLink Href="/account/settings/profile"
+                                Icon="@Icons.Material.Outlined.Person"
+                                Match="NavLinkMatch.All">
+                        Profile
+                    </MudNavLink>
+                    <MudNavLink Href="/account/settings/appearance"
+                                Icon="@Icons.Material.Outlined.Palette"
+                                Match="NavLinkMatch.All">
+                        Appearance
+                    </MudNavLink>
+                    <MudNavLink Href="/account/settings/regional"
+                                Icon="@Icons.Material.Outlined.Language"
+                                Match="NavLinkMatch.All">
+                        Regional
+                    </MudNavLink>
+                    <MudNavLink Href="/account/settings/notifications"
+                                Icon="@Icons.Material.Outlined.Notifications"
+                                Match="NavLinkMatch.All">
+                        Notifications
+                    </MudNavLink>
+                </MudNavMenu>
+            </MudItem>
+
+            <!-- Content Panel -->
+            <MudItem xs="12" md="9">
+                @Body
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+</PageContent>

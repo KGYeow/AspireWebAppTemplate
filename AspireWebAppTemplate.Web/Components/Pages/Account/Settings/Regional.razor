@@ -1,0 +1,66 @@
+@page "/account/settings/regional"
+@layout SettingsLayout
+@using AspireWebAppTemplate.Core.Common.Defaults
+
+<PageContent IsLoading="_isLoading">
+    <MudText Typo="Typo.h6" Class="fw-bold">Regional</MudText>
+    <MudText Typo="Typo.body2" Class="mud-text-secondary mb-4">Set your locale and formatting preferences</MudText>
+    <MudDivider />
+
+    <MudStack Row Justify="Justify.SpaceBetween" Class="my-4" Wrap="Wrap.Wrap">
+        <MudItem xs="12" sm="6">
+            <MudText Typo="Typo.body2" Class="fw-bold">Time Zone</MudText>
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">Used for displaying dates and times in your local time</MudText>
+        </MudItem>
+        <MudItem xs="12" sm="4" Class="d-flex justify-end">
+            <MudAutocomplete T="string"
+                             @bind-Value="TimeZoneValue"
+                             SearchFunc="SearchTimeZones"
+                             ToStringFunc="TimeZoneToString"
+                             Variant="Variant.Outlined"
+                             Margin="Margin.Dense"
+                             Typo="Typo.body2"
+                             MaxItems="null"
+                             Dense />
+        </MudItem>
+    </MudStack>
+
+    <MudDivider />
+
+    <MudStack Row Justify="Justify.SpaceBetween" Class="my-4" Wrap="Wrap.Wrap">
+        <MudItem xs="12" sm="6">
+            <MudText Typo="Typo.body2" Class="fw-bold">Date/Time Format</MudText>
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">How dates and times are displayed throughout the app</MudText>
+        </MudItem>
+        <MudItem xs="12" sm="4" Class="d-flex justify-end">
+            <MudSelect T="string"
+                       @bind-Value="DateTimeFormatValue"
+                       Variant="Variant.Outlined"
+                       Margin="Margin.Dense"
+                       Typo="Typo.body2"
+                       Dense>
+                <MudSelectItem T="string" Value="@((string?)null)">@DateTimeFormatDefaults.Label</MudSelectItem>
+                <MudSelectItem Value="@("yyyy-MM-dd HH:mm")">ISO (2026-11-03 14:30)</MudSelectItem>
+                <MudSelectItem Value="@("yyyy-MM-dd HH:mm:ss")">ISO with seconds (2026-11-03 14:30:00)</MudSelectItem>
+                <MudSelectItem Value="@("dd/MM/yyyy HH:mm")">Day first (03/11/2026 14:30)</MudSelectItem>
+                <MudSelectItem Value="@("MM/dd/yyyy h:mm tt")">US (11/03/2026 2:30 PM)</MudSelectItem>
+                <MudSelectItem Value="@("dd-MM-yyyy HH:mm")">Day first with dashes (03-11-2026 14:30)</MudSelectItem>
+                <MudSelectItem Value="@("dd.MM.yyyy HH:mm")">European with dots (03.11.2026 14:30)</MudSelectItem>
+                <MudSelectItem Value="@("yyyy/MM/dd HH:mm")">East Asian (2026/11/03 14:30)</MudSelectItem>
+                <MudSelectItem Value="@("dd MMM yyyy HH:mm")">Short month (03 Nov 2026 14:30)</MudSelectItem>
+                <MudSelectItem Value="@("d MMMM yyyy HH:mm")">Long month (3 November 2026 14:30)</MudSelectItem>
+                <MudSelectItem Value="@("d MMM yyyy h:mm tt")">Short month 12h (3 Nov 2026 2:30 PM)</MudSelectItem>
+                <MudSelectItem Value="@("MMMM d, yyyy h:mm tt")">US long (November 3, 2026 2:30 PM)</MudSelectItem>
+            </MudSelect>
+        </MudItem>
+    </MudStack>
+</PageContent>
+
+
+
+
+
+
+
+
+

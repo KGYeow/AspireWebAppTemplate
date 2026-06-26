@@ -1,0 +1,38 @@
+@page "/account/settings/appearance"
+@layout SettingsLayout
+@using AspireWebAppTemplate.Core.Domain.Enums
+
+<PageContent IsLoading="_isLoading">
+    <MudText Typo="Typo.h6" Class="fw-bold">Appearance</MudText>
+    <MudText Typo="Typo.body2" Class="mud-text-secondary mb-4">Customize how the application looks</MudText>
+    <MudDivider />
+
+    <MudStack Row Justify="Justify.SpaceBetween" Class="my-4" Wrap="Wrap.Wrap">
+        <MudItem xs="12" sm="6">
+            <MudText Typo="Typo.body2" Class="fw-bold">Theme</MudText>
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">Choose between light, dark, or system preference</MudText>
+        </MudItem>
+        <MudItem xs="12" sm="4" Class="d-flex justify-end">
+            <PillToggle T="ThemePreference" @bind-Value="ThemeValue">
+                <PillToggleItem T="ThemePreference" Value="ThemePreference.Light" Title="Light">
+                    <MudIcon Icon="@Icons.Material.Outlined.LightMode" Size="Size.Small" />
+                </PillToggleItem>
+                <PillToggleItem T="ThemePreference" Value="ThemePreference.Dark" Title="Dark">
+                    <MudIcon Icon="@Icons.Material.Outlined.DarkMode" Size="Size.Small" />
+                </PillToggleItem>
+                <PillToggleItem T="ThemePreference" Value="ThemePreference.System" Title="System">
+                    <MudIcon Icon="@Icons.Material.Outlined.SettingsBrightness" Size="Size.Small" />
+                </PillToggleItem>
+            </PillToggle>
+        </MudItem>
+    </MudStack>
+</PageContent>
+
+
+
+
+
+
+
+
+

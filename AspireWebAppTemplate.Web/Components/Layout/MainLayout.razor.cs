@@ -157,6 +157,19 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
             // Cache the user profile so OnAfterRenderAsync doesn't need another API call
             _currentUser = userResult.Data;
 
+            // Apply Light/Dark theme immediately (no JS interop needed).
+            // The System preference requires JS interop and is deferred to OnAfterRenderAsync.
+            if (userResult.Data.Theme == ThemePreference.Dark)
+            {
+                _isDarkMode = true;
+                ThemeState.SetDarkMode(true);
+            }
+            else if (userResult.Data.Theme == ThemePreference.Light)
+            {
+                _isDarkMode = false;
+                ThemeState.SetDarkMode(false);
+            }
+
             // Initialize the scoped user time zone context for this circuit (before children render)
             await UserTimeZone.InitializeAsync(userResult.Data.Id);
         }
@@ -183,8 +196,12 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
             var user = _currentUser;
             if (user is null) return;
 
-            // Initialize theme based on user preference
-            await ApplyThemePreferenceAsync(user.Theme);
+            // Only apply theme here for the System preference (requires JS interop to detect OS preference).
+            // Light/Dark are already applied in OnInitializedAsync without JS interop.
+            if (user.Theme == ThemePreference.System)
+            {
+                await ApplyThemePreferenceAsync(user.Theme);
+            }
 
             // Auto-detect browser timezone if user hasn't configured one
             if (user.TimeZoneId is not null) return;

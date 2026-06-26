@@ -1,29 +1,25 @@
-using AspireWebAppTemplate.Abstractions;
 using AspireWebAppTemplate.Core.Application.Abstractions;
 using AspireWebAppTemplate.Core.Common.Defaults;
-using AspireWebAppTemplate.Core.Contracts.Notifications;
 using AspireWebAppTemplate.Core.Contracts.Users;
-using AspireWebAppTemplate.Core.Domain.Enums;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
-using Microsoft.JSInterop;
-using MudBlazor;
 
 namespace AspireWebAppTemplate.Web.Components.Pages.Account.Settings;
 
 /// <summary>
-/// Settings page allowing authenticated users to view and edit their
-/// preferences (Time Zone, Date/Time Format) and appearance (Theme).
-/// All fields use instant-save on value change — no Save button or EditForm.
-/// Delegates persistence to the API via <see cref="ApiAuthService"/>.
+/// Regional settings sub-page allowing authenticated users to configure their timezone
+/// and date/time format preferences. Changes are saved instantly to the API.
 /// </summary>
 /// <remarks>
-/// Each preference field uses a property setter pattern that captures the previous
-/// value before saving, enabling automatic rollback on API failure.
+/// The timezone autocomplete handles legacy/alias timezone IDs that may not appear in
+/// the standard list by building display entries from <see cref="TimeZoneInfo"/>.
+/// Date/time format uses a select dropdown with predefined format options.
+/// Both fields use a property setter pattern that captures the previous value before saving,
+/// enabling automatic rollback on API failure.
 /// </remarks>
 [Authorize]
-public partial class Index : ComponentBase
+public partial class Regional : ComponentBase
 {
     #region Injected Services
 
@@ -33,6 +29,11 @@ public partial class Index : ComponentBase
     [Inject] private ApiAuthService AuthService { get; set; } = default!;
 
     /// <summary>
+    /// Provides timezone list and conversion utilities for the timezone autocomplete.
+    /// </summary>
+    [Inject] private ITimeZoneService TimeZoneService { get; set; } = default!;
+
+    /// <summary>
     /// Provides navigation actions (e.g., redirecting to InvalidUser on load failure).
     /// </summary>
     [Inject] private NavigationManager NavigationManager { get; set; } = default!;
@@ -40,67 +41,16 @@ public partial class Index : ComponentBase
     /// <summary>
     /// Structured logger for recording warnings and errors during preference saves.
     /// </summary>
-    [Inject] private ILogger<Index> Logger { get; set; } = default!;
-
-    /// <summary>
-    /// Provides timezone list and conversion utilities for the timezone autocomplete.
-    /// </summary>
-    [Inject] private ITimeZoneService TimeZoneService { get; set; } = default!;
-
-    /// <summary>
-    /// Scoped theme context for notifying the layout of theme changes in real time.
-    /// </summary>
-    [Inject] private IThemeContext ThemeState { get; set; } = default!;
-
-    /// <summary>
-    /// JavaScript runtime for detecting OS dark mode preference when applying theme changes.
-    /// </summary>
-    [Inject] private IJSRuntime JS { get; set; } = default!;
-
-    /// <summary>
-    /// Typed HttpClient service for notification preference operations (get/update).
-    /// </summary>
-    [Inject] private ApiNotificationService NotificationService { get; set; } = default!;
+    [Inject] private ILogger<Regional> Logger { get; set; } = default!;
 
     #endregion
 
     #region State
 
     /// <summary>
-    /// Status message displayed after a save operation (success or error).
-    /// </summary>
-    protected string? StatusMessage { get; set; }
-
-    /// <summary>
-    /// Whether the page is loading initial data. Controls the <see cref="UI.Components.Shared.PageContent"/> wrapper.
+    /// Whether the page is loading initial data.
     /// </summary>
     private bool _isLoading = true;
-
-    /// <summary>
-    /// The current theme preference value bound to the PillToggle component.
-    /// </summary>
-    private ThemePreference _themeValue;
-
-    /// <summary>
-    /// The previous theme value before the latest change, used for rollback on save failure.
-    /// </summary>
-    private ThemePreference _previousThemeValue;
-
-    /// <summary>
-    /// Theme preference property with instant-save on change.
-    /// Captures the previous value before firing the async save operation.
-    /// </summary>
-    private ThemePreference ThemeValue
-    {
-        get => _themeValue;
-        set
-        {
-            if (_themeValue == value) return;
-            _previousThemeValue = _themeValue;
-            _themeValue = value;
-            _ = SaveThemeAsync(value);
-        }
-    }
 
     /// <summary>
     /// The current timezone ID value bound to the autocomplete component.
@@ -154,24 +104,13 @@ public partial class Index : ComponentBase
         }
     }
 
-    /// <summary>
-    /// The list of notification preferences for all categories, loaded from the API.
-    /// </summary>
-    private List<NotificationPreferenceDto> _notificationPreferences = [];
-
-    /// <summary>
-    /// Whether the notification preferences section is loading its data.
-    /// </summary>
-    private bool _isLoadingPreferences = true;
-
     #endregion
 
     #region Lifecycle
 
     /// <summary>
-    /// Loads the current user's preferences from the API on page initialization.
+    /// Loads the current user's regional preferences from the API on page initialization.
     /// Redirects to InvalidUser page if the user cannot be resolved.
-    /// Also loads notification delivery preferences for the Notifications section.
     /// </summary>
     protected override async Task OnInitializedAsync()
     {
@@ -183,50 +122,15 @@ public partial class Index : ComponentBase
             return;
         }
 
-        var user = result.Data;
-        _timeZoneValue = user.TimeZoneId;
-        _dateTimeFormatValue = user.DateTimeFormat;
-        _themeValue = user.Theme;
-        _isLoading = false;
+        _timeZoneValue = result.Data.TimeZoneId;
+        _dateTimeFormatValue = result.Data.DateTimeFormat;
 
-        // Load notification preferences in parallel (non-blocking for the main page content)
-        await LoadNotificationPreferencesAsync();
+        _isLoading = false;
     }
 
     #endregion
 
     #region Event Handlers
-
-    /// <summary>
-    /// Persists the theme preference to the API and updates the layout's theme context.
-    /// Reverts to the previous value and shows an error message on failure.
-    /// </summary>
-    /// <param name="theme">The new theme preference to save.</param>
-    private async Task SaveThemeAsync(ThemePreference theme)
-    {
-        try
-        {
-            var result = await AuthService.UpdatePreferencesAsync(new UpdatePreferencesRequest { Theme = theme });
-            if (!result.Succeeded)
-            {
-                _themeValue = _previousThemeValue;
-                StatusMessage = "Error: Theme change failed, please try again.";
-                StateHasChanged();
-                return;
-            }
-
-            // Apply the theme change immediately by detecting OS preference and notifying the layout
-            var themeModule = await JS.InvokeAsync<IJSObjectReference>("import", "./js/theme.js");
-            var systemPrefersDark = await themeModule.InvokeAsync<bool>("getSystemPrefersDark");
-            ThemeState.SetThemePreference(theme, systemPrefersDark);
-        }
-        catch (Exception)
-        {
-            _themeValue = _previousThemeValue;
-            StatusMessage = "Error: Theme change failed, please try again.";
-            StateHasChanged();
-        }
-    }
 
     /// <summary>
     /// Persists the timezone preference to the API.
@@ -241,11 +145,7 @@ public partial class Index : ComponentBase
             if (!result.Succeeded)
             {
                 _timeZoneValue = _previousTimeZoneValue;
-                StatusMessage = "Error: Save failed, please try again.";
-            }
-            else
-            {
-                StatusMessage = "Time zone updated.";
+                Snackbar.Add("Failed to save time zone. Please try again.", MudBlazor.Severity.Error);
             }
             StateHasChanged();
         }
@@ -253,7 +153,7 @@ public partial class Index : ComponentBase
         {
             Logger.LogWarning(ex, "Error saving TimeZone preference.");
             _timeZoneValue = _previousTimeZoneValue;
-            StatusMessage = "Error: Save failed, please try again.";
+            Snackbar.Add("Failed to save time zone. Please try again.", MudBlazor.Severity.Error);
             StateHasChanged();
         }
     }
@@ -271,11 +171,7 @@ public partial class Index : ComponentBase
             if (!result.Succeeded)
             {
                 _dateTimeFormatValue = _previousDateTimeFormatValue;
-                StatusMessage = "Error: Save failed, please try again.";
-            }
-            else
-            {
-                StatusMessage = "Date/time format updated.";
+                Snackbar.Add("Failed to save date/time format. Please try again.", MudBlazor.Severity.Error);
             }
             StateHasChanged();
         }
@@ -283,132 +179,14 @@ public partial class Index : ComponentBase
         {
             Logger.LogWarning(ex, "Error saving DateTimeFormat preference.");
             _dateTimeFormatValue = _previousDateTimeFormatValue;
-            StatusMessage = "Error: Save failed, please try again.";
+            Snackbar.Add("Failed to save date/time format. Please try again.", MudBlazor.Severity.Error);
             StateHasChanged();
-        }
-    }
-
-    /// <summary>
-    /// Handles the In-App notification toggle change for a specific category.
-    /// Immediately persists the new value via the API. On failure, reverts the toggle
-    /// to its previous state and displays a Snackbar error.
-    /// </summary>
-    /// <param name="pref">The preference DTO being toggled.</param>
-    /// <param name="newValue">The new In-App enabled value.</param>
-    private async Task HandleInAppToggle(NotificationPreferenceDto pref, bool newValue)
-    {
-        var previousValue = pref.InAppEnabled;
-        pref.InAppEnabled = newValue;
-
-        var request = new UpdateNotificationPreferenceRequest
-        {
-            Category = pref.Category,
-            InAppEnabled = newValue,
-            EmailEnabled = pref.EmailEnabled
-        };
-
-        try
-        {
-            var result = await NotificationService.UpdatePreferenceAsync(request);
-            if (!result.Succeeded)
-            {
-                pref.InAppEnabled = previousValue;
-                Snackbar.Add("Failed to save notification preference. Please try again.", Severity.Error);
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.LogWarning(ex, "Error saving In-App notification preference for {Category}.", pref.Category);
-            pref.InAppEnabled = previousValue;
-            Snackbar.Add("Failed to save notification preference. Please try again.", Severity.Error);
-        }
-    }
-
-    /// <summary>
-    /// Handles the Email notification toggle change for a specific category.
-    /// Immediately persists the new value via the API. On failure, reverts the toggle
-    /// to its previous state and displays a Snackbar error.
-    /// </summary>
-    /// <param name="pref">The preference DTO being toggled.</param>
-    /// <param name="newValue">The new Email enabled value.</param>
-    private async Task HandleEmailToggle(NotificationPreferenceDto pref, bool newValue)
-    {
-        var previousValue = pref.EmailEnabled;
-        pref.EmailEnabled = newValue;
-
-        var request = new UpdateNotificationPreferenceRequest
-        {
-            Category = pref.Category,
-            InAppEnabled = pref.InAppEnabled,
-            EmailEnabled = newValue
-        };
-
-        try
-        {
-            var result = await NotificationService.UpdatePreferenceAsync(request);
-            if (!result.Succeeded)
-            {
-                pref.EmailEnabled = previousValue;
-                Snackbar.Add("Failed to save notification preference. Please try again.", Severity.Error);
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.LogWarning(ex, "Error saving Email notification preference for {Category}.", pref.Category);
-            pref.EmailEnabled = previousValue;
-            Snackbar.Add("Failed to save notification preference. Please try again.", Severity.Error);
         }
     }
 
     #endregion
 
-    #region Helpers
-
-    /// <summary>
-    /// Loads notification delivery preferences for all categories from the API.
-    /// On failure, logs a warning and leaves the list empty (non-blocking).
-    /// </summary>
-    private async Task LoadNotificationPreferencesAsync()
-    {
-        try
-        {
-            var result = await NotificationService.GetPreferencesAsync();
-            if (result.Succeeded && result.Data is not null)
-            {
-                _notificationPreferences = result.Data;
-            }
-            else
-            {
-                Logger.LogWarning("Failed to load notification preferences.");
-                Snackbar.Add("Failed to load notification preferences.", Severity.Error);
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.LogWarning(ex, "Error loading notification preferences.");
-            Snackbar.Add("Failed to load notification preferences.", Severity.Error);
-        }
-        finally
-        {
-            _isLoadingPreferences = false;
-            StateHasChanged();
-        }
-    }
-
-    /// <summary>
-    /// Converts a <see cref="NotificationCategory"/> enum value to a human-readable display name.
-    /// Inserts spaces before uppercase letters in multi-word enum names (e.g., "UserManagement" → "User Management").
-    /// </summary>
-    /// <param name="category">The notification category to format.</param>
-    /// <returns>A human-readable category name.</returns>
-    private static string FormatCategoryName(NotificationCategory category)
-    {
-        return category switch
-        {
-            NotificationCategory.Activity => "Activity",
-            _ => category.ToString()
-        };
-    }
+    #region Private Helpers
 
     /// <summary>
     /// Provides the timezone autocomplete search function.
