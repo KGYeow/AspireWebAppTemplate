@@ -13,10 +13,7 @@
     </MudText>
 </MudAlert>
 
-@if (!string.IsNullOrEmpty(StatusMessage))
-{
-    <MudAlert Severity="Severity.Error" Class="mb-4 border-1">@StatusMessage</MudAlert>
-}
+<StatusAlert @bind-Message="StatusMessage" Dismissible="false" Class="mb-4" />
 
 <MudButton Variant="Variant.Filled"
            Color="Color.Error"

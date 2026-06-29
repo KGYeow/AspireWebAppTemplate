@@ -82,10 +82,7 @@
             }
 
             <!-- Error Alert -->
-            @if (!string.IsNullOrEmpty(StatusMessage))
-            {
-                <MudAlert Severity="Severity.Error" Dense Class="border-1">@StatusMessage</MudAlert>
-            }
+            <StatusAlert @bind-Message="StatusMessage" Dense="true" Dismissible="false" Class="" />
         </MudStack>
     </ContentArea>
 

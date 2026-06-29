@@ -15,15 +15,7 @@
 </MudAlert>
 
 <!-- Error alert -->
-@if (!string.IsNullOrEmpty(ErrorMessage))
-{
-    <MudAlert Severity="Severity.Error"
-              Class="mb-4 border-1"
-              ShowCloseIcon
-              CloseIconClicked="() => ErrorMessage = null">
-        @ErrorMessage
-    </MudAlert>
-}
+<StatusAlert @bind-Message="ErrorMessage" Class="mb-4" />
 
 <!-- Permission Matrix DataGrid -->
 <MudPaper Elevation="0" Class="pa-4">

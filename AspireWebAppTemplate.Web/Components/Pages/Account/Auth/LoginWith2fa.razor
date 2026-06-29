@@ -22,15 +22,7 @@
                     </MudText>
                 </MudStack>
 
-                @if (!string.IsNullOrEmpty(ErrorMessage))
-                {
-                    <MudAlert Severity="Severity.Error"
-                              Class="mt-4 border-1"
-                              ShowCloseIcon
-                              CloseIconClicked="ClearError">
-                        @ErrorMessage
-                    </MudAlert>
-                }
+                <StatusAlert @bind-Message="ErrorMessage" Class="mt-4" />
 
                 <EditForm EditContext="editContext"
                           OnValidSubmit="OnValidSubmitAsync"

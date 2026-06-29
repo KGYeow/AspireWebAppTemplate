@@ -15,13 +15,8 @@
                         Check your email
                     </MudText>
 
-                    @if (!string.IsNullOrEmpty(StatusMessage))
-                    {
-                        <MudAlert Severity="Severity.Error" Class="mt-2 border-1">
-                            @StatusMessage
-                        </MudAlert>
-                    }
-                    else
+                    <StatusAlert @bind-Message="StatusMessage" Dismissible="false" Class="mt-2" />
+                    @if (string.IsNullOrEmpty(StatusMessage))
                     {
                         <MudText Typo="Typo.body1" Class="mt-1 text-muted">
                             We've sent a confirmation link to <strong>@Email</strong>.

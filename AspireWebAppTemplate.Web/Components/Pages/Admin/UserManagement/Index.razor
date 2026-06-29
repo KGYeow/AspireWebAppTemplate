@@ -6,36 +6,11 @@
 <PageHeader Title="User Management" Subtitle="Manage user accounts, roles, and status." />
 
 <!-- Alert Messages -->
-@if (!string.IsNullOrEmpty(ErrorMessage))
-{
-    <MudAlert Severity="Severity.Error"
-              Class="mb-4 border-1"
-              ShowCloseIcon
-              CloseIconClicked="() => ErrorMessage = null">
-        @ErrorMessage
-    </MudAlert>
-}
-
-@if (!string.IsNullOrEmpty(SuccessMessage))
-{
-    <MudAlert Severity="Severity.Success"
-              Class="mb-4 border-1"
-              ShowCloseIcon
-              CloseIconClicked="() => SuccessMessage = null">
-        @SuccessMessage
-    </MudAlert>
-}
+<StatusAlert @bind-Message="ErrorMessage" Class="mb-4" />
+<StatusAlert @bind-Message="SuccessMessage" Severity="Severity.Success" Class="mb-4" />
 
 <!-- [LDAP] Sync completion alert — remove if LDAP is not needed -->
-@if (!string.IsNullOrEmpty(SyncMessage))
-{
-    <MudAlert Severity="Severity.Success"
-              Class="mb-4 border-1"
-              ShowCloseIcon
-              CloseIconClicked="() => SyncMessage = null">
-        @SyncMessage
-    </MudAlert>
-}
+<StatusAlert @bind-Message="SyncMessage" Severity="Severity.Success" Class="mb-4" />
 
 <!-- Action Buttons Row -->
 <MudStack Row Justify="Justify.FlexEnd" AlignItems="AlignItems.Center" Spacing="2" Class="mb-4">

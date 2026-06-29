@@ -1,0 +1,17 @@
+@if (!string.IsNullOrEmpty(Message))
+{
+    <MudAlert Severity="@Severity"
+              Dense="@Dense"
+              ShowCloseIcon="@Dismissible"
+              Class="@ComputedClass"
+              CloseIconClicked="() => MessageChanged.InvokeAsync(null)">
+        @if (ChildContent != null)
+        {
+            @ChildContent
+        }
+        else
+        {
+            @Message
+        }
+    </MudAlert>
+}

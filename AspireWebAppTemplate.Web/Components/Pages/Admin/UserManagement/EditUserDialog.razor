@@ -91,12 +91,9 @@
                     </MudItem>
 
                     <!-- Error -->
-                    @if (!string.IsNullOrEmpty(StatusMessage))
-                    {
-                        <MudItem xs="12">
-                            <MudAlert Severity="Severity.Error" Class="border-1">@StatusMessage</MudAlert>
-                        </MudItem>
-                    }
+                    <MudItem xs="12" Class="@(string.IsNullOrEmpty(StatusMessage) ? "d-none" : "")">
+                        <StatusAlert @bind-Message="StatusMessage" Dismissible="false" />
+                    </MudItem>
                 </MudGrid>
             </EditForm>
         }

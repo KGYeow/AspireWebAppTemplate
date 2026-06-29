@@ -9,15 +9,7 @@
     <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
 </MudAlert>
 
-@if (!string.IsNullOrEmpty(StatusMessage))
-{
-    <MudAlert Severity="Severity.Error"
-              Class="mb-4 border-1"
-              ShowCloseIcon
-              CloseIconClicked="() => StatusMessage = null">
-        @StatusMessage
-    </MudAlert>
-}
+<StatusAlert @bind-Message="StatusMessage" Class="mb-4" />
 
 <MudGrid>
     <MudItem xs="12" md="6">

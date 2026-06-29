@@ -5,10 +5,7 @@
 
 <PageHeader Title="Two-Factor Authentication (2FA)" />
 
-@if (!string.IsNullOrEmpty(StatusMessage))
-{
-    <MudAlert Severity="Severity.Info" Class="mb-4 border-1">@StatusMessage</MudAlert>
-}
+<StatusAlert @bind-Message="StatusMessage" Severity="Severity.Info" Dismissible="false" Class="mb-4" />
 
 @if (Is2faEnabled)
 {

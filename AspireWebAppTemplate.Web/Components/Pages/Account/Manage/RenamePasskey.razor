@@ -5,10 +5,7 @@
 
 <PageHeader Title="@HeaderTitle" />
 
-@if (!string.IsNullOrEmpty(StatusMessage))
-{
-    <MudAlert Severity="Severity.Error" Class="mb-4 border-1">@StatusMessage</MudAlert>
-}
+<StatusAlert @bind-Message="StatusMessage" Dismissible="false" Class="mb-4" />
 
 <MudGrid>
     <MudItem xs="12" md="6">

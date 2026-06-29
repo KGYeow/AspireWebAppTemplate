@@ -5,15 +5,7 @@
 
 <PageHeader Title="Personal Data" />
 
-@if (!string.IsNullOrEmpty(StatusMessage))
-{
-    <MudAlert Severity="@(StatusMessage.StartsWith("Error") ? Severity.Error : Severity.Success)"
-              Class="mb-4 border-1"
-              ShowCloseIcon
-              CloseIconClicked="() => StatusMessage = null">
-        @StatusMessage
-    </MudAlert>
-}
+<StatusAlert @bind-Message="StatusMessage" Severity="@(StatusMessage?.StartsWith("Error") == true ? Severity.Error : Severity.Success)" Class="mb-4" />
 
 <MudText Typo="Typo.body1" Class="mb-2">
     Your account contains personal data that you have given us. This page allows you to download or delete that data.

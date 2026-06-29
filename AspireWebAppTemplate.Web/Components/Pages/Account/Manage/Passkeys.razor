@@ -5,15 +5,7 @@
 
 <PageHeader Title="Manage Passkeys" />
 
-@if (!string.IsNullOrEmpty(StatusMessage))
-{
-    <MudAlert Severity="@(StatusMessage.StartsWith("Error") ? Severity.Error : Severity.Success)"
-              Class="mb-4 border-1"
-              ShowCloseIcon
-              CloseIconClicked="() => StatusMessage = null">
-        @StatusMessage
-    </MudAlert>
-}
+<StatusAlert @bind-Message="StatusMessage" Severity="@(StatusMessage?.StartsWith("Error") == true ? Severity.Error : Severity.Success)" Class="mb-4" />
 
 @if (CurrentPasskeys is { Count: > 0 })
 {

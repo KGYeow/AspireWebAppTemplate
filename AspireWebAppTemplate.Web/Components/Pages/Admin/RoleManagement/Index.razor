@@ -6,25 +6,8 @@
 <PageHeader Title="Role Management" Subtitle="Manage roles and their descriptions." />
 
 <!-- Alert Messages -->
-@if (!string.IsNullOrEmpty(ErrorMessage))
-{
-    <MudAlert Severity="Severity.Error"
-              Class="mb-4 border-1"
-              ShowCloseIcon
-              CloseIconClicked="() => ErrorMessage = null">
-        @ErrorMessage
-    </MudAlert>
-}
-
-@if (!string.IsNullOrEmpty(SuccessMessage))
-{
-    <MudAlert Severity="Severity.Success"
-              Class="mb-4 border-1"
-              ShowCloseIcon
-              CloseIconClicked="() => SuccessMessage = null">
-        @SuccessMessage
-    </MudAlert>
-}
+<StatusAlert @bind-Message="ErrorMessage" Class="mb-4" />
+<StatusAlert @bind-Message="SuccessMessage" Severity="Severity.Success" Class="mb-4" />
 
 <!-- Action Buttons Row -->
 <MudStack Row Justify="Justify.FlexEnd" AlignItems="AlignItems.Center" Spacing="2" Class="mb-4">

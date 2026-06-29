@@ -28,25 +28,14 @@
             </MudItem>
 
             <!-- Error Alert -->
-            @if (!string.IsNullOrEmpty(ErrorMessage))
-            {
-                <MudItem xs="12">
-                    <MudAlert Severity="Severity.Error"
-                              Class="border-1"
-                              ShowCloseIcon
-                              CloseIconClicked="() => ErrorMessage = null">
-                        @ErrorMessage
-                    </MudAlert>
-                </MudItem>
-            }
+            <MudItem xs="12" Class="@(string.IsNullOrEmpty(ErrorMessage) ? "d-none" : "")">
+                <StatusAlert @bind-Message="ErrorMessage" />
+            </MudItem>
 
             <!-- Success Info -->
-            @if (!string.IsNullOrEmpty(InfoMessage))
-            {
-                <MudItem xs="12">
-                    <MudAlert Severity="Severity.Info" Class="border-1">@InfoMessage</MudAlert>
-                </MudItem>
-            }
+            <MudItem xs="12" Class="@(string.IsNullOrEmpty(InfoMessage) ? "d-none" : "")">
+                <StatusAlert @bind-Message="InfoMessage" Severity="Severity.Info" Dense="true" Dismissible="false" Class="" />
+            </MudItem>
         </MudGrid>
 
         <!-- LDAP User Preview -->

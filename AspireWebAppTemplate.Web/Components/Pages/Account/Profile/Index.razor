@@ -58,15 +58,7 @@
         </MudStack>
     </MudPaper>
 
-    @if (!string.IsNullOrEmpty(StatusMessage))
-    {
-        <MudAlert Severity="@(StatusMessage.StartsWith("Error") ? Severity.Error : Severity.Success)"
-                  Class="my-4 border-1"
-                  ShowCloseIcon
-                  CloseIconClicked="() => StatusMessage = null">
-            @StatusMessage
-        </MudAlert>
-    }
+    <StatusAlert @bind-Message="StatusMessage" Severity="@(StatusMessage?.StartsWith("Error") == true ? Severity.Error : Severity.Success)" Class="mt-4" />
 
     @if (!IsEditing)
     {

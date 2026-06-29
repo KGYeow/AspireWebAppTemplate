@@ -68,17 +68,9 @@
                         </MudItem>
 
                         <!-- Error Alert -->
-                        @if (!string.IsNullOrEmpty(ErrorMessage))
-                        {
-                            <MudItem xs="12">
-                                <MudAlert Severity="Severity.Error"
-                                          Class="border-1"
-                                          ShowCloseIcon
-                                          CloseIconClicked="ClearError">
-                                    @ErrorMessage
-                                </MudAlert>
-                            </MudItem>
-                        }
+                        <MudItem xs="12" Class="@(string.IsNullOrEmpty(ErrorMessage) ? "d-none" : "")">
+                            <StatusAlert @bind-Message="ErrorMessage" />
+                        </MudItem>
 
                         <!-- Login Button -->
                         <MudItem xs="12" Class="pt-4">
