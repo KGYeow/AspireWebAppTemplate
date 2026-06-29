@@ -5,10 +5,9 @@ using AspireWebAppTemplate.Core.Common.Defaults;
 namespace AspireWebAppTemplate.Tests.Navigation;
 
 /// <summary>
-/// Standalone static helper that implements both the "old" (NavMenu-style) and "new"
-/// (NavigationService-style) filtering pipelines in pure, testable static methods.
-/// Used by property-based tests to verify equivalence between the two implementations
-/// without requiring dependency injection or component lifecycle.
+/// Standalone static helper implementing the navigation filtering pipeline in pure,
+/// testable static methods. Provides two entry points (Reference and Primary) for
+/// equivalence verification in property-based tests.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -21,9 +20,8 @@ namespace AspireWebAppTemplate.Tests.Navigation;
 /// </list>
 /// </para>
 /// <para>
-/// Both implementations (Reference and New) should produce identical output for any input.
-/// The Reference implementation mirrors the original NavMenu.ComputeVisibleNavItems logic.
-/// The New implementation mirrors what NavigationService WILL implement.
+/// Both implementations (Reference and Primary) produce identical output for any valid input.
+/// The equivalence property test verifies this holds for all generated trees.
 /// </para>
 /// </remarks>
 public static class NavigationFilteringHelper
@@ -133,7 +131,7 @@ public static class NavigationFilteringHelper
                     break;
 
                 case NavItemType.Divider:
-                    if (HasPrecedingContent(result) && HasFollowingContent(items, i + 1))
+                    if (HasPrecedingContent(result) && HasFollowingContentForDivider(items, i + 1))
                         result.Add(item);
                     break;
 
@@ -174,9 +172,9 @@ public static class NavigationFilteringHelper
     #region Reference Implementation (NavMenu-style)
 
     /// <summary>
-    /// Applies the reference filtering pipeline as NavMenu.ComputeVisibleNavItems originally did:
+    /// Applies the reference filtering pipeline:
     /// FilterByAccessibility → RemoveOrphanedDecorations (at top level only).
-    /// This replicates the exact behavior of the original NavMenu implementation.
+    /// Used as the baseline for equivalence comparison in property tests.
     /// </summary>
     /// <param name="items">The source navigation items.</param>
     /// <param name="isAuthenticated">Whether the user is authenticated.</param>
@@ -194,11 +192,9 @@ public static class NavigationFilteringHelper
     }
 
     /// <summary>
-    /// Reference implementation of FilterByAccessibility matching the original NavMenu logic.
+    /// Reference implementation of FilterByAccessibility.
     /// Recursively filters items; Groups are included only if they have visible content children.
-    /// The original NavMenu did NOT apply RemoveOrphanedDecorations to group children inline —
-    /// it only applied it at the top level. However, per the design spec, both implementations
-    /// should apply decoration removal at each level. This reference mirrors the corrected behavior.
+    /// Applies RemoveOrphanedDecorations to group children inline to match the primary pipeline behavior.
     /// </summary>
     private static List<NavItem> ReferenceFilterByAccessibility(
         IReadOnlyList<NavItem> items,
@@ -253,7 +249,7 @@ public static class NavigationFilteringHelper
     }
 
     /// <summary>
-    /// Reference implementation of IsPageAccessible matching the original NavMenu logic.
+    /// Reference implementation of IsPageAccessible.
     /// Uses the same normalization rules: null → always visible, empty → "/",
     /// prepend "/" if missing, strip trailing "/", check system pages, then check permission set.
     /// </summary>
@@ -330,6 +326,7 @@ public static class NavigationFilteringHelper
     /// <summary>
     /// Checks whether there is a Content_Item (Link or Group) following the given start index.
     /// Stops at the first Header encountered (Headers delimit sections).
+    /// Used for Header orphan detection only.
     /// </summary>
     private static bool HasFollowingContent(List<NavItem> items, int startIndex)
     {
@@ -339,6 +336,21 @@ public static class NavigationFilteringHelper
                 return true;
             if (items[i].Type is NavItemType.Header)
                 return false;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Checks whether there is a Content_Item (Link or Group) anywhere after the given start index.
+    /// Unlike <see cref="HasFollowingContent"/>, this does NOT stop at Headers because Dividers
+    /// are inter-section separators — they are valid as long as content exists anywhere after them.
+    /// </summary>
+    private static bool HasFollowingContentForDivider(List<NavItem> items, int startIndex)
+    {
+        for (var i = startIndex; i < items.Count; i++)
+        {
+            if (items[i].Type is NavItemType.Link or NavItemType.Group)
+                return true;
         }
         return false;
     }

@@ -57,7 +57,7 @@ public class NavigationDecorationPropertyTests
                     break;
 
                 case NavItemType.Divider:
-                    if (HasPrecedingContent(result) && HasFollowingContent(items, i + 1))
+                    if (HasPrecedingContent(result) && HasFollowingContentForDivider(items, i + 1))
                         result.Add(item);
                     break;
 
@@ -90,6 +90,7 @@ public class NavigationDecorationPropertyTests
     /// <summary>
     /// Checks whether there is a following Content_Item (Link or Group) in the remaining
     /// items before the next Header or end of the list.
+    /// Used for Header orphan detection only.
     /// </summary>
     private static bool HasFollowingContent(List<NavItem> items, int startIndex)
     {
@@ -99,6 +100,21 @@ public class NavigationDecorationPropertyTests
                 return true;
             if (items[i].Type is NavItemType.Header)
                 return false;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Checks whether there is a Content_Item (Link or Group) anywhere after the given start index.
+    /// Does NOT stop at Headers — Dividers are inter-section separators valid as long as
+    /// content exists anywhere after them in the sibling list.
+    /// </summary>
+    private static bool HasFollowingContentForDivider(List<NavItem> items, int startIndex)
+    {
+        for (var i = startIndex; i < items.Count; i++)
+        {
+            if (items[i].Type is NavItemType.Link or NavItemType.Group)
+                return true;
         }
         return false;
     }
@@ -140,7 +156,7 @@ public class NavigationDecorationPropertyTests
         {
             if (items[i].Type == NavItemType.Divider)
             {
-                if (!HasPrecedingContent(resultSoFar) || !HasFollowingContent(items, i + 1))
+                if (!HasPrecedingContent(resultSoFar) || !HasFollowingContentForDivider(items, i + 1))
                     return false;
             }
             resultSoFar.Add(items[i]);

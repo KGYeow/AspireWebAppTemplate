@@ -9,6 +9,14 @@
 - State fields and properties in code-behind files MUST have `<summary>` explaining their role.
 - Enum values MUST have `<summary>` explaining when each is used.
 
+### Comment Tone & Semantics
+- Comments MUST describe the current functionality as-is — what the code does NOW.
+- Comments MUST NOT reference historical changes, previous implementations, migrations, or refactoring context (e.g., "previously lived in X", "was removed from Y", "replaces the old Z").
+- Use git history and spec documents for historical context — code comments are not changelogs.
+- Write in present tense describing current behavior, not past tense describing what changed.
+- Good: "Applies the filtering pipeline: auth → permissions → group visibility → decorations."
+- Bad: "This service replaces the client-side filtering that previously lived in NavMenu."
+
 ### Inline Comments
 - EF Core configurations: explain rationale (why cascade delete, why specific index, etc.)
 - Complex logic: annotate the algorithm or business rule being implemented.

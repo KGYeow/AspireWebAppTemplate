@@ -10,16 +10,16 @@ using Property = FsCheck.Property;
 namespace AspireWebAppTemplate.Tests.Navigation.Properties;
 
 /// <summary>
-/// Property-based tests verifying that the new NavigationService filtering pipeline produces
-/// structurally identical output to the original NavMenu.ComputeVisibleNavItems implementation
-/// for any valid combination of NavItem trees, authentication states, and page permission sets.
+/// Property-based tests verifying that the primary and reference filtering pipeline
+/// implementations produce structurally identical output for any valid combination of
+/// NavItem trees, authentication states, and page permission sets.
 /// </summary>
 /// <remarks>
 /// <para>
 /// <b>Property 1: Filtering Pipeline Equivalence</b> — For any valid NavItem tree (up to 5
 /// levels deep, up to 50 items per level), for any authentication state (authenticated or
-/// unauthenticated), and for any page permission set (including empty sets), the new pipeline
-/// output SHALL be structurally equal to the reference (NavMenu-style) pipeline output —
+/// unauthenticated), and for any page permission set (including empty sets), the primary pipeline
+/// output SHALL be structurally equal to the reference pipeline output —
 /// where structural equality means identical item count at each tree level, identical property
 /// values on each corresponding item, identical ordering, and identical Children lists on
 /// Group items compared recursively.

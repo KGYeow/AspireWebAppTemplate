@@ -1,13 +1,5 @@
 @using AspireWebAppTemplate.Core.Common
 
-@*
-    Pure renderer: NavMenu fetches the pre-filtered navigation tree from the API
-    and renders it directly. No client-side filtering is performed.
-    1. Loading state — show skeleton placeholder while the API call is in-flight
-    2. Success — render the received tree directly (no filtering applied)
-    3. Failure — render empty navigation (zero items)
-*@
-
 @if (_isLoading)
 {
     <!-- Loading skeleton placeholder while the API navigation call is in-flight.

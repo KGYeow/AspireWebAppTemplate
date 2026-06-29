@@ -4,8 +4,8 @@ namespace AspireWebAppTemplate.Core.Contracts.AuditLog;
 
 /// <summary>
 /// Encapsulates all parameters for recording a single audit log entry.
-/// Replaces the long-parameter-list <c>LogAsync</c> method signature with a single
-/// strongly-typed DTO, improving readability, extensibility, and testability.
+/// Groups audit logging inputs into a single strongly-typed DTO, improving
+/// readability, extensibility, and testability.
 /// </summary>
 public sealed class AuditLogRequest
 {

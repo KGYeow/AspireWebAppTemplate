@@ -13,8 +13,7 @@ namespace AspireWebAppTemplate.ApiService.Services;
 /// </summary>
 /// <remarks>
 /// <para>
-/// This service is the single source of truth for navigation visibility. It replaces
-/// the client-side filtering that previously lived in <c>NavMenu.ComputeVisibleNavItems</c>.
+/// This service is the single source of truth for navigation visibility.
 /// </para>
 /// <para>
 /// Registered as a scoped service to align with the per-request <c>DbContext</c> lifetime.
@@ -159,7 +158,7 @@ public class NavigationService : INavigationService
                     break;
 
                 case NavItemType.Divider:
-                    if (HasPrecedingContent(result) && HasFollowingContent(items, i + 1))
+                    if (HasPrecedingContent(result) && HasFollowingContentForDivider(items, i + 1))
                         result.Add(item);
                     break;
 
@@ -212,6 +211,7 @@ public class NavigationService : INavigationService
     /// <summary>
     /// Checks whether there is a Content_Item (Link or Group) following the given start index,
     /// scanning forward until a Header is found (section boundary) or end of list.
+    /// Used for Header orphan detection: a Header is orphaned if no content follows in its section.
     /// </summary>
     /// <param name="items">The full items list being processed.</param>
     /// <param name="startIndex">The index to start scanning from.</param>
@@ -224,6 +224,25 @@ public class NavigationService : INavigationService
                 return true;
             if (items[i].Type is NavItemType.Header)
                 return false;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Checks whether there is a Content_Item (Link or Group) anywhere after the given start index.
+    /// Unlike <see cref="HasFollowingContent"/>, this does NOT stop at Headers because Dividers
+    /// are inter-section separators — they are valid as long as content exists anywhere after them
+    /// in the sibling list, regardless of intervening Headers.
+    /// </summary>
+    /// <param name="items">The full items list being processed.</param>
+    /// <param name="startIndex">The index to start scanning from.</param>
+    /// <returns>True if any Content_Item exists in the remaining list.</returns>
+    private static bool HasFollowingContentForDivider(List<NavItem> items, int startIndex)
+    {
+        for (var i = startIndex; i < items.Count; i++)
+        {
+            if (items[i].Type is NavItemType.Link or NavItemType.Group)
+                return true;
         }
         return false;
     }
