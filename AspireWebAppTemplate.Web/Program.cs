@@ -7,6 +7,7 @@ using AspireWebAppTemplate.Web.Authorization;
 using AspireWebAppTemplate.Web.Components;
 using AspireWebAppTemplate.Web.Endpoints;
 using AspireWebAppTemplate.Web.Services;
+using AspireWebAppTemplate.Web.Services.ApiClients;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -79,6 +80,9 @@ builder.Services.AddHttpClient<ApiPagePermissionService>(client =>
     client.BaseAddress = new("https+http://apiservice"))
     .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
 builder.Services.AddHttpClient<ApiNotificationService>(client =>
+    client.BaseAddress = new("https+http://apiservice"))
+    .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
+builder.Services.AddHttpClient<ApiNavigationService>(client =>
     client.BaseAddress = new("https+http://apiservice"))
     .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
 

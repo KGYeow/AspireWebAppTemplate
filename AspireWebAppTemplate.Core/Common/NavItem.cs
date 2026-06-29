@@ -88,13 +88,6 @@ public sealed class NavItem
     public bool AuthorizedOnly { get; init; }
 
     /// <summary>
-    /// Comma-separated role names required to see this item.
-    /// When set, implies <see cref="AuthorizedOnly"/> = true.
-    /// Example: "Admin" or "Admin,SuperAdmin".
-    /// </summary>
-    public string? Roles { get; init; }
-
-    /// <summary>
     /// Show only to anonymous users.
     /// </summary>
     public bool NotAuthorizedOnly { get; init; }

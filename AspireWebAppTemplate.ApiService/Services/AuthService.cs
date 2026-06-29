@@ -94,9 +94,12 @@ public class AuthService : IAuthService
     {
         var user = await GetCurrentUserAsync();
 
-        if (request.Theme.HasValue) user.Theme = request.Theme.Value;
-        if (request.TimeZoneId is not null) user.TimeZoneId = request.TimeZoneId;
-        if (request.DateTimeFormat is not null) user.DateTimeFormat = request.DateTimeFormat;
+        if (request.Theme.HasValue)
+            user.Theme = request.Theme.Value;
+        if (request.TimeZoneId is not null)
+            user.TimeZoneId = string.IsNullOrEmpty(request.TimeZoneId) ? null : request.TimeZoneId;
+        if (request.DateTimeFormat is not null)
+            user.DateTimeFormat = string.IsNullOrEmpty(request.DateTimeFormat) ? null : request.DateTimeFormat;
 
         user.UpdatedUtc = DateTime.UtcNow;
         var result = await _userManager.UpdateAsync(user);

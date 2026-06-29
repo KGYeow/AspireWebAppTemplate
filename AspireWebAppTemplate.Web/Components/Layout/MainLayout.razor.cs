@@ -1,6 +1,4 @@
 using AspireWebAppTemplate.Abstractions;
-using AspireWebAppTemplate.Core.Application.Abstractions;
-using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Core.Contracts.Users;
 using AspireWebAppTemplate.Core.Domain.Enums;
 using AspireWebAppTemplate.UI.Theme;
@@ -21,8 +19,6 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
     /// Provides navigation utilities (current URI, base URI, navigation actions).
     /// </summary>
     [Inject] protected NavigationManager NavigationManager { get; set; } = default!;
-
-    [Inject] protected INavigationProvider NavigationProvider { get; set; } = default!;
 
     /// <summary>
     /// JavaScript runtime for invoking browser APIs (timezone detection).
@@ -100,12 +96,6 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
     protected ApplicationTheme AppTheme { get; } = new();
 
     /// <summary>
-    /// Custom navigation items to pass to <see cref="NavMenu"/>.
-    /// Pulled from an injectable provider to keep the layout slim.
-    /// </summary>
-    protected IReadOnlyList<NavItem> NavItems { get; private set; } = [];
-
-    /// <summary>
     /// Controls whether the dark palette is active. Bound to <c>MudThemeProvider.IsDarkMode</c>.
     /// </summary>
     private bool _isDarkMode;
@@ -125,7 +115,6 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
     /// </summary>
     protected override void OnInitialized()
     {
-        NavItems = NavigationProvider.GetMainMenuItems();
         ThemeState.OnChange += OnThemeStateChanged;
     }
 

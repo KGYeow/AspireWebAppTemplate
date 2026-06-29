@@ -3,35 +3,28 @@
 @using AspireWebAppTemplate.Core.Contracts.Notifications
 @using AspireWebAppTemplate.Core.Domain.Enums
 
-<PageContent IsLoading="false">
+<PageContent IsLoading="_isLoading">
     <MudText Typo="Typo.h6" Class="fw-bold">Notifications</MudText>
     <MudText Typo="Typo.body2" Class="mud-text-secondary mb-4">Configure which notifications you receive and through which channels</MudText>
     <MudDivider />
 
-    @if (_isLoadingNotificationPreferences)
+    @foreach (var pref in _notificationPreferences)
     {
-        <MudProgressCircular Indeterminate Size="Size.Small" Class="my-4" />
-    }
-    else
-    {
-        @foreach (var pref in _notificationPreferences)
+        <MudStack Row Justify="Justify.SpaceBetween" Class="my-4" Wrap="Wrap.Wrap">
+            <MudItem xs="12" sm="6">
+                <MudText Typo="Typo.body2" Class="fw-bold">@FormatCategoryName(pref.Category)</MudText>
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">@GetCategoryDescription(pref.Category)</MudText>
+            </MudItem>
+            <MudItem xs="12" sm="4" Class="d-flex justify-end">
+                <MudStack Row Spacing="4" AlignItems="AlignItems.Center">
+                    <MudSwitch T="bool" Value="pref.InAppEnabled" ValueChanged="(val) => HandleInAppToggle(pref, val)" Label="In-App" Color="Color.Primary" />
+                    <MudSwitch T="bool" Value="pref.EmailEnabled" ValueChanged="(val) => HandleEmailToggle(pref, val)" Label="Email" Color="Color.Primary" />
+                </MudStack>
+            </MudItem>
+        </MudStack>
+        @if (pref != _notificationPreferences.Last())
         {
-            <MudStack Row Justify="Justify.SpaceBetween" Class="my-4" Wrap="Wrap.Wrap">
-                <MudItem xs="12" sm="6">
-                    <MudText Typo="Typo.body2" Class="fw-bold">@FormatCategoryName(pref.Category)</MudText>
-                    <MudText Typo="Typo.body2" Class="mud-text-secondary">@GetCategoryDescription(pref.Category)</MudText>
-                </MudItem>
-                <MudItem xs="12" sm="4" Class="d-flex justify-end">
-                    <MudStack Row Spacing="4" AlignItems="AlignItems.Center">
-                        <MudSwitch T="bool" Value="pref.InAppEnabled" ValueChanged="(val) => HandleInAppToggle(pref, val)" Label="In-App" Color="Color.Primary" />
-                        <MudSwitch T="bool" Value="pref.EmailEnabled" ValueChanged="(val) => HandleEmailToggle(pref, val)" Label="Email" Color="Color.Primary" />
-                    </MudStack>
-                </MudItem>
-            </MudStack>
-            @if (pref != _notificationPreferences.Last())
-            {
-                <MudDivider />
-            }
+            <MudDivider />
         }
     }
 </PageContent>

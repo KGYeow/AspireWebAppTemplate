@@ -1,17 +1,17 @@
 @using AspireWebAppTemplate.Core.Common
 
-@* 
-    Filtering pipeline:
-    1. Loading state check — show skeleton placeholder while PagePermissionContext.IsLoaded is false
-    2. Auth-based filtering — AuthorizedOnly/NotAuthorizedOnly/Roles via AuthorizeView wrapping
-    3. Permission-based filtering — PagePermissionContext.CanAccess for page-level access control
-    System_Pages (login, register, error, etc.) always bypass permission checks.
+@*
+    Pure renderer: NavMenu fetches the pre-filtered navigation tree from the API
+    and renders it directly. No client-side filtering is performed.
+    1. Loading state — show skeleton placeholder while the API call is in-flight
+    2. Success — render the received tree directly (no filtering applied)
+    3. Failure — render empty navigation (zero items)
 *@
 
-@if (!PagePermissionContext.IsLoaded)
+@if (_isLoading)
 {
-    <!-- Loading skeleton placeholder while permissions are being loaded.
-         Prevents flash of unauthorized nav items before the permission cache is populated. -->
+    <!-- Loading skeleton placeholder while the API navigation call is in-flight.
+         Prevents flash of empty content before the filtered tree is received. -->
     <div class="pa-4">
         <MudSkeleton Width="80%" Height="28px" Class="mb-2" />
         <MudSkeleton Width="60%" Height="28px" Class="mb-2" />
@@ -29,10 +29,7 @@ else
         Rounded="DrawerOpen"
         Style="@NavMenuStyle"
     >
-        <!-- Render each top-level item (recursively handles children for groups).
-             Items are filtered by ShouldShowItem (Links) and HasVisibleChildren (Groups)
-             inside RenderItem, after auth-based wrapping. -->
-        @foreach (var item in Items ?? Array.Empty<NavItem>())
+        @foreach (var item in _navItems)
         {
             @RenderItem(item, isRoot: true)
         }

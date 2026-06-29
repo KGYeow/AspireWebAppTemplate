@@ -58,8 +58,10 @@ public sealed class UserTimeZoneContext : IUserTimeZoneContext
     public async Task InitializeAsync(string userId)
     {
         var result = await _authService.GetCurrentUserAsync();
-        TimeZoneId = result.Succeeded ? result.Data?.TimeZoneId : null;
-        DateTimeFormat = result.Succeeded ? result.Data?.DateTimeFormat : null;
+        var rawTz = result.Succeeded ? result.Data?.TimeZoneId : null;
+        TimeZoneId = string.IsNullOrEmpty(rawTz) ? null : rawTz;
+        var rawFormat = result.Succeeded ? result.Data?.DateTimeFormat : null;
+        DateTimeFormat = string.IsNullOrEmpty(rawFormat) ? null : rawFormat;
         OnInitialized?.Invoke();
     }
 

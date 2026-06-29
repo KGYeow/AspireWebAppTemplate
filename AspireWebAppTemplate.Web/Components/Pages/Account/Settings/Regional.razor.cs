@@ -1,6 +1,7 @@
 using AspireWebAppTemplate.Core.Application.Abstractions;
 using AspireWebAppTemplate.Core.Common.Defaults;
 using AspireWebAppTemplate.Core.Contracts.Users;
+using AspireWebAppTemplate.Web.Abstractions;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
@@ -42,6 +43,12 @@ public partial class Regional : ComponentBase
     /// Structured logger for recording warnings and errors during preference saves.
     /// </summary>
     [Inject] private ILogger<Regional> Logger { get; set; } = default!;
+
+    /// <summary>
+    /// Circuit-scoped datetime context that caches the user's timezone and format preferences.
+    /// Re-initialized after save so other pages pick up the new values immediately.
+    /// </summary>
+    [Inject] private IUserTimeZoneContext UserTimeZone { get; set; } = default!;
 
     #endregion
 
@@ -147,6 +154,11 @@ public partial class Regional : ComponentBase
                 _timeZoneValue = _previousTimeZoneValue;
                 Snackbar.Add("Failed to save time zone. Please try again.", MudBlazor.Severity.Error);
             }
+            else
+            {
+                // Refresh the circuit-scoped datetime context so other pages use the new timezone immediately
+                await UserTimeZone.InitializeAsync(string.Empty);
+            }
             StateHasChanged();
         }
         catch (Exception ex)
@@ -172,6 +184,11 @@ public partial class Regional : ComponentBase
             {
                 _dateTimeFormatValue = _previousDateTimeFormatValue;
                 Snackbar.Add("Failed to save date/time format. Please try again.", MudBlazor.Severity.Error);
+            }
+            else
+            {
+                // Refresh the circuit-scoped datetime context so other pages use the new format immediately
+                await UserTimeZone.InitializeAsync(string.Empty);
             }
             StateHasChanged();
         }

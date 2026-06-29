@@ -47,9 +47,9 @@ public partial class Notifications : ComponentBase
     private List<NotificationPreferenceDto> _notificationPreferences = [];
 
     /// <summary>
-    /// Whether the notification preferences section is loading its data.
+    /// Whether the page is loading its data.
     /// </summary>
-    private bool _isLoadingNotificationPreferences = true;
+    private bool _isLoading = true;
 
     #endregion
 
@@ -169,7 +169,7 @@ public partial class Notifications : ComponentBase
         }
         finally
         {
-            _isLoadingNotificationPreferences = false;
+            _isLoading = false;
             StateHasChanged();
         }
     }
