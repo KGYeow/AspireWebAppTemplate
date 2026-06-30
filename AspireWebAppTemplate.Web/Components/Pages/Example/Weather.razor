@@ -1,4 +1,6 @@
 @page "/weather"
+@using AspireWebAppTemplate.Core.Contracts.Notifications
+@using AspireWebAppTemplate.Core.Domain.Enums
 @using AspireWebAppTemplate.Web.Services
 
 <PageTitle>Weather</PageTitle>
@@ -11,7 +13,6 @@
              Elevation="0"
              Hover
              Dense
-             Bordered
              Filterable
              Class="px-2 pt-2">
     <NoRecordsContent>
@@ -30,3 +31,53 @@
         <MudDataGridPager T="WeatherForecast" />
     </PagerContent>
 </MudDataGrid>
+
+<!-- Feature Testing Section -->
+<MudDivider Class="my-6" />
+
+<MudText Typo="Typo.h6" Class="fw-bold mb-2">Test Notifications</MudText>
+<MudText Typo="Typo.body2" Class="mud-text-secondary mb-3">Send a test notification to yourself.</MudText>
+
+<StatusAlert @bind-Message="_notificationStatus" Severity="@_notificationSeverity" Class="mb-4" />
+
+<MudGrid>
+    <MudItem xs="12" md="6">
+        <MudStack Spacing="2">
+            <MudSelect T="NotificationCategory"
+                       @bind-Value="_selectedCategory"
+                       Label="Category"
+                       Variant="Variant.Outlined"
+                       Margin="Margin.Dense">
+                <MudSelectItem Value="NotificationCategory.System">System</MudSelectItem>
+                <MudSelectItem Value="NotificationCategory.Account">Account</MudSelectItem>
+                <MudSelectItem Value="NotificationCategory.Activity">Activity</MudSelectItem>
+            </MudSelect>
+
+            <MudTextField T="string"
+                          @bind-Value="_notificationTitle"
+                          Label="Title"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense" />
+
+            <MudTextField T="string"
+                          @bind-Value="_notificationMessage"
+                          Label="Message"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Lines="2" />
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       OnClick="SendTestNotification"
+                       Disabled="_isSending"
+                       DropShadow="false"
+                       Style="text-transform: none;">
+                @if (_isSending)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate Class="me-2" />
+                }
+                Send Test Notification
+            </MudButton>
+        </MudStack>
+    </MudItem>
+</MudGrid>

@@ -1,11 +1,8 @@
-using AspireWebAppTemplate.Abstractions;
-using AspireWebAppTemplate.ApiService.Abstractions;
 using AspireWebAppTemplate.ApiService.Authentication;
 using AspireWebAppTemplate.ApiService.Data;
 using AspireWebAppTemplate.ApiService.Data.Entities;
+using AspireWebAppTemplate.ApiService.Extensions;
 using AspireWebAppTemplate.ApiService.Services;
-using AspireWebAppTemplate.Core.Application.Abstractions;
-using AspireWebAppTemplate.Core.Application.Services;
 using AspireWebAppTemplate.Options;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
@@ -56,27 +53,15 @@ builder.Services.AddControllers();
 // HttpContext accessor (required for ICurrentUserAccessor)
 builder.Services.AddHttpContextAccessor();
 
+
 // Application services
-builder.Services.AddScoped<ICurrentUserAccessor, CurrentUserAccessor>();
-builder.Services.AddSingleton<INavigationProvider, DefaultNavigationProvider>();
-builder.Services.AddScoped<IAuditLogService, AuditLogService>();
-builder.Services.AddScoped<IExcelExportService, ExcelExportService>();
-builder.Services.AddScoped<ILoginService, LoginService>();
-builder.Services.AddScoped<IRegisterService, RegisterService>();
-builder.Services.AddScoped<IPagePermissionService, PagePermissionService>();
-builder.Services.AddScoped<ILdapAuthService, LdapAuthService>();
-builder.Services.AddScoped<ILdapLoginService, LdapLoginService>();
-builder.Services.AddScoped<INavigationService, NavigationService>();
-builder.Services.AddScoped<INotificationService, NotificationService>();
-builder.Services.AddScoped<IRoleService, RoleService>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddApplicationServices();
 
 // [LDAP] LDAP configuration — remove this block if LDAP is not needed
 builder.Services.Configure<LdapSettings>(builder.Configuration.GetSection("LDAP"));
 
 // Email sender (no-op — replace with real implementation when needed)
-builder.Services.AddSingleton<Microsoft.AspNetCore.Identity.IEmailSender<ApplicationUser>, NoOpEmailSender>();
+builder.Services.AddSingleton<IEmailSender<ApplicationUser>, NoOpEmailSender>();
 
 // EPPlus license configuration
 OfficeOpenXml.ExcelPackage.License.SetNonCommercialOrganization("AspireWebAppTemplate");

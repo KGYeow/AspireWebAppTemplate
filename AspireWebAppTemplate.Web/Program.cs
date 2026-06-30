@@ -1,13 +1,9 @@
-using AspireWebAppTemplate.Abstractions;
-using AspireWebAppTemplate.Core.Application.Abstractions;
-using AspireWebAppTemplate.Core.Application.Services;
 using AspireWebAppTemplate.Web;
-using AspireWebAppTemplate.Web.Abstractions;
 using AspireWebAppTemplate.Web.Authorization;
 using AspireWebAppTemplate.Web.Components;
 using AspireWebAppTemplate.Web.Endpoints;
+using AspireWebAppTemplate.Web.Extensions;
 using AspireWebAppTemplate.Web.Services;
-using AspireWebAppTemplate.Web.Services.ApiClients;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -59,41 +55,12 @@ builder.Services.AddHttpContextAccessor();
 // Delegating handler that forwards authenticated user identity to the API service
 builder.Services.AddTransient<UserIdentityDelegatingHandler>();
 
-// HTTP client services (call ApiService via Aspire service discovery)
-builder.Services.AddHttpClient<ApiWeatherService>(client =>
-    client.BaseAddress = new("https+http://apiservice"))
-    .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
 
-builder.Services.AddHttpClient<ApiAuthService>(client =>
-    client.BaseAddress = new("https+http://apiservice"))
-    .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
-builder.Services.AddHttpClient<ApiUserService>(client =>
-    client.BaseAddress = new("https+http://apiservice"))
-    .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
-builder.Services.AddHttpClient<ApiRoleService>(client =>
-    client.BaseAddress = new("https+http://apiservice"))
-    .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
-builder.Services.AddHttpClient<ApiAuditLogService>(client =>
-    client.BaseAddress = new("https+http://apiservice"))
-    .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
-builder.Services.AddHttpClient<ApiPagePermissionService>(client =>
-    client.BaseAddress = new("https+http://apiservice"))
-    .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
-builder.Services.AddHttpClient<ApiNotificationService>(client =>
-    client.BaseAddress = new("https+http://apiservice"))
-    .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
-builder.Services.AddHttpClient<ApiNavigationService>(client =>
-    client.BaseAddress = new("https+http://apiservice"))
-    .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
+// HTTP client services (call ApiService via Aspire service discovery)
+builder.Services.AddApiClients();
 
 // Application services (frontend-only, no API calls)
-builder.Services.AddSingleton<INavigationProvider, DefaultNavigationProvider>();
-builder.Services.AddSingleton<ITimeZoneService, TimeZoneService>();
-builder.Services.AddScoped<IUserTimeZoneContext, UserTimeZoneContext>();
-builder.Services.AddScoped<IThemeContext, ThemeContext>();
-builder.Services.AddScoped<IPagePermissionContext, PagePermissionContext>();
-builder.Services.AddScoped<INotificationContext, NotificationContext>();
-builder.Services.AddScoped<CircuitUserContext>();
+builder.Services.AddApplicationServices();
 
 // MudBlazor
 builder.Services.AddMudServices(config =>

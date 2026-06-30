@@ -44,11 +44,6 @@ public partial class NotificationBell : ComponentBase, IDisposable
     private int _unreadCount;
 
     /// <summary>
-    /// Whether the notification dropdown popover is currently open.
-    /// </summary>
-    private bool _popoverOpen;
-
-    /// <summary>
     /// The list of most recent notifications displayed in the dropdown.
     /// Null before the first load.
     /// </summary>
@@ -64,13 +59,12 @@ public partial class NotificationBell : ComponentBase, IDisposable
     #region Lifecycle
 
     /// <summary>
-    /// Initializes the notification context (loads unread count from API) and subscribes
-    /// to change notifications for real-time badge updates.
+    /// Initializes the notification context (loads unread count from API), subscribes
+    /// to change notifications, and loads recent notifications for the dropdown.
     /// </summary>
     protected override async Task OnInitializedAsync()
     {
         // Subscribe to context changes so the badge updates in real-time
-        // when other components (e.g., Notifications page) modify the count.
         NotificationContext.OnChange += HandleContextChanged;
 
         // Initialize the context if not already loaded (loads unread count from API).
@@ -80,6 +74,9 @@ public partial class NotificationBell : ComponentBase, IDisposable
         }
 
         _unreadCount = NotificationContext.UnreadCount;
+
+        // Load recent notifications for the dropdown
+        await LoadRecentNotifications();
     }
 
     /// <summary>
@@ -95,29 +92,8 @@ public partial class NotificationBell : ComponentBase, IDisposable
     #region Event Handlers
 
     /// <summary>
-    /// Toggles the notification dropdown popover. When opening, loads the 5 most recent notifications.
-    /// </summary>
-    private async Task TogglePopover()
-    {
-        _popoverOpen = !_popoverOpen;
-
-        if (_popoverOpen)
-        {
-            await LoadRecentNotifications();
-        }
-    }
-
-    /// <summary>
-    /// Closes the notification dropdown popover.
-    /// </summary>
-    private void ClosePopover()
-    {
-        _popoverOpen = false;
-    }
-
-    /// <summary>
     /// Handles clicking an individual notification in the dropdown.
-    /// Marks the notification as read (if unread), closes the popover, and navigates to /notifications.
+    /// Marks the notification as read (if unread) and navigates to /notifications.
     /// </summary>
     /// <param name="notification">The notification that was clicked.</param>
     private async Task HandleNotificationClick(NotificationDto notification)
@@ -128,20 +104,38 @@ public partial class NotificationBell : ComponentBase, IDisposable
 
             if (result.Succeeded)
             {
+                notification.IsRead = true;
                 NotificationContext.DecrementCount();
             }
         }
 
-        _popoverOpen = false;
         NavigationManager.NavigateTo("/account/notifications");
     }
 
     /// <summary>
-    /// Navigates to the full notifications page and closes the popover.
+    /// Marks all notifications as read and refreshes the list.
+    /// </summary>
+    private async Task HandleMarkAllAsRead()
+    {
+        var result = await ApiNotificationService.MarkAllAsReadAsync();
+
+        if (result.Succeeded)
+        {
+            NotificationContext.ClearCount();
+
+            if (_recentNotifications is not null)
+            {
+                foreach (var n in _recentNotifications)
+                    n.IsRead = true;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Navigates to the full notifications page.
     /// </summary>
     private void NavigateToNotifications()
     {
-        _popoverOpen = false;
         NavigationManager.NavigateTo("/account/notifications");
     }
 

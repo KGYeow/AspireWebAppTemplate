@@ -8,32 +8,44 @@
     <MudText Typo="Typo.body2" Class="mud-text-secondary mb-4">Configure which notifications you receive and through which channels</MudText>
     <MudDivider />
 
-    @foreach (var pref in _notificationPreferences)
-    {
-        <MudStack Row Justify="Justify.SpaceBetween" Class="my-4" Wrap="Wrap.Wrap">
-            <MudItem xs="12" sm="6">
-                <MudText Typo="Typo.body2" Class="fw-bold">@FormatCategoryName(pref.Category)</MudText>
-                <MudText Typo="Typo.body2" Class="mud-text-secondary">@GetCategoryDescription(pref.Category)</MudText>
-            </MudItem>
-            <MudItem xs="12" sm="4" Class="d-flex justify-end">
-                <MudStack Row Spacing="4" AlignItems="AlignItems.Center">
-                    <MudSwitch T="bool" Value="pref.InAppEnabled" ValueChanged="(val) => HandleInAppToggle(pref, val)" Label="In-App" Color="Color.Primary" />
-                    <MudSwitch T="bool" Value="pref.EmailEnabled" ValueChanged="(val) => HandleEmailToggle(pref, val)" Label="Email" Color="Color.Primary" />
-                </MudStack>
-            </MudItem>
-        </MudStack>
-        @if (pref != _notificationPreferences.Last())
-        {
-            <MudDivider />
-        }
-    }
+    <MudSimpleTable Hover Outlined Elevation="0" Class="my-4">
+        <thead>
+            <tr>
+                <th style="font-size: 0.95rem;" class="fw-bolder">General</th>
+                <th style="text-align: center; width: 100px;">In-App</th>
+                <th style="text-align: center; width: 100px;">Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var pref in _notificationPreferences)
+            {
+                <tr>
+                    <td>
+                        <MudText Typo="Typo.body2" Class="fw-bold">@FormatCategoryName(pref.Category)</MudText>
+                        <MudText Typo="Typo.body2" Class="mud-text-secondary">@GetCategoryDescription(pref.Category)</MudText>
+                    </td>
+                    <td>
+                        <div class="d-flex justify-content-center">
+                            <MudCheckBox T="bool"
+                                         Value="pref.InAppEnabled"
+                                         ValueChanged="(val) => HandleInAppToggle(pref, val)"
+                                         Color="Color.Primary"
+                                         Size="Size.Small"
+                                         Dense />
+                        </div>
+                    </td>
+                    <td>
+                        <div class="d-flex justify-content-center">
+                            <MudCheckBox T="bool"
+                                         Value="pref.EmailEnabled"
+                                         ValueChanged="(val) => HandleEmailToggle(pref, val)"
+                                         Color="Color.Primary"
+                                         Size="Size.Small"
+                                         Dense />
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </MudSimpleTable>
 </PageContent>
-
-
-
-
-
-
-
-
-

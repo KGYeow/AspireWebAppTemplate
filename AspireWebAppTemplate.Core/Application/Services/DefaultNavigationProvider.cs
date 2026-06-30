@@ -35,12 +35,6 @@ public sealed class DefaultNavigationProvider : INavigationProvider
 
         new() { Type = NavItemType.Divider, DividerClass = "my-2" },
 
-        // Account (authenticated users)
-        new() { Type = NavItemType.Header, Text = "Account" },
-        new() { Type = NavItemType.Link, Text = "Notifications", Href = "account/notifications", Icon = "material-symbols-rounded/notifications", AuthorizedOnly = true },
-
-        new() { Type = NavItemType.Divider, DividerClass = "my-2" },
-
         // Administration (Admin role only)
         new() { Type = NavItemType.Header, Text = "Administration" },
         new()

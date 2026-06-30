@@ -1,0 +1,15 @@
+/* Subtle background highlight for unread notification items in the bell dropdown */
+::deep .notification-unread {
+    background-color: rgba(128, 128, 128, 0.15);
+}
+
+/* Rounded list items matching action-menu style */
+::deep .notification-bell-list .mud-list-item {
+    border-radius: var(--mud-default-borderradius);
+}
+
+/* Add horizontal padding to the list container */
+::deep .notification-bell-list {
+    padding-left: 4px;
+    padding-right: 4px;
+}
