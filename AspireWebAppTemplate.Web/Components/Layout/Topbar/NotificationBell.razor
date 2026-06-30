@@ -5,6 +5,7 @@
          AnchorOrigin="Origin.BottomRight"
          TransformOrigin="Origin.TopRight"
          Dense>
+
     <ActivatorContent>
         <MudIconButton Color="Color.Inherit" OnClick="@context.ToggleAsync">
             <MudBadge Content="@_unreadCount" Visible="@(_unreadCount > 0)" Color="Color.Error" Overlap>
@@ -12,11 +13,13 @@
             </MudBadge>
         </MudIconButton>
     </ActivatorContent>
+
     <ChildContent>
             <!-- Header -->
-            <MudStack Row AlignItems="AlignItems.Center" Class="px-4 py-2" Style="width: 340px;">
+            <MudStack Row AlignItems="AlignItems.Center" Class="p-2">
                 <MudText Typo="Typo.subtitle1" Class="fw-bold">Notifications</MudText>
                 <MudSpacer />
+
                 @if (_unreadCount > 0)
                 {
                     <MudButton Variant="Variant.Text"

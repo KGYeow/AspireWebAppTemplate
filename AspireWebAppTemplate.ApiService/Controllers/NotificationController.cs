@@ -103,7 +103,7 @@ public class NotificationController : BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<List<NotificationDto>>> GetRecent()
     {
-        var recent = await _notificationService.GetRecentAsync(CurrentUserId!);
+        var recent = await _notificationService.GetRecentAsync(CurrentUserId!, count: 10);
         return Ok(recent);
     }
 

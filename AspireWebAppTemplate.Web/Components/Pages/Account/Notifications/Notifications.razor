@@ -60,7 +60,7 @@
         </MudStack>
     </MudPaper>
 
-    <!-- Notification List -->
+    <!-- Master-Detail Layout -->
     @if (_notifications.Count == 0 && !_isLoadingMore)
     {
         <MudPaper Class="pa-8" Elevation="0">
@@ -72,106 +72,161 @@
             </MudStack>
         </MudPaper>
     }
-    else
+    else if (_isSmallScreen && _expandedNotificationId.HasValue)
     {
-        <MudList T="NotificationDto" Dense="false" Class="pa-0">
-            @foreach (var notification in _notifications)
-            {
-                <MudPaper Class="@GetNotificationItemClass(notification)" Elevation="0" @onclick="() => HandleNotificationClick(notification)" Style="cursor: pointer;">
-                    <MudStack Row AlignItems="AlignItems.Center" Spacing="2" Class="pa-3">
-                        <!-- Selection Checkbox -->
-                        <MudCheckBox T="bool"
-                                     Value="@(_selectedIds.Contains(notification.Id))"
-                                     ValueChanged="@(isChecked => HandleSelectionChanged(notification.Id, isChecked))"
-                                     Color="Color.Primary"
-                                     Size="Size.Small"
-                                     @onclick:stopPropagation="true" />
+        <!-- Small screen: detail view only with back button -->
+        var selectedNotification = _notifications.FirstOrDefault(n => n.Id == _expandedNotificationId);
+        if (selectedNotification is not null)
+        {
+            <MudPaper Elevation="0" Class="pa-4">
+                <MudStack Spacing="3">
+                    <MudButton Variant="Variant.Text"
+                               StartIcon="@Icons.Material.Outlined.ArrowBack"
+                               OnClick="HandleBackToList"
+                               Color="Color.Default"
+                               Size="Size.Small"
+                               Class="align-self-start">
+                        Back to list
+                    </MudButton>
 
-                        <!-- Category Icon -->
-                        <MudIcon Icon="@GetCategoryIcon(notification.Category)"
+                    <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                        <MudIcon Icon="@GetCategoryIcon(selectedNotification.Category)"
                                  Size="Size.Medium"
-                                 Color="@GetCategoryColor(notification.Category)"
-                                 Class="mt-1" />
-
-                        <!-- Content -->
-                        <MudStack Spacing="0" Class="flex-grow-1 overflow-hidden">
-                            <MudText Typo="Typo.body1"
-                                     Class="@(notification.IsRead ? "" : "fw-bold")"
-                                     Style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                @notification.Title
-                            </MudText>
-                            @if (_expandedNotificationId != notification.Id)
-                            {
-                                <MudText Typo="Typo.body2"
-                                         Color="Color.Secondary"
-                                         Style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                    @notification.Message
-                                </MudText>
-                            }
-                            <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mt-1">
-                                @FormatRelativeTime(notification.CreatedAtUtc)
-                            </MudText>
-                        </MudStack>
-
-                        <!-- Action Buttons -->
-                        <MudStack Row AlignItems="AlignItems.Center" Spacing="0" @onclick:stopPropagation="true">
-                            @if (!notification.IsRead)
-                            {
-                                <MudTooltip Text="Mark as Read">
-                                    <MudIconButton Icon="@Icons.Material.Outlined.Done"
-                                                   Size="Size.Small"
-                                                   Color="Color.Primary"
-                                                   OnClick="@(() => HandleMarkAsRead(notification))" />
-                                </MudTooltip>
-                            }
-                            <MudTooltip Text="Dismiss">
-                                <MudIconButton Icon="@Icons.Material.Outlined.Close"
-                                               Size="Size.Small"
-                                               Color="Color.Error"
-                                               OnClick="@(() => HandleDismiss(notification))" />
-                            </MudTooltip>
-                        </MudStack>
+                                 Color="@GetCategoryColor(selectedNotification.Category)" />
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                            @selectedNotification.Category
+                        </MudText>
                     </MudStack>
 
-                    <!-- Expanded Detail Panel -->
-                    <MudCollapse Expanded="@(_expandedNotificationId == notification.Id)">
-                        <MudPaper Class="pa-4 mx-3 mb-3" Elevation="0" Outlined>
-                            <MudStack Spacing="2">
-                                <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
-                                    <MudIcon Icon="@GetCategoryIcon(notification.Category)"
+                    <MudText Typo="Typo.h6">@selectedNotification.Title</MudText>
+                    <MudText Typo="Typo.body1">@selectedNotification.Message</MudText>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                        @UserTimeZone.FormatDateTime(selectedNotification.CreatedAtUtc) · @FormatRelativeTime(selectedNotification.CreatedAtUtc)
+                    </MudText>
+                </MudStack>
+            </MudPaper>
+        }
+    }
+    else
+    {
+        <MudGrid>
+            <!-- Notification List Panel -->
+            <MudItem xs="12" md="5">
+                <div style="max-height: calc(100vh - 280px); overflow-y: auto;">
+                    @foreach (var notification in _notifications)
+                    {
+                        <MudPaper Class="@GetNotificationItemClass(notification)"
+                                  Elevation="0"
+                                  @onclick="() => HandleNotificationClick(notification)"
+                                  Style="cursor: pointer;">
+                            <MudStack Row AlignItems="AlignItems.Start" Spacing="2" Class="pa-3">
+                                <!-- Selection Checkbox -->
+                                <MudCheckBox T="bool"
+                                             Value="@(_selectedIds.Contains(notification.Id))"
+                                             ValueChanged="@(isChecked => HandleSelectionChanged(notification.Id, isChecked))"
+                                             Color="Color.Primary"
                                              Size="Size.Small"
-                                             Color="@GetCategoryColor(notification.Category)" />
-                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
-                                        @notification.Category
+                                             @onclick:stopPropagation="true" />
+
+                                <!-- Category Icon -->
+                                <MudIcon Icon="@GetCategoryIcon(notification.Category)"
+                                         Size="Size.Medium"
+                                         Color="@GetCategoryColor(notification.Category)"
+                                         Class="mt-1" />
+
+                                <!-- Content -->
+                                <MudStack Spacing="0" Class="flex-grow-1 overflow-hidden">
+                                    <MudText Typo="Typo.body1"
+                                             Class="@(notification.IsRead ? "" : "fw-bold")"
+                                             Style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                        @notification.Title
                                     </MudText>
-                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
-                                        · @notification.CreatedAtUtc.ToString("g")
+                                    <MudText Typo="Typo.body2"
+                                             Color="Color.Secondary"
+                                             Style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                        @notification.Message
+                                    </MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mt-1">
+                                        @FormatRelativeTime(notification.CreatedAtUtc)
                                     </MudText>
                                 </MudStack>
-                                <MudText Typo="Typo.body1" Class="fw-bold">@notification.Title</MudText>
-                                <MudText Typo="Typo.body2">@notification.Message</MudText>
+
+                                <!-- Action Buttons -->
+                                <MudStack Row AlignItems="AlignItems.Center" Spacing="0" @onclick:stopPropagation="true">
+                                    <MudTooltip Text="Dismiss">
+                                        <MudIconButton Icon="@Icons.Material.Outlined.Close"
+                                                       Size="Size.Small"
+                                                       Color="Color.Error"
+                                                       OnClick="@(() => HandleDismiss(notification))" />
+                                    </MudTooltip>
+                                </MudStack>
                             </MudStack>
                         </MudPaper>
-                    </MudCollapse>
-                </MudPaper>
-            }
-        </MudList>
-
-        <!-- Load More Button -->
-        @if (_hasNextPage)
-        {
-            <MudStack Row Justify="Justify.Center" Class="mt-4 mb-2">
-                <MudButton Variant="Variant.Outlined"
-                           Color="Color.Primary"
-                           OnClick="LoadMoreAsync"
-                           Disabled="_isLoadingMore">
-                    @if (_isLoadingMore)
-                    {
-                        <MudProgressCircular Size="Size.Small" Indeterminate Class="mr-2" />
                     }
-                    Load More
-                </MudButton>
-            </MudStack>
-        }
+
+                    <!-- Load More Button -->
+                    @if (_hasNextPage)
+                    {
+                        <MudStack Row Justify="Justify.Center" Class="mt-4 mb-2">
+                            <MudButton Variant="Variant.Outlined"
+                                       Color="Color.Primary"
+                                       OnClick="LoadMoreAsync"
+                                       Disabled="_isLoadingMore">
+                                @if (_isLoadingMore)
+                                {
+                                    <MudProgressCircular Size="Size.Small" Indeterminate Class="mr-2" />
+                                }
+                                Load More
+                            </MudButton>
+                        </MudStack>
+                    }
+                </div>
+            </MudItem>
+
+            <!-- Detail Panel (desktop only) -->
+            @if (!_isSmallScreen)
+            {
+                <MudItem md="7">
+                    @if (_expandedNotificationId.HasValue)
+                    {
+                        var detailNotification = _notifications.FirstOrDefault(n => n.Id == _expandedNotificationId);
+                        if (detailNotification is not null)
+                        {
+                            <MudPaper Elevation="0" Class="pa-4">
+                                <MudStack Spacing="3">
+                                    <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                                        <MudIcon Icon="@GetCategoryIcon(detailNotification.Category)"
+                                                 Size="Size.Medium"
+                                                 Color="@GetCategoryColor(detailNotification.Category)" />
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                            @detailNotification.Category
+                                        </MudText>
+                                    </MudStack>
+
+                                    <MudText Typo="Typo.h6">@detailNotification.Title</MudText>
+                                    <MudText Typo="Typo.body1">@detailNotification.Message</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                        @UserTimeZone.FormatDateTime(detailNotification.CreatedAtUtc) · @FormatRelativeTime(detailNotification.CreatedAtUtc)
+                                    </MudText>
+                                </MudStack>
+                            </MudPaper>
+                        }
+                    }
+                    else
+                    {
+                        <MudPaper Elevation="0" Class="pa-8">
+                            <MudStack AlignItems="AlignItems.Center" Spacing="2">
+                                <MudIcon Icon="@Icons.Material.Outlined.MarkEmailRead"
+                                         Size="Size.Large"
+                                         Color="Color.Default" />
+                                <MudText Typo="Typo.body1" Color="Color.Secondary">
+                                    Select a notification to view details
+                                </MudText>
+                            </MudStack>
+                        </MudPaper>
+                    }
+                </MudItem>
+            }
+        </MudGrid>
     }
 </PageContent>

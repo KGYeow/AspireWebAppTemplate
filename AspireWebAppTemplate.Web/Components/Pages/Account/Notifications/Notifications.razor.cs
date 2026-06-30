@@ -1,5 +1,6 @@
 using AspireWebAppTemplate.Core.Contracts.Notifications;
 using AspireWebAppTemplate.Core.Domain.Enums;
+using AspireWebAppTemplate.UI.Components.Shared;
 using AspireWebAppTemplate.Web.Abstractions;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -9,9 +10,10 @@ using MudBlazor;
 namespace AspireWebAppTemplate.Web.Components.Pages.Account.Notifications;
 
 /// <summary>
-/// Full notification management page at /notifications.
-/// Displays notifications in a list/feed layout with category and read status filtering,
-/// "Load More" pagination, and visual distinction for unread items.
+/// Full notification management page at /account/notifications.
+/// Displays notifications in a responsive master-detail layout:
+/// desktop shows a two-column split (list + detail panel),
+/// mobile shows a single column with navigation between list and detail views.
 /// </summary>
 /// <remarks>
 /// Uses <see cref="ApiNotificationService"/> for data fetching and
@@ -39,6 +41,19 @@ public partial class Notifications : ComponentBase
     /// </summary>
     [Inject]
     private NavigationManager NavigationManager { get; set; } = default!;
+
+    /// <summary>
+    /// Provides user-aware datetime formatting in the viewer's configured time zone.
+    /// </summary>
+    [Inject]
+    private IUserTimeZoneContext UserTimeZone { get; set; } = default!;
+
+    /// <summary>
+    /// The current viewport breakpoint, cascaded from MainLayout via MudBreakpointProvider.
+    /// Used to determine responsive layout behavior (list-detail vs single-column).
+    /// </summary>
+    [CascadingParameter]
+    private Breakpoint CurrentBreakpoint { get; set; }
 
     #endregion
 
@@ -84,7 +99,7 @@ public partial class Notifications : ComponentBase
     /// <summary>
     /// The number of notifications to fetch per page.
     /// </summary>
-    private const int PageSize = 20;
+    private const int PageSize = 5;
 
     /// <summary>
     /// Tracks selected notification IDs for bulk dismiss operations.
@@ -92,7 +107,8 @@ public partial class Notifications : ComponentBase
     private HashSet<Guid> _selectedIds = [];
 
     /// <summary>
-    /// The ID of the currently expanded notification (showing full detail). Null when none is expanded.
+    /// The ID of the currently selected notification (showing full detail in the detail panel).
+    /// Null when no notification is selected.
     /// </summary>
     private Guid? _expandedNotificationId;
 
@@ -102,20 +118,26 @@ public partial class Notifications : ComponentBase
     [SupplyParameterFromQuery(Name = "id")]
     private string? HighlightedNotificationId { get; set; }
 
+    /// <summary>
+    /// Indicates whether the current viewport is below the medium breakpoint.
+    /// When true, the layout switches to a single-column mobile view.
+    /// </summary>
+    private bool _isSmallScreen => CurrentBreakpoint < Breakpoint.Md;
+
     #endregion
 
     #region Lifecycle
 
     /// <summary>
     /// Loads the initial set of notifications from the API on page initialization.
-    /// If a notification ID is provided via query parameter, expands and marks it as read.
+    /// If a notification ID is provided via query parameter, selects and marks it as read.
     /// </summary>
     protected override async Task OnInitializedAsync()
     {
         await LoadNotificationsAsync(resetList: true);
         _isLoading = false;
 
-        // If navigated from bell dropdown with a specific notification ID, expand it
+        // If navigated from bell dropdown with a specific notification ID, select it
         if (Guid.TryParse(HighlightedNotificationId, out var notificationId))
         {
             _expandedNotificationId = notificationId;
@@ -164,49 +186,28 @@ public partial class Notifications : ComponentBase
     }
 
     /// <summary>
-    /// Marks a single notification as read. Updates the item in the list and decrements the
-    /// NotificationContext cached unread count.
-    /// </summary>
-    /// <param name="notification">The notification to mark as read.</param>
-    private async Task HandleMarkAsRead(NotificationDto notification)
-    {
-        var result = await ApiNotificationService.MarkAsReadAsync(notification.Id);
-
-        if (result.Succeeded)
-        {
-            notification.IsRead = true;
-            notification.ReadAtUtc = DateTime.UtcNow;
-            NotificationContext.DecrementCount();
-            Snackbar.Add("Notification marked as read.", Severity.Success);
-        }
-        else
-        {
-            Snackbar.Add("Failed to mark notification as read.", Severity.Error);
-        }
-    }
-
-    /// <summary>
-    /// Handles clicking a notification row. Toggles the expanded state and marks the
-    /// notification as read if it's being expanded and is currently unread.
+    /// Handles clicking a notification row. Selects the notification in the detail panel
+    /// and marks it as read if currently unread.
     /// </summary>
     /// <param name="notification">The notification that was clicked.</param>
     private async Task HandleNotificationClick(NotificationDto notification)
     {
-        // Toggle expand/collapse
-        if (_expandedNotificationId == notification.Id)
-        {
-            _expandedNotificationId = null;
-        }
-        else
-        {
-            _expandedNotificationId = notification.Id;
-            await MarkExpandedAsRead(notification.Id);
-        }
+        _expandedNotificationId = notification.Id;
+        await MarkExpandedAsRead(notification.Id);
+    }
+
+    /// <summary>
+    /// Returns to the notification list view on small screens.
+    /// Clears the selected notification so the list is displayed again.
+    /// </summary>
+    private void HandleBackToList()
+    {
+        _expandedNotificationId = null;
     }
 
     /// <summary>
     /// Marks a notification as read by its ID if it's currently unread.
-    /// Used when expanding a notification (either via click or query parameter deep-link).
+    /// Used when selecting a notification (either via click or query parameter deep-link).
     /// </summary>
     /// <param name="notificationId">The ID of the notification to mark as read.</param>
     private async Task MarkExpandedAsRead(Guid notificationId)
@@ -225,19 +226,38 @@ public partial class Notifications : ComponentBase
     }
 
     /// <summary>
-    /// Dismisses (deletes) a single notification. Removes it from the list and refreshes
-    /// the NotificationContext since dismissed items might be unread.
+    /// Dismisses (deletes) a single notification after user confirmation.
+    /// Removes it from the list and refreshes the NotificationContext.
     /// </summary>
     /// <param name="notification">The notification to dismiss.</param>
     private async Task HandleDismiss(NotificationDto notification)
     {
-        var request = new BulkDismissRequest { NotificationIds = [notification.Id] };
-        var result = await ApiNotificationService.BulkDismissAsync(request);
+        var parameters = new DialogParameters<ConfirmationDialog>
+        {
+            { x => x.ContentText, $"Are you sure you want to dismiss this notification? This action cannot be undone." },
+            { x => x.SubmitBtnText, "Dismiss" },
+            { x => x.DialogIcon, Icons.Material.Rounded.DeleteForever },
+            { x => x.DialogIconColor, Color.Error }
+        };
 
-        if (result.Succeeded)
+        var options = new DialogOptions { CloseButton = true, CloseOnEscapeKey = true, MaxWidth = MaxWidth.ExtraSmall, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<ConfirmationDialog>("Dismiss Notification", parameters, options);
+        var result = await dialog.Result;
+        if (result is null || result.Canceled) return;
+
+        var request = new BulkDismissRequest { NotificationIds = [notification.Id] };
+        var dismissResult = await ApiNotificationService.BulkDismissAsync(request);
+
+        if (dismissResult.Succeeded)
         {
             _notifications.Remove(notification);
             _selectedIds.Remove(notification.Id);
+
+            if (_expandedNotificationId == notification.Id)
+            {
+                _expandedNotificationId = null;
+            }
+
             await NotificationContext.RefreshAsync();
             Snackbar.Add("Notification dismissed.", Severity.Success);
         }
@@ -248,19 +268,38 @@ public partial class Notifications : ComponentBase
     }
 
     /// <summary>
-    /// Dismisses all currently selected notifications. Removes them from the list and refreshes
-    /// the NotificationContext since dismissed items might be unread.
+    /// Dismisses all currently selected notifications after user confirmation.
+    /// Removes them from the list and refreshes the NotificationContext.
     /// </summary>
     private async Task HandleDismissSelected()
     {
         if (_selectedIds.Count == 0) return;
 
-        var request = new BulkDismissRequest { NotificationIds = _selectedIds.ToList() };
-        var result = await ApiNotificationService.BulkDismissAsync(request);
+        var parameters = new DialogParameters<ConfirmationDialog>
+        {
+            { x => x.ContentText, $"Are you sure you want to dismiss {_selectedIds.Count} notification(s)? This action cannot be undone." },
+            { x => x.SubmitBtnText, "Dismiss All" },
+            { x => x.DialogIcon, Icons.Material.Rounded.DeleteForever },
+            { x => x.DialogIconColor, Color.Error }
+        };
 
-        if (result.Succeeded)
+        var options = new DialogOptions { CloseButton = true, CloseOnEscapeKey = true, MaxWidth = MaxWidth.ExtraSmall, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<ConfirmationDialog>("Dismiss Notifications", parameters, options);
+        var result = await dialog.Result;
+        if (result is null || result.Canceled) return;
+
+        var request = new BulkDismissRequest { NotificationIds = _selectedIds.ToList() };
+        var dismissResult = await ApiNotificationService.BulkDismissAsync(request);
+
+        if (dismissResult.Succeeded)
         {
             _notifications.RemoveAll(n => _selectedIds.Contains(n.Id));
+
+            if (_expandedNotificationId.HasValue && _selectedIds.Contains(_expandedNotificationId.Value))
+            {
+                _expandedNotificationId = null;
+            }
+
             _selectedIds.Clear();
             await NotificationContext.RefreshAsync();
             Snackbar.Add("Selected notifications dismissed.", Severity.Success);
@@ -361,14 +400,25 @@ public partial class Notifications : ComponentBase
 
     /// <summary>
     /// Returns the CSS class string for a notification item.
-    /// Unread items receive a subtle background highlight.
+    /// Applies highlight for unread items and a selected state for the active notification.
     /// </summary>
     /// <param name="notification">The notification to style.</param>
     /// <returns>A CSS class string.</returns>
-    private static string GetNotificationItemClass(NotificationDto notification)
+    private string GetNotificationItemClass(NotificationDto notification)
     {
         var baseClass = "mb-2";
-        return notification.IsRead ? baseClass : $"{baseClass} notification-unread";
+
+        if (!notification.IsRead)
+        {
+            baseClass += " notification-unread";
+        }
+
+        if (_expandedNotificationId == notification.Id)
+        {
+            baseClass += " mud-primary-text";
+        }
+
+        return baseClass;
     }
 
     /// <summary>
@@ -400,7 +450,6 @@ public partial class Notifications : ComponentBase
     /// <summary>
     /// Formats a UTC timestamp as a human-readable relative time string.
     /// Examples: "just now", "5 min ago", "2 hours ago", "yesterday", "3 days ago".
-    /// Same logic as <see cref="Layout.Topbar.NotificationBell"/>.
     /// </summary>
     /// <param name="utcTimestamp">The UTC timestamp to format.</param>
     /// <returns>A relative time string.</returns>
