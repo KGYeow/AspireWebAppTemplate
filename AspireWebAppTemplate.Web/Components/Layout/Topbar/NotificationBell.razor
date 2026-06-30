@@ -5,10 +5,16 @@
     <MudMenu Icon="@Icons.Material.Outlined.Notifications"
              Color="Color.Inherit"
              PopoverClass="mud-elevation-25 p-2 notification-bell-popover"
+             ListClass="px-1"
              AnchorOrigin="Origin.BottomRight"
              TransformOrigin="Origin.TopRight"
              ActivationEvent="MouseEvent.LeftClick"
              Dense>
+        <ActivatorContent>
+            <MudBadge Content="@_unreadCount" Visible="@(_unreadCount > 0)" Color="Color.Error" Overlap>
+                <MudIconButton Icon="@Icons.Material.Outlined.Notifications" />
+            </MudBadge>
+        </ActivatorContent>
         <ChildContent>
             <!-- Header -->
             <MudStack Row AlignItems="AlignItems.Center" Class="px-4 py-2" Style="width: 340px;">
@@ -46,7 +52,7 @@
             }
             else
             {
-                <MudList T="NotificationDto" Dense Class="py-0 notification-bell-list">
+                <MudList T="NotificationDto" Dense Class="notification-bell-list">
                     @foreach (var notification in _recentNotifications)
                     {
                         <MudListItem T="NotificationDto"

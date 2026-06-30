@@ -1,4 +1,0 @@
-/* Subtle background highlight for unread notification items */
-::deep .notification-unread {
-    background-color: rgba(128, 128, 128, 0.15);
-}

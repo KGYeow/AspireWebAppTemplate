@@ -15,7 +15,7 @@ public partial class AuthLayout : LayoutComponentBase
     /// <summary>
     /// Application theme instance used by <c>MudThemeProvider</c>.
     /// </summary>
-    protected ApplicationTheme AppTheme { get; } = new();
+    protected JabilTheme AppTheme { get; } = new();
 
     #endregion
 }

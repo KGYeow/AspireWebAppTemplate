@@ -310,7 +310,7 @@ public partial class Notifications : ComponentBase
     private static string GetNotificationItemClass(NotificationDto notification)
     {
         var baseClass = "mb-2";
-        return notification.IsRead ? baseClass : $"{baseClass} mud-theme-primary" + " notification-unread";
+        return notification.IsRead ? baseClass : $"{baseClass} notification-unread";
     }
 
     /// <summary>

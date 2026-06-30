@@ -93,7 +93,7 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
     /// <summary>
     /// Application theme instance used by <c>MudThemeProvider</c>.
     /// </summary>
-    protected ApplicationTheme AppTheme { get; } = new();
+    protected JabilTheme AppTheme { get; } = new();
 
     /// <summary>
     /// Controls whether the dark palette is active. Bound to <c>MudThemeProvider.IsDarkMode</c>.

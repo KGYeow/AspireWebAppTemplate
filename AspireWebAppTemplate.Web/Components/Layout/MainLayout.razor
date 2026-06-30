@@ -30,9 +30,9 @@
     <MudDrawer Variant="CurrentBreakpoint >= Breakpoint.Md ? DrawerVariant.Mini : DrawerVariant.Responsive" @bind-Open="@DrawerOpen">
         <DrawerHeader
             DrawerOpen="DrawerOpen"
-            LogoSrc="images/logos/jabil-white-skyblue.svg"
+            LogoSrc="@AssetDefaults.LogoSidebar"
             LogoHeight="24"
-            MiniLogoSrc="favicon-jabil.png"
+            MiniLogoSrc="@AssetDefaults.LogoMini"
             MiniLogoHeight="24"
         />
         <NavMenu DrawerOpen="DrawerOpen" />
