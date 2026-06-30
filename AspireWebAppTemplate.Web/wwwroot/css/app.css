@@ -19,6 +19,12 @@
     min-width: 180px;
 }
 
+/* Add horizontal padding to the menu list container */
+.action-menu .mud-list {
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
 /* Rounded menu items */
 .action-menu .mud-menu-item {
     border-radius: var(--mud-default-borderradius);
@@ -32,4 +38,9 @@
 /* Notification bell list — rounded items matching action-menu style */
 .notification-bell-list .mud-list-item {
     border-radius: var(--mud-default-borderradius);
+}
+
+/* Notification bell popover max width */
+.notification-bell-popover {
+    max-width: 360px !important;
 }

@@ -1,21 +1,18 @@
 @using AspireWebAppTemplate.Core.Contracts.Notifications
 @using AspireWebAppTemplate.Core.Domain.Enums
 
-<MudBadge Content="@_unreadCount" Visible="@(_unreadCount > 0)" Color="Color.Error" Overlap>
-    <MudMenu Icon="@Icons.Material.Outlined.Notifications"
-             Color="Color.Inherit"
-             PopoverClass="mud-elevation-25 p-2 notification-bell-popover"
-             ListClass="px-1"
-             AnchorOrigin="Origin.BottomRight"
-             TransformOrigin="Origin.TopRight"
-             ActivationEvent="MouseEvent.LeftClick"
-             Dense>
-        <ActivatorContent>
+<MudMenu PopoverClass="mud-elevation-25 p-2 notification-bell-popover"
+         AnchorOrigin="Origin.BottomRight"
+         TransformOrigin="Origin.TopRight"
+         Dense>
+    <ActivatorContent>
+        <MudIconButton Color="Color.Inherit" OnClick="@context.ToggleAsync">
             <MudBadge Content="@_unreadCount" Visible="@(_unreadCount > 0)" Color="Color.Error" Overlap>
-                <MudIconButton Icon="@Icons.Material.Outlined.Notifications" />
+                <MudIcon Icon="@Icons.Material.Outlined.Notifications" />
             </MudBadge>
-        </ActivatorContent>
-        <ChildContent>
+        </MudIconButton>
+    </ActivatorContent>
+    <ChildContent>
             <!-- Header -->
             <MudStack Row AlignItems="AlignItems.Center" Class="px-4 py-2" Style="width: 340px;">
                 <MudText Typo="Typo.subtitle1" Class="fw-bold">Notifications</MudText>
@@ -52,12 +49,12 @@
             }
             else
             {
-                <MudList T="NotificationDto" Dense Class="notification-bell-list">
+                <MudList T="NotificationDto" Dense Class="notification-bell-list" Style="max-height: 300px; overflow-y: auto;">
                     @foreach (var notification in _recentNotifications)
                     {
                         <MudListItem T="NotificationDto"
                                      OnClick="() => HandleNotificationClick(notification)"
-                                     Class="@(notification.IsRead ? "" : "notification-unread")">
+                                     Class="@(notification.IsRead ? "mb-1" : "notification-unread mb-1")">
                             <MudStack Row AlignItems="AlignItems.Start" Spacing="2">
                                 <MudIcon Icon="@GetCategoryIcon(notification.Category)"
                                          Size="Size.Small"
@@ -68,6 +65,11 @@
                                              Class="@(notification.IsRead ? "" : "fw-bold")"
                                              Style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                         @notification.Title
+                                    </MudText>
+                                    <MudText Typo="Typo.caption"
+                                             Color="Color.Secondary"
+                                             Style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                        @notification.Message
                                     </MudText>
                                     <MudText Typo="Typo.caption" Color="Color.Secondary">
                                         @FormatRelativeTime(notification.CreatedAtUtc)
@@ -93,4 +95,3 @@
             </MudStack>
         </ChildContent>
     </MudMenu>
-</MudBadge>

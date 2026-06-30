@@ -93,7 +93,8 @@ public partial class NotificationBell : ComponentBase, IDisposable
 
     /// <summary>
     /// Handles clicking an individual notification in the dropdown.
-    /// Marks the notification as read (if unread) and navigates to /notifications.
+    /// Marks the notification as read (if unread) and navigates to the notifications page
+    /// with the notification ID as a query parameter for inline expansion.
     /// </summary>
     /// <param name="notification">The notification that was clicked.</param>
     private async Task HandleNotificationClick(NotificationDto notification)
@@ -109,7 +110,7 @@ public partial class NotificationBell : ComponentBase, IDisposable
             }
         }
 
-        NavigationManager.NavigateTo("/account/notifications");
+        NavigationManager.NavigateTo($"/account/notifications?id={notification.Id}");
     }
 
     /// <summary>

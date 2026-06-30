@@ -5,13 +5,13 @@
     <MudMenu Icon="@Icons.Material.Rounded.AccountCircle"
              Color="Color.Inherit"
              PopoverClass="mud-elevation-25 p-2 action-menu"
-             ListClass="px-1"
+             ListClass="px-0"
              RelativeWidth="DropdownWidth.Adaptive"
              TransformOrigin="Origin.TopRight"
              AnchorOrigin="Origin.BottomRight"
              Style="margin-right: -12px"
              Dense>
-        <MudStack Spacing="2" Row AlignItems="AlignItems.Center" Style="width: 250px">
+        <MudStack Spacing="2" Row AlignItems="AlignItems.Center" Class="pb-2 px-1" Style="width: 250px">
             <MudIcon Icon="@Icons.Material.Rounded.AccountCircle" Style="font-size: 40px" />
 
             <MudStack Spacing="0" Class="overflow-hidden">
@@ -24,7 +24,7 @@
             </MudStack>
         </MudStack>
 
-        <MudDivider Class="my-1" />
+        <MudDivider />
 
         <MudMenuItem Class=""
                      Icon="@Icons.Material.Rounded.Person"
@@ -34,7 +34,7 @@
                      Icon="@Icons.Material.Rounded.Settings"
                      Label="Settings"
                      Href="/account/settings" />
-        <MudDivider Class="my-1" />
+        <MudDivider />
         <MudMenuItem Class=""
                      Icon="material-symbols-rounded/logout"
                      Label="Log Out"

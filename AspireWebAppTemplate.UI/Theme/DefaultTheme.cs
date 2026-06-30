@@ -42,7 +42,7 @@ public class DefaultTheme : MudTheme
             Surface = "#FFFFFF",
 
             AppbarBackground = "#1976D2",
-            DrawerBackground = "#1E3A5F",
+            DrawerBackground = "#1976D2",
             DrawerText = "#FFFFFF",
             DrawerIcon = "#FFFFFF",
 

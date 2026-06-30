@@ -91,17 +91,36 @@ public partial class Notifications : ComponentBase
     /// </summary>
     private HashSet<Guid> _selectedIds = [];
 
+    /// <summary>
+    /// The ID of the currently expanded notification (showing full detail). Null when none is expanded.
+    /// </summary>
+    private Guid? _expandedNotificationId;
+
+    /// <summary>
+    /// Query parameter for deep-linking to a specific notification from the bell dropdown.
+    /// </summary>
+    [SupplyParameterFromQuery(Name = "id")]
+    private string? HighlightedNotificationId { get; set; }
+
     #endregion
 
     #region Lifecycle
 
     /// <summary>
     /// Loads the initial set of notifications from the API on page initialization.
+    /// If a notification ID is provided via query parameter, expands and marks it as read.
     /// </summary>
     protected override async Task OnInitializedAsync()
     {
         await LoadNotificationsAsync(resetList: true);
         _isLoading = false;
+
+        // If navigated from bell dropdown with a specific notification ID, expand it
+        if (Guid.TryParse(HighlightedNotificationId, out var notificationId))
+        {
+            _expandedNotificationId = notificationId;
+            await MarkExpandedAsRead(notificationId);
+        }
     }
 
     #endregion
@@ -163,6 +182,45 @@ public partial class Notifications : ComponentBase
         else
         {
             Snackbar.Add("Failed to mark notification as read.", Severity.Error);
+        }
+    }
+
+    /// <summary>
+    /// Handles clicking a notification row. Toggles the expanded state and marks the
+    /// notification as read if it's being expanded and is currently unread.
+    /// </summary>
+    /// <param name="notification">The notification that was clicked.</param>
+    private async Task HandleNotificationClick(NotificationDto notification)
+    {
+        // Toggle expand/collapse
+        if (_expandedNotificationId == notification.Id)
+        {
+            _expandedNotificationId = null;
+        }
+        else
+        {
+            _expandedNotificationId = notification.Id;
+            await MarkExpandedAsRead(notification.Id);
+        }
+    }
+
+    /// <summary>
+    /// Marks a notification as read by its ID if it's currently unread.
+    /// Used when expanding a notification (either via click or query parameter deep-link).
+    /// </summary>
+    /// <param name="notificationId">The ID of the notification to mark as read.</param>
+    private async Task MarkExpandedAsRead(Guid notificationId)
+    {
+        var notification = _notifications.FirstOrDefault(n => n.Id == notificationId);
+        if (notification is not null && !notification.IsRead)
+        {
+            var result = await ApiNotificationService.MarkAsReadAsync(notification.Id);
+            if (result.Succeeded)
+            {
+                notification.IsRead = true;
+                notification.ReadAtUtc = DateTime.UtcNow;
+                NotificationContext.DecrementCount();
+            }
         }
     }
 

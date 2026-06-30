@@ -6,47 +6,58 @@ A curated list of pages and features that would complement the existing template
 
 ## What Already Exists
 
-| Page / Feature | Path |
-|---|---|
-| Home (landing) | `/` |
-| User Profile (view + edit) | `/profile` |
-| Settings (theme, timezone, date format) | `/settings` (instant-save) |
-| User Management (CRUD, LDAP import/sync, bulk operations) | `/user-management` |
-| Role Management (CRUD, user assignment, position hierarchy) | `/role-management` |
-| Audit Log (searchable, filterable, paginated, CSV export, old/new value tracking) | `/audit-log` |
-| Page Access Permissions (role × page matrix, per-circuit cache, nav filtering) | `/admin/page-permissions` |
-| Full Auth flow (login, register, 2FA, passkeys, password reset, lockout) | `/Account/*` |
-| Theme Switching (light/dark/system, real-time) | Built into layout + settings |
-| Example pages (counter, weather, auth status) | `/counter`, `/weather`, `/auth` |
+| Page / Feature | Path | Notes |
+|---|---|---|
+| Home (landing) | `/` | |
+| User Profile (view + edit) | `/account/profile` | |
+| Settings (theme, timezone, date format, notifications) | `/account/settings/*` | Tabbed layout with profile, appearance, regional, notifications |
+| Notifications (inbox + preferences) | `/account/notifications` | Bell dropdown, click-to-expand detail, mark as read, bulk dismiss, category/status filters |
+| User Management (CRUD, LDAP, bulk ops) | `/admin/user-management` | Server-side grid, multi-select, bulk activate/deactivate/delete/role-assign |
+| Role Management (CRUD, user assignment) | `/admin/role-management` | Position hierarchy, user assignment dialog |
+| Audit Log (searchable, filterable, export) | `/admin/audit-log` | Old/new value tracking, Excel export |
+| Page Permissions (role × page matrix) | `/admin/page-permissions` | Bordered matrix grid, per-circuit cache, nav filtering |
+| Auth (login, register, 2FA, passkeys, password reset) | `/Account/*` | Full ASP.NET Core Identity flow + LDAP |
+| Theme Switching (light/dark/system) | Built into layout + settings | Real-time toggle, per-user DB persistence |
+| StatusAlert (reusable component) | UI library | Self-hiding, @bind-Message, dismissible, dense mode |
+| Example pages (counter, weather + notification test) | `/counter`, `/weather`, `/auth` | Weather page includes notification testing |
+
+### Recently Completed (This Session)
+
+- StatusAlert component created and deployed across all pages
+- Service registration extensions (`AddApiClients()`, `AddApplicationServices()`)
+- SystemPageDefaults expanded (all self-service pages bypass permissions)
+- RedirectToLogin → AccessDenied for authenticated users without permission
+- Notification bell redesign (MudMenu, unread background, click-to-expand-and-read)
+- AssetDefaults centralized (logos, backgrounds)
+- Theme separation (DefaultTheme + JabilTheme from brand guidelines)
+- Notification settings table layout (MudSimpleTable)
+- Removed Bordered from data grids (except page permissions matrix)
+- Settings nav icon color fix (IconColor.Inherit)
 
 ---
 
 ## High Priority — Common in Every Internal/Enterprise App
 
-### ~~1. Page Access Permissions~~ ✅ IMPLEMENTED
-- ~~Admin UI to configure which roles can access which pages~~
-- ~~Database-driven — no code changes needed when adding new roles~~
-- ~~Permissions cached per-circuit for zero performance impact~~
-- ~~Navigation menu auto-filters based on role permissions~~
-- See [`docs/features/page-access-permissions/`](./page-access-permissions/) for full spec
-- Route: `/admin/page-permissions`
-
-### 2. Notification System
-- In-app notification bell in the topbar
-- Notification preferences page (email, in-app toggles)
-- Mark as read, bulk dismiss
-- Route: `/notifications`
-
-### 2. Email Templates & SMTP Configuration
+### 1. Email Templates & SMTP Configuration
 - Admin page to configure SMTP settings (stored in DB, not just appsettings)
 - Preview/test email sending
 - Customizable email templates for password reset, account confirmation, etc.
+- Replace `NoOpEmailSender` with real implementation
 - Route: `/admin/email-settings`
 
-### 3. Application Settings (Admin)
+### 2. Application Settings (Admin)
 - Site-wide config stored in DB (site name, logo URL, maintenance mode toggle)
 - Feature flags page
+- Runtime-configurable settings without redeployment
 - Route: `/admin/app-settings`
+
+### 3. Wire Up Notification Triggers
+- Connect `CreateNotificationAsync` calls to actual user events:
+  - Role assignment/removal → notify affected user
+  - Account activation/deactivation → notify user
+  - Password changed by admin → notify user
+  - System announcements → notify all users
+- Currently the creation pipeline exists but nothing triggers it in production code
 
 ---
 
@@ -56,96 +67,128 @@ A curated list of pages and features that would complement the existing template
 - Admin sends invite link via email
 - Invitation token with expiry
 - Invited user completes registration via link
+- Track invitation status (pending, accepted, expired)
 - Route: `/admin/invitations`
 
 ### 5. File / Avatar Upload
 - Profile picture upload with cropping
 - Reusable file upload component (drag & drop, progress bar)
 - Store in local filesystem or blob storage (configurable)
+- Display avatar in topbar profile dropdown and user management
 
 ### 6. Session Management
 - View active sessions for current user (device, IP, last seen)
 - Ability to revoke/sign out other sessions
+- Admin view of all active sessions
 - Route: `/account/sessions`
 
-### 7. Multi-Tenant Support
-- Tenant switcher in topbar (for users in multiple tenants)
-- Admin tenant management (create, configure, deactivate)
-- Route: `/admin/tenants`
+### 7. Announcement / Banner System
+- Admin posts site-wide banners (info, warning, maintenance)
+- Dismissible by users (remember dismissal)
+- Scheduled start/end dates
+- Renders at top of MainLayout
+- Route: `/admin/announcements`
 
-### 8. Help / Documentation Page
+### 8. Dashboard / Home Page Widgets
+- Replace blank home page with useful widgets:
+  - Recent notifications summary
+  - Quick stats (user count, active sessions)
+  - Recent activity feed
+  - System health indicators
+- Admin-configurable widget layout
+
+### 9. Help / Documentation Page
 - Static markdown-rendered docs or FAQ
 - In-app contextual help tooltips
+- Version/changelog display
 - Route: `/help`
 
 ---
 
 ## Lower Priority — Nice-to-Have / Progressive Enhancement
 
-### 9. Bulk Operations Page
-- Bulk user import from CSV
-- Bulk deactivate/activate users
-- Bulk password reset
+### 10. Multi-Tenant Support
+- Tenant switcher in topbar (for users in multiple tenants)
+- Admin tenant management (create, configure, deactivate)
+- Data isolation per tenant
+- Route: `/admin/tenants`
+
+### 11. Bulk Import / Export
+- Bulk user import from CSV/Excel
+- Template download for correct format
+- Validation preview before import
 - Route: `/admin/bulk-operations`
 
-### 10. System Health / Status Page
+### 12. System Health / Status Page
 - Database connectivity check
 - External service health (LDAP, SMTP, Aspire services)
 - App version, uptime, memory usage
 - Route: `/admin/health`
 
-### 11. Localization / Language Switcher
+### 13. Localization / Language Switcher
 - Multi-language support (resource files or DB-driven)
 - Language preference in user settings
 - Admin page to manage translations
 - Route: Settings page enhancement + `/admin/translations`
 
-### 12. Password Policy Configuration
+### 14. Password Policy Configuration
 - Admin page to configure password rules (min length, complexity, expiry)
 - View/edit lockout policy (max attempts, duration)
+- Password expiry notifications
 - Route: `/admin/security-policies`
 
-### 13. API Key Management
+### 15. API Key Management
 - Users can generate personal API tokens
 - Admin can view/revoke all keys
 - Scoped permissions per key
 - Route: `/account/api-keys`
 
-### 14. Announcement / Banner System
-- Admin posts site-wide banners (info, warning, maintenance)
-- Dismissible by users
-- Scheduled start/end dates
-- Route: `/admin/announcements`
-
-### 15. Report Builder (CRUD)
+### 16. Report Builder
 - Simple saved queries / report definitions
-- Render as table or chart
+- Render as table or chart (MudChart)
 - Share with roles
+- Export to Excel/PDF
 - Route: `/reports`
 
-### 16. User Onboarding Wizard
+### 17. User Onboarding Wizard
 - First-login guided setup (set display name, avatar, timezone)
 - Skip-able steps
 - Tracks completion state
+- Only shows once per user
 
-### 17. Change Log / Release Notes Page
+### 18. Change Log / Release Notes Page
 - Markdown-driven list of app changes
-- Highlights new features on login
+- "What's new" badge on first login after update
 - Route: `/changelog`
 
 ---
 
 ## Infrastructure / Non-Page Enhancements
 
-| Enhancement | Description |
-|---|---|
-| Background Job Dashboard | Hangfire/Quartz dashboard for scheduled tasks |
-| SignalR Real-Time Notifications | Push updates to connected users |
-| Rate Limiting Middleware | Protect login and API endpoints |
-| Structured Logging Dashboard | Seq/ELK viewer embedded or linked |
-| CI/CD Pipeline (GitHub Actions) | Build, test, deploy workflow |
-| Docker Support | Aspire already supports containers — add production Dockerfile |
-| Health Checks UI | Aspire dashboard provides this — add custom health checks |
+| Enhancement | Description | Priority |
+|---|---|---|
+| SignalR Real-Time Notifications | Push notification count updates to connected users without polling | High |
+| Background Job Dashboard | Hangfire/Quartz for scheduled tasks (email sending, cleanup) | Medium |
+| Rate Limiting Middleware | Protect login and API endpoints from brute force | Medium |
+| CI/CD Pipeline (GitHub Actions) | Build, test, deploy workflow | Medium |
+| Docker Support | Production Dockerfile + docker-compose | Medium |
+| Structured Logging Dashboard | Seq/ELK viewer embedded or linked | Low |
+| Health Checks UI | Custom health checks beyond Aspire defaults | Low |
+| Response Caching | Cache static API responses (navigation, roles list) | Low |
+
+---
+
+## Suggested Next Features
+
+Based on what's built and what would add the most value:
+
+1. **Wire Up Notification Triggers** (#3) — Low effort, high value. The entire notification pipeline exists but nothing fires it. Adding calls in UserService/RoleService/AuthService completes the feature end-to-end.
+
+2. **SignalR Real-Time Notifications** — The bell currently loads on page init. With SignalR, the badge updates instantly when a notification is created. Pairs well with #3.
+
+3. **Dashboard Widgets** (#8) — The home page is currently empty. Adding a few widgets (recent notifications, quick stats) makes the template feel complete and demonstrates component composition.
+
+4. **Announcement/Banner System** (#7) — Simple to build, immediately useful. Admin creates a banner, all users see it at the top of the page until dismissed.
 
 ---
 

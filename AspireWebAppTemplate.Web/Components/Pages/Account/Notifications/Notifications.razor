@@ -77,14 +77,15 @@
         <MudList T="NotificationDto" Dense="false" Class="pa-0">
             @foreach (var notification in _notifications)
             {
-                <MudPaper Class="@GetNotificationItemClass(notification)" Elevation="0">
+                <MudPaper Class="@GetNotificationItemClass(notification)" Elevation="0" @onclick="() => HandleNotificationClick(notification)" Style="cursor: pointer;">
                     <MudStack Row AlignItems="AlignItems.Center" Spacing="2" Class="pa-3">
                         <!-- Selection Checkbox -->
                         <MudCheckBox T="bool"
                                      Value="@(_selectedIds.Contains(notification.Id))"
                                      ValueChanged="@(isChecked => HandleSelectionChanged(notification.Id, isChecked))"
                                      Color="Color.Primary"
-                                     Size="Size.Small" />
+                                     Size="Size.Small"
+                                     @onclick:stopPropagation="true" />
 
                         <!-- Category Icon -->
                         <MudIcon Icon="@GetCategoryIcon(notification.Category)"
@@ -99,18 +100,21 @@
                                      Style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                 @notification.Title
                             </MudText>
-                            <MudText Typo="Typo.body2"
-                                     Color="Color.Secondary"
-                                     Style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                @notification.Message
-                            </MudText>
+                            @if (_expandedNotificationId != notification.Id)
+                            {
+                                <MudText Typo="Typo.body2"
+                                         Color="Color.Secondary"
+                                         Style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    @notification.Message
+                                </MudText>
+                            }
                             <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mt-1">
                                 @FormatRelativeTime(notification.CreatedAtUtc)
                             </MudText>
                         </MudStack>
 
                         <!-- Action Buttons -->
-                        <MudStack Row AlignItems="AlignItems.Center" Spacing="0">
+                        <MudStack Row AlignItems="AlignItems.Center" Spacing="0" @onclick:stopPropagation="true">
                             @if (!notification.IsRead)
                             {
                                 <MudTooltip Text="Mark as Read">
@@ -128,6 +132,27 @@
                             </MudTooltip>
                         </MudStack>
                     </MudStack>
+
+                    <!-- Expanded Detail Panel -->
+                    <MudCollapse Expanded="@(_expandedNotificationId == notification.Id)">
+                        <MudPaper Class="pa-4 mx-3 mb-3" Elevation="0" Outlined>
+                            <MudStack Spacing="2">
+                                <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                                    <MudIcon Icon="@GetCategoryIcon(notification.Category)"
+                                             Size="Size.Small"
+                                             Color="@GetCategoryColor(notification.Category)" />
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                        @notification.Category
+                                    </MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                        · @notification.CreatedAtUtc.ToString("g")
+                                    </MudText>
+                                </MudStack>
+                                <MudText Typo="Typo.body1" Class="fw-bold">@notification.Title</MudText>
+                                <MudText Typo="Typo.body2">@notification.Message</MudText>
+                            </MudStack>
+                        </MudPaper>
+                    </MudCollapse>
                 </MudPaper>
             }
         </MudList>
