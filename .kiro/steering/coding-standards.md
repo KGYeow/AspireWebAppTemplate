@@ -90,6 +90,24 @@ Rules:
 - Use MudBlazor utility classes for spacing/flex (`d-flex`, `align-center`, `pa-4`, etc.)
 - Prefer `Elevation="0"` on MudPaper for flat card style with border
 
+### Service Registration Extensions
+- Web project: `Extensions/ApiClientServiceExtensions.cs` exposes `AddApiClients(this IServiceCollection)` — registers all typed HttpClient services.
+- Web project: `Extensions/ApplicationServiceExtensions.cs` exposes `AddApplicationServices(this IServiceCollection)` — registers scoped services, handlers, contexts.
+- API project: `Extensions/ApplicationServiceExtensions.cs` exposes `AddApplicationServices(this IServiceCollection)` — registers all business services.
+- `Program.cs` calls these extension methods instead of inline registrations.
+- Group related registrations (e.g., all API clients together, all scoped services together) within the extension method.
+
+### Asset Defaults
+- Centralized logo and background paths in `Web/Common/Defaults/AssetDefaults.cs`.
+- Reference via `@AssetDefaults.LogoAuth`, `@AssetDefaults.LogoSidebar`, `@AssetDefaults.BackgroundAuth`, etc.
+- Never hardcode asset paths directly in Razor files — always go through `AssetDefaults`.
+
+### Theme Configuration
+- `DefaultTheme` (neutral blue) and `JabilTheme` (corporate brand) in `UI/Theme/`.
+- Layouts declare: `protected JabilTheme AppTheme { get; } = new();`
+- Swap `JabilTheme` → `DefaultTheme` for personal/unbranded deployments.
+- Do NOT use `ApplicationTheme` — it no longer exists.
+
 ### Testing
 - Property-based tests: FsCheck.Xunit 3.x with `[Property(MaxTest = 2)]`
 - Unit tests: xUnit + Moq

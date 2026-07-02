@@ -212,6 +212,27 @@ public class NotificationService : INotificationService
     }
 
     /// <inheritdoc />
+    public async Task<bool> MarkAsUnreadAsync(string userId, Guid notificationId)
+    {
+        // Find the notification by ID and ensure it belongs to the specified user.
+        var notification = await _dbContext.Notifications
+            .FirstOrDefaultAsync(n => n.Id == notificationId && n.UserId == userId);
+
+        if (notification is null)
+            return false;
+
+        // Idempotent: if already unread, no changes needed.
+        if (!notification.IsRead)
+            return true;
+
+        notification.IsRead = false;
+        notification.ReadAtUtc = null;
+        await _dbContext.SaveChangesAsync();
+
+        return true;
+    }
+
+    /// <inheritdoc />
     public async Task<int> MarkAllAsReadAsync(string userId)
     {
         // Query all unread notifications for the user.

@@ -29,10 +29,11 @@ ASP.NET Core Web API with business logic, data access, and Identity.
 
 | Folder | Purpose |
 |--------|---------|
-| `Controllers/` | API endpoints (Auth, Users, Roles, AuditLog) |
+| `Controllers/` | API endpoints (Auth, Users, Roles, AuditLog, Notifications) |
 | `Data/` | ApplicationDbContext, entities, migrations, seed data |
-| `Services/` | Business logic (LoginService, AuditLogService, LdapAuthService, ExcelExportService, etc.) |
-| `Abstractions/` | Service interfaces (IAuditLogService, ILoginService, etc.) |
+| `Extensions/` | DI registration extensions (ApplicationServiceExtensions) |
+| `Services/` | Business logic (LoginService, AuditLogService, LdapAuthService, ExcelExportService, NotificationService, etc.) |
+| `Abstractions/` | Service interfaces (IAuditLogService, ILoginService, INotificationService, etc.) |
 | `Options/` | Configuration option classes (LdapSettings) |
 | `Authentication/` | InternalAuthenticationHandler for service-to-service auth |
 
@@ -42,9 +43,11 @@ Blazor Server frontend (Global InteractiveServer mode) — no database or Identi
 
 | Folder | Purpose |
 |--------|---------|
-| `Components/Pages/` | Feature pages organized by domain (Profile, Settings, UserManagement, RoleManagement, AuditLog) |
+| `Components/Pages/` | Feature pages organized by domain (Profile, Settings, UserManagement, RoleManagement, AuditLog, Notifications) |
 | `Components/Layout/` | MainLayout, DropdownProfile, navigation components |
 | `Components/Account/` | Login, Register, Manage pages (calls API via HTTP) |
+| `Common/Defaults/` | Centralized constants (AssetDefaults — logo/background paths) |
+| `Extensions/` | DI registration extensions (ApiClientServiceExtensions, ApplicationServiceExtensions) |
 | `Services/` | HTTP client services (ApiAuthService, ApiUserService, ApiRoleService, ApiAuditLogService, etc.) |
 | `Abstractions/` | Frontend service interfaces |
 | `wwwroot/` | Static assets, JS interop modules (timezone.js, theme.js) |
@@ -69,8 +72,8 @@ Reusable Blazor components and theming shared across the application.
 | Folder | Purpose |
 |--------|---------|
 | `Components/DataGrid/` | BoolFilterSelect and other grid components |
-| `Components/Shared/` | PillToggle, PillToggleItem, and other generic components |
-| `Theme/` | ApplicationTheme (MudTheme with dual palettes) |
+| `Components/Shared/` | PillToggle, PillToggleItem, StatusAlert, and other generic components |
+| `Theme/` | DefaultTheme (neutral blue), JabilTheme (corporate brand) — dual palette themes |
 | `Utilities/` | DataGridUtils<T> (in-memory filtering/sorting/pagination) |
 
 ### AspireWebAppTemplate.Tests (Test Project)

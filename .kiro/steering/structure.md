@@ -40,6 +40,7 @@ AspireWebAppTemplate.ApiService/
 │   ├── Entities/               ← EF Core entities (ApplicationUser, ApplicationRole, AuditLogEntry, etc.)
 │   ├── ApplicationDbContext.cs
 │   └── SeedData.cs
+├── Extensions/                 ← DI registration extensions (ApplicationServiceExtensions)
 ├── Services/                   ← Full service implementations (all business logic lives here)
 └── Utilities/                  ← AuditChangeHelper, etc.
 ```
@@ -47,6 +48,8 @@ AspireWebAppTemplate.ApiService/
 ## Web Project
 ```
 AspireWebAppTemplate.Web/
+├── Common/
+│   └── Defaults/               ← Centralized constants (AssetDefaults — logo/background paths)
 ├── Components/
 │   ├── Layout/                 ← Region-based layout organization
 │   │   ├── MainLayout.razor    ← Entry-point layouts at root level
@@ -61,6 +64,7 @@ AspireWebAppTemplate.Web/
 │   │   ├── Admin/              ← AuditLog, UserManagement, RoleManagement, PagePermissions
 │   │   └── Example/            ← Counter, Weather, Auth demo
 │   └── Shared/                 ← Web-specific shared components
+├── Extensions/                 ← DI registration extensions (ApiClientServiceExtensions, ApplicationServiceExtensions)
 ├── Services/
 │   └── ApiClients/             ← Typed HttpClient services (ApiUserService, etc.)
 ├── Authorization/              ← PagePermissionHandler, requirements
@@ -70,9 +74,9 @@ AspireWebAppTemplate.Web/
 ## UI Project (Razor Class Library)
 ```
 AspireWebAppTemplate.UI/
-├── Components/Shared/          ← Reusable components (PageContent, LoadingOverlay, PageHeader, etc.)
+├── Components/Shared/          ← Reusable components (PageContent, LoadingOverlay, PageHeader, StatusAlert, etc.)
 ├── Utilities/                  ← DataGridUtils, QueryableDataGridUtils
-└── Theme/                      ← AppTheme, palette configuration
+└── Theme/                      ← DefaultTheme (neutral blue) + JabilTheme (corporate brand)
 ```
 
 ## Tests Project

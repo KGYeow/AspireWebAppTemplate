@@ -131,6 +131,29 @@ public class NotificationController : BaseController
     }
 
     /// <summary>
+    /// Marks a single notification as unread for the authenticated user.
+    /// Idempotent: succeeds even if already unread.
+    /// </summary>
+    /// <param name="id">The unique identifier of the notification to mark as unread.</param>
+    /// <returns>200 OK if successful, 404 if the notification was not found or does not belong to the user.</returns>
+    /// <response code="200">The notification was marked as unread successfully.</response>
+    /// <response code="401">User is not authenticated.</response>
+    /// <response code="404">The notification was not found or does not belong to the user.</response>
+    [HttpPut("{id:guid}/unread")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> MarkAsUnread(Guid id)
+    {
+        var found = await _notificationService.MarkAsUnreadAsync(CurrentUserId!, id);
+
+        if (!found)
+            return NotFound();
+
+        return Ok();
+    }
+
+    /// <summary>
     /// Marks all unread notifications as read for the authenticated user.
     /// Returns the count of notifications that were actually updated.
     /// </summary>

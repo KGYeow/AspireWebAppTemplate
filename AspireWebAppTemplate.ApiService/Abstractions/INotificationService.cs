@@ -107,6 +107,16 @@ public interface INotificationService
     Task<bool> MarkAsReadAsync(string userId, Guid notificationId);
 
     /// <summary>
+    /// Marks a single notification as unread for the specified user.
+    /// Sets IsRead to false and clears ReadAtUtc.
+    /// Idempotent: succeeds even if already unread.
+    /// </summary>
+    /// <param name="userId">The user who owns the notification.</param>
+    /// <param name="notificationId">The notification to mark as unread.</param>
+    /// <returns>True if the notification was found; false if not found or doesn't belong to the user.</returns>
+    Task<bool> MarkAsUnreadAsync(string userId, Guid notificationId);
+
+    /// <summary>
     /// Marks all unread notifications for the specified user as read.
     /// Sets IsRead=true and ReadAtUtc to the current UTC time on all matching records.
     /// </summary>

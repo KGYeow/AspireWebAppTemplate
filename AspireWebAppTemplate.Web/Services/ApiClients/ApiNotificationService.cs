@@ -90,6 +90,21 @@ public class ApiNotificationService(HttpClient http)
     }
 
     /// <summary>
+    /// Marks a single notification as unread for the authenticated user.
+    /// Calls PUT /api/notifications/{id}/unread.
+    /// </summary>
+    /// <param name="notificationId">The unique identifier of the notification to mark as unread.</param>
+    /// <returns>
+    /// An <see cref="ApiResult"/> indicating success or failure with an error message.
+    /// </returns>
+    public async Task<ApiResult> MarkAsUnreadAsync(Guid notificationId)
+    {
+        var response = await http.PutAsync($"/api/notifications/{notificationId}/unread", null);
+        if (response.IsSuccessStatusCode) return ApiResult.Success();
+        return ApiResult.Failure(await response.Content.ReadAsStringAsync());
+    }
+
+    /// <summary>
     /// Marks all unread notifications as read for the authenticated user.
     /// Calls PUT /api/notifications/read-all.
     /// </summary>

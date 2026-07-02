@@ -92,7 +92,9 @@ catch (ArgumentException ex)         { return BadRequest(ex.Message); }
 
 ### DI Registration
 - Services registered as **scoped** (aligns with per-request DbContext lifetime).
-- Register in `Program.cs`.
+- API project: registered via `Extensions/ApplicationServiceExtensions.cs` → `AddApplicationServices()`.
+- Web project: HTTP clients via `Extensions/ApiClientServiceExtensions.cs` → `AddApiClients()`; other services via `Extensions/ApplicationServiceExtensions.cs` → `AddApplicationServices()`.
+- `Program.cs` calls these extension methods — no inline service registrations.
 
 ### Service Method Signatures
 - For **user-scoped queries** (e.g., "get MY notifications"): accept `userId` as a parameter. The controller passes `CurrentUserId`.

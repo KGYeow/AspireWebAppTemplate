@@ -9,7 +9,7 @@ namespace AspireWebAppTemplate.Web.Components.Layout.Topbar;
 
 /// <summary>
 /// Notification bell icon with unread count badge and dropdown popover.
-/// Displays the 5 most recent notifications with title, category icon, and relative timestamp.
+/// Displays the 10 most recent notifications with title, category icon, and relative timestamp.
 /// Subscribes to <see cref="INotificationContext.OnChange"/> for real-time badge updates.
 /// </summary>
 public partial class NotificationBell : ComponentBase, IDisposable
@@ -42,6 +42,11 @@ public partial class NotificationBell : ComponentBase, IDisposable
     /// The cached unread notification count displayed in the badge.
     /// </summary>
     private int _unreadCount;
+
+    /// <summary>
+    /// Reference to the MudMenu component for programmatic close on navigation.
+    /// </summary>
+    private MudMenu _menuRef = default!;
 
     /// <summary>
     /// The list of most recent notifications displayed in the dropdown.
@@ -110,6 +115,7 @@ public partial class NotificationBell : ComponentBase, IDisposable
             }
         }
 
+        await _menuRef.CloseMenuAsync();
         NavigationManager.NavigateTo($"/account/notifications?id={notification.Id}");
     }
 
@@ -135,8 +141,9 @@ public partial class NotificationBell : ComponentBase, IDisposable
     /// <summary>
     /// Navigates to the full notifications page.
     /// </summary>
-    private void NavigateToNotifications()
+    private async Task NavigateToNotifications()
     {
+        await _menuRef.CloseMenuAsync();
         NavigationManager.NavigateTo("/account/notifications");
     }
 
@@ -146,9 +153,10 @@ public partial class NotificationBell : ComponentBase, IDisposable
     /// </summary>
     private void HandleContextChanged()
     {
-        InvokeAsync(() =>
+        InvokeAsync(async () =>
         {
             _unreadCount = NotificationContext.UnreadCount;
+            await LoadRecentNotifications();
             StateHasChanged();
         });
     }
@@ -158,7 +166,7 @@ public partial class NotificationBell : ComponentBase, IDisposable
     #region Helpers
 
     /// <summary>
-    /// Loads the 5 most recent notifications from the API for the dropdown display.
+    /// Loads the 10 most recent notifications from the API for the dropdown display.
     /// </summary>
     private async Task LoadRecentNotifications()
     {
@@ -167,13 +175,9 @@ public partial class NotificationBell : ComponentBase, IDisposable
         var result = await ApiNotificationService.GetRecentAsync();
 
         if (result.Succeeded)
-        {
             _recentNotifications = result.Data;
-        }
         else
-        {
             _recentNotifications = [];
-        }
 
         _isLoadingRecent = false;
     }

@@ -32,7 +32,7 @@
 
 /* Notification unread background — used in bell dropdown and notifications page */
 .notification-unread {
-    background-color: var(--mud-palette-action-default-hover) !important;
+    background-color: rgba(var(--mud-palette-primary-rgb), 0.05) !important;
 }
 
 /* Notification bell list — rounded items matching action-menu style */
@@ -43,4 +43,15 @@
 /* Notification bell popover max width */
 .notification-bell-popover {
     max-width: 360px !important;
+}
+
+/* Notification selected item — left border accent for active detail */
+.notification-selected {
+    background-color: var(--mud-palette-action-default-hover) !important;
+    border-left: 3px solid var(--mud-palette-primary) !important;
+}
+
+/* Notification page list items — rounded corners matching bell dropdown */
+.notification-page-list .mud-list-item {
+    border-radius: var(--mud-default-borderradius);
 }

@@ -5,6 +5,7 @@ using AspireWebAppTemplate.Web.Abstractions;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using MudBlazor;
 
 namespace AspireWebAppTemplate.Web.Components.Pages.Account.Notifications;
@@ -20,7 +21,7 @@ namespace AspireWebAppTemplate.Web.Components.Pages.Account.Notifications;
 /// <see cref="INotificationContext"/> for keeping the topbar badge in sync.
 /// </remarks>
 [Authorize]
-public partial class Notifications : ComponentBase
+public partial class Notifications : ComponentBase, IAsyncDisposable
 {
     #region Injected Services
 
@@ -49,11 +50,27 @@ public partial class Notifications : ComponentBase
     private IUserTimeZoneContext UserTimeZone { get; set; } = default!;
 
     /// <summary>
+    /// JavaScript runtime for infinite scroll Intersection Observer setup.
+    /// </summary>
+    [Inject]
+    private IJSRuntime JS { get; set; } = default!;
+
+    #endregion
+
+    #region Parameters
+
+    /// <summary>
     /// The current viewport breakpoint, cascaded from MainLayout via MudBreakpointProvider.
     /// Used to determine responsive layout behavior (list-detail vs single-column).
     /// </summary>
     [CascadingParameter]
     private Breakpoint CurrentBreakpoint { get; set; }
+
+    /// <summary>
+    /// Query parameter for deep-linking to a specific notification from the bell dropdown.
+    /// </summary>
+    [SupplyParameterFromQuery(Name = "id")]
+    private string? HighlightedNotificationId { get; set; }
 
     #endregion
 
@@ -65,13 +82,13 @@ public partial class Notifications : ComponentBase
     private bool _isLoading = true;
 
     /// <summary>
-    /// Whether additional notifications are being loaded via the "Load More" button.
+    /// Whether additional notifications are being loaded via infinite scroll.
     /// </summary>
     private bool _isLoadingMore;
 
     /// <summary>
     /// The list of notifications currently displayed on the page.
-    /// Appended to when "Load More" is clicked.
+    /// Appended to as the user scrolls down (infinite scroll).
     /// </summary>
     private List<NotificationDto> _notifications = [];
 
@@ -92,14 +109,14 @@ public partial class Notifications : ComponentBase
 
     /// <summary>
     /// Whether there are more notifications available beyond the current page.
-    /// Controls visibility of the "Load More" button.
+    /// Controls visibility of the infinite scroll sentinel.
     /// </summary>
     private bool _hasNextPage;
 
     /// <summary>
     /// The number of notifications to fetch per page.
     /// </summary>
-    private const int PageSize = 5;
+    private const int PageSize = 10;
 
     /// <summary>
     /// Tracks selected notification IDs for bulk dismiss operations.
@@ -107,16 +124,25 @@ public partial class Notifications : ComponentBase
     private HashSet<Guid> _selectedIds = [];
 
     /// <summary>
+    /// Element reference for the infinite scroll sentinel div.
+    /// </summary>
+    private ElementReference _scrollSentinel;
+
+    /// <summary>
+    /// JavaScript module reference for infinite scroll Intersection Observer.
+    /// </summary>
+    private IJSObjectReference? _jsModule;
+
+    /// <summary>
+    /// .NET object reference passed to JS for callback invocation.
+    /// </summary>
+    private DotNetObjectReference<Notifications>? _dotNetRef;
+
+    /// <summary>
     /// The ID of the currently selected notification (showing full detail in the detail panel).
     /// Null when no notification is selected.
     /// </summary>
     private Guid? _expandedNotificationId;
-
-    /// <summary>
-    /// Query parameter for deep-linking to a specific notification from the bell dropdown.
-    /// </summary>
-    [SupplyParameterFromQuery(Name = "id")]
-    private string? HighlightedNotificationId { get; set; }
 
     /// <summary>
     /// Indicates whether the current viewport is below the medium breakpoint.
@@ -130,19 +156,56 @@ public partial class Notifications : ComponentBase
 
     /// <summary>
     /// Loads the initial set of notifications from the API on page initialization.
-    /// If a notification ID is provided via query parameter, selects and marks it as read.
     /// </summary>
     protected override async Task OnInitializedAsync()
     {
         await LoadNotificationsAsync(resetList: true);
         _isLoading = false;
+    }
 
-        // If navigated from bell dropdown with a specific notification ID, select it
+    /// <summary>
+    /// Handles parameter changes including query string updates.
+    /// If a notification ID is provided via query parameter, selects and marks it as read.
+    /// </summary>
+    protected override async Task OnParametersSetAsync()
+    {
         if (Guid.TryParse(HighlightedNotificationId, out var notificationId))
         {
             _expandedNotificationId = notificationId;
             await MarkExpandedAsRead(notificationId);
         }
+    }
+
+    /// <summary>
+    /// Sets up the Intersection Observer for infinite scroll after the component renders.
+    /// </summary>
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_hasNextPage && _jsModule is null)
+        {
+            await SetupInfiniteScroll();
+        }
+    }
+
+    /// <summary>
+    /// Disposes the JS module and .NET object reference.
+    /// </summary>
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (_jsModule is not null)
+            {
+                await _jsModule.InvokeVoidAsync("dispose");
+                await _jsModule.DisposeAsync();
+            }
+        }
+        catch (JSDisconnectedException)
+        {
+            // Circuit disconnected during disposal (e.g., page refresh) — safe to ignore.
+        }
+
+        _dotNetRef?.Dispose();
     }
 
     #endregion
@@ -174,18 +237,6 @@ public partial class Notifications : ComponentBase
     }
 
     /// <summary>
-    /// Handles the "Load More" button click.
-    /// Increments the page and appends the next set of notifications to the existing list.
-    /// </summary>
-    private async Task LoadMoreAsync()
-    {
-        _currentPage++;
-        _isLoadingMore = true;
-        await LoadNotificationsAsync(resetList: false);
-        _isLoadingMore = false;
-    }
-
-    /// <summary>
     /// Handles clicking a notification row. Selects the notification in the detail panel
     /// and marks it as read if currently unread.
     /// </summary>
@@ -194,6 +245,28 @@ public partial class Notifications : ComponentBase
     {
         _expandedNotificationId = notification.Id;
         await MarkExpandedAsRead(notification.Id);
+    }
+
+    /// <summary>
+    /// Marks a notification as unread. Updates the item in the list and increments the
+    /// NotificationContext cached unread count.
+    /// </summary>
+    /// <param name="notification">The notification to mark as unread.</param>
+    private async Task HandleMarkAsUnread(NotificationDto notification)
+    {
+        var result = await ApiNotificationService.MarkAsUnreadAsync(notification.Id);
+
+        if (result.Succeeded)
+        {
+            notification.IsRead = false;
+            notification.ReadAtUtc = null;
+            await NotificationContext.RefreshAsync();
+            Snackbar.Add("Notification marked as unread.", Severity.Success);
+        }
+        else
+        {
+            Snackbar.Add("Failed to mark notification as unread.", Severity.Error);
+        }
     }
 
     /// <summary>
@@ -348,16 +421,59 @@ public partial class Notifications : ComponentBase
             _selectedIds.Remove(notificationId);
     }
 
+    /// <summary>
+    /// Clears all selected notification IDs.
+    /// </summary>
+    private void ClearSelection()
+    {
+        _selectedIds.Clear();
+    }
+
     #endregion
 
     #region Helpers
+
+    /// <summary>
+    /// Sets up the Intersection Observer for infinite scroll on the sentinel element.
+    /// </summary>
+    private async Task SetupInfiniteScroll()
+    {
+        _dotNetRef = DotNetObjectReference.Create(this);
+        _jsModule = await JS.InvokeAsync<IJSObjectReference>("import", "./js/infinite-scroll.js");
+        await _jsModule.InvokeVoidAsync("initialize", _scrollSentinel, _dotNetRef);
+    }
+
+    /// <summary>
+    /// Called by the JS Intersection Observer when the sentinel element becomes visible.
+    /// Triggers loading the next page of notifications.
+    /// </summary>
+    [JSInvokable]
+    public async Task OnScrolledToBottom()
+    {
+        if (_isLoadingMore || !_hasNextPage) return;
+
+        _currentPage++;
+        _isLoadingMore = true;
+        StateHasChanged();
+
+        await LoadNotificationsAsync(resetList: false);
+
+        _isLoadingMore = false;
+        StateHasChanged();
+
+        // Re-setup observer if there are more pages
+        if (_hasNextPage && _jsModule is not null)
+        {
+            await _jsModule.InvokeVoidAsync("initialize", _scrollSentinel, _dotNetRef);
+        }
+    }
 
     /// <summary>
     /// Loads notifications from the API using current filter and pagination state.
     /// </summary>
     /// <param name="resetList">
     /// When true, replaces the notification list (used for initial load and filter changes).
-    /// When false, appends to the existing list (used for "Load More").
+    /// When false, appends to the existing list (used for infinite scroll pagination).
     /// </param>
     private async Task LoadNotificationsAsync(bool resetList)
     {
@@ -408,14 +524,13 @@ public partial class Notifications : ComponentBase
     {
         var baseClass = "mb-2";
 
-        if (!notification.IsRead)
-        {
-            baseClass += " notification-unread";
-        }
-
         if (_expandedNotificationId == notification.Id)
         {
-            baseClass += " mud-primary-text";
+            baseClass += " notification-selected";
+        }
+        else if (!notification.IsRead)
+        {
+            baseClass += " notification-unread";
         }
 
         return baseClass;
