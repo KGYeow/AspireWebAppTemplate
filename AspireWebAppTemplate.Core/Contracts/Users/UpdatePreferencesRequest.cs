@@ -22,4 +22,10 @@ public sealed class UpdatePreferencesRequest
     /// The user's preferred date/time format string.
     /// </summary>
     public string? DateTimeFormat { get; set; }
+
+    /// <summary>
+    /// Whether real-time pop-up notifications are enabled for this user.
+    /// Null means "no change" (partial update semantics).
+    /// </summary>
+    public bool? NotificationPopupsEnabled { get; set; }
 }

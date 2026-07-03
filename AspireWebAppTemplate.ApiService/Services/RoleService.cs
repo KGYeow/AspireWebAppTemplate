@@ -508,7 +508,8 @@ public class RoleService : IRoleService
             TenantId = user.TenantId,
             Theme = user.Theme,
             TimeZoneId = user.TimeZoneId,
-            DateTimeFormat = user.DateTimeFormat
+            DateTimeFormat = user.DateTimeFormat,
+            NotificationPopupsEnabled = user.NotificationPopupsEnabled
         };
     }
 

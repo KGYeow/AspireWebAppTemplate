@@ -94,7 +94,7 @@ public class NotificationCreationPropertyTests
                     var userId = SeedUser(dbContext);
 
                     var logger = NullLogger<NotificationService>.Instance;
-                    var service = new NotificationService(dbContext, logger);
+                    var service = new NotificationService(dbContext, logger, null!);
 
                     var request = new CreateNotificationRequest
                     {
@@ -176,7 +176,7 @@ public class NotificationCreationPropertyTests
                     dbContext.SaveChanges();
 
                     // Create the notification service and attempt to create a notification
-                    var service = new NotificationService(dbContext, NullLogger<NotificationService>.Instance);
+                    var service = new NotificationService(dbContext, NullLogger<NotificationService>.Instance, null!);
 
                     var request = new CreateNotificationRequest
                     {
@@ -235,7 +235,7 @@ public class NotificationCreationPropertyTests
                     dbContext.SaveChanges();
 
                     // Create the notification service and attempt to create a notification
-                    var service = new NotificationService(dbContext, NullLogger<NotificationService>.Instance);
+                    var service = new NotificationService(dbContext, NullLogger<NotificationService>.Instance, null!);
 
                     var request = new CreateNotificationRequest
                     {
@@ -282,7 +282,7 @@ public class NotificationCreationPropertyTests
                     var userId = SeedUser(dbContext);
 
                     // Create the notification service and attempt to create a notification
-                    var service = new NotificationService(dbContext, NullLogger<NotificationService>.Instance);
+                    var service = new NotificationService(dbContext, NullLogger<NotificationService>.Instance, null!);
 
                     var request = new CreateNotificationRequest
                     {

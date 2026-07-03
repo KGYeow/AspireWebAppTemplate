@@ -47,6 +47,12 @@ public partial class NotificationBell : ComponentBase, IDisposable
     [Inject]
     private ILogger<NotificationBell> Logger { get; set; } = default!;
 
+    /// <summary>
+    /// Typed HttpClient service for auth operations (loading user preferences).
+    /// </summary>
+    [Inject]
+    private ApiAuthService AuthService { get; set; } = default!;
+
     #endregion
 
     #region State
@@ -73,10 +79,10 @@ public partial class NotificationBell : ComponentBase, IDisposable
     private bool _isLoadingRecent;
 
     /// <summary>
-    /// Cached user notification preferences for toast suppression.
-    /// Loaded once during initialization. Null before first load.
+    /// Whether pop-up notifications are enabled for this user. Loaded once during initialization.
+    /// Defaults to true so toasts show until the user's preference is loaded.
     /// </summary>
-    private List<NotificationPreferenceDto>? _preferences;
+    private bool _popupsEnabled = true;
 
     #endregion
 
@@ -104,8 +110,8 @@ public partial class NotificationBell : ComponentBase, IDisposable
         // Load recent notifications for the dropdown.
         await LoadRecentNotifications();
 
-        // Load user preferences for toast suppression.
-        await LoadPreferences();
+        // Load user's global popup preference.
+        await LoadPopupPreferenceAsync();
     }
 
     /// <summary>
@@ -166,8 +172,8 @@ public partial class NotificationBell : ComponentBase, IDisposable
                     _recentNotifications.RemoveAt(_recentNotifications.Count - 1);
             }
 
-            // Show snackbar toast if the category is not suppressed by user preferences.
-            ShowToastIfEnabled(title, category);
+            // Show snackbar toast for the new notification.
+            ShowToast(title);
 
             StateHasChanged();
         });
@@ -246,49 +252,52 @@ public partial class NotificationBell : ComponentBase, IDisposable
     }
 
     /// <summary>
-    /// Loads the user's notification preferences for toast suppression logic.
+    /// Loads the user's global pop-up notification preference from the API.
+    /// Defaults to true (show popups) if the preference cannot be loaded.
     /// </summary>
-    private async Task LoadPreferences()
+    private async Task LoadPopupPreferenceAsync()
     {
         try
         {
-            var result = await ApiNotificationService.GetPreferencesAsync();
-
-            if (result.Succeeded)
-                _preferences = result.Data;
+            var result = await AuthService.GetCurrentUserAsync();
+            if (result.Succeeded && result.Data is not null)
+            {
+                _popupsEnabled = result.Data.NotificationPopupsEnabled;
+            }
         }
         catch (Exception ex)
         {
-            Logger.LogWarning(ex, "Failed to load notification preferences for toast suppression.");
+            Logger.LogWarning(ex, "Failed to load pop-up notification preference.");
         }
     }
 
     /// <summary>
-    /// Displays a snackbar toast for a received notification if the user's preference
-    /// for the given category has InAppEnabled set to true (or no preference exists, defaulting to true).
+    /// Displays a snackbar toast for a received notification if the user has pop-up
+    /// notifications enabled. Suppresses the toast when disabled globally.
     /// </summary>
     /// <param name="title">The notification title.</param>
-    /// <param name="category">The notification category string.</param>
-    private void ShowToastIfEnabled(string title, string category)
+    private void ShowToast(string title)
     {
-        // Check if the user has suppressed toasts for this category.
-        if (_preferences is not null &&
-            Enum.TryParse<NotificationCategory>(category, ignoreCase: true, out var parsedCategory))
-        {
-            var pref = _preferences.FirstOrDefault(p => p.Category == parsedCategory);
+        if (!_popupsEnabled)
+            return;
 
-            // If InAppEnabled is explicitly false, suppress the toast.
-            if (pref is not null && !pref.InAppEnabled)
-                return;
-        }
-
-        // Truncate title to 100 characters with ellipsis for the toast.
-        var displayTitle = title.Length > 100 ? string.Concat(title.AsSpan(0, 100), "…") : title;
+        var displayTitle = TruncateTitle(title);
 
         Snackbar.Add(displayTitle, Severity.Info, config =>
         {
             config.VisibleStateDuration = 5000;
         });
+    }
+
+    /// <summary>
+    /// Truncates a notification title to a maximum of 100 characters, appending an ellipsis ("…")
+    /// if the original exceeds the limit. Returns the original string unchanged when within the limit.
+    /// </summary>
+    /// <param name="title">The notification title to truncate.</param>
+    /// <returns>The original or truncated title.</returns>
+    internal static string TruncateTitle(string title)
+    {
+        return title.Length > 100 ? string.Concat(title.AsSpan(0, 100), "…") : title;
     }
 
     /// <summary>

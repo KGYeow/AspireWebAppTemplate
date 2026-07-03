@@ -8,6 +8,19 @@
     <MudText Typo="Typo.body2" Class="mud-text-secondary mb-4">Configure which notifications you receive and through which channels</MudText>
     <MudDivider />
 
+    <MudPaper Class="pa-4 my-4" Elevation="0">
+        <div class="d-flex align-center justify-space-between">
+            <div>
+                <MudText Typo="Typo.body1" Class="fw-bold">Pop-up notifications</MudText>
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">Show a brief pop-up when new notifications arrive</MudText>
+            </div>
+            <MudSwitch T="bool"
+                       Value="_notificationPopupsEnabled"
+                       ValueChanged="HandlePopupToggle"
+                       Color="Color.Primary" />
+        </div>
+    </MudPaper>
+
     <MudSimpleTable Hover Outlined Elevation="0" Class="my-4">
         <thead>
             <tr>

@@ -68,7 +68,7 @@ public class NotificationPreferenceDefaultsPropertyTests
                 {
                     // No preference records are seeded for this user — the user has no stored preferences.
                     var logger = NullLogger<NotificationService>.Instance;
-                    var service = new NotificationService(dbContext, logger);
+                    var service = new NotificationService(dbContext, logger, null!);
 
                     // Act: retrieve preferences for a user with no preference records.
                     var preferences = service.GetPreferencesAsync(userId).GetAwaiter().GetResult();

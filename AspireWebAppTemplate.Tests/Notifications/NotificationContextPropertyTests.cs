@@ -1,4 +1,5 @@
 // Feature: notification-system, Property 6: NotificationContext cache correctly reflects mark/dismiss operations
+// Feature: realtime-notifications, Property 4: UpdateFromHub replaces cached unread count
 using System.Net;
 using System.Text;
 using AspireWebAppTemplate.Web.Services;
@@ -177,6 +178,84 @@ public class NotificationContextPropertyTests
                 return (neverNegative && finalCount == 0).Label(
                     $"NeverNegative={neverNegative}, FinalAfterClear={finalCount} " +
                     $"(initial={initialCount}, decrements=[{string.Join(",", decrements)}])");
+            });
+    }
+
+    /// <summary>
+    /// Property: For any initial unread count N and any incoming hub unread count M (>= 0),
+    /// calling UpdateFromHub(M) SHALL set UnreadCount to M regardless of N.
+    /// **Validates: Requirements 3.2**
+    /// </summary>
+    [Property(MaxTest = 2)]
+    public FsCheck.Property UpdateFromHub_ReplacesUnreadCount_RegardlessOfInitialValue()
+    {
+        // Generate pairs of initial count N (0–1000) and hub count M (0–1000).
+        var gen = Gen.Choose(0, 1000).SelectMany(initialCount =>
+            Gen.Choose(0, 1000).Select(hubCount => (initialCount, hubCount)));
+
+        return Prop.ForAll(
+            Arb.From(gen),
+            ((int initialCount, int hubCount) input) =>
+            {
+                var (initialCount, hubCount) = input;
+
+                // Arrange: create context with mocked API returning the initial count
+                var apiService = CreateMockedApiService(initialCount);
+                var logger = NullLogger<NotificationContext>.Instance;
+                var context = new NotificationContext(apiService, logger);
+
+                // Act: initialize to load the initial count from the "API"
+                context.InitializeAsync(new Uri("https://localhost/hubs/notifications")).GetAwaiter().GetResult();
+
+                // Act: call UpdateFromHub with the hub count
+                context.UpdateFromHub(hubCount);
+
+                // Assert: UnreadCount equals M regardless of initial N
+                var actualCount = context.UnreadCount;
+
+                return (actualCount == hubCount).Label(
+                    $"Expected UnreadCount={hubCount} after UpdateFromHub({hubCount}), " +
+                    $"but got {actualCount} (initial was {initialCount})");
+            });
+    }
+
+    /// <summary>
+    /// Property: For any initial unread count N and any incoming hub unread count M (>= 0),
+    /// calling UpdateFromHub(M) SHALL raise the OnChange event exactly once.
+    /// **Validates: Requirements 3.2**
+    /// </summary>
+    [Property(MaxTest = 2)]
+    public FsCheck.Property UpdateFromHub_RaisesOnChangeEvent()
+    {
+        // Generate pairs of initial count N (0–1000) and hub count M (0–1000).
+        var gen = Gen.Choose(0, 1000).SelectMany(initialCount =>
+            Gen.Choose(0, 1000).Select(hubCount => (initialCount, hubCount)));
+
+        return Prop.ForAll(
+            Arb.From(gen),
+            ((int initialCount, int hubCount) input) =>
+            {
+                var (initialCount, hubCount) = input;
+
+                // Arrange: create context with mocked API returning the initial count
+                var apiService = CreateMockedApiService(initialCount);
+                var logger = NullLogger<NotificationContext>.Instance;
+                var context = new NotificationContext(apiService, logger);
+
+                // Act: initialize to load the initial count from the "API"
+                context.InitializeAsync(new Uri("https://localhost/hubs/notifications")).GetAwaiter().GetResult();
+
+                // Track OnChange invocations AFTER initialization (reset count)
+                var onChangeCount = 0;
+                context.OnChange += () => onChangeCount++;
+
+                // Act: call UpdateFromHub with the hub count
+                context.UpdateFromHub(hubCount);
+
+                // Assert: OnChange was raised exactly once by UpdateFromHub
+                return (onChangeCount == 1).Label(
+                    $"Expected OnChange to fire exactly 1 time after UpdateFromHub({hubCount}), " +
+                    $"but fired {onChangeCount} times (initial was {initialCount})");
             });
     }
 }

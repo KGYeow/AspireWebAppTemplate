@@ -130,7 +130,7 @@ public class NotificationControllerTests
         };
 
         _mockService
-            .Setup(s => s.GetRecentAsync(TestUserId, 5))
+            .Setup(s => s.GetRecentAsync(TestUserId, 10))
             .ReturnsAsync(recentList);
 
         // Act
@@ -141,7 +141,7 @@ public class NotificationControllerTests
         var list = Assert.IsType<List<NotificationDto>>(okResult.Value);
         Assert.Equal(2, list.Count);
 
-        _mockService.Verify(s => s.GetRecentAsync(TestUserId, 5), Times.Once);
+        _mockService.Verify(s => s.GetRecentAsync(TestUserId, 10), Times.Once);
     }
 
     #endregion

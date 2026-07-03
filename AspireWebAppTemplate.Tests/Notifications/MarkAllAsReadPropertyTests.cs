@@ -134,7 +134,7 @@ public class MarkAllAsReadPropertyTests
                         .Where(n => alreadyReadIds.Contains(n.Id))
                         .ToDictionary(n => n.Id, n => n.ReadAtUtc);
 
-                    var service = new NotificationService(dbContext, NullLogger<NotificationService>.Instance);
+                    var service = new NotificationService(dbContext, NullLogger<NotificationService>.Instance, null!);
 
                     // Act: mark all as read.
                     var returnedCount = service.MarkAllAsReadAsync(userId).GetAwaiter().GetResult();

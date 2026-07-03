@@ -100,6 +100,8 @@ public class AuthService : IAuthService
             user.TimeZoneId = string.IsNullOrEmpty(request.TimeZoneId) ? null : request.TimeZoneId;
         if (request.DateTimeFormat is not null)
             user.DateTimeFormat = string.IsNullOrEmpty(request.DateTimeFormat) ? null : request.DateTimeFormat;
+        if (request.NotificationPopupsEnabled.HasValue)
+            user.NotificationPopupsEnabled = request.NotificationPopupsEnabled.Value;
 
         user.UpdatedUtc = DateTime.UtcNow;
         var result = await _userManager.UpdateAsync(user);
@@ -573,7 +575,8 @@ public class AuthService : IAuthService
             UpdatedUtc = user.UpdatedUtc,
             Theme = user.Theme,
             TimeZoneId = user.TimeZoneId,
-            DateTimeFormat = user.DateTimeFormat
+            DateTimeFormat = user.DateTimeFormat,
+            NotificationPopupsEnabled = user.NotificationPopupsEnabled
         };
     }
 

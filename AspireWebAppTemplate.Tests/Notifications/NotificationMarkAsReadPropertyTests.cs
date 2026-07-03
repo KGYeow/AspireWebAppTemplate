@@ -109,7 +109,7 @@ public class NotificationMarkAsReadPropertyTests
                     // Seed an unread notification.
                     var (userId, notificationId) = SeedUnreadNotification(dbContext, category);
 
-                    var service = new NotificationService(dbContext, NullLogger<NotificationService>.Instance);
+                    var service = new NotificationService(dbContext, NullLogger<NotificationService>.Instance, null!);
 
                     // First call: mark as read — this should set IsRead=true and ReadAtUtc.
                     var firstResult = service.MarkAsReadAsync(userId, notificationId).GetAwaiter().GetResult();

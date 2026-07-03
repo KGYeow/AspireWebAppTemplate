@@ -123,4 +123,11 @@ public class ApplicationUser : IdentityUser
     /// Gets or sets the timestamp (UTC) when the user record was last updated.
     /// </summary>
     public DateTime? UpdatedUtc { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether real-time pop-up notifications are shown to the user.
+    /// When false, notifications still appear in the notification bell/list but no
+    /// in-page pop-up is displayed on arrival. Defaults to true.
+    /// </summary>
+    public bool NotificationPopupsEnabled { get; set; } = true;
 }

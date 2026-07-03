@@ -1,4 +1,5 @@
 using AspireWebAppTemplate.Core.Contracts.Notifications;
+using AspireWebAppTemplate.Core.Contracts.Users;
 using AspireWebAppTemplate.Core.Domain.Enums;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -28,6 +29,11 @@ public partial class Notifications : ComponentBase
     [Inject] private ApiNotificationService NotificationService { get; set; } = default!;
 
     /// <summary>
+    /// Typed HttpClient service for user preference operations (get current user, update preferences).
+    /// </summary>
+    [Inject] private ApiAuthService AuthService { get; set; } = default!;
+
+    /// <summary>
     /// Provides navigation actions (e.g., redirecting to InvalidUser on load failure).
     /// </summary>
     [Inject] private NavigationManager NavigationManager { get; set; } = default!;
@@ -47,6 +53,11 @@ public partial class Notifications : ComponentBase
     private List<NotificationPreferenceDto> _notificationPreferences = [];
 
     /// <summary>
+    /// Whether pop-up notifications are enabled globally for this user.
+    /// </summary>
+    private bool _notificationPopupsEnabled = true;
+
+    /// <summary>
     /// Whether the page is loading its data.
     /// </summary>
     private bool _isLoading = true;
@@ -56,16 +67,47 @@ public partial class Notifications : ComponentBase
     #region Lifecycle
 
     /// <summary>
-    /// Loads notification delivery preferences for all categories from the API on page initialization.
+    /// Loads notification delivery preferences for all categories and the global popup setting from the API.
     /// </summary>
     protected override async Task OnInitializedAsync()
     {
+        await LoadPopupPreferenceAsync();
         await LoadNotificationPreferencesAsync();
     }
 
     #endregion
 
     #region Event Handlers
+
+    /// <summary>
+    /// Handles the global pop-up notifications toggle change.
+    /// Immediately persists the new value via the API. On failure, reverts the toggle
+    /// and displays a Snackbar error.
+    /// </summary>
+    /// <param name="newValue">The new pop-up enabled value.</param>
+    private async Task HandlePopupToggle(bool newValue)
+    {
+        var previousValue = _notificationPopupsEnabled;
+        _notificationPopupsEnabled = newValue;
+
+        try
+        {
+            var result = await AuthService.UpdatePreferencesAsync(
+                new UpdatePreferencesRequest { NotificationPopupsEnabled = newValue });
+
+            if (!result.Succeeded)
+            {
+                _notificationPopupsEnabled = previousValue;
+                Snackbar.Add("Failed to save notification preference. Please try again.", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Error saving pop-up notification preference.");
+            _notificationPopupsEnabled = previousValue;
+            Snackbar.Add("Failed to save notification preference. Please try again.", Severity.Error);
+        }
+    }
 
     /// <summary>
     /// Handles the In-App notification toggle change for a specific category.
@@ -142,6 +184,25 @@ public partial class Notifications : ComponentBase
     #endregion
 
     #region Private Helpers
+
+    /// <summary>
+    /// Loads the global pop-up notification preference from the current user's profile.
+    /// </summary>
+    private async Task LoadPopupPreferenceAsync()
+    {
+        try
+        {
+            var result = await AuthService.GetCurrentUserAsync();
+            if (result.Succeeded && result.Data is not null)
+            {
+                _notificationPopupsEnabled = result.Data.NotificationPopupsEnabled;
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Error loading pop-up notification preference.");
+        }
+    }
 
     /// <summary>
     /// Loads notification delivery preferences for all categories from the API.

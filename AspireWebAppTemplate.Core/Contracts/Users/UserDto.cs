@@ -153,4 +153,10 @@ public sealed class UserDto
     /// The user's preferred date/time format string.
     /// </summary>
     public string? DateTimeFormat { get; set; }
+
+    /// <summary>
+    /// Whether real-time pop-up notifications are enabled for this user.
+    /// When false, notifications still appear in the bell/list but no pop-up is shown.
+    /// </summary>
+    public bool NotificationPopupsEnabled { get; set; } = true;
 }

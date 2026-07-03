@@ -101,7 +101,7 @@ public class NotificationRetrievalPropertyTests
                     dbContext.SaveChanges();
 
                     // Create service and apply both filters
-                    var service = new NotificationService(dbContext, NullLogger<NotificationService>.Instance);
+                    var service = new NotificationService(dbContext, NullLogger<NotificationService>.Instance, null!);
                     var queryParams = new NotificationQueryParams
                     {
                         Page = 1,
@@ -199,7 +199,7 @@ public class NotificationRetrievalPropertyTests
                     dbContext.SaveChanges();
 
                     // Act: call GetNotificationsAsync with the generated page/pageSize
-                    var service = new NotificationService(dbContext, NullLogger<NotificationService>.Instance);
+                    var service = new NotificationService(dbContext, NullLogger<NotificationService>.Instance, null!);
                     var queryParams = new NotificationQueryParams
                     {
                         Page = page,
@@ -287,7 +287,7 @@ public class NotificationRetrievalPropertyTests
                             dbContext.SaveChanges();
 
                             // Act: call GetUnreadCountAsync
-                            var service = new NotificationService(dbContext, NullLogger<NotificationService>.Instance);
+                            var service = new NotificationService(dbContext, NullLogger<NotificationService>.Instance, null!);
                             var result = service.GetUnreadCountAsync(userId).GetAwaiter().GetResult();
 
                             // Assert: returned count equals the actual number of unread notifications

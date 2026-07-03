@@ -123,7 +123,7 @@ public class BulkDismissPropertyTests
                     };
 
                     // Create the service and call BulkDismissAsync.
-                    var service = new NotificationService(dbContext, NullLogger<NotificationService>.Instance);
+                    var service = new NotificationService(dbContext, NullLogger<NotificationService>.Instance, null!);
                     var deletedCount = service.BulkDismissAsync(userA, idsToDismiss).GetAwaiter().GetResult();
 
                     // Clear the change tracker so retrieval hits the database.

@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="AspireWebAppTemplate.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\AspireWebAppTemplate.ServiceDefaults\AspireWebAppTemplate.ServiceDefaults.csproj" />
     <ProjectReference Include="..\AspireWebAppTemplate.Core\AspireWebAppTemplate.Core.csproj" />
     <ProjectReference Include="..\AspireWebAppTemplate.UI\AspireWebAppTemplate.UI.csproj" />

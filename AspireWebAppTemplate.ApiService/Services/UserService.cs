@@ -628,7 +628,8 @@ public class UserService : IUserService
             LastPasswordChangeUtc = user.LastPasswordChangeUtc,
             AvatarUrl = user.AvatarUrl,
             Locale = user.Locale,
-            TenantId = user.TenantId
+            TenantId = user.TenantId,
+            NotificationPopupsEnabled = user.NotificationPopupsEnabled
         };
     }
 

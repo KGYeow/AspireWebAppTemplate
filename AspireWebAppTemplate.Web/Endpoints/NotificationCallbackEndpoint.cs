@@ -37,7 +37,7 @@ public static class NotificationCallbackEndpoint
     /// Validates the incoming push request and delivers the notification event to the target
     /// user's SignalR group via the <see cref="NotificationHub"/>.
     /// </summary>
-    private static async Task<IResult> HandlePush(NotificationPushRequest request, IHubContext<NotificationHub> hubContext)
+    internal static async Task<IResult> HandlePush(NotificationPushRequest request, IHubContext<NotificationHub> hubContext)
     {
         // Validate required fields.
         if (string.IsNullOrWhiteSpace(request.UserId))
