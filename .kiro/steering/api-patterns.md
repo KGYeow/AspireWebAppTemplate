@@ -201,3 +201,27 @@ public class ApiUserService(HttpClient http)
 
 ### Service Discovery
 Registered with Aspire: `"https+http://apiservice"` base address.
+
+## API → Web Communication (Internal Callbacks)
+
+### Pattern
+The API project calls back to the Web project for real-time notification delivery. This is a reverse direction from the normal Web→API flow.
+
+### Components
+- **`WebCallbackClient`** (`ApiService/Services/WebCallbackClient.cs`) — typed HttpClient that POSTs to the Web project's internal endpoint
+- **`InternalApiKeyDelegatingHandler`** (`ApiService/Services/Handlers/`) — attaches `X-Internal-Api-Key` header to outbound requests
+- **`InternalApiKeyAuthenticationHandler`** (`Web/Authentication/`) — validates the API key on the Web side
+- **`NotificationCallbackEndpoint`** (`Web/Endpoints/`) — minimal API endpoint that receives the callback and pushes to SignalR
+
+### Service Discovery
+Registered with Aspire: `"https+http://webfrontend"` base address (reverse direction).
+
+### Authentication
+- Shared secret via `INTERNAL_API_KEY` environment variable (set by Aspire AppHost parameter)
+- API attaches: `InternalApiKeyDelegatingHandler` adds `X-Internal-Api-Key` header
+- Web validates: `InternalApiKeyAuthenticationHandler` + `"InternalApiPolicy"` authorization policy
+
+### Error Handling
+- Callback failures (timeout, network, non-success status) are logged at Warning level and **never** disrupt the primary operation
+- The notification is already persisted in the database — real-time delivery is best-effort
+- No retry logic — the user sees the notification on next page load if real-time fails

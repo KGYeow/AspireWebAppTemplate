@@ -26,7 +26,14 @@ public class WebCallbackClient
     /// </summary>
     private const string CallbackPath = "/internal/notifications/push";
 
+    /// <summary>
+    /// The configured HttpClient with Aspire service discovery base address for the Web project.
+    /// </summary>
     private readonly HttpClient _httpClient;
+
+    /// <summary>
+    /// The logger for recording callback warnings and errors.
+    /// </summary>
     private readonly ILogger<WebCallbackClient> _logger;
 
     /// <summary>

@@ -16,6 +16,8 @@ namespace AspireWebAppTemplate.Web.Authentication;
 /// </remarks>
 public class InternalApiKeyAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
+    #region Constructor
+
     /// <summary>
     /// The authentication scheme name used for internal API key validation.
     /// </summary>
@@ -26,6 +28,9 @@ public class InternalApiKeyAuthenticationHandler : AuthenticationHandler<Authent
     /// </summary>
     private const string ApiKeyHeaderName = "X-Internal-Api-Key";
 
+    /// <summary>
+    /// The application configuration for reading the expected internal API key value.
+    /// </summary>
     private readonly IConfiguration _configuration;
 
     /// <summary>
@@ -44,6 +49,8 @@ public class InternalApiKeyAuthenticationHandler : AuthenticationHandler<Authent
     {
         _configuration = configuration;
     }
+
+    #endregion
 
     /// <summary>
     /// Validates the <c>X-Internal-Api-Key</c> header against the configured expected value.

@@ -23,10 +23,11 @@ AspireWebAppTemplate.Core/
 ├── Contracts/                  ← DTOs grouped by feature
 │   ├── AuditLog/
 │   ├── Auth/
+│   ├── Notifications/          ← NotificationDto, CreateNotificationRequest, NotificationPushRequest, etc.
 │   ├── PagePermissions/
 │   ├── Roles/
 │   └── Users/
-├── Domain/Enums/               ← AuditActionType, AuditEntityType, ThemePreference, etc.
+├── Domain/Enums/               ← AuditActionType, AuditEntityType, ThemePreference, NotificationCategory, etc.
 ├── Extensions/                 ← Extension methods
 └── Utilities/                  ← Shared utilities
 ```
@@ -42,12 +43,14 @@ AspireWebAppTemplate.ApiService/
 │   └── SeedData.cs
 ├── Extensions/                 ← DI registration extensions (ApplicationServiceExtensions)
 ├── Services/                   ← Full service implementations (all business logic lives here)
+│   └── Handlers/               ← Delegating handlers (InternalApiKeyDelegatingHandler)
 └── Utilities/                  ← AuditChangeHelper, etc.
 ```
 
 ## Web Project
 ```
 AspireWebAppTemplate.Web/
+├── Authentication/             ← Internal API key auth handler (service-to-service)
 ├── Common/
 │   └── Defaults/               ← Centralized constants (AssetDefaults — logo/background paths)
 ├── Components/
@@ -55,7 +58,7 @@ AspireWebAppTemplate.Web/
 │   │   ├── MainLayout.razor    ← Entry-point layouts at root level
 │   │   ├── AuthLayout.razor
 │   │   ├── ManageLayout.razor
-│   │   ├── Topbar/             ← Topbar, DropdownProfile
+│   │   ├── Topbar/             ← Topbar, DropdownProfile, NotificationBell
 │   │   ├── Sidebar/            ← DrawerHeader, NavMenu, ManageNavMenu
 │   │   ├── Footer/             ← Footer
 │   │   └── Shared/             ← ReconnectModal, etc.
@@ -64,9 +67,14 @@ AspireWebAppTemplate.Web/
 │   │   ├── Admin/              ← AuditLog, UserManagement, RoleManagement, PagePermissions
 │   │   └── Example/            ← Counter, Weather, Auth demo
 │   └── Shared/                 ← Web-specific shared components
+├── Endpoints/                  ← Minimal API endpoints (NotificationCallbackEndpoint)
 ├── Extensions/                 ← DI registration extensions (ApiClientServiceExtensions, ApplicationServiceExtensions)
+├── Hubs/                       ← SignalR hubs (NotificationHub)
 ├── Services/
-│   └── ApiClients/             ← Typed HttpClient services (ApiUserService, etc.)
+│   ├── ApiClients/             ← Typed HttpClient services (ApiUserService, ApiNotificationService, etc.)
+│   ├── Contexts/               ← Per-circuit scoped state (NotificationContext, CircuitUserContext)
+│   ├── Handlers/               ← Delegating handlers (UserIdentityDelegatingHandler)
+│   └── ExponentialBackoffRetryPolicy.cs
 ├── Authorization/              ← PagePermissionHandler, requirements
 └── wwwroot/                    ← Static assets (css, js, images)
 ```
@@ -84,6 +92,7 @@ AspireWebAppTemplate.UI/
 AspireWebAppTemplate.Tests/
 ├── ControllerServiceRefactor/  ← Property + unit tests for service layer
 ├── AuditLog/                   ← Property + unit tests for audit features
+├── Notifications/              ← Property + unit tests for notification features
 ├── PagePermissions/            ← Property + unit tests for page permissions
 ├── Services/                   ← Service-level unit tests
 └── Layout/                     ← Layout/component tests

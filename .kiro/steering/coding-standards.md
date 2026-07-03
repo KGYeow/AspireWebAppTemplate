@@ -141,6 +141,28 @@ Rules:
 - Controllers: map service exceptions to HTTP status codes via try/catch (see api-patterns.md).
 - UI save operations: show error via Snackbar or inline alert, revert state on failure.
 
+### Server-Side SignalR Hub Connections
+In Blazor Server, when a scoped service (e.g., `NotificationContext`) creates a `HubConnection` back to its own host:
+- The connection is server-side code connecting to the same ASP.NET Core process — there is NO browser involved
+- `UserIdentityDelegatingHandler` does NOT apply — it's for `HttpClient` pipelines (Web→API calls)
+- The user's auth cookie must be **manually captured** from `IHttpContextAccessor` during construction (SSR phase) and forwarded via `options.Headers.Add("Cookie", cookie)` in `WithUrl`
+- After the circuit establishes, `HttpContext` becomes null — capture must happen in the constructor or early lifecycle
+
+```csharp
+// Capture cookie during SSR (constructor or early init)
+_authCookie = httpContextAccessor.HttpContext?.Request.Headers.Cookie.ToString();
+
+// Forward when building the hub connection
+_hubConnection = new HubConnectionBuilder()
+    .WithUrl(hubUrl, options =>
+    {
+        if (!string.IsNullOrEmpty(_authCookie))
+            options.Headers.Add("Cookie", _authCookie);
+    })
+    .WithAutomaticReconnect(new ExponentialBackoffRetryPolicy())
+    .Build();
+```
+
 ## Conventions
 
 ### Naming

@@ -30,13 +30,31 @@ namespace AspireWebAppTemplate.Web.Services;
 /// <b>Failure tolerance:</b> Hub connection failures are caught and logged. The service falls back
 /// to navigation-based refresh when the hub is unavailable. No exceptions propagate to callers.
 /// </para>
+/// <para>
+/// <b>Cookie forwarding:</b> In Blazor Server, the hub connection is established from server-side
+/// code back to the same host. The user's authentication cookie must be captured during the initial
+/// SSR render (when HttpContext is available) and forwarded to the hub connection so the
+/// [Authorize] attribute on NotificationHub can authenticate the connection.
+/// </para>
 /// </remarks>
 public sealed class NotificationContext : INotificationContext
 {
     #region Constructor
 
+    /// <summary>
+    /// The typed HttpClient service for notification API operations (fetching unread count).
+    /// </summary>
     private readonly ApiNotificationService _apiNotificationService;
+
+    /// <summary>
+    /// The logger for recording warnings and errors during hub connection and API calls.
+    /// </summary>
     private readonly ILogger<NotificationContext> _logger;
+
+    /// <summary>
+    /// The HTTP context accessor used to capture the auth cookie during SSR.
+    /// </summary>
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     /// <summary>
     /// The cached unread notification count for the current user's circuit.
@@ -55,14 +73,29 @@ public sealed class NotificationContext : INotificationContext
     private HubConnection? _hubConnection;
 
     /// <summary>
+    /// The authentication cookie value captured during the initial SSR render.
+    /// Forwarded to the hub connection to authenticate with NotificationHub.
+    /// </summary>
+    private string? _authCookie;
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="NotificationContext"/> class.
+    /// Captures the authentication cookie from the current HTTP context (available during SSR).
     /// </summary>
     /// <param name="apiNotificationService">The typed HttpClient for notification API operations.</param>
     /// <param name="logger">The logger for recording warnings and errors.</param>
-    public NotificationContext(ApiNotificationService apiNotificationService, ILogger<NotificationContext> logger)
+    /// <param name="httpContextAccessor">Accessor for the HTTP context to capture the auth cookie.</param>
+    public NotificationContext(
+        ApiNotificationService apiNotificationService,
+        ILogger<NotificationContext> logger,
+        IHttpContextAccessor httpContextAccessor)
     {
         _apiNotificationService = apiNotificationService;
         _logger = logger;
+        _httpContextAccessor = httpContextAccessor;
+
+        // Capture the auth cookie during construction (which happens during SSR when HttpContext is available).
+        _authCookie = _httpContextAccessor.HttpContext?.Request.Headers.Cookie.ToString();
     }
 
     #endregion
@@ -110,7 +143,7 @@ public sealed class NotificationContext : INotificationContext
             }
             else
             {
-                // API returned a non-success result — keep count at 0 and log warning.
+                // API returned a non-success result - keep count at 0 and log warning.
                 _logger.LogWarning(
                     "Failed to load unread notification count from API. Error: {Error}. " +
                     "Notification badge will show 0 until next refresh.",
@@ -120,7 +153,7 @@ public sealed class NotificationContext : INotificationContext
         }
         catch (Exception ex)
         {
-            // Network failure or unexpected error — keep count at 0 and log warning.
+            // Network failure or unexpected error ï¿½ keep count at 0 and log warning.
             // The notification badge will simply not show a count rather than breaking the layout.
             _logger.LogWarning(ex,
                 "Exception occurred while loading unread notification count. " +
@@ -143,13 +176,21 @@ public sealed class NotificationContext : INotificationContext
     /// <summary>
     /// Establishes the SignalR hub connection with exponential backoff reconnection
     /// and registers event handlers for real-time notification delivery.
+    /// Forwards the captured authentication cookie so NotificationHub's [Authorize] succeeds.
     /// </summary>
     private async Task StartHubConnectionAsync(Uri hubUrl)
     {
         try
         {
             _hubConnection = new HubConnectionBuilder()
-                .WithUrl(hubUrl)
+                .WithUrl(hubUrl, options =>
+                {
+                    // Forward the captured auth cookie so the hub connection is authenticated.
+                    if (!string.IsNullOrEmpty(_authCookie))
+                    {
+                        options.Headers.Add("Cookie", _authCookie);
+                    }
+                })
                 .WithAutomaticReconnect(new ExponentialBackoffRetryPolicy())
                 .Build();
 
@@ -233,7 +274,7 @@ public sealed class NotificationContext : INotificationContext
             }
             else
             {
-                // API failure during refresh — keep current count and log warning.
+                // API failure during refresh - keep current count and log warning.
                 // Better to show a slightly stale count than reset to 0 unexpectedly.
                 _logger.LogWarning(
                     "Failed to refresh unread notification count from API. Error: {Error}. " +
@@ -243,7 +284,7 @@ public sealed class NotificationContext : INotificationContext
         }
         catch (Exception ex)
         {
-            // Network failure during refresh — preserve current count and log warning.
+            // Network failure during refresh - preserve current count and log warning.
             _logger.LogWarning(ex,
                 "Exception occurred while refreshing unread notification count. " +
                 "Cached count remains at {CachedCount}.", _unreadCount);

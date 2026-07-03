@@ -14,6 +14,8 @@ namespace AspireWebAppTemplate.Web.Services;
 /// </remarks>
 public class ExponentialBackoffRetryPolicy : IRetryPolicy
 {
+    #region Constructor
+
     /// <summary>
     /// Maximum number of reconnection attempts before giving up.
     /// </summary>
@@ -23,6 +25,10 @@ public class ExponentialBackoffRetryPolicy : IRetryPolicy
     /// Maximum delay between reconnection attempts (30 seconds).
     /// </summary>
     private static readonly TimeSpan MaxDelay = TimeSpan.FromSeconds(30);
+
+    #endregion
+
+    #region Retry Logic
 
     /// <summary>
     /// Computes the next retry delay using exponential backoff (2^N seconds),
@@ -39,4 +45,6 @@ public class ExponentialBackoffRetryPolicy : IRetryPolicy
         var delay = TimeSpan.FromSeconds(Math.Pow(2, retryContext.PreviousRetryCount));
         return delay > MaxDelay ? MaxDelay : delay;
     }
+
+    #endregion
 }

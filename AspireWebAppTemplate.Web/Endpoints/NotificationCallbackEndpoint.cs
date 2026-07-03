@@ -22,6 +22,8 @@ namespace AspireWebAppTemplate.Web.Endpoints;
 /// </remarks>
 public static class NotificationCallbackEndpoint
 {
+    #region Endpoint Registration
+
     /// <summary>
     /// Maps the internal notification push endpoint at <c>POST /internal/notifications/push</c>.
     /// </summary>
@@ -32,6 +34,10 @@ public static class NotificationCallbackEndpoint
 
         return endpoints;
     }
+
+    #endregion
+
+    #region Request Handling
 
     /// <summary>
     /// Validates the incoming push request and delivers the notification event to the target
@@ -62,4 +68,6 @@ public static class NotificationCallbackEndpoint
 
         return Results.Ok();
     }
+
+    #endregion
 }

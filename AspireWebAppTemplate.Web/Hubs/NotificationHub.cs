@@ -27,6 +27,8 @@ namespace AspireWebAppTemplate.Web.Hubs;
 [Authorize]
 public class NotificationHub : Hub
 {
+    #region Connection Lifecycle
+
     /// <summary>
     /// Adds the authenticated user's connection to their user-specific SignalR group.
     /// Aborts the connection if the user identity cannot be determined.
@@ -59,4 +61,6 @@ public class NotificationHub : Hub
 
         await base.OnDisconnectedAsync(exception);
     }
+
+    #endregion
 }

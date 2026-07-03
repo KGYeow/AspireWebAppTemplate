@@ -11,11 +11,16 @@ namespace AspireWebAppTemplate.ApiService.Services.Handlers;
 /// </remarks>
 public class InternalApiKeyDelegatingHandler : DelegatingHandler
 {
+    #region Constructor
+
     /// <summary>
     /// The HTTP header name used for internal service-to-service authentication.
     /// </summary>
     private const string ApiKeyHeaderName = "X-Internal-Api-Key";
 
+    /// <summary>
+    /// The application configuration for reading the internal API key value.
+    /// </summary>
     private readonly IConfiguration _configuration;
 
     /// <summary>
@@ -26,6 +31,8 @@ public class InternalApiKeyDelegatingHandler : DelegatingHandler
     {
         _configuration = configuration;
     }
+
+    #endregion
 
     /// <summary>
     /// Adds the internal API key header to the outbound request before forwarding it.
