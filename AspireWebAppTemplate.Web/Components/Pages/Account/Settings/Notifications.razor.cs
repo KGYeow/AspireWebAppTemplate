@@ -1,6 +1,7 @@
 using AspireWebAppTemplate.Core.Contracts.Notifications;
 using AspireWebAppTemplate.Core.Contracts.Users;
 using AspireWebAppTemplate.Core.Domain.Enums;
+using AspireWebAppTemplate.Web.Abstractions;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
@@ -32,6 +33,11 @@ public partial class Notifications : ComponentBase
     /// Typed HttpClient service for user preference operations (get current user, update preferences).
     /// </summary>
     [Inject] private ApiAuthService AuthService { get; set; } = default!;
+
+    /// <summary>
+    /// Per-circuit notification context for updating the popup preference in real time.
+    /// </summary>
+    [Inject] private INotificationContext NotificationContext { get; set; } = default!;
 
     /// <summary>
     /// Provides navigation actions (e.g., redirecting to InvalidUser on load failure).
@@ -81,8 +87,9 @@ public partial class Notifications : ComponentBase
 
     /// <summary>
     /// Handles the global pop-up notifications toggle change.
-    /// Immediately persists the new value via the API. On failure, reverts the toggle
-    /// and displays a Snackbar error.
+    /// Immediately persists the new value via the API and updates the shared NotificationContext
+    /// so the change takes effect across the layout without a page refresh.
+    /// On failure, reverts the toggle and displays a Snackbar error.
     /// </summary>
     /// <param name="newValue">The new pop-up enabled value.</param>
     private async Task HandlePopupToggle(bool newValue)
@@ -99,7 +106,11 @@ public partial class Notifications : ComponentBase
             {
                 _notificationPopupsEnabled = previousValue;
                 Snackbar.Add("Failed to save notification preference. Please try again.", Severity.Error);
+                return;
             }
+
+            // Update the shared per-circuit context so NotificationBell picks up the change immediately.
+            NotificationContext.NotificationPopupsEnabled = newValue;
         }
         catch (Exception ex)
         {

@@ -123,11 +123,14 @@ public class NotificationService : INotificationService
                 var unreadCount = await _dbContext.Notifications
                     .CountAsync(n => n.UserId == request.UserId && !n.IsRead);
 
-                await _webCallbackClient.NotifyAsync(
-                    request.UserId,
-                    request.Title,
-                    request.Category.ToString(),
-                    unreadCount);
+                await _webCallbackClient.NotifyAsync(new Core.Contracts.Notifications.NotificationPushRequest
+                {
+                    UserId = request.UserId,
+                    Title = request.Title,
+                    Message = request.Message,
+                    Category = request.Category.ToString(),
+                    UnreadCount = unreadCount
+                });
             }
             catch (Exception callbackEx)
             {

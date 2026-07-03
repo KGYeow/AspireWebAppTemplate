@@ -77,7 +77,7 @@ public class NotificationContextPropertyTests
                 // Arrange: create context with mocked API returning the initial count
                 var apiService = CreateMockedApiService(initialCount);
                 var logger = NullLogger<NotificationContext>.Instance;
-                var context = new NotificationContext(apiService, logger, new Mock<IHttpContextAccessor>().Object);
+                var context = new NotificationContext(apiService, logger, new Mock<IHttpContextAccessor>().Object, new Mock<ApiAuthService>(new HttpClient()).Object);
 
                 // Act: initialize to load the count from the "API"
                 context.InitializeAsync(new Uri("https://localhost/hubs/notifications")).GetAwaiter().GetResult();
@@ -117,7 +117,7 @@ public class NotificationContextPropertyTests
                 // Arrange: create context with mocked API returning the initial count
                 var apiService = CreateMockedApiService(initialCount);
                 var logger = NullLogger<NotificationContext>.Instance;
-                var context = new NotificationContext(apiService, logger, new Mock<IHttpContextAccessor>().Object);
+                var context = new NotificationContext(apiService, logger, new Mock<IHttpContextAccessor>().Object, new Mock<ApiAuthService>(new HttpClient()).Object);
 
                 // Act: initialize to load the count, then clear
                 context.InitializeAsync(new Uri("https://localhost/hubs/notifications")).GetAwaiter().GetResult();
@@ -158,7 +158,7 @@ public class NotificationContextPropertyTests
                 // Arrange: create context with mocked API returning the initial count
                 var apiService = CreateMockedApiService(initialCount);
                 var logger = NullLogger<NotificationContext>.Instance;
-                var context = new NotificationContext(apiService, logger, new Mock<IHttpContextAccessor>().Object);
+                var context = new NotificationContext(apiService, logger, new Mock<IHttpContextAccessor>().Object, new Mock<ApiAuthService>(new HttpClient()).Object);
 
                 // Act: initialize to load the count
                 context.InitializeAsync(new Uri("https://localhost/hubs/notifications")).GetAwaiter().GetResult();
@@ -203,7 +203,7 @@ public class NotificationContextPropertyTests
                 // Arrange: create context with mocked API returning the initial count
                 var apiService = CreateMockedApiService(initialCount);
                 var logger = NullLogger<NotificationContext>.Instance;
-                var context = new NotificationContext(apiService, logger, new Mock<IHttpContextAccessor>().Object);
+                var context = new NotificationContext(apiService, logger, new Mock<IHttpContextAccessor>().Object, new Mock<ApiAuthService>(new HttpClient()).Object);
 
                 // Act: initialize to load the initial count from the "API"
                 context.InitializeAsync(new Uri("https://localhost/hubs/notifications")).GetAwaiter().GetResult();
@@ -241,7 +241,7 @@ public class NotificationContextPropertyTests
                 // Arrange: create context with mocked API returning the initial count
                 var apiService = CreateMockedApiService(initialCount);
                 var logger = NullLogger<NotificationContext>.Instance;
-                var context = new NotificationContext(apiService, logger, new Mock<IHttpContextAccessor>().Object);
+                var context = new NotificationContext(apiService, logger, new Mock<IHttpContextAccessor>().Object, new Mock<ApiAuthService>(new HttpClient()).Object);
 
                 // Act: initialize to load the initial count from the "API"
                 context.InitializeAsync(new Uri("https://localhost/hubs/notifications")).GetAwaiter().GetResult();

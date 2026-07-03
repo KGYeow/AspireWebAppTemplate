@@ -33,6 +33,12 @@ public interface INotificationContext : IAsyncDisposable
     bool IsLoaded { get; }
 
     /// <summary>
+    /// Gets or sets whether pop-up notifications are enabled for this user.
+    /// Shared per-circuit so that settings changes are immediately reflected in the layout.
+    /// </summary>
+    bool NotificationPopupsEnabled { get; set; }
+
+    /// <summary>
     /// Raised when <see cref="UnreadCount"/> changes. Subscribers should call <c>StateHasChanged</c>
     /// to re-render with the updated count.
     /// </summary>
@@ -40,13 +46,13 @@ public interface INotificationContext : IAsyncDisposable
 
     /// <summary>
     /// Raised when a new notification arrives via the SignalR hub. Provides the notification
-    /// title and category for UI-specific reactions (snackbar toast, dropdown update).
+    /// title, message, and category for UI-specific reactions (snackbar toast, dropdown update).
     /// </summary>
     /// <remarks>
     /// This event is raised after <see cref="OnChange"/> — the unread count is already updated
     /// when this fires. Subscribers use this for UI-only concerns (toast display, list prepending).
     /// </remarks>
-    event Action<string, string>? OnNotificationReceived;
+    event Action<string, string, string>? OnNotificationReceived;
 
     /// <summary>
     /// Loads the unread count from the API and starts the SignalR hub connection.

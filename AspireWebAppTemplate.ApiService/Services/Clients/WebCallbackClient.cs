@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using AspireWebAppTemplate.Core.Contracts.Notifications;
 
 namespace AspireWebAppTemplate.ApiService.Services.Clients;
 
@@ -55,36 +56,31 @@ public class WebCallbackClient
     /// Notifies the Web project that a notification was created so it can push
     /// the event to the target user's connected circuits via SignalR.
     /// </summary>
-    /// <param name="userId">The target user's unique identifier.</param>
-    /// <param name="title">The notification title for display.</param>
-    /// <param name="category">The notification category as a string (NotificationCategory enum name).</param>
-    /// <param name="unreadCount">The user's current total unread notification count.</param>
+    /// <param name="request">The notification push request containing user ID, title, message, category, and unread count.</param>
     /// <remarks>
     /// Failures are logged at Warning level but never propagate to the caller.
     /// The notification is already persisted in the database.
     /// </remarks>
-    public async Task NotifyAsync(string userId, string title, string category, int unreadCount)
+    public async Task NotifyAsync(NotificationPushRequest request)
     {
         try
         {
-            var response = await _httpClient.PostAsJsonAsync(
-                CallbackPath,
-                new { userId, title, category, unreadCount });
+            var response = await _httpClient.PostAsJsonAsync(CallbackPath, request);
 
             if (!response.IsSuccessStatusCode)
             {
                 _logger.LogWarning(
                     "Notification callback to Web failed with status {StatusCode} for user '{UserId}'.",
-                    response.StatusCode, userId);
+                    response.StatusCode, request.UserId);
             }
         }
         catch (TaskCanceledException)
         {
-            _logger.LogWarning("Notification callback timed out for user '{UserId}'.", userId);
+            _logger.LogWarning("Notification callback timed out for user '{UserId}'.", request.UserId);
         }
         catch (HttpRequestException ex)
         {
-            _logger.LogWarning(ex,"Notification callback network error for user '{UserId}'.", userId);
+            _logger.LogWarning(ex, "Notification callback network error for user '{UserId}'.", request.UserId);
         }
     }
 

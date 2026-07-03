@@ -25,4 +25,9 @@ public sealed class NotificationPushRequest
     /// The user's current total unread notification count (>= 0).
     /// </summary>
     public int UnreadCount { get; set; }
+
+    /// <summary>
+    /// The notification message body (may be empty).
+    /// </summary>
+    public string Message { get; set; } = "";
 }

@@ -47,12 +47,6 @@ public partial class NotificationBell : ComponentBase, IDisposable
     [Inject]
     private ILogger<NotificationBell> Logger { get; set; } = default!;
 
-    /// <summary>
-    /// Typed HttpClient service for auth operations (loading user preferences).
-    /// </summary>
-    [Inject]
-    private ApiAuthService AuthService { get; set; } = default!;
-
     #endregion
 
     #region State
@@ -77,12 +71,6 @@ public partial class NotificationBell : ComponentBase, IDisposable
     /// Whether recent notifications are currently being loaded from the API.
     /// </summary>
     private bool _isLoadingRecent;
-
-    /// <summary>
-    /// Whether pop-up notifications are enabled for this user. Loaded once during initialization.
-    /// Defaults to true so toasts show until the user's preference is loaded.
-    /// </summary>
-    private bool _popupsEnabled = true;
 
     #endregion
 
@@ -109,9 +97,6 @@ public partial class NotificationBell : ComponentBase, IDisposable
 
         // Load recent notifications for the dropdown.
         await LoadRecentNotifications();
-
-        // Load user's global popup preference.
-        await LoadPopupPreferenceAsync();
     }
 
     /// <summary>
@@ -145,8 +130,9 @@ public partial class NotificationBell : ComponentBase, IDisposable
     /// Prepends the new notification to the dropdown list and shows a snackbar toast.
     /// </summary>
     /// <param name="title">The notification title.</param>
+    /// <param name="message">The notification message body.</param>
     /// <param name="category">The notification category as a string.</param>
-    private void HandleNotificationReceived(string title, string category)
+    private void HandleNotificationReceived(string title, string message, string category)
     {
         InvokeAsync(() =>
         {
@@ -161,7 +147,7 @@ public partial class NotificationBell : ComponentBase, IDisposable
                 {
                     Id = Guid.NewGuid(),
                     Title = title,
-                    Message = "",
+                    Message = message,
                     Category = parsedCategory,
                     IsRead = false,
                     CreatedAtUtc = DateTime.UtcNow
@@ -252,33 +238,13 @@ public partial class NotificationBell : ComponentBase, IDisposable
     }
 
     /// <summary>
-    /// Loads the user's global pop-up notification preference from the API.
-    /// Defaults to true (show popups) if the preference cannot be loaded.
-    /// </summary>
-    private async Task LoadPopupPreferenceAsync()
-    {
-        try
-        {
-            var result = await AuthService.GetCurrentUserAsync();
-            if (result.Succeeded && result.Data is not null)
-            {
-                _popupsEnabled = result.Data.NotificationPopupsEnabled;
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.LogWarning(ex, "Failed to load pop-up notification preference.");
-        }
-    }
-
-    /// <summary>
     /// Displays a snackbar toast for a received notification if the user has pop-up
     /// notifications enabled. Suppresses the toast when disabled globally.
     /// </summary>
     /// <param name="title">The notification title.</param>
     private void ShowToast(string title)
     {
-        if (!_popupsEnabled)
+        if (!NotificationContext.NotificationPopupsEnabled)
             return;
 
         var displayTitle = TruncateTitle(title);

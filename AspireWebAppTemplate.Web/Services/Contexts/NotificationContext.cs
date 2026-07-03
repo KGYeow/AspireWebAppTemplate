@@ -57,6 +57,11 @@ public sealed class NotificationContext : INotificationContext
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     /// <summary>
+    /// The typed HttpClient service for auth/user operations (loading popup preference).
+    /// </summary>
+    private readonly ApiAuthService _apiAuthService;
+
+    /// <summary>
     /// The cached unread notification count for the current user's circuit.
     /// </summary>
     private int _unreadCount;
@@ -85,14 +90,17 @@ public sealed class NotificationContext : INotificationContext
     /// <param name="apiNotificationService">The typed HttpClient for notification API operations.</param>
     /// <param name="logger">The logger for recording warnings and errors.</param>
     /// <param name="httpContextAccessor">Accessor for the HTTP context to capture the auth cookie.</param>
+    /// <param name="apiAuthService">The typed HttpClient for auth/user operations.</param>
     public NotificationContext(
         ApiNotificationService apiNotificationService,
         ILogger<NotificationContext> logger,
-        IHttpContextAccessor httpContextAccessor)
+        IHttpContextAccessor httpContextAccessor,
+        ApiAuthService apiAuthService)
     {
         _apiNotificationService = apiNotificationService;
         _logger = logger;
         _httpContextAccessor = httpContextAccessor;
+        _apiAuthService = apiAuthService;
 
         // Capture the auth cookie during construction (which happens during SSR when HttpContext is available).
         _authCookie = _httpContextAccessor.HttpContext?.Request.Headers.Cookie.ToString();
@@ -112,7 +120,10 @@ public sealed class NotificationContext : INotificationContext
     public event Action? OnChange;
 
     /// <inheritdoc />
-    public event Action<string, string>? OnNotificationReceived;
+    public event Action<string, string, string>? OnNotificationReceived;
+
+    /// <inheritdoc />
+    public bool NotificationPopupsEnabled { get; set; } = true;
 
     #endregion
 
@@ -123,6 +134,9 @@ public sealed class NotificationContext : INotificationContext
     {
         // Load unread count from API.
         await LoadUnreadCountAsync();
+
+        // Load the user's global popup notification preference.
+        await LoadPopupPreferenceAsync();
 
         // Start the SignalR hub connection for real-time delivery.
         await StartHubConnectionAsync(hubUrl);
@@ -169,6 +183,26 @@ public sealed class NotificationContext : INotificationContext
         }
     }
 
+    /// <summary>
+    /// Loads the user's global pop-up notification preference from the API.
+    /// Defaults to true (show popups) if the preference cannot be loaded.
+    /// </summary>
+    private async Task LoadPopupPreferenceAsync()
+    {
+        try
+        {
+            var result = await _apiAuthService.GetCurrentUserAsync();
+            if (result.Succeeded && result.Data is not null)
+            {
+                NotificationPopupsEnabled = result.Data.NotificationPopupsEnabled;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to load pop-up notification preference. Defaulting to enabled.");
+        }
+    }
+
     #endregion
 
     #region Hub Connection
@@ -194,7 +228,7 @@ public sealed class NotificationContext : INotificationContext
                 .WithAutomaticReconnect(new ExponentialBackoffRetryPolicy())
                 .Build();
 
-            _hubConnection.On<string, string, int>("ReceiveNotification", HandleReceiveNotification);
+            _hubConnection.On<string, string, string, int>("ReceiveNotification", HandleReceiveNotification);
             _hubConnection.Reconnected += HandleReconnected;
             _hubConnection.Closed += HandleClosed;
 
@@ -211,11 +245,11 @@ public sealed class NotificationContext : INotificationContext
     /// Handles the "ReceiveNotification" event from the SignalR hub.
     /// Updates the cached unread count and raises events for UI components.
     /// </summary>
-    private Task HandleReceiveNotification(string title, string category, int unreadCount)
+    private Task HandleReceiveNotification(string title, string message, string category, int unreadCount)
     {
         _unreadCount = Math.Max(0, unreadCount);
         OnChange?.Invoke();
-        OnNotificationReceived?.Invoke(title, category);
+        OnNotificationReceived?.Invoke(title, message, category);
         return Task.CompletedTask;
     }
 

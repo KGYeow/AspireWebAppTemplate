@@ -21,7 +21,7 @@ namespace AspireWebAppTemplate.Web.Components.Pages.Account.Notifications;
 /// <see cref="INotificationContext"/> for keeping the topbar badge in sync.
 /// </remarks>
 [Authorize]
-public partial class Notifications : ComponentBase, IAsyncDisposable
+public partial class Index : ComponentBase, IAsyncDisposable
 {
     #region Injected Services
 

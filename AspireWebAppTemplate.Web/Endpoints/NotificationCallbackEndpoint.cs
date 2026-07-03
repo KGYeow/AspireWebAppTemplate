@@ -64,7 +64,7 @@ public static class NotificationCallbackEndpoint
 
         // Deliver to the user's SignalR group (no-op if user has no active connections).
         await hubContext.Clients.Group(request.UserId)
-            .SendAsync("ReceiveNotification", request.Title, request.Category, request.UnreadCount);
+            .SendAsync("ReceiveNotification", request.Title, request.Message, request.Category, request.UnreadCount);
 
         return Results.Ok();
     }
