@@ -10,14 +10,21 @@ namespace AspireWebAppTemplate.Web.Components.Layout.Topbar;
 /// <summary>
 /// Notification bell icon with unread count badge and dropdown popover.
 /// Displays the 10 most recent notifications with title, category icon, and relative timestamp.
-/// Subscribes to <see cref="INotificationContext.OnChange"/> for real-time badge updates.
+/// Subscribes to <see cref="INotificationContext.OnChange"/> for badge updates and
+/// <see cref="INotificationContext.OnNotificationReceived"/> for toast/dropdown reactions.
 /// </summary>
+/// <remarks>
+/// The hub connection lifecycle is managed by <see cref="INotificationContext"/>.
+/// This component handles only UI concerns: rendering the badge, showing the dropdown,
+/// displaying snackbar toasts, and prepending new notifications to the dropdown list.
+/// </remarks>
 public partial class NotificationBell : ComponentBase, IDisposable
 {
     #region Injected Services
 
     /// <summary>
-    /// Per-circuit notification context providing cached unread count and change notifications.
+    /// Per-circuit notification context providing cached unread count, hub connectivity,
+    /// and change/notification events.
     /// </summary>
     [Inject]
     private INotificationContext NotificationContext { get; set; } = default!;
@@ -33,6 +40,12 @@ public partial class NotificationBell : ComponentBase, IDisposable
     /// </summary>
     [Inject]
     private NavigationManager NavigationManager { get; set; } = default!;
+
+    /// <summary>
+    /// Logger for recording component-level warnings.
+    /// </summary>
+    [Inject]
+    private ILogger<NotificationBell> Logger { get; set; } = default!;
 
     #endregion
 
@@ -59,42 +72,106 @@ public partial class NotificationBell : ComponentBase, IDisposable
     /// </summary>
     private bool _isLoadingRecent;
 
+    /// <summary>
+    /// Cached user notification preferences for toast suppression.
+    /// Loaded once during initialization. Null before first load.
+    /// </summary>
+    private List<NotificationPreferenceDto>? _preferences;
+
     #endregion
 
     #region Lifecycle
 
     /// <summary>
-    /// Initializes the notification context (loads unread count from API), subscribes
-    /// to change notifications, and loads recent notifications for the dropdown.
+    /// Initializes the notification context (loads unread count + starts hub connection),
+    /// subscribes to events, and loads recent notifications for the dropdown.
     /// </summary>
     protected override async Task OnInitializedAsync()
     {
-        // Subscribe to context changes so the badge updates in real-time
+        // Subscribe to context events.
         NotificationContext.OnChange += HandleContextChanged;
+        NotificationContext.OnNotificationReceived += HandleNotificationReceived;
 
-        // Initialize the context if not already loaded (loads unread count from API).
+        // Initialize the context if not already loaded (loads count + starts hub).
         if (!NotificationContext.IsLoaded)
         {
-            await NotificationContext.InitializeAsync();
+            var hubUrl = NavigationManager.ToAbsoluteUri("/hubs/notifications");
+            await NotificationContext.InitializeAsync(hubUrl);
         }
 
         _unreadCount = NotificationContext.UnreadCount;
 
-        // Load recent notifications for the dropdown
+        // Load recent notifications for the dropdown.
         await LoadRecentNotifications();
+
+        // Load user preferences for toast suppression.
+        await LoadPreferences();
     }
 
     /// <summary>
-    /// Unsubscribes from <see cref="INotificationContext.OnChange"/> to prevent memory leaks.
+    /// Unsubscribes from context events to prevent memory leaks.
     /// </summary>
     public void Dispose()
     {
         NotificationContext.OnChange -= HandleContextChanged;
+        NotificationContext.OnNotificationReceived -= HandleNotificationReceived;
     }
 
     #endregion
 
     #region Event Handlers
+
+    /// <summary>
+    /// Handles the <see cref="INotificationContext.OnChange"/> event.
+    /// Updates the local unread count and triggers a re-render via InvokeAsync for thread safety.
+    /// </summary>
+    private void HandleContextChanged()
+    {
+        InvokeAsync(() =>
+        {
+            _unreadCount = NotificationContext.UnreadCount;
+            StateHasChanged();
+        });
+    }
+
+    /// <summary>
+    /// Handles the <see cref="INotificationContext.OnNotificationReceived"/> event.
+    /// Prepends the new notification to the dropdown list and shows a snackbar toast.
+    /// </summary>
+    /// <param name="title">The notification title.</param>
+    /// <param name="category">The notification category as a string.</param>
+    private void HandleNotificationReceived(string title, string category)
+    {
+        InvokeAsync(() =>
+        {
+            // Prepend to dropdown if notifications are already loaded (dropdown may be open).
+            if (_recentNotifications is not null)
+            {
+                var parsedCategory = Enum.TryParse<NotificationCategory>(category, ignoreCase: true, out var cat)
+                    ? cat
+                    : NotificationCategory.System;
+
+                _recentNotifications.Insert(0, new NotificationDto
+                {
+                    Id = Guid.NewGuid(),
+                    Title = title,
+                    Message = "",
+                    Category = parsedCategory,
+                    IsRead = false,
+                    CreatedAtUtc = DateTime.UtcNow
+                });
+
+                // Keep the list at a reasonable size (10 items max in dropdown).
+                if (_recentNotifications.Count > 10)
+                    _recentNotifications.RemoveAt(_recentNotifications.Count - 1);
+            }
+
+            // Show snackbar toast if the category is not suppressed by user preferences.
+            ShowToastIfEnabled(title, category);
+
+            StateHasChanged();
+        });
+    }
 
     /// <summary>
     /// Handles clicking an individual notification in the dropdown.
@@ -147,20 +224,6 @@ public partial class NotificationBell : ComponentBase, IDisposable
         NavigationManager.NavigateTo("/account/notifications");
     }
 
-    /// <summary>
-    /// Handles the <see cref="INotificationContext.OnChange"/> event.
-    /// Updates the local unread count and triggers a re-render via InvokeAsync for thread safety.
-    /// </summary>
-    private void HandleContextChanged()
-    {
-        InvokeAsync(async () =>
-        {
-            _unreadCount = NotificationContext.UnreadCount;
-            await LoadRecentNotifications();
-            StateHasChanged();
-        });
-    }
-
     #endregion
 
     #region Helpers
@@ -180,6 +243,52 @@ public partial class NotificationBell : ComponentBase, IDisposable
             _recentNotifications = [];
 
         _isLoadingRecent = false;
+    }
+
+    /// <summary>
+    /// Loads the user's notification preferences for toast suppression logic.
+    /// </summary>
+    private async Task LoadPreferences()
+    {
+        try
+        {
+            var result = await ApiNotificationService.GetPreferencesAsync();
+
+            if (result.Succeeded)
+                _preferences = result.Data;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Failed to load notification preferences for toast suppression.");
+        }
+    }
+
+    /// <summary>
+    /// Displays a snackbar toast for a received notification if the user's preference
+    /// for the given category has InAppEnabled set to true (or no preference exists, defaulting to true).
+    /// </summary>
+    /// <param name="title">The notification title.</param>
+    /// <param name="category">The notification category string.</param>
+    private void ShowToastIfEnabled(string title, string category)
+    {
+        // Check if the user has suppressed toasts for this category.
+        if (_preferences is not null &&
+            Enum.TryParse<NotificationCategory>(category, ignoreCase: true, out var parsedCategory))
+        {
+            var pref = _preferences.FirstOrDefault(p => p.Category == parsedCategory);
+
+            // If InAppEnabled is explicitly false, suppress the toast.
+            if (pref is not null && !pref.InAppEnabled)
+                return;
+        }
+
+        // Truncate title to 100 characters with ellipsis for the toast.
+        var displayTitle = title.Length > 100 ? string.Concat(title.AsSpan(0, 100), "…") : title;
+
+        Snackbar.Add(displayTitle, Severity.Info, config =>
+        {
+            config.VisibleStateDuration = 5000;
+        });
     }
 
     /// <summary>

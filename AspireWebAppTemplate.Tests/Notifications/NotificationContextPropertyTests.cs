@@ -78,7 +78,7 @@ public class NotificationContextPropertyTests
                 var context = new NotificationContext(apiService, logger);
 
                 // Act: initialize to load the count from the "API"
-                context.InitializeAsync().GetAwaiter().GetResult();
+                context.InitializeAsync(new Uri("https://localhost/hubs/notifications")).GetAwaiter().GetResult();
 
                 // Apply all decrements in sequence
                 foreach (var amount in decrements)
@@ -118,7 +118,7 @@ public class NotificationContextPropertyTests
                 var context = new NotificationContext(apiService, logger);
 
                 // Act: initialize to load the count, then clear
-                context.InitializeAsync().GetAwaiter().GetResult();
+                context.InitializeAsync(new Uri("https://localhost/hubs/notifications")).GetAwaiter().GetResult();
                 context.ClearCount();
 
                 // Assert: count is always 0 after ClearCount
@@ -159,7 +159,7 @@ public class NotificationContextPropertyTests
                 var context = new NotificationContext(apiService, logger);
 
                 // Act: initialize to load the count
-                context.InitializeAsync().GetAwaiter().GetResult();
+                context.InitializeAsync(new Uri("https://localhost/hubs/notifications")).GetAwaiter().GetResult();
 
                 // Track that count never goes negative during decrements
                 var neverNegative = true;

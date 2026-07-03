@@ -1,22 +1,24 @@
 namespace AspireWebAppTemplate.Web.Abstractions;
 
 /// <summary>
-/// Per-circuit scoped service caching the current user's unread notification count.
-/// Provides synchronous O(1) access for layout components (NotificationBell) without
-/// requiring async calls on every render.
+/// Per-circuit scoped service that manages real-time notification state and hub connectivity.
+/// Provides synchronous O(1) access to the unread count for layout components and manages
+/// the SignalR hub connection lifecycle for real-time notification delivery.
 /// </summary>
 /// <remarks>
 /// <para>
 /// Registered as <b>scoped</b> — one instance per SignalR circuit (user session).
 /// The unread count is loaded once via <see cref="InitializeAsync"/> at circuit startup
-/// and subsequently updated synchronously by page components after mark-as-read or dismiss actions.
+/// and subsequently updated synchronously by page components after mark-as-read or dismiss actions,
+/// or via the SignalR hub when new notifications arrive.
 /// </para>
 /// <para>
 /// Subscribers (e.g., NotificationBell in the layout) listen to <see cref="OnChange"/> and call
-/// <c>StateHasChanged</c> to re-render when the count changes.
+/// <c>StateHasChanged</c> to re-render when the count changes. They listen to
+/// <see cref="OnNotificationReceived"/> for UI-specific reactions (toast, dropdown update).
 /// </para>
 /// </remarks>
-public interface INotificationContext
+public interface INotificationContext : IAsyncDisposable
 {
     /// <summary>
     /// Gets the cached unread notification count. Returns 0 before initialization completes.
@@ -37,16 +39,28 @@ public interface INotificationContext
     event Action? OnChange;
 
     /// <summary>
-    /// Loads the unread count from the API. Called once per circuit during initialization
-    /// (typically from the root layout's <c>OnInitializedAsync</c>).
+    /// Raised when a new notification arrives via the SignalR hub. Provides the notification
+    /// title and category for UI-specific reactions (snackbar toast, dropdown update).
     /// </summary>
+    /// <remarks>
+    /// This event is raised after <see cref="OnChange"/> — the unread count is already updated
+    /// when this fires. Subscribers use this for UI-only concerns (toast display, list prepending).
+    /// </remarks>
+    event Action<string, string>? OnNotificationReceived;
+
+    /// <summary>
+    /// Loads the unread count from the API and starts the SignalR hub connection.
+    /// Called once per circuit during initialization (typically from the root layout or
+    /// the first component that needs notification state).
+    /// </summary>
+    /// <param name="hubUrl">The absolute URL for the NotificationHub endpoint.</param>
     /// <returns>A task representing the asynchronous initialization operation.</returns>
     /// <remarks>
     /// On API failure, <see cref="UnreadCount"/> remains at 0, <see cref="IsLoaded"/> is set to
-    /// <c>true</c>, and a warning is logged. The application does not remain in a perpetual
-    /// loading state.
+    /// <c>true</c>, and a warning is logged. Hub connection failures are handled gracefully
+    /// with fallback to navigation-based refresh.
     /// </remarks>
-    Task InitializeAsync();
+    Task InitializeAsync(Uri hubUrl);
 
     /// <summary>
     /// Decrements the cached unread count by the specified amount (e.g., after marking a notification as read).
@@ -66,4 +80,11 @@ public interface INotificationContext
     /// </summary>
     /// <returns>A task representing the asynchronous refresh operation.</returns>
     Task RefreshAsync();
+
+    /// <summary>
+    /// Replaces the cached unread count with the server-authoritative value received
+    /// from the NotificationHub. Raises <see cref="OnChange"/> to trigger UI re-renders.
+    /// </summary>
+    /// <param name="unreadCount">The authoritative unread count from the server.</param>
+    void UpdateFromHub(int unreadCount);
 }

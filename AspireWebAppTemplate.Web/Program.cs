@@ -1,9 +1,11 @@
 using AspireWebAppTemplate.Web;
+using AspireWebAppTemplate.Web.Authentication;
 using AspireWebAppTemplate.Web.Authorization;
 using AspireWebAppTemplate.Web.Components;
 using AspireWebAppTemplate.Web.Endpoints;
 using AspireWebAppTemplate.Web.Extensions;
 using AspireWebAppTemplate.Web.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -31,7 +33,9 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.AccessDeniedPath = "/Account/AccessDenied";
         options.ExpireTimeSpan = TimeSpan.FromHours(1);
         options.SlidingExpiration = true;
-    });
+    })
+    .AddScheme<AuthenticationSchemeOptions, InternalApiKeyAuthenticationHandler>(
+        InternalApiKeyAuthenticationHandler.SchemeName, _ => { });
 
 // Authorization: register the page permission handler and add PagePermissionRequirement
 // to the default policy (triggered by [Authorize] in _Imports.razor).
@@ -44,6 +48,11 @@ builder.Services.AddAuthorization(options =>
         .RequireAuthenticatedUser()
         .AddRequirements(new PagePermissionRequirement())
         .Build();
+
+    // Internal API policy: used by the notification callback endpoint for service-to-service auth.
+    options.AddPolicy("InternalApiPolicy", policy =>
+        policy.AddAuthenticationSchemes(InternalApiKeyAuthenticationHandler.SchemeName)
+              .RequireAuthenticatedUser());
 });
 builder.Services.AddCascadingAuthenticationState();
 
@@ -73,6 +82,9 @@ builder.Services.AddMudServices(config =>
     config.SnackbarConfiguration.MaximumOpacity = 90;
 });
 
+// SignalR: required for the NotificationHub real-time notification delivery.
+builder.Services.AddSignalR();
+
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
@@ -96,6 +108,12 @@ app.MapStaticAssets();
 
 // Auth endpoints (PerformLogin, Logout — must be real HTTP requests for cookie operations)
 app.MapAuthEndpoints();
+
+// Internal notification callback endpoint (API→Web service-to-service)
+app.MapNotificationCallback();
+
+// Real-time notification hub for Blazor Server circuits
+app.MapHub<AspireWebAppTemplate.Web.Hubs.NotificationHub>("/hubs/notifications");
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

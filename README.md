@@ -137,7 +137,14 @@ Reusable Blazor components and themes:
    cd AspireWebAppTemplate
    ```
 
-2. **Configure the database connection**
+2. **Configure user secrets**
+   The project uses .NET user-secrets for local development secrets. Run this once after cloning:
+   ```bash
+   dotnet user-secrets set "Parameters:InternalApiKey" "k8sF2mP9xQ4wR7vL1nJ6hT3yA0cB5dE" --project AspireWebAppTemplate.AppHost
+   ```
+   This sets the shared API key used for internal service-to-service communication (API→Web notification callbacks). The value can be any random string — it just needs to exist. Each developer can use a different value since it's only used locally between the two services running on the same machine.
+
+3. **Configure the database connection**
    Update `AspireWebAppTemplate.ApiService/appsettings.json`:
    ```json
    {
@@ -147,23 +154,23 @@ Reusable Blazor components and themes:
    }
    ```
 
-3. **Run with Aspire (recommended)**
+4. **Run with Aspire (recommended)**
    ```bash
    dotnet run --project AspireWebAppTemplate.AppHost
    ```
    Aspire dashboard opens at `https://localhost:17024` with links to both services.
 
-4. **Or run ApiService standalone** (for EF migrations)
+5. **Or run ApiService standalone** (for EF migrations)
    ```bash
    dotnet run --project AspireWebAppTemplate.ApiService
    ```
 
-5. **Database migrations**
+6. **Database migrations**
    - Auto-migrates on startup in Development mode
    - Manual: `Update-Database -Project AspireWebAppTemplate.ApiService -StartupProject AspireWebAppTemplate.ApiService`
    - CLI: `dotnet ef database update --project AspireWebAppTemplate.ApiService --startup-project AspireWebAppTemplate.ApiService`
 
-6. **Default accounts** (seeded automatically)
+7. **Default accounts** (seeded automatically)
    - Admin: `admin@example.com` / `Admin123#`
    - User: `user@example.com` / `User123#`
 

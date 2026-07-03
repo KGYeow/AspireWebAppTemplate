@@ -5,8 +5,8 @@
 ### XML Documentation Comments
 - ALL public classes, interfaces, methods, and properties MUST have `<summary>` XML docs.
 - ALL private methods MUST have at least a `<summary>` tag explaining their purpose.
+- ALL private fields (instance and static) MUST have `<summary>` explaining their role — in services, handlers, contexts, and code-behind files alike.
 - Use `<param>`, `<returns>`, `<remarks>`, and `<exception>` tags where appropriate.
-- State fields and properties in code-behind files MUST have `<summary>` explaining their role.
 - Enum values MUST have `<summary>` explaining when each is used.
 
 ### Comment Tone & Semantics
@@ -23,6 +23,29 @@
 - Non-obvious patterns: explain the "why" not just the "what".
 
 ## Code Organization
+
+### Constructor Style
+- Use **traditional constructors** with explicit field assignments — NOT primary constructors.
+- This applies to all classes: services, controllers, handlers, contexts, and typed HttpClients.
+- Reason: primary constructors make class declarations too long when multiple dependencies are involved and obscure the field declarations.
+
+```csharp
+// GOOD: Traditional constructor
+public class FooService : IFooService
+{
+    private readonly ApplicationDbContext _dbContext;
+    private readonly ILogger<FooService> _logger;
+
+    public FooService(ApplicationDbContext dbContext, ILogger<FooService> logger)
+    {
+        _dbContext = dbContext;
+        _logger = logger;
+    }
+}
+
+// BAD: Primary constructor
+public class FooService(ApplicationDbContext dbContext, ILogger<FooService> logger) : IFooService
+```
 
 ### Region Structure (Services & Controllers)
 All service implementations and controllers use consistent `#region` grouping:
@@ -54,11 +77,51 @@ public interface IFooService
 }
 ```
 
+**Context pattern (per-circuit scoped services):**
+```csharp
+public class FooContext : IFooContext
+{
+    #region Constructor           // fields + constructor
+    #region Properties and Events // public properties + events
+    #region Initialization        // InitializeAsync and related startup logic
+    #region [Domain Group]        // domain-specific methods (e.g., "Hub Connection", "Count Mutations")
+    #region Disposal              // IAsyncDisposable/IDisposable implementation
+}
+```
+
+**Delegating handler pattern:**
+```csharp
+public class FooDelegatingHandler : DelegatingHandler
+{
+    #region Constructor       // fields + constructor (no region needed if class is <30 lines)
+    // SendAsync override — no region needed for single-method handlers
+}
+```
+
+**Authentication handler pattern:**
+```csharp
+public class FooAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
+{
+    #region Constructor       // fields + constructor (no region needed if class is <30 lines)
+    // HandleAuthenticateAsync override — no region needed for single-method handlers
+}
+```
+
+**Typed HttpClient pattern:**
+```csharp
+public class FooClient
+{
+    #region Constructor       // fields (including const paths) + constructor
+    #region [Domain Group]    // public methods grouped by operation type
+}
+```
+
 Rules:
 - Every field, constructor, and method lives inside a region — nothing is left loose.
 - The first region is always `#region Constructor`.
-- Domain groups use descriptive names: "CRUD Operations", "Activation", "Query Operations", "Write Operations", etc.
+- Domain groups use descriptive names: "CRUD Operations", "Activation", "Query Operations", "Write Operations", "Hub Connection", "Notification Callback", etc.
 - Private helpers are always the last region in service files.
+- Exception for very small classes (<30 lines total): regions may be omitted for single-method handlers.
 
 ### Blazor Code-Behind
 - Use partial class pattern (`.razor.cs`) for all page components — no `@code` blocks in `.razor`.

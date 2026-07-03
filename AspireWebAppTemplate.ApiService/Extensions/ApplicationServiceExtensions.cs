@@ -1,6 +1,7 @@
 using AspireWebAppTemplate.Abstractions;
 using AspireWebAppTemplate.ApiService.Abstractions;
 using AspireWebAppTemplate.ApiService.Services;
+using AspireWebAppTemplate.ApiService.Services.Handlers;
 using AspireWebAppTemplate.Core.Application.Abstractions;
 using AspireWebAppTemplate.Core.Application.Services;
 
@@ -32,6 +33,15 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IRoleService, RoleService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IAuthService, AuthService>();
+
+        // WebCallbackClient: typed HttpClient for API→Web notification callbacks via Aspire service discovery.
+        services.AddTransient<InternalApiKeyDelegatingHandler>();
+        services.AddHttpClient<WebCallbackClient>(client =>
+        {
+            client.BaseAddress = new Uri("https+http://webfrontend");
+            client.Timeout = TimeSpan.FromSeconds(5);
+        })
+        .AddHttpMessageHandler<InternalApiKeyDelegatingHandler>();
 
         return services;
     }

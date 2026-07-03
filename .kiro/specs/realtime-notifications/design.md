@@ -286,47 +286,49 @@ public class InternalApiKeyDelegatingHandler(IConfiguration configuration) : Del
 
 ### 6. Enhanced NotificationContext (Web Project)
 
-The existing `INotificationContext` interface gains a new method for hub-driven updates:
+The existing `INotificationContext` interface is extended to own the hub connection lifecycle and expose a new event for UI-specific reactions:
 
 ```csharp
 /// <summary>
-/// Replaces the cached unread count with the server-authoritative value received
-/// from the NotificationHub. Raises OnChange to trigger UI re-renders.
+/// Raised when a new notification arrives via the SignalR hub. Provides the notification
+/// title and category for UI-specific reactions (snackbar toast, dropdown update).
 /// </summary>
-/// <param name="unreadCount">The authoritative unread count from the server.</param>
-void UpdateFromHub(int unreadCount);
+event Action<string, string>? OnNotificationReceived;
+
+/// <summary>
+/// Loads the unread count from the API and starts the SignalR hub connection.
+/// Called once per circuit during initialization.
+/// </summary>
+/// <param name="hubUrl">The absolute URL for the NotificationHub endpoint.</param>
+Task InitializeAsync(Uri hubUrl);
 ```
 
-Implementation in `NotificationContext`:
+The `NotificationContext` now owns:
+- Unread count cache (existing)
+- Hub connection lifecycle (new — creates, reconnects, disposes the connection)
+- `UpdateFromHub` (existing)
+- Reconnection handling with `RefreshAsync` on reconnect (new)
+- `OnNotificationReceived` event for UI-only concerns (new)
 
-```csharp
-public void UpdateFromHub(int unreadCount)
-{
-    _unreadCount = Math.Max(0, unreadCount);
-    OnChange?.Invoke();
-}
-```
+Implementation also implements `IAsyncDisposable` to clean up the hub connection when the circuit ends.
 
 ### 7. Enhanced NotificationBell (Web Project)
 
-The component gains SignalR hub connection management:
+The component is simplified to handle only UI concerns. It subscribes to two events:
 
 ```csharp
 // In OnInitializedAsync:
-_hubConnection = new HubConnectionBuilder()
-    .WithUrl(NavigationManager.ToAbsoluteUri("/hubs/notifications"), options =>
-    {
-        // Cookie auth flows automatically for same-origin requests
-    })
-    .WithAutomaticReconnect(new ExponentialBackoffRetryPolicy())
-    .Build();
+NotificationContext.OnChange += HandleContextChanged;           // badge re-render
+NotificationContext.OnNotificationReceived += HandleNotificationReceived; // toast + dropdown
 
-_hubConnection.On<string, string, int>("ReceiveNotification", HandleReceiveNotification);
-_hubConnection.Reconnected += HandleReconnected;
-_hubConnection.Closed += HandleClosed;
-
-await _hubConnection.StartAsync();
+if (!NotificationContext.IsLoaded)
+{
+    var hubUrl = NavigationManager.ToAbsoluteUri("/hubs/notifications");
+    await NotificationContext.InitializeAsync(hubUrl);
+}
 ```
+
+The component no longer manages hub connections, reconnection, or closed events directly — that's the context's responsibility.
 
 ### 8. ExponentialBackoffRetryPolicy
 
@@ -460,6 +462,37 @@ The `ReceiveNotification` hub method transmits three parameters (not a complex o
 *For any* configured expected API key K and any request header value V, the `InternalApiKeyAuthenticationHandler` SHALL authenticate successfully if and only if V equals K. Requests without the header or with a non-matching value SHALL fail authentication.
 
 **Validates: Requirements 5.4, 5.5**
+
+## Production Considerations
+
+### Single-Instance Deployment (Current Design)
+
+This design targets a single-instance Web project deployment, which is the typical topology for internal enterprise applications. The HTTP callback from the API service resolves to one Web instance via Aspire service discovery, and all SignalR connections live on that same instance. No additional infrastructure is needed.
+
+### Multi-Instance Scale-Out
+
+If the Web project is scaled to multiple replicas behind a load balancer, the HTTP callback would hit one instance, but the user's SignalR connection may live on a different instance. To support this topology:
+- Add a **SignalR backplane** (Redis or Azure SignalR Service) so hub messages broadcast across all instances
+- The rest of the architecture (callback endpoint, hub groups, client integration) remains unchanged
+- Configuration change only — no code restructuring required
+
+### API Key Rotation
+
+The shared `INTERNAL_API_KEY` is static for the lifetime of the deployment. For long-lived production deployments:
+- Consider periodic rotation via Aspire parameters or a secrets manager
+- The delegating handler and auth handler read from configuration on each request, so a config reload triggers immediate key adoption
+- Not a launch blocker for initial deployment
+
+### No Retry on Callback Failure
+
+The design deliberately omits retry logic for the API→Web callback. The notification is already persisted in the database — the user sees it on next page load or navigation. This is the right tradeoff for simplicity. If guaranteed real-time delivery through transient Web project restarts becomes a requirement, a durable message queue (e.g., Azure Service Bus) would replace the HTTP callback.
+
+### SignalR Connection Capacity
+
+Each browser tab holds one hub connection. For a typical internal enterprise user base (hundreds of concurrent users), the default SignalR configuration handles this without tuning. For larger deployments (thousands of concurrent connections), consider:
+- Increasing the `MaximumParallelInvocationsPerClient` setting
+- Monitoring connection count via Aspire telemetry
+- Using Azure SignalR Service for managed scaling
 
 ## Error Handling
 

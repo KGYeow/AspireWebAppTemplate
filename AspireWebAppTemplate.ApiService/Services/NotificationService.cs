@@ -39,16 +39,22 @@ public class NotificationService : INotificationService
 
     private readonly ApplicationDbContext _dbContext;
     private readonly ILogger<NotificationService> _logger;
+    private readonly WebCallbackClient _webCallbackClient;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="NotificationService"/> class.
     /// </summary>
     /// <param name="dbContext">The application database context for querying and persisting notification data.</param>
     /// <param name="logger">The logger instance for recording warnings and errors during notification operations.</param>
-    public NotificationService(ApplicationDbContext dbContext, ILogger<NotificationService> logger)
+    /// <param name="webCallbackClient">The typed HttpClient for sending real-time notification callbacks to the Web project.</param>
+    public NotificationService(
+        ApplicationDbContext dbContext,
+        ILogger<NotificationService> logger,
+        WebCallbackClient webCallbackClient)
     {
         _dbContext = dbContext;
         _logger = logger;
+        _webCallbackClient = webCallbackClient;
     }
 
     #endregion
@@ -108,6 +114,27 @@ public class NotificationService : INotificationService
                 notification.Id,
                 request.UserId,
                 request.Category);
+
+            // Trigger real-time delivery to the user's connected circuits via the Web project callback.
+            // This is best-effort: failures are logged but never disrupt notification creation.
+            try
+            {
+                var unreadCount = await _dbContext.Notifications
+                    .CountAsync(n => n.UserId == request.UserId && !n.IsRead);
+
+                await _webCallbackClient.NotifyAsync(
+                    request.UserId,
+                    request.Title,
+                    request.Category.ToString(),
+                    unreadCount);
+            }
+            catch (Exception callbackEx)
+            {
+                _logger.LogWarning(callbackEx,
+                    "Real-time callback failed for notification '{NotificationId}'. " +
+                    "User will see the notification on next page load.",
+                    notification.Id);
+            }
         }
         catch (Exception ex)
         {
