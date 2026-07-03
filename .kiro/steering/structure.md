@@ -42,8 +42,11 @@ AspireWebAppTemplate.ApiService/
 │   ├── ApplicationDbContext.cs
 │   └── SeedData.cs
 ├── Extensions/                 ← DI registration extensions (ApplicationServiceExtensions)
-├── Services/                   ← Full service implementations (all business logic lives here)
-│   └── Handlers/               ← Delegating handlers (InternalApiKeyDelegatingHandler)
+├── Services/                   ← Business logic and supporting infrastructure
+│   ├── Clients/                ← Typed HttpClients (WebCallbackClient)
+│   ├── Handlers/               ← Delegating handlers (InternalApiKeyDelegatingHandler)
+│   ├── Infrastructure/         ← Accessors, adapters, stubs (CurrentUserAccessor, NoOpEmailSender)
+│   └── *.cs                    ← Business service implementations (NotificationService, AuthService, etc.)
 └── Utilities/                  ← AuditChangeHelper, etc.
 ```
 

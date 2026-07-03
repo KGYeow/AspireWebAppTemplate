@@ -2,7 +2,7 @@ using AspireWebAppTemplate.ApiService.Authentication;
 using AspireWebAppTemplate.ApiService.Data;
 using AspireWebAppTemplate.ApiService.Data.Entities;
 using AspireWebAppTemplate.ApiService.Extensions;
-using AspireWebAppTemplate.ApiService.Services;
+using AspireWebAppTemplate.ApiService.Services.Infrastructure;
 using AspireWebAppTemplate.Options;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;

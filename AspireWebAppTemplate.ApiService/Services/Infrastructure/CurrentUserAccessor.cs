@@ -2,7 +2,7 @@ using System.Security.Claims;
 using AspireWebAppTemplate.ApiService.Abstractions;
 using Microsoft.AspNetCore.Http;
 
-namespace AspireWebAppTemplate.ApiService.Services;
+namespace AspireWebAppTemplate.ApiService.Services.Infrastructure;
 
 /// <summary>
 /// Implements <see cref="ICurrentUserAccessor"/> by reading identity claims and connection

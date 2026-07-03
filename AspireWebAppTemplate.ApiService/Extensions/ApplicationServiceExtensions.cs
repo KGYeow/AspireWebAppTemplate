@@ -1,7 +1,9 @@
 using AspireWebAppTemplate.Abstractions;
 using AspireWebAppTemplate.ApiService.Abstractions;
 using AspireWebAppTemplate.ApiService.Services;
+using AspireWebAppTemplate.ApiService.Services.Clients;
 using AspireWebAppTemplate.ApiService.Services.Handlers;
+using AspireWebAppTemplate.ApiService.Services.Infrastructure;
 using AspireWebAppTemplate.Core.Application.Abstractions;
 using AspireWebAppTemplate.Core.Application.Services;
 

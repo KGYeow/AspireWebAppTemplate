@@ -1,6 +1,6 @@
 using System.Net.Http.Json;
 
-namespace AspireWebAppTemplate.ApiService.Services;
+namespace AspireWebAppTemplate.ApiService.Services.Clients;
 
 /// <summary>
 /// Typed HttpClient for calling the Web project's notification callback endpoint.

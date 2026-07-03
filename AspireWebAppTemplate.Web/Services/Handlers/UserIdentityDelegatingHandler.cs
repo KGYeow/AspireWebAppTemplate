@@ -30,16 +30,43 @@ namespace AspireWebAppTemplate.Web.Services;
 /// <see cref="Microsoft.AspNetCore.Http.ConnectionInfo.RemoteIpAddress"/> during SSR.
 /// </para>
 /// </remarks>
-public class UserIdentityDelegatingHandler(
-    IHttpContextAccessor httpContextAccessor,
-    CircuitUserContext circuitUserContext) : DelegatingHandler
+public class UserIdentityDelegatingHandler : DelegatingHandler
 {
+    #region Constructor
+
+    /// <summary>
+    /// Provides access to the HTTP context for identity resolution during the initial SSR render.
+    /// </summary>
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
+    /// <summary>
+    /// Circuit-scoped cached user principal and IP, available throughout the circuit's WebSocket lifetime.
+    /// </summary>
+    private readonly CircuitUserContext _circuitUserContext;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UserIdentityDelegatingHandler"/> class.
+    /// </summary>
+    /// <param name="httpContextAccessor">Provides access to the HTTP context during SSR.</param>
+    /// <param name="circuitUserContext">Circuit-scoped cached user principal and IP.</param>
+    public UserIdentityDelegatingHandler(IHttpContextAccessor httpContextAccessor, CircuitUserContext circuitUserContext)
+    {
+        _httpContextAccessor = httpContextAccessor;
+        _circuitUserContext = circuitUserContext;
+    }
+
+    #endregion
+
+    /// <summary>
+    /// Attaches the authenticated user's identity claims and client IP address as custom headers
+    /// on the outbound HTTP request before forwarding it to the API service.
+    /// </summary>
     protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         // Resolve user identity: prefer CircuitUserContext (available throughout circuit lifetime),
         // fall back to HttpContext (available only during initial SSR render).
-        var user = circuitUserContext.User
-            ?? httpContextAccessor.HttpContext?.User;
+        var user = _circuitUserContext.User
+            ?? _httpContextAccessor.HttpContext?.User;
 
         if (user?.Identity?.IsAuthenticated == true)
         {
@@ -65,8 +92,8 @@ public class UserIdentityDelegatingHandler(
         // Forward the end-user's client IP address so the API service can use it for audit logging.
         // Prefer the cached IP from CircuitUserContext (available after WebSocket takes over),
         // fall back to HttpContext.Connection.RemoteIpAddress during initial SSR render.
-        var clientIp = circuitUserContext.ClientIpAddress
-            ?? httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString();
+        var clientIp = _circuitUserContext.ClientIpAddress
+            ?? _httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString();
 
         if (!string.IsNullOrEmpty(clientIp))
             request.Headers.TryAddWithoutValidation("X-Client-Ip", clientIp);
