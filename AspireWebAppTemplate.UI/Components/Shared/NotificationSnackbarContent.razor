@@ -1,0 +1,18 @@
+<div class="notification-snackbar-content" style="cursor: pointer;">
+    <MudStack Row AlignItems="AlignItems.Center" Spacing="3">
+        <MudAvatar Size="Size.Small" Class="@CategoryColorClass">
+            <MudIcon Icon="@CategoryIcon" Style="font-size: 16px" />
+        </MudAvatar>
+
+        <MudStack Spacing="0" Class="overflow-hidden">
+            <MudText Typo="Typo.body2" Class="fw-bold"
+                     Style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                @DisplayTitle
+            </MudText>
+            <MudText Typo="Typo.caption"
+                     Style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                @DisplayMessage
+            </MudText>
+        </MudStack>
+    </MudStack>
+</div>

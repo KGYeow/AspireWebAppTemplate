@@ -1,6 +1,7 @@
 using AspireWebAppTemplate.Core.Contracts.Notifications;
 using AspireWebAppTemplate.Core.Domain.Enums;
 using AspireWebAppTemplate.UI.Components.Shared;
+using AspireWebAppTemplate.UI.Utilities;
 using AspireWebAppTemplate.Web.Abstractions;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -136,7 +137,7 @@ public partial class Index : ComponentBase, IAsyncDisposable
     /// <summary>
     /// .NET object reference passed to JS for callback invocation.
     /// </summary>
-    private DotNetObjectReference<Notifications>? _dotNetRef;
+    private DotNetObjectReference<Index>? _dotNetRef;
 
     /// <summary>
     /// The ID of the currently selected notification (showing full detail in the detail panel).
@@ -537,30 +538,20 @@ public partial class Index : ComponentBase, IAsyncDisposable
     }
 
     /// <summary>
-    /// Returns the appropriate MudBlazor icon for a notification category.
+    /// Returns the Material Symbols icon string for a notification category.
     /// </summary>
     /// <param name="category">The notification category.</param>
-    /// <returns>A MudBlazor icon string.</returns>
-    private static string GetCategoryIcon(NotificationCategory category) => category switch
-    {
-        NotificationCategory.Account => Icons.Material.Outlined.Security,
-        NotificationCategory.Activity => Icons.Material.Outlined.People,
-        NotificationCategory.System => Icons.Material.Outlined.Info,
-        _ => Icons.Material.Outlined.Notifications
-    };
+    /// <returns>A Material Symbols icon string.</returns>
+    private static string GetCategoryIcon(NotificationCategory category) =>
+        NotificationCategoryHelper.GetIcon(category.ToString());
 
     /// <summary>
-    /// Returns the appropriate color for a notification category icon.
+    /// Returns the MudBlazor CSS class for a notification category's color.
     /// </summary>
     /// <param name="category">The notification category.</param>
-    /// <returns>A MudBlazor Color value.</returns>
-    private static Color GetCategoryColor(NotificationCategory category) => category switch
-    {
-        NotificationCategory.Account => Color.Error,
-        NotificationCategory.Activity => Color.Primary,
-        NotificationCategory.System => Color.Info,
-        _ => Color.Default
-    };
+    /// <returns>A MudBlazor CSS class string.</returns>
+    private static string GetCategoryColor(NotificationCategory category) =>
+        NotificationCategoryHelper.GetColorClass(category.ToString());
 
     /// <summary>
     /// Formats a UTC timestamp as a human-readable relative time string.

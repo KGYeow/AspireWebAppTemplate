@@ -38,7 +38,7 @@
                 <div class="flex-grow-1 overflow-y-auto pa-2">
                     <MudStack Spacing="3">
                         <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
-                            <MudAvatar Size="Size.Small" Color="@GetCategoryColor(selectedNotification.Category)">
+                            <MudAvatar Size="Size.Small" Class="@GetCategoryColor(selectedNotification.Category)">
                                 <MudIcon Icon="@GetCategoryIcon(selectedNotification.Category)" Style="font-size: 16px" />
                             </MudAvatar>
                             <MudText Typo="Typo.caption" Class="text-muted">
@@ -149,7 +149,7 @@
                                                  @onclick:stopPropagation="true" />
 
                                     <!-- Category Icon -->
-                                    <MudAvatar Size="Size.Small" Color="@GetCategoryColor(notification.Category)">
+                                    <MudAvatar Size="Size.Small" Class="@GetCategoryColor(notification.Category)">
                                         <MudIcon Icon="@GetCategoryIcon(notification.Category)" Style="font-size: 16px" />
                                     </MudAvatar>
 
@@ -221,7 +221,7 @@
                                 <div class="flex-grow-1 overflow-y-auto pa-2">
                                     <MudStack Spacing="3">
                                         <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
-                                            <MudAvatar Size="Size.Small" Color="@GetCategoryColor(detailNotification.Category)">
+                                            <MudAvatar Size="Size.Small" Class="@GetCategoryColor(detailNotification.Category)">
                                                 <MudIcon Icon="@GetCategoryIcon(detailNotification.Category)" Style="font-size: 16px" />
                                             </MudAvatar>
                                             <MudText Typo="Typo.caption" Class="text-muted">

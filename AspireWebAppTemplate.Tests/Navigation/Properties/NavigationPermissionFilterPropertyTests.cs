@@ -266,12 +266,12 @@ public class NavigationPermissionFilterPropertyTests
     [Property(MaxTest = 2)]
     public Property PermissionFilter_PathNotInPermissions_AndNotSystemPage_Excluded()
     {
-        // Generate non-system-page hrefs
+        // Generate non-system-page hrefs (excludes paths listed in SystemPageDefaults.Paths)
         var nonSystemHrefGen = Gen.Elements<string?>(
             "counter", "weather", "admin/audit-log",
             "admin/user-management", "admin/role-management",
-            "admin/page-permissions", "account/notifications",
-            "account/settings", "account/profile", "dashboard", "reports");
+            "admin/page-permissions",
+            "dashboard", "reports");
 
         return Prop.ForAll(Arb.From(nonSystemHrefGen), (string? href) =>
         {

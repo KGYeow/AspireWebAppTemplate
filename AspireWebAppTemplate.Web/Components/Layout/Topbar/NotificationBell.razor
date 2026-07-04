@@ -66,7 +66,7 @@
                                  Class="@($"mb-1 px-3{(notification.IsRead ? "" : " notification-unread")}")">
 
                         <MudStack Row AlignItems="AlignItems.Start" Spacing="2">
-                            <MudAvatar Size="Size.Small" Color="@GetCategoryColor(notification.Category)">
+                            <MudAvatar Size="Size.Small" Class="@GetCategoryColor(notification.Category)">
                                 <MudIcon Icon="@GetCategoryIcon(notification.Category)" Style="font-size: 16px" />
                             </MudAvatar>
 

@@ -10,8 +10,8 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
+using MudBlazor;
 using MudBlazor.Services;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -74,9 +74,10 @@ builder.Services.AddApplicationServices();
 // MudBlazor
 builder.Services.AddMudServices(config =>
 {
+    config.SnackbarConfiguration.RequireInteraction = true;
     config.SnackbarConfiguration.PreventDuplicates = false;
     config.SnackbarConfiguration.NewestOnTop = false;
-    config.SnackbarConfiguration.VisibleStateDuration = 4000;
+    config.SnackbarConfiguration.VisibleStateDuration = 3000;
     config.SnackbarConfiguration.HideTransitionDuration = 500;
     config.SnackbarConfiguration.ShowTransitionDuration = 500;
     config.SnackbarConfiguration.MaximumOpacity = 90;

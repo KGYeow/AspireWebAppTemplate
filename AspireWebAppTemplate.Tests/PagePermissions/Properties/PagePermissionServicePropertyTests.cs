@@ -94,6 +94,7 @@ public class PagePermissionServicePropertyTests
     /// <summary>
     /// Pool of valid page paths used for Property 7 (PUT Idempotent Full Replacement).
     /// The mocked INavigationProvider returns NavItems for all these paths.
+    /// Excludes paths that are in SystemPageDefaults.Paths (system pages bypass permissions).
     /// </summary>
     private static readonly string[] ValidPagePool =
     [
@@ -105,8 +106,7 @@ public class PagePermissionServicePropertyTests
         "/admin/audit-log",
         "/admin/page-permissions",
         "/dashboard",
-        "/reports",
-        "/account/settings"
+        "/reports"
     ];
 
     /// <summary>

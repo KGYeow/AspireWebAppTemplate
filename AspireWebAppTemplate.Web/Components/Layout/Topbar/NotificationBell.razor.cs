@@ -1,5 +1,7 @@
 using AspireWebAppTemplate.Core.Contracts.Notifications;
 using AspireWebAppTemplate.Core.Domain.Enums;
+using AspireWebAppTemplate.UI.Components.Shared;
+using AspireWebAppTemplate.UI.Utilities;
 using AspireWebAppTemplate.Web.Abstractions;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
@@ -159,7 +161,7 @@ public partial class NotificationBell : ComponentBase, IDisposable
             }
 
             // Show snackbar toast for the new notification.
-            ShowToast(title);
+            ShowToast(title, message, category);
 
             StateHasChanged();
         });
@@ -238,59 +240,54 @@ public partial class NotificationBell : ComponentBase, IDisposable
     }
 
     /// <summary>
-    /// Displays a snackbar toast for a received notification if the user has pop-up
-    /// notifications enabled. Suppresses the toast when disabled globally.
+    /// Displays a rich notification snackbar using the custom NotificationSnackbarContent component.
+    /// Configures per-snackbar positioning to top-right and 5-second auto-dismiss.
+    /// Passes the navigation URL so the UI project component knows where to navigate on click.
+    /// Suppresses display when the user has disabled notification popups.
     /// </summary>
     /// <param name="title">The notification title.</param>
-    private void ShowToast(string title)
+    /// <param name="message">The notification message body.</param>
+    /// <param name="category">The notification category string.</param>
+    private void ShowToast(string title, string message, string category)
     {
         if (!NotificationContext.NotificationPopupsEnabled)
             return;
 
-        var displayTitle = TruncateTitle(title);
-
-        Snackbar.Add(displayTitle, Severity.Info, config =>
+        Snackbar.Add<NotificationSnackbarContent>(new Dictionary<string, object>
         {
-            config.VisibleStateDuration = 5000;
+            { nameof(NotificationSnackbarContent.Title), title },
+            { nameof(NotificationSnackbarContent.Message), message },
+            { nameof(NotificationSnackbarContent.Category), category }
+        }, Severity.Normal, config =>
+        {
+            //config.VisibleStateDuration = 5000;
+            config.RequireInteraction = true;
+            config.ShowCloseIcon = true;
+            config.SnackbarVariant = Variant.Text;
+            config.HideIcon = true;
+            config.Onclick = _ =>
+            {
+                NavigationManager.NavigateTo("/account/notifications");
+                return Task.CompletedTask;
+            };
         });
     }
 
     /// <summary>
-    /// Truncates a notification title to a maximum of 100 characters, appending an ellipsis ("…")
-    /// if the original exceeds the limit. Returns the original string unchanged when within the limit.
-    /// </summary>
-    /// <param name="title">The notification title to truncate.</param>
-    /// <returns>The original or truncated title.</returns>
-    internal static string TruncateTitle(string title)
-    {
-        return title.Length > 100 ? string.Concat(title.AsSpan(0, 100), "…") : title;
-    }
-
-    /// <summary>
-    /// Returns the appropriate MudBlazor icon for a notification category.
+    /// Returns the Material Symbols icon string for a notification category.
     /// </summary>
     /// <param name="category">The notification category.</param>
-    /// <returns>A MudBlazor icon string.</returns>
-    private static string GetCategoryIcon(NotificationCategory category) => category switch
-    {
-        NotificationCategory.Account => Icons.Material.Outlined.Security,
-        NotificationCategory.Activity => Icons.Material.Outlined.People,
-        NotificationCategory.System => Icons.Material.Outlined.Info,
-        _ => Icons.Material.Outlined.Notifications
-    };
+    /// <returns>A Material Symbols icon string.</returns>
+    private static string GetCategoryIcon(NotificationCategory category) =>
+        NotificationCategoryHelper.GetIcon(category.ToString());
 
     /// <summary>
-    /// Returns the appropriate color for a notification category icon.
+    /// Returns the MudBlazor CSS class for a notification category's color.
     /// </summary>
     /// <param name="category">The notification category.</param>
-    /// <returns>A MudBlazor Color value.</returns>
-    private static Color GetCategoryColor(NotificationCategory category) => category switch
-    {
-        NotificationCategory.Account => Color.Error,
-        NotificationCategory.Activity => Color.Primary,
-        NotificationCategory.System => Color.Info,
-        _ => Color.Default
-    };
+    /// <returns>A MudBlazor CSS class string.</returns>
+    private static string GetCategoryColor(NotificationCategory category) =>
+        NotificationCategoryHelper.GetColorClass(category.ToString());
 
     /// <summary>
     /// Formats a UTC timestamp as a human-readable relative time string.
