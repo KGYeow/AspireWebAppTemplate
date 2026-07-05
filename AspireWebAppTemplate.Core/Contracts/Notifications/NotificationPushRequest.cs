@@ -30,4 +30,10 @@ public sealed class NotificationPushRequest
     /// The notification message body (may be empty).
     /// </summary>
     public string Message { get; set; } = "";
+
+    /// <summary>
+    /// The unique identifier of the persisted notification entity.
+    /// Used by downstream components to construct deep-link URLs for direct navigation.
+    /// </summary>
+    public Guid NotificationId { get; set; }
 }

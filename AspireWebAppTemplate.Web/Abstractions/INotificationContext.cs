@@ -1,3 +1,5 @@
+using AspireWebAppTemplate.Web.Models;
+
 namespace AspireWebAppTemplate.Web.Abstractions;
 
 /// <summary>
@@ -45,14 +47,15 @@ public interface INotificationContext : IAsyncDisposable
     event Action? OnChange;
 
     /// <summary>
-    /// Raised when a new notification arrives via the SignalR hub. Provides the notification
-    /// title, message, and category for UI-specific reactions (snackbar toast, dropdown update).
+    /// Raised when a new notification arrives via the SignalR hub. Provides a strongly-typed
+    /// event args object containing title, message, category, and notification ID for UI-specific
+    /// reactions (snackbar toast, dropdown update, deep-link navigation).
     /// </summary>
     /// <remarks>
     /// This event is raised after <see cref="OnChange"/> — the unread count is already updated
     /// when this fires. Subscribers use this for UI-only concerns (toast display, list prepending).
     /// </remarks>
-    event Action<string, string, string>? OnNotificationReceived;
+    event Action<NotificationReceivedEventArgs>? OnNotificationReceived;
 
     /// <summary>
     /// Loads the unread count from the API and starts the SignalR hub connection.

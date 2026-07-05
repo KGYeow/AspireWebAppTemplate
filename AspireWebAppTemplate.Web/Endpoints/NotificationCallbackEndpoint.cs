@@ -62,9 +62,12 @@ public static class NotificationCallbackEndpoint
         if (request.UnreadCount < 0)
             return Results.BadRequest("UnreadCount must be >= 0.");
 
+        if (request.NotificationId == Guid.Empty)
+            return Results.BadRequest("NotificationId is required.");
+
         // Deliver to the user's SignalR group (no-op if user has no active connections).
         await hubContext.Clients.Group(request.UserId)
-            .SendAsync("ReceiveNotification", request.Title, request.Message, request.Category, request.UnreadCount);
+            .SendAsync("ReceiveNotification", request.Title, request.Message, request.Category, request.UnreadCount, request.NotificationId);
 
         return Results.Ok();
     }

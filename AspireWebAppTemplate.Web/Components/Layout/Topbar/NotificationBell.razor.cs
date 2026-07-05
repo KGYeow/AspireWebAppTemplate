@@ -3,6 +3,7 @@ using AspireWebAppTemplate.Core.Domain.Enums;
 using AspireWebAppTemplate.UI.Components.Shared;
 using AspireWebAppTemplate.UI.Utilities;
 using AspireWebAppTemplate.Web.Abstractions;
+using AspireWebAppTemplate.Web.Models;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
@@ -129,27 +130,26 @@ public partial class NotificationBell : ComponentBase, IDisposable
 
     /// <summary>
     /// Handles the <see cref="INotificationContext.OnNotificationReceived"/> event.
-    /// Prepends the new notification to the dropdown list and shows a snackbar toast.
+    /// Prepends the new notification to the dropdown list and shows a snackbar toast
+    /// with a deep-link click handler.
     /// </summary>
-    /// <param name="title">The notification title.</param>
-    /// <param name="message">The notification message body.</param>
-    /// <param name="category">The notification category as a string.</param>
-    private void HandleNotificationReceived(string title, string message, string category)
+    /// <param name="args">The notification event arguments containing title, message, category, and notification ID.</param>
+    private void HandleNotificationReceived(NotificationReceivedEventArgs args)
     {
         InvokeAsync(() =>
         {
-            // Prepend to dropdown if notifications are already loaded (dropdown may be open).
+            // Prepend to dropdown if notifications are already loaded.
             if (_recentNotifications is not null)
             {
-                var parsedCategory = Enum.TryParse<NotificationCategory>(category, ignoreCase: true, out var cat)
+                var parsedCategory = Enum.TryParse<NotificationCategory>(args.Category, ignoreCase: true, out var cat)
                     ? cat
                     : NotificationCategory.System;
 
                 _recentNotifications.Insert(0, new NotificationDto
                 {
-                    Id = Guid.NewGuid(),
-                    Title = title,
-                    Message = message,
+                    Id = args.NotificationId,
+                    Title = args.Title,
+                    Message = args.Message,
                     Category = parsedCategory,
                     IsRead = false,
                     CreatedAtUtc = DateTime.UtcNow
@@ -160,9 +160,7 @@ public partial class NotificationBell : ComponentBase, IDisposable
                     _recentNotifications.RemoveAt(_recentNotifications.Count - 1);
             }
 
-            // Show snackbar toast for the new notification.
-            ShowToast(title, message, category);
-
+            ShowToast(args.Title, args.Message, args.Category, args.NotificationId);
             StateHasChanged();
         });
     }
@@ -241,14 +239,15 @@ public partial class NotificationBell : ComponentBase, IDisposable
 
     /// <summary>
     /// Displays a rich notification snackbar using the custom NotificationSnackbarContent component.
-    /// Configures per-snackbar positioning to top-right and 5-second auto-dismiss.
-    /// Passes the navigation URL so the UI project component knows where to navigate on click.
+    /// Configures per-snackbar positioning to top-right and require-interaction dismiss.
+    /// The snackbar's Onclick handler navigates to the deep-link URL for inline notification expansion.
     /// Suppresses display when the user has disabled notification popups.
     /// </summary>
     /// <param name="title">The notification title.</param>
     /// <param name="message">The notification message body.</param>
     /// <param name="category">The notification category string.</param>
-    private void ShowToast(string title, string message, string category)
+    /// <param name="notificationId">The notification entity ID for deep-link URL construction.</param>
+    private void ShowToast(string title, string message, string category, Guid notificationId)
     {
         if (!NotificationContext.NotificationPopupsEnabled)
             return;
@@ -265,9 +264,9 @@ public partial class NotificationBell : ComponentBase, IDisposable
             config.ShowCloseIcon = true;
             config.SnackbarVariant = Variant.Text;
             config.HideIcon = true;
-            config.Onclick = _ =>
+            config.OnClick = _ =>
             {
-                NavigationManager.NavigateTo("/account/notifications");
+                NavigationManager.NavigateTo($"/account/notifications?id={notificationId}");
                 return Task.CompletedTask;
             };
         });

@@ -129,7 +129,8 @@ public class NotificationService : INotificationService
                     Title = request.Title,
                     Message = request.Message,
                     Category = request.Category.ToString(),
-                    UnreadCount = unreadCount
+                    UnreadCount = unreadCount,
+                    NotificationId = notification.Id
                 });
             }
             catch (Exception callbackEx)

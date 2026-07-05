@@ -1,4 +1,5 @@
 using AspireWebAppTemplate.Web.Abstractions;
+using AspireWebAppTemplate.Web.Models;
 using Microsoft.AspNetCore.SignalR.Client;
 
 namespace AspireWebAppTemplate.Web.Services;
@@ -120,7 +121,7 @@ public sealed class NotificationContext : INotificationContext
     public event Action? OnChange;
 
     /// <inheritdoc />
-    public event Action<string, string, string>? OnNotificationReceived;
+    public event Action<NotificationReceivedEventArgs>? OnNotificationReceived;
 
     /// <inheritdoc />
     public bool NotificationPopupsEnabled { get; set; } = true;
@@ -228,7 +229,7 @@ public sealed class NotificationContext : INotificationContext
                 .WithAutomaticReconnect(new ExponentialBackoffRetryPolicy())
                 .Build();
 
-            _hubConnection.On<string, string, string, int>("ReceiveNotification", HandleReceiveNotification);
+            _hubConnection.On<string, string, string, int, Guid>("ReceiveNotification", HandleReceiveNotification);
             _hubConnection.Reconnected += HandleReconnected;
             _hubConnection.Closed += HandleClosed;
 
@@ -245,11 +246,17 @@ public sealed class NotificationContext : INotificationContext
     /// Handles the "ReceiveNotification" event from the SignalR hub.
     /// Updates the cached unread count and raises events for UI components.
     /// </summary>
-    private Task HandleReceiveNotification(string title, string message, string category, int unreadCount)
+    private Task HandleReceiveNotification(string title, string message, string category, int unreadCount, Guid notificationId)
     {
         _unreadCount = Math.Max(0, unreadCount);
         OnChange?.Invoke();
-        OnNotificationReceived?.Invoke(title, message, category);
+        OnNotificationReceived?.Invoke(new NotificationReceivedEventArgs
+        {
+            Title = title,
+            Message = message,
+            Category = category,
+            NotificationId = notificationId
+        });
         return Task.CompletedTask;
     }
 

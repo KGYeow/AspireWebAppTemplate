@@ -89,17 +89,22 @@ public class CallbackValidationPropertyTests
 
         var unreadCountGen = Gen.Choose(0, 10000);
 
+        var notificationIdGen = Gen.Elements(
+            Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
+
         var requestGen = nonEmptyStringGen.SelectMany(userId =>
             titleGen.SelectMany(title =>
                 categoryGen.SelectMany(category =>
-                    unreadCountGen.Select(count =>
-                        new NotificationPushRequest
-                        {
-                            UserId = userId,
-                            Title = title,
-                            Category = category,
-                            UnreadCount = count
-                        }))));
+                    unreadCountGen.SelectMany(count =>
+                        notificationIdGen.Select(notificationId =>
+                            new NotificationPushRequest
+                            {
+                                UserId = userId,
+                                Title = title,
+                                Category = category,
+                                UnreadCount = count,
+                                NotificationId = notificationId
+                            })))));
 
         return Prop.ForAll(
             Arb.From(requestGen),
