@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Text;
 using AspireWebAppTemplate.Abstractions;
 using AspireWebAppTemplate.Core.Domain.Enums;
-using AspireWebAppTemplate.Core.Utilities;
+using AspireWebAppTemplate.Core.Utilities.Attributes;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 

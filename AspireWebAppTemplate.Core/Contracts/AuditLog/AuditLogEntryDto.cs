@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using AspireWebAppTemplate.Core.Domain.Enums;
-using AspireWebAppTemplate.Core.Utilities;
+using AspireWebAppTemplate.Core.Utilities.Attributes;
 
 namespace AspireWebAppTemplate.Core.Contracts.AuditLog;
 

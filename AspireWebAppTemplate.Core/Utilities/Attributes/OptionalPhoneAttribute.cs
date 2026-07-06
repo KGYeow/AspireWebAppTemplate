@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 
-namespace AspireWebAppTemplate.Core.Utilities;
+namespace AspireWebAppTemplate.Core.Utilities.Attributes;
 
 /// <summary>
 /// Validates a phone number field that is optional — null, empty, and whitespace-only

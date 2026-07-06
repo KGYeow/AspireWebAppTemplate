@@ -1,7 +1,7 @@
 using System;
 using AspireWebAppTemplate.Core.Domain.Enums;
 
-namespace AspireWebAppTemplate.Core.Utilities;
+namespace AspireWebAppTemplate.Core.Utilities.Attributes;
 
 /// <summary>
 /// Marks a property as a column in Excel/CSV exports.

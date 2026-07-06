@@ -29,7 +29,8 @@ AspireWebAppTemplate.Core/
 │   └── Users/
 ├── Domain/Enums/               ← AuditActionType, AuditEntityType, ThemePreference, NotificationCategory, etc.
 ├── Extensions/                 ← Extension methods
-└── Utilities/                  ← Shared utilities
+└── Utilities/                  ← Shared utility classes (SecureConnectionString)
+    └── Attributes/             ← Custom validation/metadata attributes (ExportColumnAttribute, OptionalPhoneAttribute)
 ```
 
 ## ApiService Project
