@@ -4,6 +4,7 @@ using AspireWebAppTemplate.ApiService.Data.Entities;
 using AspireWebAppTemplate.ApiService.Utilities;
 using AspireWebAppTemplate.Core.Contracts;
 using AspireWebAppTemplate.Core.Contracts.AuditLog;
+using AspireWebAppTemplate.Core.Contracts.Notifications;
 using AspireWebAppTemplate.Core.Contracts.Roles;
 using AspireWebAppTemplate.Core.Contracts.Users;
 using AspireWebAppTemplate.Core.Domain.Enums;
@@ -42,6 +43,7 @@ public class UserService : IUserService
     private readonly IAuditLogService _auditLogService;
     private readonly ICurrentUserAccessor _currentUser;
     private readonly ILdapAuthService _ldapAuthService;
+    private readonly INotificationService _notificationService;
 
     /// <summary>
     /// Static field definitions used by <see cref="AuditChangeHelper.Snapshot{T}"/> to capture
@@ -67,18 +69,21 @@ public class UserService : IUserService
     /// <param name="auditLogService">The audit log service for recording user management actions.</param>
     /// <param name="currentUser">The current user accessor for identity and IP address resolution.</param>
     /// <param name="ldapAuthService">The LDAP authentication service for directory attribute fetching.</param>
+    /// <param name="notificationService">The notification service for sending in-app notifications to affected users.</param>
     public UserService(
         UserManager<ApplicationUser> userManager,
         RoleManager<ApplicationRole> roleManager,
         IAuditLogService auditLogService,
         ICurrentUserAccessor currentUser,
-        ILdapAuthService ldapAuthService)
+        ILdapAuthService ldapAuthService,
+        INotificationService notificationService)
     {
         _userManager = userManager;
         _roleManager = roleManager;
         _auditLogService = auditLogService;
         _currentUser = currentUser;
         _ldapAuthService = ldapAuthService;
+        _notificationService = notificationService;
     }
 
     #endregion
@@ -332,6 +337,53 @@ public class UserService : IUserService
             OldValues = AuditChangeHelper.Serialize(new { IsActive = true }),
             NewValues = AuditChangeHelper.Serialize(new { IsActive = false }),
             IpAddress = _currentUser.IpAddress
+        });
+
+        // Notify the affected user that their account has been deactivated
+        await _notificationService.CreateNotificationAsync(new CreateNotificationRequest
+        {
+            UserId = user.Id,
+            Category = NotificationCategory.Account,
+            Title = "Account Deactivated",
+            Message = "Your account has been deactivated by an administrator. You will no longer be able to sign in."
+        });
+    }
+
+    /// <inheritdoc />
+    public async Task ResetPasswordAsync(string id, string newPassword)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user is null)
+            throw new KeyNotFoundException($"User with ID '{id}' was not found.");
+
+        // Generate a password reset token and use it to set the new password
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+        if (!result.Succeeded)
+        {
+            var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+            throw new InvalidOperationException(errors);
+        }
+
+        // Log audit entry for admin password reset (no password values in audit)
+        await _auditLogService.LogAsync(new AuditLogRequest
+        {
+            UserId = _currentUser.UserId,
+            ActionType = AuditActionType.PasswordChanged,
+            EntityType = AuditEntityType.User,
+            EntityId = user.Id,
+            EntityName = user.DisplayName ?? user.UserName ?? string.Empty,
+            Description = $"Password for user '{user.DisplayName ?? user.UserName}' was reset by an administrator.",
+            IpAddress = _currentUser.IpAddress
+        });
+
+        // Notify the affected user that their password was reset by an admin
+        await _notificationService.CreateNotificationAsync(new CreateNotificationRequest
+        {
+            UserId = user.Id,
+            Category = NotificationCategory.Account,
+            Title = "Password Reset",
+            Message = "Your password has been reset by an administrator. Please sign in with your new password."
         });
     }
 

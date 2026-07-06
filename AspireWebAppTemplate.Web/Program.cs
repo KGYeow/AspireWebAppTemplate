@@ -74,13 +74,12 @@ builder.Services.AddApplicationServices();
 // MudBlazor
 builder.Services.AddMudServices(config =>
 {
-    config.SnackbarConfiguration.RequireInteraction = true;
     config.SnackbarConfiguration.PreventDuplicates = false;
     config.SnackbarConfiguration.NewestOnTop = false;
     config.SnackbarConfiguration.VisibleStateDuration = 3000;
     config.SnackbarConfiguration.HideTransitionDuration = 500;
     config.SnackbarConfiguration.ShowTransitionDuration = 500;
-    config.SnackbarConfiguration.MaximumOpacity = 90;
+    config.SnackbarConfiguration.MaximumOpacity = 95;
 });
 
 // SignalR: required for the NotificationHub real-time notification delivery.

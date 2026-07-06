@@ -259,8 +259,7 @@ public partial class NotificationBell : ComponentBase, IDisposable
             { nameof(NotificationSnackbarContent.Category), category }
         }, Severity.Normal, config =>
         {
-            //config.VisibleStateDuration = 5000;
-            config.RequireInteraction = true;
+            config.VisibleStateDuration = 6000;
             config.ShowCloseIcon = true;
             config.SnackbarVariant = Variant.Text;
             config.HideIcon = true;

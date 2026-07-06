@@ -209,6 +209,31 @@ public class UsersController : BaseController
         catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
     }
 
+    /// <summary>
+    /// Resets a user's password to a new value specified by an administrator.
+    /// Notifies the affected user via in-app notification.
+    /// </summary>
+    /// <param name="id">The unique identifier of the user whose password is being reset.</param>
+    /// <param name="request">The request containing the new password.</param>
+    /// <returns>200 OK on success.</returns>
+    /// <response code="200">The user's password was reset successfully.</response>
+    /// <response code="400">Password reset failed (policy violation).</response>
+    /// <response code="404">No user exists with the specified ID.</response>
+    [HttpPost("{id}/reset-password")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ResetPassword(string id, [FromBody] AdminResetPasswordRequest request)
+    {
+        try
+        {
+            await _userService.ResetPasswordAsync(id, request.NewPassword);
+            return Ok();
+        }
+        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+    }
+
     #endregion
 
     #region Roles

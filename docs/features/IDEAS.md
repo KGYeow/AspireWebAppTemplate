@@ -53,10 +53,12 @@ A curated list of pages and features that would complement the existing template
 
 ### 3. Wire Up Notification Triggers
 - Connect `CreateNotificationAsync` calls to actual user events:
-  - Role assignment/removal → notify affected user
-  - Account activation/deactivation → notify user
-  - Password changed by admin → notify user
-  - System announcements → notify all users
+  - Password changed by admin → notify affected user (Account category)
+  - Account deactivated by admin → notify affected user (Account category)
+  - System announcements → notify all users (System category)
+- Excluded (industry standard: no user value, creates noise):
+  - Role assignment/removal — users discover access changes organically via nav filtering
+  - Account activation — user can't see in-app notifications until they log in (use email/invitation instead)
 - Currently the creation pipeline exists but nothing triggers it in production code
 
 ---

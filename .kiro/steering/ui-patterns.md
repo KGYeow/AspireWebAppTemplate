@@ -102,6 +102,15 @@ The topbar notification bell uses `MudMenu` (not MudPopover):
 - Skeleton loading while notifications fetch.
 - Category icons wrapped in circle containers for visual consistency.
 - Badge count on the bell icon for unread notifications.
+- Real-time events delivered via `NotificationReceivedEventArgs` (strongly-typed event args with Title, Message, Category, NotificationId).
+- Snackbar toast click navigates to `/account/notifications?id={notificationId}` for deep-link expansion.
+
+### NotificationSnackbarContent
+Custom snackbar content component in UI shared library (`NotificationSnackbarContent.razor`):
+- Uses `MudStack Row` with `AlignItems.Start` (top-aligned icon to support multi-line messages).
+- Icon avatar with category-specific color class.
+- Title (bold, body2) and message (caption), both with text-overflow ellipsis.
+- Cursor pointer to indicate clickability (deep-link navigation handled by snackbar's `Onclick`).
 
 ### Notification Page (Master-Detail Layout)
 The full notifications page uses a master-detail pattern:

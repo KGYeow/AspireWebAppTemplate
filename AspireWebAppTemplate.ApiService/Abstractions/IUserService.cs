@@ -106,6 +106,20 @@ public interface IUserService
     Task DeactivateAsync(string id);
 
     /// <summary>
+    /// Resets a user's password to a new value specified by an administrator.
+    /// Generates a reset token internally and applies the new password.
+    /// Notifies the affected user via in-app notification.
+    /// </summary>
+    /// <param name="id">The unique identifier of the user whose password is being reset.</param>
+    /// <param name="newPassword">The new password to set for the user.</param>
+    /// <returns>A task representing the asynchronous password reset operation.</returns>
+    /// <exception cref="KeyNotFoundException">Thrown when no user exists with the specified ID.</exception>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the new password fails identity validation (policy violation).
+    /// </exception>
+    Task ResetPasswordAsync(string id, string newPassword);
+
+    /// <summary>
     /// Replaces all existing role assignments for the specified user with the provided set of role names.
     /// Removes any roles not in the new set and adds any roles not currently assigned.
     /// </summary>

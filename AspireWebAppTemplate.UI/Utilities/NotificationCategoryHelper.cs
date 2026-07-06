@@ -31,9 +31,9 @@ public static class NotificationCategoryHelper
     /// <returns>A MudBlazor CSS class string (e.g., "mud-error mud-theme-dark").</returns>
     public static string GetColorClass(string? category) => category?.ToLowerInvariant() switch
     {
-        "account" => "mud-error mud-theme-dark",
-        "activity" => "mud-primary mud-theme-dark",
-        "system" => "mud-info mud-theme-dark",
+        "account" => "mud-error",
+        "activity" => "mud-primary",
+        "system" => "mud-info",
         _ => ""
     };
 }

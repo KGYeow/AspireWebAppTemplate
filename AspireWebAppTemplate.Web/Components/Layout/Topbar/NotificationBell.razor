@@ -7,13 +7,17 @@
          AnchorOrigin="Origin.BottomRight"
          TransformOrigin="Origin.TopRight"
          Dense>
-
+         
     <ActivatorContent>
-        <MudIconButton Color="Color.Inherit" OnClick="@context.ToggleAsync">
-            <MudBadge Content="@_unreadCount" Visible="@(_unreadCount > 0)" Color="Color.Error" Overlap>
+        <MudBadge Content="@_unreadCount"
+                  Visible="@(_unreadCount > 0)"
+                  BadgeClass=""
+                  Color="Color.Error"
+                  Overlap>
+            <MudIconButton Color="Color.Inherit" OnClick="@context.ToggleAsync">
                 <MudIcon Icon="@Icons.Material.Outlined.Notifications" />
-            </MudBadge>
-        </MudIconButton>
+             </MudIconButton>
+        </MudBadge>
     </ActivatorContent>
 
     <ChildContent>
@@ -66,7 +70,7 @@
                                  Class="@($"mb-1 px-3{(notification.IsRead ? "" : " notification-unread")}")">
 
                         <MudStack Row AlignItems="AlignItems.Start" Spacing="2">
-                            <MudAvatar Size="Size.Small" Class="@GetCategoryColor(notification.Category)">
+                            <MudAvatar Size="Size.Small" Class="@GetCategoryColor(notification.Category)" Variant="Variant.Text">
                                 <MudIcon Icon="@GetCategoryIcon(notification.Category)" Style="font-size: 16px" />
                             </MudAvatar>
 
