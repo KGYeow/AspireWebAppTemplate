@@ -7,6 +7,7 @@
 
 ## Frontend
 - **MudBlazor 9.x** — Material Design UI component library
+- **Radzen.Blazor** — HtmlEditor component only (WYSIWYG rich text editing for announcements)
 - **CSS isolation** — scoped `.razor.css` files per component
 - **MudBlazor utility classes** — spacing, flex, alignment (no custom CSS frameworks)
 
@@ -29,6 +30,7 @@
 
 ## Key Libraries
 - **EPPlus** — Excel export (in ApiService)
+- **Ganss.Xss.HtmlSanitizer** — server-side HTML content sanitization (announcement content)
 - **System.Text.Json** — JSON serialization (camelCase policy for audit values)
 
 ## Development

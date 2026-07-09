@@ -14,8 +14,10 @@ An enterprise Blazor Server web application template built on .NET Aspire. It pr
 
 - **User Management** — CRUD, activation/deactivation, LDAP sync, role assignment
 - **Role Management** — custom roles with position ordering, system role protection
+- **Announcement System** — multi-surface announcements with banner, list page, admin CRUD, scheduling, severity levels, per-user dismissal, HTML content editing, and notification integration
 - **Audit Logging** — security-event tracking with old/new value change capture
 - **Page-Level Permissions** — database-driven, role-based page access (whitelist model)
+- **Notification System** — real-time in-app notifications with SignalR, snackbar popups, deep-linking, and per-category preferences
 - **Settings & Preferences** — per-user theme, timezone, date/time format
 - **Profile Management** — user profile viewing and editing
 - **Authentication** — local Identity + optional LDAP/Active Directory integration

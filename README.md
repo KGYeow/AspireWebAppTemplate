@@ -43,9 +43,12 @@ Blazor Server frontend (Global InteractiveServer mode):
 - **Components/Pages/** — Application pages
   - `Account/Auth/` — Login, Register, ForgotPassword, ResetPassword, etc.
   - `Account/Manage/` — Profile, Email, ChangePassword, 2FA, Passkeys, etc.
-  - `UserManagement/` — Admin user CRUD with bulk operations
-  - `RoleManagement/` — Admin role CRUD
-  - `AuditLog/` — Searchable audit log with export
+  - `Admin/UserManagement/` — Admin user CRUD with bulk operations
+  - `Admin/RoleManagement/` — Admin role CRUD
+  - `Admin/Announcements/` — Admin announcement CRUD with DataGrid, rich text editor
+  - `Admin/AuditLog/` — Searchable audit log with export
+  - `Announcements/` — User-facing announcement list with master-detail layout
+  - `Account/Notifications/` — Notification list with master-detail layout
   - `Settings/` — User preferences (theme, timezone, date format)
   - `Example/` — Demo pages (Auth, Counter, Weather)
 - **Components/Layout/** — MainLayout, AuthLayout, ManageLayout, NavMenu, Topbar
@@ -67,25 +70,27 @@ Shared between frontend and backend:
 
 ### 6. **AspireWebAppTemplate.UI** (Shared UI Components)
 Reusable Blazor components and themes:
-- **Components/Shared/** — ConfirmationDialog, PageHeader, ModalDialog
-- **Components/DataGrid/** — BoolFilterSelect
+- **Components/Shared/** — ConfirmationDialog, PageHeader, ModalDialog, PillToggle, StatusAlert
+- **Components/DataGrid/** — BoolFilterSelect, EnumFilterSelect, StringFilterSelect
 - **Theme/** — ApplicationTheme
 - **Utilities/** — DataGridUtils<T> (client-side filtering/sorting/pagination)
 
 ### 7. **AspireWebAppTemplate.Tests** (Test Project)
 - **AuditLog/** — Property-based tests (FsCheck)
+- **Announcements/** — Property-based tests for announcement service (status, CRUD, dismissal, notifications)
 - Integration and unit tests
 
 ## Technology Stack
 
 - **Framework**: .NET 10.0, .NET Aspire
 - **Frontend**: Blazor Server (Global InteractiveServer)
-- **UI Components**: MudBlazor 9.5.0
+- **UI Components**: MudBlazor 9.5.0, Radzen.Blazor (HtmlEditor only)
 - **Backend**: ASP.NET Core Web API with Controllers
 - **Database**: SQL Server with Entity Framework Core 10.0
 - **Authentication**: Cookie-based (Web) + ASP.NET Core Identity (API)
 - **LDAP**: Active Directory integration via System.DirectoryServices.Protocols
 - **Excel Export**: EPPlus
+- **HTML Sanitization**: Ganss.Xss.HtmlSanitizer
 - **Telemetry**: OpenTelemetry
 - **Testing**: xUnit, FsCheck.Xunit, Moq
 
@@ -108,6 +113,18 @@ Reusable Blazor components and themes:
 - Searchable, filterable data grid with server-side pagination
 - Excel export
 - Configurable retention
+
+### Announcement System
+- Multi-surface announcements: persistent banner, dedicated list page, admin CRUD
+- Two display types: Banner (top-of-layout) and Standard (list page only)
+- Three severity levels: Info, Warning, Critical — with distinct visual styling
+- Scheduling: optional start/expiry dates with timezone-aware date entry
+- Per-user banner dismissal stored in the database
+- Rich text content editing via Radzen HtmlEditor with server-side HTML sanitization (Ganss.Xss)
+- Notification integration: optionally notify all users when announcements go live
+- Admin management: DataGrid with built-in filtering, sorting, pagination, bulk delete
+- User list page: responsive master-detail layout with infinite scroll and severity filter
+- Collaborative administration: all authorized admins manage the shared announcement pool
 
 ### Settings & Preferences
 - Theme (Light/Dark/System)

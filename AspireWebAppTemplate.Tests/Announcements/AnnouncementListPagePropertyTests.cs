@@ -4,6 +4,7 @@ using AspireWebAppTemplate.ApiService.Abstractions;
 using AspireWebAppTemplate.ApiService.Data;
 using AspireWebAppTemplate.ApiService.Data.Entities;
 using AspireWebAppTemplate.ApiService.Services;
+using AspireWebAppTemplate.Core.Contracts;
 using AspireWebAppTemplate.Core.Contracts.Announcements;
 using AspireWebAppTemplate.Core.Contracts.AuditLog;
 using AspireWebAppTemplate.Core.Domain.Enums;
@@ -211,7 +212,7 @@ public class AnnouncementListPagePropertyTests
                         $"List page 30-day window failed. ActiveNoExpiry={activeNoExpiryIncluded}, " +
                         $"ActiveFuture={activeFutureIncluded}, RecentExpired={recentlyExpiredIncluded} " +
                         $"(expired {input.recentDaysAgo} days ago), OldExpiredExcluded={oldExpiredExcluded} " +
-                        $"(expired {input.oldDaysAgo} days ago). ResultCount={results.Count}");
+                        $"(expired {input.oldDaysAgo} days ago). ResultCount={results.Items.Count}");
                 }
                 finally
                 {

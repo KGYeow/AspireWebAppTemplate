@@ -21,13 +21,14 @@ AspireWebAppTemplate.Core/
 ├── Application/Abstractions/   ← Shared interfaces (INavigationProvider, etc.)
 ├── Common/                     ← NavModels, Defaults, shared models
 ├── Contracts/                  ← DTOs grouped by feature
+│   ├── Announcements/          ← AnnouncementDto, CreateAnnouncementRequest, UpdateAnnouncementRequest, AnnouncementQueryParams
 │   ├── AuditLog/
 │   ├── Auth/
 │   ├── Notifications/          ← NotificationDto, CreateNotificationRequest, NotificationPushRequest, etc.
 │   ├── PagePermissions/
 │   ├── Roles/
 │   └── Users/
-├── Domain/Enums/               ← AuditActionType, AuditEntityType, ThemePreference, NotificationCategory, etc.
+├── Domain/Enums/               ← AuditActionType, AuditEntityType, ThemePreference, NotificationCategory, AnnouncementDisplayType, AnnouncementSeverity, etc.
 ├── Extensions/                 ← Extension methods
 └── Utilities/                  ← Shared utility classes (SecureConnectionString)
     └── Attributes/             ← Custom validation/metadata attributes (ExportColumnAttribute, OptionalPhoneAttribute)
@@ -39,7 +40,8 @@ AspireWebAppTemplate.ApiService/
 ├── Abstractions/               ← Service interfaces (IAuditLogService, IRoleService, IUserService, IAuthService, etc.)
 ├── Controllers/                ← Thin REST API controllers (extend BaseController, delegate to services)
 ├── Data/
-│   ├── Entities/               ← EF Core entities (ApplicationUser, ApplicationRole, AuditLogEntry, etc.)
+│   ├── Entities/               ← EF Core entities (ApplicationUser, ApplicationRole, AuditLogEntry, Announcement, etc.)
+│   ├── Configurations/         ← IEntityTypeConfiguration<T> classes (one per entity)
 │   ├── ApplicationDbContext.cs
 │   └── SeedData.cs
 ├── Extensions/                 ← DI registration extensions (ApplicationServiceExtensions)
@@ -62,21 +64,22 @@ AspireWebAppTemplate.Web/
 │   │   ├── MainLayout.razor    ← Entry-point layouts at root level
 │   │   ├── AuthLayout.razor
 │   │   ├── ManageLayout.razor
-│   │   ├── Topbar/             ← Topbar, DropdownProfile, NotificationBell
+│   │   ├── Topbar/             ← Topbar, DropdownProfile, NotificationBell, AnnouncementIcon, AnnouncementBanner
 │   │   ├── Sidebar/            ← DrawerHeader, NavMenu, ManageNavMenu
 │   │   ├── Footer/             ← Footer
 │   │   └── Shared/             ← ReconnectModal, etc.
 │   ├── Pages/
-│   │   ├── Account/            ← Profile, Settings, Auth, Manage
-│   │   ├── Admin/              ← AuditLog, UserManagement, RoleManagement, PagePermissions
+│   │   ├── Account/            ← Profile, Settings, Auth, Manage, Notifications
+│   │   ├── Admin/              ← AuditLog, UserManagement, RoleManagement, PagePermissions, Announcements
+│   │   ├── Announcements/      ← User-facing announcement list page (master-detail)
 │   │   └── Example/            ← Counter, Weather, Auth demo
 │   └── Shared/                 ← Web-specific shared components
 ├── Endpoints/                  ← Minimal API endpoints (NotificationCallbackEndpoint)
 ├── Extensions/                 ← DI registration extensions (ApiClientServiceExtensions, ApplicationServiceExtensions)
 ├── Hubs/                       ← SignalR hubs (NotificationHub)
 ├── Services/
-│   ├── ApiClients/             ← Typed HttpClient services (ApiUserService, ApiNotificationService, etc.)
-│   ├── Contexts/               ← Per-circuit scoped state (NotificationContext, CircuitUserContext)
+│   ├── ApiClients/             ← Typed HttpClient services (ApiUserService, ApiNotificationService, ApiAnnouncementService, etc.)
+│   ├── Contexts/               ← Per-circuit scoped state (NotificationContext, AnnouncementContext, CircuitUserContext)
 │   ├── Handlers/               ← Delegating handlers (UserIdentityDelegatingHandler)
 │   └── ExponentialBackoffRetryPolicy.cs
 ├── Authorization/              ← PagePermissionHandler, requirements
@@ -86,7 +89,8 @@ AspireWebAppTemplate.Web/
 ## UI Project (Razor Class Library)
 ```
 AspireWebAppTemplate.UI/
-├── Components/Shared/          ← Reusable components (PageContent, LoadingOverlay, PageHeader, StatusAlert, etc.)
+├── Components/Shared/          ← Reusable components (PageContent, LoadingOverlay, PageHeader, StatusAlert, PillToggle, ModalDialog, etc.)
+├── Components/DataGrid/        ← DataGrid filter components (BoolFilterSelect, EnumFilterSelect, StringFilterSelect)
 ├── Utilities/                  ← DataGridUtils, QueryableDataGridUtils
 └── Theme/                      ← DefaultTheme (neutral blue) + JabilTheme (corporate brand)
 ```
@@ -94,6 +98,7 @@ AspireWebAppTemplate.UI/
 ## Tests Project
 ```
 AspireWebAppTemplate.Tests/
+├── Announcements/              ← Property + unit tests for announcement features
 ├── ControllerServiceRefactor/  ← Property + unit tests for service layer
 ├── AuditLog/                   ← Property + unit tests for audit features
 ├── Notifications/              ← Property + unit tests for notification features

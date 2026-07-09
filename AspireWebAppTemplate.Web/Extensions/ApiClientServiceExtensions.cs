@@ -64,6 +64,10 @@ public static class ApiClientServiceExtensions
         //     client.BaseAddress = new("https+http://apiservice"))
         //     .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
 
+        services.AddHttpClient<ApiAiService>(client =>
+            client.BaseAddress = new("https+http://apiservice"))
+            .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
+
         #endregion
 
         return services;

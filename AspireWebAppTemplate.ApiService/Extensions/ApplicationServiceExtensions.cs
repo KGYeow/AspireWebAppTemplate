@@ -1,3 +1,7 @@
+using Amazon;
+using Amazon.BedrockRuntime;
+using Amazon.Runtime;
+using Amazon.Runtime.Credentials;
 using AspireWebAppTemplate.Abstractions;
 using AspireWebAppTemplate.ApiService.Abstractions;
 using AspireWebAppTemplate.ApiService.Services;
@@ -107,6 +111,41 @@ public static class ApplicationServiceExtensions
         // Example:
         // services.AddScoped<IOrderService, OrderService>();
         // services.AddScoped<IInvoiceService, InvoiceService>();
+
+        // AI Service
+        services.AddSingleton<AmazonBedrockRuntimeClient>(sp =>
+        {
+            var config = sp.GetRequiredService<IConfiguration>();
+            var region = config["Ai:Region"]
+                ?? throw new InvalidOperationException("Ai:Region configuration is required.");
+
+            var accessKeyId = config["Ai:AccessKeyId"];
+            var secretAccessKey = config["Ai:SecretAccessKey"];
+            var sessionToken = config["Ai:SessionToken"];
+
+            var clientConfig = new AmazonBedrockRuntimeConfig
+            {
+                RegionEndpoint = RegionEndpoint.GetBySystemName(region)
+            };
+
+            AWSCredentials credentials;
+            if (!string.IsNullOrEmpty(accessKeyId) && !string.IsNullOrEmpty(secretAccessKey) && !string.IsNullOrEmpty(sessionToken))
+            {
+                credentials = new SessionAWSCredentials(accessKeyId, secretAccessKey, sessionToken);
+            }
+            else if (!string.IsNullOrEmpty(accessKeyId) && !string.IsNullOrEmpty(secretAccessKey))
+            {
+                credentials = new BasicAWSCredentials(accessKeyId, secretAccessKey);
+            }
+            else
+            {
+                credentials = FallbackCredentialsFactory.GetCredentials(clientConfig, false);
+                //credentials = DefaultAWSCredentialsIdentityResolver.GetCredentialsAsync(clientConfig);
+            }
+
+            return new AmazonBedrockRuntimeClient(credentials, clientConfig);
+        });
+        services.AddScoped<IAiService, AiService>();
 
         #endregion
 
