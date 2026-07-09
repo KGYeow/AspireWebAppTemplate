@@ -12,7 +12,7 @@ This feature adds an AI integration layer to the application using Amazon Bedroc
 - **Bedrock_Runtime_Client**: The AWS SDK client (`AmazonBedrockRuntimeClient`) used to invoke foundation models on Amazon Bedrock.
 - **Prompt_Request**: The DTO (`AiPromptRequest`) containing the user's natural language prompt text.
 - **AI_Response**: The DTO (`AiResponseDto`) containing the generated text from the AI model.
-- **Model_Identifier**: The Amazon Bedrock model ID string (e.g., `amazon.nova-2-lite-v1:0`) that identifies which foundation model to invoke.
+- **Model_Identifier**: The Amazon Bedrock model ID string (e.g., `us.amazon.nova-2-lite-v1:0`) that identifies which foundation model to invoke. The `us.` prefix indicates the US cross-region inference profile.
 - **Session_Credentials**: The temporary AWS credentials (Access Key ID + Secret Access Key + Session Token) used to authenticate with Amazon Bedrock. These credentials expire and must be refreshed periodically.
 
 ## Requirements
@@ -39,7 +39,7 @@ This feature adds an AI integration layer to the application using Amazon Bedroc
 1. WHEN all three credential configuration values (`Ai:AccessKeyId`, `Ai:SecretAccessKey`, and `Ai:SessionToken`) are present, THE AI_Service SHALL create a SessionAWSCredentials object and use it to authenticate the Bedrock_Runtime_Client.
 2. WHEN only `Ai:AccessKeyId` and `Ai:SecretAccessKey` configuration values are present (no `Ai:SessionToken`), THE AI_Service SHALL create a BasicAWSCredentials object and use it to authenticate the Bedrock_Runtime_Client.
 3. WHEN none of the credential configuration values (`Ai:AccessKeyId`, `Ai:SecretAccessKey`, `Ai:SessionToken`) are present, THE AI_Service SHALL fall back to the AWS SDK default credential chain (supporting IAM roles in production).
-4. THE AI_Service SHALL read the Model_Identifier from `Ai:ModelId` in the base `appsettings.json` file, defaulting to `amazon.nova-2-lite-v1:0`. This is a non-secret application configuration value.
+4. THE AI_Service SHALL read the Model_Identifier from `Ai:ModelId` in the base `appsettings.json` file, defaulting to `us.amazon.nova-2-lite-v1:0`. This is a non-secret application configuration value. The `us.` prefix is required for the US cross-region inference profile.
 5. THE AI_Service SHALL read the AWS region from `Ai:Region` in the base `appsettings.json` file and configure the Bedrock_Runtime_Client to use that region. This is a non-secret application configuration value.
 6. IF the AWS region configuration value is missing or empty, THEN THE AI_Service SHALL throw an InvalidOperationException with a message indicating the region is not configured.
 7. THE AI_Service SHALL receive credential values (`Ai:AccessKeyId`, `Ai:SecretAccessKey`, `Ai:SessionToken`) exclusively through Aspire parameters defined in the AppHost, which are passed to the ApiService as environment variables. These values SHALL NOT appear in any appsettings.json file.

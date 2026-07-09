@@ -2,7 +2,7 @@
 
 ## Overview
 
-This feature adds a provider-agnostic AI text generation layer to the application. Internally it uses Amazon Bedrock with **Amazon Nova 2 Lite** (`amazon.nova-2-lite-v1:0`) as the default foundation model, but all public-facing types use generic "Ai" naming (`IAiService`, `AiService`, `AiPromptRequest`, `AiResponseDto`) to allow future provider swaps without breaking API contracts.
+This feature adds a provider-agnostic AI text generation layer to the application. Internally it uses Amazon Bedrock with **Amazon Nova 2 Lite** (`us.amazon.nova-2-lite-v1:0`) as the default foundation model, but all public-facing types use generic "Ai" naming (`IAiService`, `AiService`, `AiPromptRequest`, `AiResponseDto`) to allow future provider swaps without breaking API contracts.
 
 The integration follows the existing thin controller / full service layer architecture:
 - **Core/Contracts/Ai/** — DTOs shared between ApiService and Web
@@ -211,7 +211,7 @@ public sealed class AiResponseDto
 ```json
 {
   "Ai": {
-    "ModelId": "amazon.nova-2-lite-v1:0",
+    "ModelId": "us.amazon.nova-2-lite-v1:0",
     "Region": "us-east-1"
   }
 }

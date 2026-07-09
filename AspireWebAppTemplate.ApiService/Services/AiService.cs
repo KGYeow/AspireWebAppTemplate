@@ -38,7 +38,7 @@ public class AiService : IAiService
     /// <summary>
     /// The default model identifier used when <c>Ai:ModelId</c> is not configured.
     /// </summary>
-    private const string DefaultModelId = "amazon.nova-2-lite-v1:0";
+    private const string DefaultModelId = "us.amazon.nova-2-lite-v1:0";
 
     /// <summary>
     /// The timeout duration for Bedrock model invocation requests.
@@ -102,32 +102,38 @@ public class AiService : IAiService
         }
         catch (OperationCanceledException) when (cts.IsCancellationRequested)
         {
+            _logger.LogWarning("AI model invocation timed out after 60 seconds. ModelId: {ModelId}", modelId);
             throw new InvalidOperationException(
                 "The AI model did not respond within the 60-second timeout.");
         }
         catch (AmazonServiceException ex) when (IsExpiredCredentialsException(ex))
         {
+            _logger.LogWarning(ex, "AWS credentials expired during AI model invocation. ErrorCode: {ErrorCode}", ex.ErrorCode);
             throw new InvalidOperationException(
                 "The AWS credentials have expired and need to be refreshed.", ex);
         }
         catch (ThrottlingException ex)
         {
+            _logger.LogWarning(ex, "AI service request was throttled. ModelId: {ModelId}", modelId);
             throw new InvalidOperationException(
                 "The AI service request was rate-limited. Please try again later.", ex);
         }
         catch (ResourceNotFoundException ex)
         {
+            _logger.LogError(ex, "Configured AI model not found. ModelId: {ModelId}", modelId);
             throw new InvalidOperationException(
                 "The configured AI model is unavailable.", ex);
         }
         catch (ServiceUnavailableException ex)
         {
+            _logger.LogWarning(ex, "AWS Bedrock service unavailable. ModelId: {ModelId}", modelId);
             throw new InvalidOperationException(
                 "The AI service is temporarily unavailable. Please try again later.", ex);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An unexpected error occurred while invoking the AI model.");
+            _logger.LogError(ex, "Unexpected error invoking AI model. ModelId: {ModelId}, ExceptionType: {ExceptionType}, Message: {ErrorMessage}",
+                modelId, ex.GetType().Name, ex.Message);
             throw new InvalidOperationException(
                 "An unexpected error occurred while processing the AI request.", ex);
         }

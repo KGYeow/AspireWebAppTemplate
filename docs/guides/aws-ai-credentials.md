@@ -104,13 +104,15 @@ The AI model ID and AWS region are non-secret values configured in `appsettings.
 ```json
 {
   "Ai": {
-    "ModelId": "amazon.nova-2-lite-v1:0",
+    "ModelId": "us.amazon.nova-2-lite-v1:0",
     "Region": "us-east-1"
   }
 }
 ```
 
 These values are safe to commit to source control and can be overridden per environment via `appsettings.Production.json` or environment variables.
+
+> **Note:** Amazon Nova 2 Lite requires a cross-region inference profile ID (`us.amazon.nova-2-lite-v1:0`) rather than the base model ID (`amazon.nova-2-lite-v1:0`). The `us.` prefix indicates the US cross-region inference profile. If you're in a different geography (EU, APAC), use the corresponding prefix (e.g., `eu.amazon.nova-2-lite-v1:0`).
 
 ## Troubleshooting
 

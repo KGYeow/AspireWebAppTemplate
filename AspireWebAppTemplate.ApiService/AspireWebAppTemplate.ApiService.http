@@ -1,6 +1,44 @@
 @ApiService_HostAddress = http://localhost:5524
 
 GET {{ApiService_HostAddress}}/weatherforecast/
-Accept: application/json
+Content-Type: application/json
+X-User-Id: test-user-001
+X-User-Name: Test User
+
+###
+
+### Send AI Prompt (basic test)
+POST {{ApiService_HostAddress}}/api/ai/prompt
+Content-Type: application/json
+X-User-Id: test-user-001
+X-User-Name: Test User
+
+{
+  "prompt": "Explain what Amazon Bedrock is in one sentence."
+}
+
+###
+
+### Send AI Prompt (longer prompt)
+POST {{ApiService_HostAddress}}/api/ai/prompt
+Content-Type: application/json
+X-User-Id: test-user-001
+X-User-Name: Test User
+
+{
+  "prompt": "List three advantages of using Amazon Nova 2 Lite for enterprise applications. Keep each point to one sentence."
+}
+
+###
+
+### Send AI Prompt (empty prompt - expect 400 error)
+POST {{ApiService_HostAddress}}/api/ai/prompt
+Content-Type: application/json
+X-User-Id: test-user-001
+X-User-Name: Test User
+
+{
+  "prompt": ""
+}
 
 ###

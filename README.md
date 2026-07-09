@@ -90,6 +90,7 @@ Reusable Blazor components and themes:
 - **Authentication**: Cookie-based (Web) + ASP.NET Core Identity (API)
 - **LDAP**: Active Directory integration via System.DirectoryServices.Protocols
 - **Excel Export**: EPPlus
+- **AI Integration**: AWSSDK.BedrockRuntime (Amazon Bedrock Converse API)
 - **HTML Sanitization**: Ganss.Xss.HtmlSanitizer
 - **Telemetry**: OpenTelemetry
 - **Testing**: xUnit, FsCheck.Xunit, Moq
@@ -113,6 +114,13 @@ Reusable Blazor components and themes:
 - Searchable, filterable data grid with server-side pagination
 - Excel export
 - Configurable retention
+
+### AI Integration
+- Provider-agnostic AI text generation via Amazon Bedrock (Amazon Nova 2 Lite)
+- Converse API with cross-region inference profile (`us.amazon.nova-2-lite-v1:0`)
+- Three-tier credential resolution: session credentials → basic credentials → IAM role fallback
+- Credentials managed via Aspire secret parameters (never committed to source control)
+- 60-second timeout with structured error handling and logging
 
 ### Announcement System
 - Multi-surface announcements: persistent banner, dedicated list page, admin CRUD
@@ -160,6 +168,15 @@ Reusable Blazor components and themes:
    dotnet user-secrets set "Parameters:InternalApiKey" "k8sF2mP9xQ4wR7vL1nJ6hT3yA0cB5dE" --project AspireWebAppTemplate.AppHost
    ```
    This sets the shared API key used for internal service-to-service communication (API→Web notification callbacks). The value can be any random string — it just needs to exist. Each developer can use a different value since it's only used locally between the two services running on the same machine.
+
+3. **Configure AWS credentials for AI integration** (optional)
+   If you want to use the AI feature (Amazon Bedrock), set your AWS credentials:
+   ```bash
+   dotnet user-secrets set "Parameters:ai-access-key-id" "your-access-key-id" --project AspireWebAppTemplate.AppHost
+   dotnet user-secrets set "Parameters:ai-secret-access-key" "your-secret-access-key" --project AspireWebAppTemplate.AppHost
+   dotnet user-secrets set "Parameters:ai-session-token" "your-session-token" --project AspireWebAppTemplate.AppHost
+   ```
+   Get these values from the AWS console (Option 3: "Use individual values in your AWS service client"). Session tokens expire — see `docs/guides/aws-ai-credentials.md` for details.
 
 3. **Configure the database connection**
    Update `AspireWebAppTemplate.ApiService/appsettings.json`:

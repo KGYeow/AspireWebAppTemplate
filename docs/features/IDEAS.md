@@ -23,6 +23,7 @@ A curated list of pages and features that would complement the existing template
 
 ### Recently Completed (This Session)
 
+- **AWS AI Integration** — Provider-agnostic AI text generation service via Amazon Bedrock (Nova 2 Lite), with three-tier credential resolution, Aspire parameter-based secrets, and structured error handling
 - StatusAlert component created and deployed across all pages
 - Service registration extensions (`AddApiClients()`, `AddApplicationServices()`)
 - SystemPageDefaults expanded (all self-service pages bypass permissions)
@@ -84,12 +85,13 @@ A curated list of pages and features that would complement the existing template
 - Admin view of all active sessions
 - Route: `/account/sessions`
 
-### 7. Announcement / Banner System
-- Admin posts site-wide banners (info, warning, maintenance)
-- Dismissible by users (remember dismissal)
-- Scheduled start/end dates
-- Renders at top of MainLayout
-- Route: `/admin/announcements`
+### 7. ~~Announcement / Banner System~~ ✅ COMPLETED
+- ~~Admin posts site-wide banners (info, warning, maintenance)~~
+- ~~Dismissible by users (remember dismissal)~~
+- ~~Scheduled start/end dates~~
+- ~~Renders at top of MainLayout~~
+- ~~Route: `/admin/announcements`~~
+- Fully implemented with multi-surface display (banner + list page), three severity levels, scheduling, per-user dismissal, HTML content editing, and notification integration
 
 ### 8. Dashboard / Home Page Widgets
 - Replace blank home page with useful widgets:
@@ -190,7 +192,7 @@ Based on what's built and what would add the most value:
 
 3. **Dashboard Widgets** (#8) — The home page is currently empty. Adding a few widgets (recent notifications, quick stats) makes the template feel complete and demonstrates component composition.
 
-4. **Announcement/Banner System** (#7) — Simple to build, immediately useful. Admin creates a banner, all users see it at the top of the page until dismissed.
+4. **Email Templates & SMTP** (#1) — Replaces `NoOpEmailSender` with a real implementation. High value for production readiness.
 
 ---
 

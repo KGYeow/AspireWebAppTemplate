@@ -30,6 +30,7 @@
 
 ## Key Libraries
 - **EPPlus** — Excel export (in ApiService)
+- **AWSSDK.BedrockRuntime** — Amazon Bedrock AI model invocation (Converse API)
 - **Ganss.Xss.HtmlSanitizer** — server-side HTML content sanitization (announcement content)
 - **System.Text.Json** — JSON serialization (camelCase policy for audit values)
 
