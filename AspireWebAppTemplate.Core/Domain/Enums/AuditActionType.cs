@@ -6,6 +6,8 @@ namespace AspireWebAppTemplate.Core.Domain.Enums;
 /// </summary>
 public enum AuditActionType
 {
+    #region Template
+
     /// <summary>
     /// A new user account was created in the system.
     /// </summary>
@@ -84,5 +86,32 @@ public enum AuditActionType
     /// <summary>
     /// A user updated their own profile information (e.g., display name, preferences).
     /// </summary>
-    ProfileUpdated
+    ProfileUpdated,
+
+    /// <summary>
+    /// A new announcement was created by an administrator.
+    /// </summary>
+    AnnouncementCreated,
+
+    /// <summary>
+    /// An existing announcement was updated by an administrator.
+    /// </summary>
+    AnnouncementUpdated,
+
+    /// <summary>
+    /// An announcement was deleted by an administrator.
+    /// </summary>
+    AnnouncementDeleted,
+
+    #endregion
+
+    #region Custom
+
+    // Add your application-specific audit action types below this line.
+    // Example:
+    // OrderCreated,
+    // OrderApproved,
+    // InvoiceGenerated,
+
+    #endregion
 }

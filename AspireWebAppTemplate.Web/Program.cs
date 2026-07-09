@@ -8,6 +8,7 @@ using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Radzen;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using MudBlazor;
@@ -81,6 +82,9 @@ builder.Services.AddMudServices(config =>
     config.SnackbarConfiguration.ShowTransitionDuration = 500;
     config.SnackbarConfiguration.MaximumOpacity = 95;
 });
+
+// Radzen: required for RadzenHtmlEditor (announcement content editor).
+builder.Services.AddRadzenComponents();
 
 // SignalR: required for the NotificationHub real-time notification delivery.
 builder.Services.AddSignalR();

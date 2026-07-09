@@ -1,0 +1,15 @@
+@typeparam T
+
+<MudSelect T="string"
+           Label="Value"
+           Value="@GetValue()"
+           ValueChanged="@SetValue"
+           Placeholder="@Placeholder"
+           Margin="Margin.Dense"
+           Dense
+           Clearable>
+    @foreach (var option in Options)
+    {
+        <MudSelectItem T="string" Value="@option">@option</MudSelectItem>
+    }
+</MudSelect>

@@ -1,0 +1,36 @@
+@using AspireWebAppTemplate.Core.Domain.Enums
+
+@if (_currentAnnouncement is not null)
+{
+    <MudPaper Class="@GetBannerClass()" Elevation="0" Square>
+        <MudStack Row AlignItems="AlignItems.Center" Class="px-6 py-2">
+            <!-- Severity Icon -->
+            <MudIcon Icon="@GetSeverityIcon()" Size="Size.Small" />
+
+            <!-- Title and Excerpt -->
+            <MudStack Spacing="0" Class="flex-grow-1 overflow-hidden">
+                <MudText Typo="Typo.body2" Class="fw-bold" Style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    @_currentAnnouncement.Title
+                </MudText>
+                <MudText Typo="Typo.caption" Style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    @_contentExcerpt
+                </MudText>
+            </MudStack>
+
+            <!-- "N more" link -->
+            @if (_moreCount > 0)
+            {
+                <MudLink Href="/announcements" Typo="Typo.caption" Class="flex-shrink-0">
+                    @_moreCount more
+                </MudLink>
+            }
+
+            <!-- Dismiss button -->
+            <MudIconButton Icon="@Icons.Material.Rounded.Close"
+                           Size="Size.Small"
+                           OnClick="HandleDismiss"
+                           title="Dismiss announcement"
+                           aria-label="Dismiss announcement" />
+        </MudStack>
+    </MudPaper>
+}

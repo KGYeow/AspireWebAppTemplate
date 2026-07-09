@@ -67,4 +67,22 @@ public interface IUserTimeZoneContext
     /// <param name="fallback">The string to return when the value is null. Defaults to "-".</param>
     /// <returns>The formatted datetime string or the fallback.</returns>
     string FormatDateTime(DateTimeOffset? utcDateTimeOffset, string? format = null, string fallback = "-");
+
+    /// <summary>
+    /// Converts a local <see cref="DateTime"/> in the user's configured time zone to UTC.
+    /// Returns the value as-is (treated as UTC) if no time zone is configured.
+    /// Returns null if the input is null.
+    /// </summary>
+    /// <param name="localDateTime">The local datetime to convert to UTC.</param>
+    /// <returns>The UTC datetime, or null if the input is null.</returns>
+    DateTime? ConvertToUtc(DateTime? localDateTime);
+
+    /// <summary>
+    /// Converts a UTC <see cref="DateTime"/> to the user's configured local time zone.
+    /// Returns the value as-is if no time zone is configured.
+    /// Returns null if the input is null.
+    /// </summary>
+    /// <param name="utcDateTime">The UTC datetime to convert to local.</param>
+    /// <returns>The local datetime, or null if the input is null.</returns>
+    DateTime? ConvertFromUtc(DateTime? utcDateTime);
 }

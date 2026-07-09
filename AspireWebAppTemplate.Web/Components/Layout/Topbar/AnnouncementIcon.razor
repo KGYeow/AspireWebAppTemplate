@@ -1,0 +1,16 @@
+@inject NavigationManager NavigationManager
+
+<MudIconButton Icon="@Icons.Material.Filled.Campaign"
+               Color="Color.Inherit"
+               aria-label="Announcements"
+               OnClick="NavigateToAnnouncements" />
+
+@code {
+    /// <summary>
+    /// Navigates to the Announcement List Page at /announcements.
+    /// </summary>
+    private void NavigateToAnnouncements()
+    {
+        NavigationManager.NavigateTo("/announcements");
+    }
+}

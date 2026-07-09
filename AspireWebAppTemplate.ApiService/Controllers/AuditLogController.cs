@@ -12,7 +12,7 @@ namespace AspireWebAppTemplate.ApiService.Controllers;
 /// export formatting to <see cref="IExcelExportService"/>.
 /// </summary>
 [Route("api/audit-log")]
-[Authorize(Roles = "Admin")]
+[Authorize]
 public class AuditLogController : BaseController
 {
     #region Constructor

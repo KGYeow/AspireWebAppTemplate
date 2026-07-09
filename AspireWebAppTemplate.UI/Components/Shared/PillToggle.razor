@@ -1,12 +1,15 @@
 @typeparam T
 
-<MudToggleGroup T="T"
-                Value="Value"
-                ValueChanged="ValueChanged"
-                Class="@($"p-1 d-flex flex-row {Class}")"
-                Style="@($"border-radius: 9999px; gap: 4px; width: fit-content; border: 1px solid var(--mud-palette-lines-inputs); {Style}")"
-                Color="Color"
-                Delimiters="false"
-                Ripple="false">
-    @ChildContent
-</MudToggleGroup>
+<CascadingValue Value="Size" Name="PillToggleSize">
+    <MudToggleGroup T="T"
+                    Value="Value"
+                    ValueChanged="ValueChanged"
+                    Size="Size"
+                    Class="@($"p-1 d-flex flex-row {Class}")"
+                    Style="@($"border-radius: 9999px; gap: {GetGap()}; width: fit-content; border: 1px solid var(--mud-palette-lines-inputs); {Style}")"
+                    Color="Color"
+                    Delimiters="false"
+                    Ripple="false">
+        @ChildContent
+    </MudToggleGroup>
+</CascadingValue>

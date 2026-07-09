@@ -6,6 +6,8 @@ namespace AspireWebAppTemplate.Core.Domain.Enums;
 /// </summary>
 public enum NotificationCategory
 {
+    #region Template
+
     /// <summary>
     /// System-wide announcements such as maintenance windows, platform updates, and downtime notices.
     /// </summary>
@@ -19,5 +21,17 @@ public enum NotificationCategory
     /// <summary>
     /// Activity notifications such as task assignments, mentions, and workflow updates.
     /// </summary>
-    Activity
+    Activity,
+
+    #endregion
+
+    #region Custom
+
+    // Add your application-specific notification categories below this line.
+    // Example:
+    // Workflow,
+    // Approval,
+    // Billing,
+
+    #endregion
 }

@@ -23,7 +23,7 @@ namespace AspireWebAppTemplate.ApiService.Controllers;
 /// </para>
 /// </remarks>
 [Route("api/[controller]")]
-[Authorize(Roles = "Admin")]
+[Authorize]
 public class RolesController : BaseController
 {
     #region Constructor

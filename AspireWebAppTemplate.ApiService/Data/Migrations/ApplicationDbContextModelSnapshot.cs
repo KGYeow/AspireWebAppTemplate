@@ -22,6 +22,85 @@ namespace AspireWebAppTemplate.ApiService.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("AspireWebAppTemplate.ApiService.Data.Entities.Announcement", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(10000)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedByUserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("DisplayType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ExpiresAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("NotifyUsers")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Severity")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("StartsAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAtUtc")
+                        .HasDatabaseName("IX_Announcements_CreatedAtUtc");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("IsActive", "StartsAtUtc", "ExpiresAtUtc")
+                        .HasDatabaseName("IX_Announcements_IsActive_StartsAtUtc_ExpiresAtUtc");
+
+                    b.ToTable("Announcements", (string)null);
+                });
+
+            modelBuilder.Entity("AspireWebAppTemplate.ApiService.Data.Entities.AnnouncementDismissal", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<Guid>("AnnouncementId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("DismissedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("UserId", "AnnouncementId");
+
+                    b.HasIndex("AnnouncementId");
+
+                    b.ToTable("AnnouncementDismissals", (string)null);
+                });
+
             modelBuilder.Entity("AspireWebAppTemplate.ApiService.Data.Entities.ApplicationRole", b =>
                 {
                     b.Property<string>("Id")
@@ -480,6 +559,36 @@ namespace AspireWebAppTemplate.ApiService.Data.Migrations
                     b.ToTable("ApplicationUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("AspireWebAppTemplate.ApiService.Data.Entities.Announcement", b =>
+                {
+                    b.HasOne("AspireWebAppTemplate.ApiService.Data.Entities.ApplicationUser", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CreatedByUser");
+                });
+
+            modelBuilder.Entity("AspireWebAppTemplate.ApiService.Data.Entities.AnnouncementDismissal", b =>
+                {
+                    b.HasOne("AspireWebAppTemplate.ApiService.Data.Entities.Announcement", "Announcement")
+                        .WithMany("Dismissals")
+                        .HasForeignKey("AnnouncementId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AspireWebAppTemplate.ApiService.Data.Entities.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Announcement");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("AspireWebAppTemplate.ApiService.Data.Entities.AuditLogEntry", b =>
                 {
                     b.HasOne("AspireWebAppTemplate.ApiService.Data.Entities.ApplicationUser", "User")
@@ -573,6 +682,11 @@ namespace AspireWebAppTemplate.ApiService.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("AspireWebAppTemplate.ApiService.Data.Entities.Announcement", b =>
+                {
+                    b.Navigation("Dismissals");
                 });
 #pragma warning restore 612, 618
         }

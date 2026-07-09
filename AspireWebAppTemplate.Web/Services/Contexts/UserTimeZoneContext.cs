@@ -92,4 +92,26 @@ public sealed class UserTimeZoneContext : IUserTimeZoneContext
         if (utcDateTimeOffset is null) return fallback;
         return FormatDateTime(utcDateTimeOffset.Value.UtcDateTime, format);
     }
+
+    /// <inheritdoc />
+    public DateTime? ConvertToUtc(DateTime? localDateTime)
+    {
+        if (localDateTime is null) return null;
+
+        if (string.IsNullOrEmpty(TimeZoneId))
+            return DateTime.SpecifyKind(localDateTime.Value, DateTimeKind.Utc);
+
+        return _timeZoneService.ConvertToUtc(localDateTime.Value, TimeZoneId);
+    }
+
+    /// <inheritdoc />
+    public DateTime? ConvertFromUtc(DateTime? utcDateTime)
+    {
+        if (utcDateTime is null) return null;
+
+        if (string.IsNullOrEmpty(TimeZoneId))
+            return utcDateTime;
+
+        return _timeZoneService.ConvertFromUtc(utcDateTime.Value, TimeZoneId);
+    }
 }

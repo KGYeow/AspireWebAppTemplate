@@ -21,6 +21,7 @@
         <RightContent>
             <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
                 <NotificationBell />
+                <AnnouncementIcon />
                 <DropdownProfile />
             </MudStack>
         </RightContent>
@@ -40,6 +41,9 @@
 
     <!-- Main Content -->
     <MudMainContent Class="min-vh-100" Style="position: relative;">
+        <!-- Announcement Banner -->
+        <AnnouncementBanner />
+
         <!-- Page Content -->
         <MudContainer Class="py-6" MaxWidth="MaxWidth.Large">
             <CascadingValue Value="CurrentBreakpoint">

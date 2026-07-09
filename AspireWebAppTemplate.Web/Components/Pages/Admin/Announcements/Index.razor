@@ -1,0 +1,155 @@
+@page "/admin/announcements"
+
+@using AspireWebAppTemplate.Core.Contracts.Announcements
+@using AspireWebAppTemplate.Core.Domain.Enums
+@using AspireWebAppTemplate.UI.Components.DataGrid
+
+<PageTitle>Announcements</PageTitle>
+
+<PageHeader Title="Announcements" Subtitle="Create and manage system announcements." />
+
+<!-- Action Buttons Row -->
+<MudStack Row Justify="Justify.FlexEnd" AlignItems="AlignItems.Center" Spacing="2" Class="mb-4">
+    <MudButton Color="Color.Primary"
+               Variant="Variant.Filled"
+               StartIcon="@Icons.Material.Outlined.AddCircle"
+               OnClick="OpenCreateDialogAsync"
+               DropShadow="false"
+               Style="text-transform: none;">
+        Create Announcement
+    </MudButton>
+</MudStack>
+
+<!-- Announcements Data Grid -->
+<MudPaper Elevation="0" Class="pa-4">
+    <!-- Search Filter -->
+    <MudStack Row Spacing="2" AlignItems="AlignItems.Center" Class="mb-4">
+        <MudTextField T="string"
+                      ValueChanged="@(s => OnSearch(s))"
+                      Placeholder="Search announcements..."
+                      Variant="Variant.Outlined"
+                      Typo="Typo.body2"
+                      Margin="Margin.Dense"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Rounded.Search"
+                      IconSize="Size.Small"
+                      DebounceInterval="500" />
+    </MudStack>
+
+    <!-- Bulk actions — visible only when announcements are selected -->
+    @if (_selectedItems.Count > 0)
+    {
+        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-2">
+            <MudButton StartIcon="@Icons.Material.Rounded.Close"
+                       OnClick="ClearSelection"
+                       Size="Size.Small"
+                       Style="text-transform: none;">
+                @_selectedItems.Count selected
+            </MudButton>
+
+            <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                <MudTooltip Text="Delete selected">
+                    <MudIconButton Icon="@Icons.Material.Outlined.DeleteOutline"
+                                   Color="Color.Error"
+                                   OnClick="BulkDeleteAsync"
+                                   Size="Size.Small" />
+                </MudTooltip>
+            </MudStack>
+        </MudStack>
+    }
+
+    <MudDataGrid T="AnnouncementDto"
+                 @ref="_dataGrid"
+                 ServerData="ServerReload"
+                 MultiSelection="true"
+                 @bind-SelectedItems="_selectedItems"
+                 SelectOnRowClick="false"
+                 Loading="@_isLoading"
+                 Elevation="0"
+                 Filterable
+                 Hover
+                 Dense>
+        <NoRecordsContent>
+            <MudText Typo="Typo.body2">No announcements found.</MudText>
+        </NoRecordsContent>
+        <LoadingContent>
+            <MudText Typo="Typo.body2">Loading announcements...</MudText>
+        </LoadingContent>
+        <Columns>
+            <SelectColumn T="AnnouncementDto" />
+            <PropertyColumn Property="a => a.Title" Title="Title" />
+            <PropertyColumn Property="a => a.DisplayType" Title="Display Type" Filterable="true">
+                <FilterTemplate>
+                    <EnumFilterSelect T="AnnouncementDto"
+                                      TEnum="AnnouncementDisplayType"
+                                      FilterContext="context"
+                                      DataGrid="_dataGrid" />
+                </FilterTemplate>
+                <CellTemplate>
+                    <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined">
+                        @context.Item.DisplayType.ToString()
+                    </MudChip>
+                </CellTemplate>
+            </PropertyColumn>
+            <PropertyColumn Property="a => a.Severity" Title="Severity" Filterable="true">
+                <FilterTemplate>
+                    <EnumFilterSelect T="AnnouncementDto"
+                                      TEnum="AnnouncementSeverity"
+                                      FilterContext="context"
+                                      DataGrid="_dataGrid" />
+                </FilterTemplate>
+                <CellTemplate>
+                    <MudChip T="string" Size="Size.Small" Color="@GetSeverityColor(context.Item.Severity)">
+                        @context.Item.Severity.ToString()
+                    </MudChip>
+                </CellTemplate>
+            </PropertyColumn>
+            <PropertyColumn Property="a => a.Status" Title="Status" Filterable="true">
+                <FilterTemplate>
+                    <StringFilterSelect T="AnnouncementDto"
+                                        FilterContext="context"
+                                        DataGrid="_dataGrid"
+                                        Options="@(new[] { "Active", "Scheduled", "Expired", "Draft" })" />
+                </FilterTemplate>
+                <CellTemplate>
+                    <MudChip T="string" Size="Size.Small" Color="@GetStatusColor(context.Item.Status)">
+                        @context.Item.Status
+                    </MudChip>
+                </CellTemplate>
+            </PropertyColumn>
+            <PropertyColumn Property="a => a.StartsAtUtc" Title="Starts At" Filterable="false">
+                <CellTemplate>
+                    @UserTimeZone.FormatDateTime(context.Item.StartsAtUtc)
+                </CellTemplate>
+            </PropertyColumn>
+            <PropertyColumn Property="a => a.ExpiresAtUtc" Title="Expires At" Filterable="false">
+                <CellTemplate>
+                    @UserTimeZone.FormatDateTime(context.Item.ExpiresAtUtc)
+                </CellTemplate>
+            </PropertyColumn>
+            <PropertyColumn Property="a => a.CreatedAtUtc" Title="Created At" Filterable="false">
+                <CellTemplate>
+                    @UserTimeZone.FormatDateTime(context.Item.CreatedAtUtc)
+                </CellTemplate>
+            </PropertyColumn>
+            <TemplateColumn Title="" Sortable="false" Filterable="false">
+                <CellTemplate>
+                    <MudStack Row Spacing="1">
+                        <MudIconButton Size="Size.Small"
+                                       Icon="@Icons.Material.Outlined.Edit"
+                                       OnClick="() => OpenEditDialogAsync(context.Item)"
+                                       title="Edit" />
+                        <MudIconButton Size="Size.Small"
+                                       Icon="@Icons.Material.Outlined.DeleteOutline"
+                                       Color="Color.Error"
+                                       OnClick="() => DeleteAnnouncementAsync(context.Item)"
+                                       title="Delete" />
+                    </MudStack>
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+        <PagerContent>
+            <MudDataGridPager T="AnnouncementDto" />
+        </PagerContent>
+    </MudDataGrid>
+</MudPaper>

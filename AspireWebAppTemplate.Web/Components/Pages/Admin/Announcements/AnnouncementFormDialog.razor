@@ -1,0 +1,189 @@
+@using AspireWebAppTemplate.Core.Domain.Enums
+@using Radzen.Blazor
+
+<ModalDialog Title="@(_isEditMode ? "Edit Announcement" : "Create Announcement")">
+    <ContentArea>
+        <EditForm EditContext="_editContext" OnValidSubmit="OnSubmitAsync">
+            <DataAnnotationsValidator />
+
+            <MudGrid Spacing="4">
+                <!-- Title -->
+                <MudItem xs="12">
+                    <MudInputLabel>Title *</MudInputLabel>
+                    <MudTextField T="string"
+                                  @bind-Value="_model.Title"
+                                  Placeholder="Announcement title"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  Typo="Typo.body2"
+                                  Counter="200"
+                                  MaxLength="200"
+                                  For="@(() => _model.Title)" />
+                </MudItem>
+
+                <!-- Display Type -->
+                <MudItem xs="12" sm="6">
+                    <MudInputLabel>Display Type</MudInputLabel>
+                    <MudToggleGroup T="AnnouncementDisplayType"
+                                    Value="_model.DisplayType"
+                                    ValueChanged="OnDisplayTypeChanged"
+                                    Size="Size.Small"
+                                    Class="mt-1"
+                                    Style="width: fit-content;">
+                        <MudToggleItem T="AnnouncementDisplayType" Value="AnnouncementDisplayType.Standard" Text="Standard" Class="px-4" Style="text-transform: none;" />
+                        <MudToggleItem T="AnnouncementDisplayType" Value="AnnouncementDisplayType.Banner" Text="Banner" Class="px-4" Style="text-transform: none;" />
+                    </MudToggleGroup>
+                </MudItem>
+
+                <!-- Severity -->
+                <MudItem xs="12" sm="6">
+                    <MudInputLabel>Severity</MudInputLabel>
+                    <MudToggleGroup T="AnnouncementSeverity"
+                                    @bind-Value="_model.Severity"
+                                    Size="Size.Small"
+                                    Class="mt-1"
+                                    Style="width: fit-content;">
+                        <MudToggleItem T="AnnouncementSeverity" Value="AnnouncementSeverity.Info" Text="Info" Class="px-4" Style="text-transform: none;" />
+                        <MudToggleItem T="AnnouncementSeverity" Value="AnnouncementSeverity.Warning" Text="Warning" Class="px-4" Style="text-transform: none;" />
+                        <MudToggleItem T="AnnouncementSeverity" Value="AnnouncementSeverity.Critical" Text="Critical" Class="px-4" Style="text-transform: none;" />
+                    </MudToggleGroup>
+                </MudItem>
+
+                <!-- Content (Radzen HtmlEditor) -->
+                <MudItem xs="12">
+                    <MudInputLabel>Content *</MudInputLabel>
+                    <MudField Variant="Variant.Outlined"
+                              Error="@_contentHasError"
+                              ErrorText="Content is required."
+                              Class="my-1">
+                        <RadzenHtmlEditor @bind-Value="_model.Message" Style="height: 300px; border: none; margin: -18.5px -14px;">
+                            <RadzenHtmlEditorBold />
+                            <RadzenHtmlEditorItalic />
+                            <RadzenHtmlEditorUnderline />
+                            <RadzenHtmlEditorSeparator />
+                            <RadzenHtmlEditorFormatBlock />
+                            <RadzenHtmlEditorSeparator />
+                            <RadzenHtmlEditorOrderedList />
+                            <RadzenHtmlEditorUnorderedList />
+                        </RadzenHtmlEditor>
+                    </MudField>
+                </MudItem>
+
+                <!-- Starts At (date + time side by side) -->
+                <MudItem xs="12" sm="6">
+                    <MudInputLabel>Starts At</MudInputLabel>
+                    <MudStack Row Spacing="2">
+                        <MudDatePicker @bind-Date="_startsAtDate"
+                                       Variant="Variant.Outlined"
+                                       Margin="Margin.Dense"
+                                       Placeholder="Date"
+                                       DateFormat="yyyy-MM-dd"
+                                       Clearable
+                                       IconSize="Size.Small"
+                                       Style="font-size: 14px;" />
+                        <MudTimePicker @bind-Time="_startsAtTime"
+                                       Variant="Variant.Outlined"
+                                       Margin="Margin.Dense"
+                                       Placeholder="Time"
+                                       Clearable
+                                       IconSize="Size.Small"
+                                       Style="font-size: 14px;" />
+                    </MudStack>
+                </MudItem>
+
+                <!-- Expires At (date + time side by side) -->
+                <MudItem xs="12" sm="6">
+                    <MudInputLabel>Expires At</MudInputLabel>
+                    <MudStack Row Spacing="2">
+                        <MudDatePicker @bind-Date="_expiresAtDate"
+                                       Variant="Variant.Outlined"
+                                       Margin="Margin.Dense"
+                                       Placeholder="Date"
+                                       DateFormat="yyyy-MM-dd"
+                                       Clearable
+                                       IconSize="Size.Small"
+                                       Style="font-size: 14px;" />
+                        <MudTimePicker @bind-Time="_expiresAtTime"
+                                       Variant="Variant.Outlined"
+                                       Margin="Margin.Dense"
+                                       Placeholder="Time"
+                                       Clearable
+                                       IconSize="Size.Small"
+                                       Style="font-size: 14px;" />
+                    </MudStack>
+                </MudItem>
+
+                <!-- Active toggle -->
+                <MudItem xs="12">
+                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <div>
+                            <MudInputLabel>Active</MudInputLabel>
+                            <MudText Class="mud-input-helper-text">
+                                Publish this announcement immediately when saved.
+                            </MudText>
+                        </div>
+                        <MudSwitch @bind-Value="_model.IsActive" Color="Color.Primary" />
+                    </MudStack>
+                </MudItem>
+
+                <!-- Notify Users toggle -->
+                <MudItem xs="12">
+                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <div>
+                            <MudInputLabel>Notify Users</MudInputLabel>
+                            @if (_model.DisplayType == AnnouncementDisplayType.Banner)
+                            {
+                                <MudText Class="mud-input-helper-text">
+                                    Banner announcements are already highly visible. Notifications are optional.
+                                </MudText>
+                            }
+                            else
+                            {
+                                <MudText Class="mud-input-helper-text">
+                                    Send a notification to all active users when this announcement becomes active.
+                                </MudText>
+                            }
+                        </div>
+                        <MudSwitch @bind-Value="_model.NotifyUsers" Color="Color.Primary" />
+                    </MudStack>
+                </MudItem>
+
+                <!-- Clear Dismissals (edit mode + Banner type only) -->
+                @if (_isEditMode && _model.DisplayType == AnnouncementDisplayType.Banner)
+                {
+                    <MudItem xs="12">
+                        <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                            <div>
+                                <MudInputLabel>Clear Dismissals</MudInputLabel>
+                                <MudText Class="mud-input-helper-text">
+                                    All users will see this announcement again, including those who previously dismissed it.
+                                </MudText>
+                            </div>
+                            <MudCheckBox @bind-Value="_clearDismissals" Color="Color.Warning" Size="Size.Small" />
+                        </MudStack>
+                    </MudItem>
+                }
+
+                <!-- Error Alert -->
+                <MudItem xs="12" Class="@(string.IsNullOrEmpty(_statusMessage) ? "d-none" : "")">
+                    <StatusAlert @bind-Message="_statusMessage" Dismissible="false" />
+                </MudItem>
+            </MudGrid>
+        </EditForm>
+    </ContentArea>
+
+    <ActionsTemplate>
+        <MudButton Disabled="@_isBusy" OnClick="() => MudDialog.Cancel()">Cancel</MudButton>
+        <MudButton Color="Color.Primary"
+                   Variant="Variant.Filled"
+                   Disabled="@_isBusy"
+                   OnClick="OnSubmitAsync"
+                   DropShadow="false">
+            @if (_isBusy)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate Class="me-2" />
+            }
+            @(_isEditMode ? "Save Changes" : "Create")
+        </MudButton>
+    </ActionsTemplate>
+</ModalDialog>

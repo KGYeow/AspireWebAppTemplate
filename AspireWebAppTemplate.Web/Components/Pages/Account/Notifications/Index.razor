@@ -37,6 +37,7 @@
 
                 <div class="flex-grow-1 overflow-y-auto pa-2">
                     <MudStack Spacing="3">
+                        <!-- Header -->
                         <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
                             <MudAvatar Size="Size.Small" Class="@GetCategoryColor(selectedNotification.Category)" Variant="Variant.Text">
                                 <MudIcon Icon="@GetCategoryIcon(selectedNotification.Category)" Style="font-size: 16px" />
@@ -133,79 +134,79 @@
                     <!-- Scrollable List -->
                     <div class="flex-grow-1 overflow-y-auto">
                         <MudList T="NotificationDto" Dense Class="pa-0 notification-page-list">
-                        @foreach (var notification in _notifications)
-                        {
-                            <MudListItem T="NotificationDto"
-                                         OnClick="() => HandleNotificationClick(notification)"
-                                         Class="@GetNotificationItemClass(notification)">
-                                <MudStack Row AlignItems="AlignItems.Start" Spacing="2">
-                                    <!-- Selection Checkbox -->
-                                    <MudCheckBox T="bool"
-                                                 Value="@(_selectedIds.Contains(notification.Id))"
-                                                 ValueChanged="@(isChecked => HandleSelectionChanged(notification.Id, isChecked))"
-                                                 Color="Color.Primary"
-                                                 Size="Size.Small"
-                                                 Dense
-                                                 @onclick:stopPropagation="true" />
-
-                                    <!-- Category Icon -->
-                                    <MudAvatar Size="Size.Small" Class="@GetCategoryColor(notification.Category)" Variant="Variant.Text">
-                                        <MudIcon Icon="@GetCategoryIcon(notification.Category)" Style="font-size: 16px" />
-                                    </MudAvatar>
-
-                                    <!-- Content -->
-                                    <MudStack Spacing="0" Class="flex-grow-1 overflow-hidden">
-                                        <MudText Typo="Typo.body2"
-                                                 Class="@(notification.IsRead ? "" : "fw-bold")"
-                                                 Style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                            @notification.Title
-                                        </MudText>
-                                        <MudText Typo="Typo.caption"
-                                                 Style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                            @notification.Message
-                                        </MudText>
-                                        <MudText Typo="Typo.caption" Class="mt-1 text-muted">
-                                            @FormatRelativeTime(notification.CreatedAtUtc)
-                                        </MudText>
-                                    </MudStack>
-
-                                    <!-- Action Menu -->
-                                    <div @onclick:stopPropagation="true">
-                                        <MudMenu Icon="@Icons.Material.Rounded.MoreVert"
-                                                 Size="Size.Small"
-                                                 Dense
-                                                 AnchorOrigin="Origin.BottomRight"
-                                                 TransformOrigin="Origin.TopRight"
-                                                 PopoverClass="action-menu">
-                                            <MudMenuItem Icon="@Icons.Material.Outlined.MarkEmailUnread"
-                                                         OnClick="() => HandleMarkAsUnread(notification)"
-                                                         Disabled="@(!notification.IsRead)">
-                                                Mark as unread
-                                            </MudMenuItem>
-                                            <MudMenuItem Icon="@Icons.Material.Outlined.Delete"
-                                                         OnClick="() => HandleDismiss(notification)"
-                                                         IconColor="Color.Error">
-                                                Dismiss
-                                            </MudMenuItem>
-                                        </MudMenu>
-                                    </div>
-                                </MudStack>
-                            </MudListItem>
-                        }
-                    </MudList>
-
-                    <!-- Infinite Scroll Sentinel -->
-                    @if (_hasNextPage)
-                    {
-                        <div @ref="_scrollSentinel" class="pa-2">
-                            @if (_isLoadingMore)
+                            @foreach (var notification in _notifications)
                             {
-                                <MudStack Row Justify="Justify.Center">
-                                    <MudProgressCircular Size="Size.Small" Indeterminate />
-                                </MudStack>
+                                <MudListItem T="NotificationDto"
+                                             OnClick="() => HandleNotificationClick(notification)"
+                                             Class="@GetNotificationItemClass(notification)">
+                                    <MudStack Row AlignItems="AlignItems.Start" Spacing="2">
+                                        <!-- Selection Checkbox -->
+                                        <MudCheckBox T="bool"
+                                                     Value="@(_selectedIds.Contains(notification.Id))"
+                                                     ValueChanged="@(isChecked => HandleSelectionChanged(notification.Id, isChecked))"
+                                                     Color="Color.Primary"
+                                                     Size="Size.Small"
+                                                     Dense
+                                                     @onclick:stopPropagation="true" />
+
+                                        <!-- Category Icon -->
+                                        <MudAvatar Size="Size.Small" Class="@GetCategoryColor(notification.Category)" Variant="Variant.Text">
+                                            <MudIcon Icon="@GetCategoryIcon(notification.Category)" Style="font-size: 16px" />
+                                        </MudAvatar>
+
+                                        <!-- Content -->
+                                        <MudStack Spacing="0" Class="flex-grow-1 overflow-hidden">
+                                            <MudText Typo="Typo.body2"
+                                                     Class="@(notification.IsRead ? "" : "fw-bold")"
+                                                     Style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                                @notification.Title
+                                            </MudText>
+                                            <MudText Typo="Typo.caption"
+                                                     Style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                                @notification.Message
+                                            </MudText>
+                                            <MudText Typo="Typo.caption" Class="mt-1 text-muted">
+                                                @FormatRelativeTime(notification.CreatedAtUtc)
+                                            </MudText>
+                                        </MudStack>
+
+                                        <!-- Action Menu -->
+                                        <div @onclick:stopPropagation="true">
+                                            <MudMenu Icon="@Icons.Material.Rounded.MoreVert"
+                                                     Size="Size.Small"
+                                                     Dense
+                                                     AnchorOrigin="Origin.BottomRight"
+                                                     TransformOrigin="Origin.TopRight"
+                                                     PopoverClass="action-menu">
+                                                <MudMenuItem Icon="@Icons.Material.Outlined.MarkEmailUnread"
+                                                             OnClick="() => HandleMarkAsUnread(notification)"
+                                                             Disabled="@(!notification.IsRead)">
+                                                    Mark as unread
+                                                </MudMenuItem>
+                                                <MudMenuItem Icon="@Icons.Material.Outlined.Delete"
+                                                             OnClick="() => HandleDismiss(notification)"
+                                                             IconColor="Color.Error">
+                                                    Dismiss
+                                                </MudMenuItem>
+                                            </MudMenu>
+                                        </div>
+                                    </MudStack>
+                                </MudListItem>
                             }
-                        </div>
-                    }
+                        </MudList>
+
+                        <!-- Infinite Scroll Sentinel -->
+                        @if (_hasNextPage)
+                        {
+                            <div @ref="_scrollSentinel" class="pa-2">
+                                @if (_isLoadingMore)
+                                {
+                                    <MudStack Row Justify="Justify.Center">
+                                        <MudProgressCircular Size="Size.Small" Indeterminate />
+                                    </MudStack>
+                                }
+                            </div>
+                        }
                     </div>
                 </MudItem>
 
@@ -220,6 +221,7 @@
                             {
                                 <div class="flex-grow-1 overflow-y-auto pa-2">
                                     <MudStack Spacing="3">
+                                        <!-- Header -->
                                         <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
                                             <MudAvatar Size="Size.Small" Class="@GetCategoryColor(detailNotification.Category)" Variant="Variant.Text">
                                                 <MudIcon Icon="@GetCategoryIcon(detailNotification.Category)" Style="font-size: 16px" />

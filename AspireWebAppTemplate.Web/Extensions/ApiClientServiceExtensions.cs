@@ -16,6 +16,8 @@ public static class ApiClientServiceExtensions
     /// </summary>
     public static IServiceCollection AddApiClients(this IServiceCollection services)
     {
+        #region Template
+
         services.AddHttpClient<ApiWeatherService>(client =>
             client.BaseAddress = new("https+http://apiservice"))
             .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
@@ -47,6 +49,22 @@ public static class ApiClientServiceExtensions
         services.AddHttpClient<ApiNavigationService>(client =>
             client.BaseAddress = new("https+http://apiservice"))
             .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
+
+        services.AddHttpClient<ApiAnnouncementService>(client =>
+            client.BaseAddress = new("https+http://apiservice"))
+            .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
+
+        #endregion
+
+        #region Custom
+
+        // Register your application-specific API client services below this line.
+        // Example:
+        // services.AddHttpClient<ApiOrderService>(client =>
+        //     client.BaseAddress = new("https+http://apiservice"))
+        //     .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
+
+        #endregion
 
         return services;
     }

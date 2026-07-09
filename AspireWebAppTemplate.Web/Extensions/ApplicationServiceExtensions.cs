@@ -18,13 +18,26 @@ public static class ApplicationServiceExtensions
     /// </summary>
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
+        #region Template
+
         services.AddSingleton<INavigationProvider, DefaultNavigationProvider>();
         services.AddSingleton<ITimeZoneService, TimeZoneService>();
         services.AddScoped<IUserTimeZoneContext, UserTimeZoneContext>();
         services.AddScoped<IThemeContext, ThemeContext>();
         services.AddScoped<IPagePermissionContext, PagePermissionContext>();
         services.AddScoped<INotificationContext, NotificationContext>();
+        services.AddScoped<IAnnouncementContext, AnnouncementContext>();
         services.AddScoped<CircuitUserContext>();
+
+        #endregion
+
+        #region Custom
+
+        // Register your application-specific frontend services below this line.
+        // Example:
+        // services.AddScoped<IWorkflowContext, WorkflowContext>();
+
+        #endregion
 
         return services;
     }

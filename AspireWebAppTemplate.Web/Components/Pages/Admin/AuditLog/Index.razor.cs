@@ -1,4 +1,3 @@
-using AspireWebAppTemplate.Core.Application.Abstractions;
 using AspireWebAppTemplate.Core.Domain.Enums;
 using AspireWebAppTemplate.Web.Services;
 using AspireWebAppTemplate.Web.Abstractions;
@@ -23,14 +22,9 @@ public partial class Index : ComponentBase, IDisposable
     [Inject] private ApiAuditLogService AuditLogService { get; set; } = default!;
 
     /// <summary>
-    /// Provides user-aware datetime formatting using the current user's configured time zone.
+    /// Provides user-aware datetime formatting and timezone conversion.
     /// </summary>
     [Inject] private IUserTimeZoneContext TimeZoneContext { get; set; } = default!;
-
-    /// <summary>
-    /// Provides timezone conversion utilities (local → UTC) for date range filtering.
-    /// </summary>
-    [Inject] private ITimeZoneService TimeZoneService { get; set; } = default!;
 
     /// <summary>
     /// JavaScript runtime for triggering browser file downloads.
@@ -195,8 +189,8 @@ public partial class Index : ComponentBase, IDisposable
                 searchTerm: _searchString,
                 actionType: _actionTypeFilter,
                 entityType: _entityTypeFilter,
-                dateStart: ConvertLocalDateToUtc(_dateRange?.Start),
-                dateEnd: ConvertLocalDateToUtc(_dateRange?.End?.Date.AddDays(1).AddTicks(-1)));
+                dateStart: TimeZoneContext.ConvertToUtc(_dateRange?.Start),
+                dateEnd: TimeZoneContext.ConvertToUtc(_dateRange?.End?.Date.AddDays(1).AddTicks(-1)));
 
             if (!apiResult.Succeeded || apiResult.Data is null)
             {
@@ -318,8 +312,8 @@ public partial class Index : ComponentBase, IDisposable
                 searchTerm: _searchString,
                 actionType: _actionTypeFilter,
                 entityType: _entityTypeFilter,
-                dateStart: ConvertLocalDateToUtc(_dateRange?.Start),
-                dateEnd: ConvertLocalDateToUtc(_dateRange?.End?.Date.AddDays(1).AddTicks(-1)));
+                dateStart: TimeZoneContext.ConvertToUtc(_dateRange?.Start),
+                dateEnd: TimeZoneContext.ConvertToUtc(_dateRange?.End?.Date.AddDays(1).AddTicks(-1)));
 
             if (!exportResult.Succeeded || exportResult.Data is null || exportResult.Data.Length == 0)
             {
@@ -343,26 +337,6 @@ public partial class Index : ComponentBase, IDisposable
         {
             IsExporting = false;
         }
-    }
-
-    #endregion
-
-    #region Helpers
-
-    /// <summary>
-    /// Converts a local DateTime (from the user's timezone) to UTC for API queries.
-    /// The timezone is guaranteed to be initialized by MainLayout.OnInitializedAsync
-    /// before this page renders. Falls back to returning the date as-is if no timezone is configured.
-    /// </summary>
-    private DateTime? ConvertLocalDateToUtc(DateTime? localDateTime)
-    {
-        if (localDateTime is null) return null;
-
-        var userTimeZoneId = TimeZoneContext.TimeZoneId;
-        if (string.IsNullOrEmpty(userTimeZoneId))
-            return localDateTime; // No timezone configured — pass through as-is
-
-        return TimeZoneService.ConvertToUtc(localDateTime, userTimeZoneId);
     }
 
     #endregion

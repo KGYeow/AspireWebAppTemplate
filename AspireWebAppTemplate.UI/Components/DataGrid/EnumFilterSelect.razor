@@ -1,0 +1,16 @@
+@typeparam T
+@typeparam TEnum
+
+<MudSelect T="string"
+           Label="Value"
+           Value="@GetValue()"
+           ValueChanged="@SetValue"
+           Placeholder="@Placeholder"
+           Margin="Margin.Dense"
+           Dense
+           Clearable>
+    @foreach (var name in Enum.GetNames(typeof(TEnum)))
+    {
+        <MudSelectItem T="string" Value="@name">@name</MudSelectItem>
+    }
+</MudSelect>

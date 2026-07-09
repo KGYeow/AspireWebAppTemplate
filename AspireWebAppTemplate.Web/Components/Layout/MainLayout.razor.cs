@@ -60,6 +60,13 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
     [Inject] private CircuitUserContext CircuitUserContext { get; set; } = default!;
 
     /// <summary>
+    /// Per-circuit announcement context. Initialized once during circuit startup so that
+    /// the TopBanner and DashboardCard components have cached announcement data available
+    /// for synchronous rendering.
+    /// </summary>
+    [Inject] private IAnnouncementContext AnnouncementContext { get; set; } = default!;
+
+    /// <summary>
     /// Provides access to the current HTTP context for reading the client's remote IP address
     /// during circuit initialization (before HttpContext becomes null post-SSR).
     /// </summary>
@@ -139,6 +146,11 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
             // PagePermissionHandler and NavMenu have cached permissions available.
             // This runs independently of the user profile fetch below.
             await PagePermissionContext.InitializeAsync();
+
+            // Initialize the per-circuit announcement cache early so that the TopBanner
+            // and DashboardCard components have cached announcement data available for
+            // synchronous rendering without additional API calls.
+            await AnnouncementContext.InitializeAsync();
 
             var userResult = await AuthService.GetCurrentUserAsync();
             if (!userResult.Succeeded || userResult.Data is null) return;

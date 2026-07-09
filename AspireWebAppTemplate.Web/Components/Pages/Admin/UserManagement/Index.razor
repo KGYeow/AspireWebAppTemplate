@@ -145,109 +145,109 @@
                  Filterable
                  Hover
                  Dense>
-    <NoRecordsContent>
-        <MudText Typo="Typo.body2">No users found.</MudText>
-    </NoRecordsContent>
-    <LoadingContent>
-        <MudText Typo="Typo.body2">Loading users...</MudText>
-    </LoadingContent>
-    <Columns>
-        <SelectColumn T="UserViewModel" />
-        <TemplateColumn Title="#" Sortable="false" Filterable="false">
-            <CellTemplate>
-                @context.Item.LineNumber
-            </CellTemplate>
-        </TemplateColumn>
-        <PropertyColumn Property="u => u.UserName" Title="Username" />
-        <PropertyColumn Property="u => u.DisplayName" Title="Display Name" />
-        <PropertyColumn Property="u => u.JobTitle" Title="Job Title" />
-        <PropertyColumn Property="u => u.Department" Title="Department" />
-        <PropertyColumn Property="u => u.IsActive" Title="Status" Filterable="true">
-            <FilterTemplate>
-                <BoolFilterSelect T="UserViewModel"
-                                  FilterContext="context"
-                                  DataGrid="dataGrid"
-                                  TrueLabel="Active"
-                                  FalseLabel="Inactive" />
-            </FilterTemplate>
-            <CellTemplate>
-                @if (context.Item.IsActive)
-                {
-                    <MudChip T="string" Color="Color.Success" Size="Size.Small">Active</MudChip>
-                }
-                else
-                {
-                    <MudChip T="string" Color="Color.Error" Size="Size.Small">Inactive</MudChip>
-                }
-            </CellTemplate>
-        </PropertyColumn>
-        <TemplateColumn Title="Roles">
-            <CellTemplate>
-                @if (context.Item.Roles.Count > 0)
-                {
-                    <MudStack Row Spacing="1" Wrap="Wrap.Wrap">
-                        @foreach (var role in context.Item.Roles)
-                        {
-                            <MudChip T="string"
-                                     Color="Color.Primary"
-                                     Variant="Variant.Outlined"
-                                     Size="Size.Small">
-                                @role
-                            </MudChip>
-                        }
-                    </MudStack>
-                }
-                else
-                {
-                    <MudText Typo="Typo.body2" Class="text-muted">-</MudText>
-                }
-            </CellTemplate>
-        </TemplateColumn>
-        <TemplateColumn Title="" Sortable="false" Filterable="false">
-            <CellTemplate>
-                <MudStack Row Spacing="1">
-                    <!-- Primary action — View Details (direct) -->
-                    <MudIconButton Size="Size.Small"
-                                   Icon="@Icons.Material.Outlined.Visibility"
-                                   Href="@($"/admin/user-management/{context.Item.Id}")"
-                                   title="View Details" />
+        <NoRecordsContent>
+            <MudText Typo="Typo.body2">No users found.</MudText>
+        </NoRecordsContent>
+        <LoadingContent>
+            <MudText Typo="Typo.body2">Loading users...</MudText>
+        </LoadingContent>
+        <Columns>
+            <SelectColumn T="UserViewModel" />
+            <TemplateColumn Title="#" Sortable="false" Filterable="false">
+                <CellTemplate>
+                    @context.Item.LineNumber
+                </CellTemplate>
+            </TemplateColumn>
+            <PropertyColumn Property="u => u.UserName" Title="Username" />
+            <PropertyColumn Property="u => u.DisplayName" Title="Display Name" />
+            <PropertyColumn Property="u => u.JobTitle" Title="Job Title" />
+            <PropertyColumn Property="u => u.Department" Title="Department" />
+            <PropertyColumn Property="u => u.IsActive" Title="Status" Filterable="true">
+                <FilterTemplate>
+                    <BoolFilterSelect T="UserViewModel"
+                                      FilterContext="context"
+                                      DataGrid="dataGrid"
+                                      TrueLabel="Active"
+                                      FalseLabel="Inactive" />
+                </FilterTemplate>
+                <CellTemplate>
+                    @if (context.Item.IsActive)
+                    {
+                        <MudChip T="string" Color="Color.Success" Size="Size.Small">Active</MudChip>
+                    }
+                    else
+                    {
+                        <MudChip T="string" Color="Color.Error" Size="Size.Small">Inactive</MudChip>
+                    }
+                </CellTemplate>
+            </PropertyColumn>
+            <TemplateColumn Title="Roles">
+                <CellTemplate>
+                    @if (context.Item.Roles.Count > 0)
+                    {
+                        <MudStack Row Spacing="1" Wrap="Wrap.Wrap">
+                            @foreach (var role in context.Item.Roles)
+                            {
+                                <MudChip T="string"
+                                         Color="Color.Primary"
+                                         Variant="Variant.Outlined"
+                                         Size="Size.Small">
+                                    @role
+                                </MudChip>
+                            }
+                        </MudStack>
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.body2" Class="text-muted">-</MudText>
+                    }
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="" Sortable="false" Filterable="false">
+                <CellTemplate>
+                    <MudStack Row Spacing="1">
+                        <!-- Primary action — View Details (direct) -->
+                        <MudIconButton Size="Size.Small"
+                                       Icon="@Icons.Material.Outlined.Visibility"
+                                       Href="@($"/admin/user-management/{context.Item.Id}")"
+                                       title="View Details" />
 
-                    <!-- Overflow menu for remaining actions -->
-                    <MudMenu Icon="@Icons.Material.Rounded.MoreVert"
-                             Size="Size.Small"
-                             Dense
-                             AnchorOrigin="Origin.BottomRight"
-                             TransformOrigin="Origin.TopRight"
-                             PopoverClass="action-menu">
-                        <MudMenuItem Icon="@Icons.Material.Outlined.Edit"
-                                     Disabled="@(context.Item.IsSelf)"
-                                     OnClick="() => OpenEditUserDialog(context.Item)">
-                            Edit
-                        </MudMenuItem>
-                        <MudMenuItem Icon="@Icons.Material.Outlined.AssignmentInd"
-                                     Disabled="@(context.Item.IsSelf)"
-                                     OnClick="() => OpenManageRolesDialog(context.Item)">
-                            Manage Roles
-                        </MudMenuItem>
-                        <MudMenuItem Icon="@(context.Item.IsActive ? "material-symbols-rounded/person_cancel" : "material-symbols-rounded/person_check")"
-                                     Disabled="@(context.Item.IsSelf)"
-                                     OnClick="() => ToggleActivationAsync(context.Item)">
-                            @(context.Item.IsActive ? "Deactivate" : "Activate")
-                        </MudMenuItem>
-                        <MudDivider />
-                        <MudMenuItem Icon="@Icons.Material.Outlined.DeleteOutline"
-                                     Disabled="@(context.Item.IsSelf)"
-                                     OnClick="() => DeleteUserAsync(context.Item)"
-                                     IconColor="Color.Error">
-                            Delete
-                        </MudMenuItem>
-                    </MudMenu>
-                </MudStack>
-            </CellTemplate>
-        </TemplateColumn>
-    </Columns>
-    <PagerContent>
-        <MudDataGridPager T="UserViewModel" />
-    </PagerContent>
+                        <!-- Overflow menu for remaining actions -->
+                        <MudMenu Icon="@Icons.Material.Rounded.MoreVert"
+                                 Size="Size.Small"
+                                 Dense
+                                 AnchorOrigin="Origin.BottomRight"
+                                 TransformOrigin="Origin.TopRight"
+                                 PopoverClass="action-menu">
+                            <MudMenuItem Icon="@Icons.Material.Outlined.Edit"
+                                         Disabled="@(context.Item.IsSelf)"
+                                         OnClick="() => OpenEditUserDialog(context.Item)">
+                                Edit
+                            </MudMenuItem>
+                            <MudMenuItem Icon="@Icons.Material.Outlined.AssignmentInd"
+                                         Disabled="@(context.Item.IsSelf)"
+                                         OnClick="() => OpenManageRolesDialog(context.Item)">
+                                Manage Roles
+                            </MudMenuItem>
+                            <MudMenuItem Icon="@(context.Item.IsActive ? "material-symbols-rounded/person_cancel" : "material-symbols-rounded/person_check")"
+                                         Disabled="@(context.Item.IsSelf)"
+                                         OnClick="() => ToggleActivationAsync(context.Item)">
+                                @(context.Item.IsActive ? "Deactivate" : "Activate")
+                            </MudMenuItem>
+                            <MudDivider />
+                            <MudMenuItem Icon="@Icons.Material.Outlined.DeleteOutline"
+                                         Disabled="@(context.Item.IsSelf)"
+                                         OnClick="() => DeleteUserAsync(context.Item)"
+                                         IconColor="Color.Error">
+                                Delete
+                            </MudMenuItem>
+                        </MudMenu>
+                    </MudStack>
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+        <PagerContent>
+            <MudDataGridPager T="UserViewModel" />
+        </PagerContent>
     </MudDataGrid>
 </MudPaper>

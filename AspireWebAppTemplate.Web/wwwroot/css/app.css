@@ -66,3 +66,110 @@
 .notification-page-list .mud-list-item {
     border-radius: var(--mud-default-borderradius);
 }
+
+/* Announcement page list items — rounded corners matching notification page */
+.announcement-page-list .mud-list-item {
+    border-radius: var(--mud-default-borderradius);
+}
+
+/* Announcement expired item — dimmed styling for expired announcements */
+.announcement-expired {
+    opacity: 0.55;
+}
+
+/* Announcement content — basic typography for rendered HTML content */
+.announcement-content {
+    line-height: 1.6;
+}
+
+.announcement-content p {
+    margin-bottom: 0.5rem;
+}
+
+.announcement-content ul,
+.announcement-content ol {
+    padding-left: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.announcement-content blockquote {
+    border-left: 3px solid var(--mud-palette-lines-default);
+    padding-left: 1rem;
+    margin: 0.5rem 0;
+    opacity: 0.85;
+}
+
+/* Remove Radzen HtmlEditor's own focus ring when wrapped in MudField */
+.rz-html-editor:focus-within,
+.rz-html-editor .rz-html-editor-content:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border-color: transparent !important;
+}
+
+/* Make Radzen HtmlEditor respect dark mode by inheriting MudBlazor surface colors */
+.rz-html-editor {
+    background: var(--mud-palette-surface) !important;
+}
+
+.rz-html-editor .rz-html-editor-content {
+    background: var(--mud-palette-surface) !important;
+    color: var(--mud-palette-text-primary) !important;
+}
+
+.rz-html-editor .rz-html-editor-toolbar {
+    background: var(--mud-palette-background-gray) !important;
+    border-color: var(--mud-palette-lines-default) !important;
+}
+
+.rz-html-editor .rz-html-editor-toolbar button {
+    color: var(--mud-palette-text-primary) !important;
+}
+
+.rz-html-editor .rz-html-editor-toolbar button:hover {
+    background: var(--mud-palette-action-default-hover) !important;
+}
+
+.rz-html-editor .rz-html-editor-separator {
+    border-color: var(--mud-palette-lines-default) !important;
+}
+
+.rz-html-editor .rz-dropdown,
+.rz-html-editor .rz-dropdown .rz-dropdown-panel,
+.rz-html-editor .rz-dropdown .rz-dropdown-items,
+.rz-html-editor .rz-dropdown .rz-dropdown-item {
+    background: var(--mud-palette-surface) !important;
+    color: var(--mud-palette-text-primary) !important;
+}
+
+.rz-html-editor .rz-dropdown .rz-dropdown-item:hover {
+    background: var(--mud-palette-action-default-hover) !important;
+}
+
+.rz-html-editor select,
+.rz-html-editor .rz-html-editor-toolbar select {
+    background: var(--mud-palette-surface) !important;
+    color: var(--mud-palette-text-primary) !important;
+    border-color: var(--mud-palette-lines-default) !important;
+}
+
+/* Radzen dropdown popup (rendered outside the editor in body) */
+.rz-popup,
+.rz-popup .rz-listbox,
+.rz-popup .rz-listbox-item {
+    background: var(--mud-palette-surface) !important;
+    color: var(--mud-palette-text-primary) !important;
+}
+
+.rz-popup .rz-listbox-item:hover,
+.rz-popup .rz-state-highlight {
+    background: var(--mud-palette-action-default-hover) !important;
+}
+
+/* Radzen dropdown trigger in toolbar */
+.rz-html-editor .rz-dropdown-trigger,
+.rz-html-editor .rz-inputtext {
+    background: var(--mud-palette-surface) !important;
+    color: var(--mud-palette-text-primary) !important;
+    border-color: var(--mud-palette-lines-default) !important;
+}

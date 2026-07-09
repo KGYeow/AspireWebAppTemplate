@@ -14,7 +14,7 @@ public sealed class DefaultNavigationProvider : INavigationProvider
     [
         // Activity
         new() { Type = NavItemType.Header, Text = "Activity" },
-        new() { Type = NavItemType.Link,   Text = "Home", Href = "", Icon = "material-symbols-rounded/home" },
+        new() { Type = NavItemType.Link,   Text = "Home",          Href = "",              Icon = "material-symbols-rounded/home" },
 
         new() { Type = NavItemType.Divider, DividerClass = "my-2" },
 
@@ -39,6 +39,7 @@ public sealed class DefaultNavigationProvider : INavigationProvider
         new() { Type = NavItemType.Header, Text = "Administration", AuthorizedOnly = true },
         new() { Type = NavItemType.Link, Text = "User Management",  Href = "admin/user-management",  Icon = "material-symbols-rounded/group",           AuthorizedOnly = true },
         new() { Type = NavItemType.Link, Text = "Role Management",  Href = "admin/role-management",  Icon = "material-symbols-rounded/assignment_ind",  AuthorizedOnly = true },
+        new() { Type = NavItemType.Link, Text = "Announcements",    Href = "admin/announcements",    Icon = "material-symbols-rounded/campaign",        AuthorizedOnly = true },
         new() { Type = NavItemType.Link, Text = "Audit Log",        Href = "admin/audit-log",        Icon = "material-symbols-rounded/history",         AuthorizedOnly = true },
         new() { Type = NavItemType.Link, Text = "Page Permissions", Href = "admin/page-permissions", Icon = "material-symbols-rounded/lock",            AuthorizedOnly = true },
     ];

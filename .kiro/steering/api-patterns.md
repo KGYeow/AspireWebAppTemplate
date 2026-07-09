@@ -58,7 +58,7 @@ All controllers extend `BaseController` which provides:
 ```
 
 ### Authorization
-- Admin-only endpoints: `[Authorize(Roles = "Admin")]`
+- Admin/restricted endpoints: `[Authorize]` (page permission system controls access via database-driven whitelist; will evolve to permission-based policies)
 - Authenticated users: `[Authorize]`
 - Public endpoints: `[AllowAnonymous]`
 
