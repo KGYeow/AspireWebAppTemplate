@@ -21,8 +21,13 @@ An enterprise Blazor Server web application template built on .NET Aspire. It pr
 - **Settings & Preferences** — per-user theme, timezone, date/time format
 - **Profile Management** — user profile viewing and editing
 - **Authentication** — local Identity + optional LDAP/Active Directory integration
-- **AI Integration** — provider-agnostic AI text generation via Amazon Bedrock (Nova 2 Lite), with configurable model and three-tier credential resolution
 - **Excel Export** — audit log export with server-side filtering
+
+## Optional / Custom Extensions
+
+Features built on top of the template for specific project needs. These are not part of the core template but demonstrate how to extend it:
+
+- **AI Integration** — provider-agnostic AI text generation via Amazon Bedrock (Nova 2 Lite), with configurable model, three-tier credential resolution, and Aspire parameter-based secrets
 
 ## Design Principles
 

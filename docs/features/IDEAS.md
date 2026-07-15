@@ -39,12 +39,36 @@ A curated list of pages and features that would complement the existing template
 
 ## High Priority — Common in Every Internal/Enterprise App
 
-### 1. Email Templates & SMTP Configuration
-- Admin page to configure SMTP settings (stored in DB, not just appsettings)
-- Preview/test email sending
-- Customizable email templates for password reset, account confirmation, etc.
-- Replace `NoOpEmailSender` with real implementation
-- Route: `/admin/email-settings`
+### 1. Email Templates & SMTP Configuration 🔧 IN PROGRESS
+- Replace `NoOpEmailSender` with real SMTP implementation
+- Two-tier template architecture: system security (codebase) + business (database, admin-editable)
+- Preview/test email sending from admin UI
+- Aspire parameter-based secret management for SMTP credentials
+- Route: `/admin/email-templates`
+- **Spec:** `.kiro/specs/email-smtp-integration/`
+
+#### Deferred Email Templates (Future Enhancement)
+The following templates are not in the initial implementation but should be added when the corresponding features or needs arise:
+
+| Template | Category | Storage | Trigger |
+|---|---|---|---|
+| TwoFactorEnabled | Security | Codebase | When user enables 2FA |
+| TwoFactorDisabled | Security | Codebase | When user disables 2FA |
+| SuspiciousSignIn | Security | Codebase | Login from unrecognized device/location (requires device fingerprinting) |
+| AccountActivated | Administrative | Database | When admin reactivates a user account |
+| AdminPasswordReset | Administrative | Database | When admin resets a user's password (distinct from user-initiated) |
+| UserInvitation | Business | Database | When admin invites a user to join (requires invitation feature) |
+| MaintenanceNotification | System | Database | Planned downtime notice (requires scheduling feature) |
+
+#### Deferred Email Infrastructure (Future Enhancement)
+| Enhancement | Description |
+|---|---|
+| Shared layout/master template | Reusable HTML wrapper (logo, footer, colors) inherited by all emails |
+| Plain-text alternative | MultiPart/alternative with text fallback for accessibility |
+| Localization | Per-culture template variants with fallback to default |
+| Template versioning | Version history with rollback capability |
+| Email scheduling | Send emails at a specified future time (requires background jobs) |
+| Branding configuration | Admin-configurable logo, colors, and footer applied to all emails |
 
 ### 2. Application Settings (Admin)
 - Site-wide config stored in DB (site name, logo URL, maintenance mode toggle)
@@ -52,15 +76,10 @@ A curated list of pages and features that would complement the existing template
 - Runtime-configurable settings without redeployment
 - Route: `/admin/app-settings`
 
-### 3. Wire Up Notification Triggers
-- Connect `CreateNotificationAsync` calls to actual user events:
-  - Password changed by admin → notify affected user (Account category)
-  - Account deactivated by admin → notify affected user (Account category)
-  - System announcements → notify all users (System category)
-- Excluded (industry standard: no user value, creates noise):
-  - Role assignment/removal — users discover access changes organically via nav filtering
-  - Account activation — user can't see in-app notifications until they log in (use email/invitation instead)
-- Currently the creation pipeline exists but nothing triggers it in production code
+### 3. ~~Wire Up Notification Triggers~~ ✅ COMPLETED
+- ~~Connect `CreateNotificationAsync` calls to actual user events~~
+- Implemented in UserService (account deactivation, password reset by admin) and AnnouncementService (announcement published notifications to all users)
+- Excluded by design: role assignment/removal, account activation (per industry standard — no user value, creates noise)
 
 ---
 
@@ -171,7 +190,7 @@ A curated list of pages and features that would complement the existing template
 
 | Enhancement | Description | Priority |
 |---|---|---|
-| SignalR Real-Time Notifications | Push notification count updates to connected users without polling | High |
+| ~~SignalR Real-Time Notifications~~ ✅ | Push notification count updates to connected users without polling — implemented via NotificationHub + NotificationContext | ~~High~~ Done |
 | Background Job Dashboard | Hangfire/Quartz for scheduled tasks (email sending, cleanup) | Medium |
 | Rate Limiting Middleware | Protect login and API endpoints from brute force | Medium |
 | CI/CD Pipeline (GitHub Actions) | Build, test, deploy workflow | Medium |
@@ -186,13 +205,13 @@ A curated list of pages and features that would complement the existing template
 
 Based on what's built and what would add the most value:
 
-1. **Wire Up Notification Triggers** (#3) — Low effort, high value. The entire notification pipeline exists but nothing fires it. Adding calls in UserService/RoleService/AuthService completes the feature end-to-end.
+1. **Email Templates & SMTP** (#1) — Low-to-medium effort. Replaces `NoOpEmailSender` with a real implementation, making password resets and account confirmations actually work.
 
-2. **SignalR Real-Time Notifications** — The bell currently loads on page init. With SignalR, the badge updates instantly when a notification is created. Pairs well with #3.
+2. **Dashboard Widgets** (#8) — The home page is currently empty. Adding a few widgets (recent notifications, quick stats) makes the template feel complete and demonstrates component composition.
 
-3. **Dashboard Widgets** (#8) — The home page is currently empty. Adding a few widgets (recent notifications, quick stats) makes the template feel complete and demonstrates component composition.
+3. **Application Settings** (#2) — Admin-configurable site settings stored in DB. Enables runtime changes without redeployment.
 
-4. **Email Templates & SMTP** (#1) — Replaces `NoOpEmailSender` with a real implementation. High value for production readiness.
+4. **User Invitation System** (#4) — Admin sends invite link via email. Natural next step after SMTP is configured.
 
 ---
 

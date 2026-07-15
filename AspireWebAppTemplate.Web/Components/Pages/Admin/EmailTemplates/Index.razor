@@ -1,0 +1,129 @@
+@page "/admin/email-templates"
+
+@using AspireWebAppTemplate.Core.Contracts.Email
+@using AspireWebAppTemplate.Core.Domain.Enums
+@using AspireWebAppTemplate.UI.Components.DataGrid
+
+<PageTitle>Email Templates</PageTitle>
+
+<PageHeader Title="Email Templates" Subtitle="View system templates and edit business notification templates."/>
+
+<!-- Email Templates Data Grid — Server-Side Filtering, Sorting & Pagination -->
+<MudPaper Elevation="0" Class="pa-4">
+    <!-- Search Filter -->
+    <MudStack Row Spacing="2" AlignItems="AlignItems.Center" Class="mb-4">
+        <MudTextField T="string"
+                      ValueChanged="@(s => OnSearch(s))"
+                      Placeholder="Search templates..."
+                      Variant="Variant.Outlined"
+                      Typo="Typo.body2"
+                      Margin="Margin.Dense"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Rounded.Search"
+                      IconSize="Size.Small"
+                      DebounceInterval="500" />
+    </MudStack>
+
+    <!-- Email Templates Data Grid -->
+    <MudDataGrid T="EmailTemplateViewModel"
+                 @ref="_dataGrid"
+                 ServerData="ServerReload"
+                 Loading="@_isLoading"
+                 Filterable
+                 Elevation="0"
+                 Hover
+                 Dense>
+        <NoRecordsContent>
+            <MudText Typo="Typo.body2">No email templates found.</MudText>
+        </NoRecordsContent>
+        <LoadingContent>
+            <MudText Typo="Typo.body2">Loading email templates...</MudText>
+        </LoadingContent>
+        <Columns>
+            <TemplateColumn Title="#" Sortable="false" Filterable="false">
+                <CellTemplate>
+                    @context.Item.LineNumber
+                </CellTemplate>
+            </TemplateColumn>
+            <PropertyColumn Property="t => t.DisplayName" Title="Display Name" />
+            <PropertyColumn Property="t => t.Category" Title="Category" Filterable="true">
+                <FilterTemplate>
+                    <EnumFilterSelect T="EmailTemplateViewModel"
+                                      TEnum="EmailTemplateCategory"
+                                      FilterContext="context"
+                                      DataGrid="_dataGrid"
+                                      Placeholder="All" />
+                </FilterTemplate>
+                <CellTemplate>
+                    @if (context.Item.Category == EmailTemplateCategory.System)
+                    {
+                        <MudChip T="string" Size="Size.Small" Color="Color.Default" Variant="Variant.Outlined">
+                            System
+                        </MudChip>
+                    }
+                    else
+                    {
+                        <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined">
+                            Business
+                        </MudChip>
+                    }
+                </CellTemplate>
+            </PropertyColumn>
+            <PropertyColumn Property="t => t.IsActive" Title="Active" Filterable="true">
+                <FilterTemplate>
+                    <BoolFilterSelect T="EmailTemplateViewModel"
+                                      FilterContext="context"
+                                      DataGrid="_dataGrid"
+                                      TrueLabel="Active"
+                                      FalseLabel="Inactive" />
+                </FilterTemplate>
+                <CellTemplate>
+                    @if (context.Item.IsActive)
+                    {
+                        <MudChip T="string" Size="Size.Small" Color="Color.Success">Active</MudChip>
+                    }
+                    else
+                    {
+                        <MudChip T="string" Size="Size.Small" Color="Color.Default">Inactive</MudChip>
+                    }
+                </CellTemplate>
+            </PropertyColumn>
+            <TemplateColumn Title="Last Updated" Sortable="false">
+                <CellTemplate>
+                    @UserTimeZone.FormatDateTime(context.Item.UpdatedAtUtc)
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="" Sortable="false" Filterable="false">
+                <CellTemplate>
+                    <MudStack Row Spacing="1">
+                        <!-- Preview action -->
+                        <MudIconButton Size="Size.Small"
+                                       Icon="@Icons.Material.Outlined.Visibility"
+                                       OnClick="() => OpenPreviewDialogAsync(context.Item)"
+                                       title="Preview template" />
+
+                        @if (context.Item.Category == EmailTemplateCategory.System)
+                        {
+                            <MudTooltip Text="System template — read-only">
+                                <MudIconButton Size="Size.Small"
+                                               Icon="@Icons.Material.Outlined.EditOff"
+                                               Disabled
+                                               title="System template — read-only" />
+                            </MudTooltip>
+                        }
+                        else
+                        {
+                            <MudIconButton Size="Size.Small"
+                                           Icon="@Icons.Material.Outlined.Edit"
+                                           OnClick="() => OpenEditDialogAsync(context.Item)"
+                                           title="Edit template" />
+                        }
+                    </MudStack>
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+        <PagerContent>
+            <MudDataGridPager T="EmailTemplateViewModel" />
+        </PagerContent>
+    </MudDataGrid>
+</MudPaper>

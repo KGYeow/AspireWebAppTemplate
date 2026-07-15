@@ -4,6 +4,7 @@ using Amazon.Runtime;
 using Amazon.Runtime.Credentials;
 using AspireWebAppTemplate.Abstractions;
 using AspireWebAppTemplate.ApiService.Abstractions;
+using AspireWebAppTemplate.ApiService.Data.Entities;
 using AspireWebAppTemplate.ApiService.Services;
 using AspireWebAppTemplate.ApiService.Services.Clients;
 using AspireWebAppTemplate.ApiService.Services.Handlers;
@@ -11,6 +12,7 @@ using AspireWebAppTemplate.ApiService.Services.Infrastructure;
 using AspireWebAppTemplate.Core.Application.Abstractions;
 using AspireWebAppTemplate.Core.Application.Services;
 using Ganss.Xss;
+using Microsoft.AspNetCore.Identity;
 
 namespace AspireWebAppTemplate.ApiService.Extensions;
 
@@ -43,6 +45,9 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IAnnouncementService, AnnouncementService>();
+        services.AddScoped<IEmailTemplateService, EmailTemplateService>();
+        services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<IEmailSender<ApplicationUser>, EmailService>();
 
         // HtmlSanitizer: singleton with allowlist configuration for announcement content sanitization.
         services.AddSingleton(_ =>

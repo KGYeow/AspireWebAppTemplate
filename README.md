@@ -115,13 +115,6 @@ Reusable Blazor components and themes:
 - Excel export
 - Configurable retention
 
-### AI Integration
-- Provider-agnostic AI text generation via Amazon Bedrock (Amazon Nova 2 Lite)
-- Converse API with cross-region inference profile (`us.amazon.nova-2-lite-v1:0`)
-- Three-tier credential resolution: session credentials → basic credentials → IAM role fallback
-- Credentials managed via Aspire secret parameters (never committed to source control)
-- 60-second timeout with structured error handling and logging
-
 ### Announcement System
 - Multi-surface announcements: persistent banner, dedicated list page, admin CRUD
 - Two display types: Banner (top-of-layout) and Standard (list page only)
@@ -146,6 +139,18 @@ Reusable Blazor components and themes:
 - **Resilience**: Built-in retry and circuit breaker patterns
 - **Observability**: OpenTelemetry tracing, metrics, and logging
 - **Separation of Concerns**: Frontend has zero database/Identity dependencies
+
+## Optional / Custom Extensions
+
+Features built on top of the template for specific project needs. Not part of the core template, but demonstrate how to extend it:
+
+### AI Integration (Amazon Bedrock)
+- Provider-agnostic AI text generation via Amazon Bedrock (Amazon Nova 2 Lite)
+- Converse API with cross-region inference profile (`us.amazon.nova-2-lite-v1:0`)
+- Three-tier credential resolution: session credentials → basic credentials → IAM role fallback
+- Credentials managed via Aspire secret parameters (never committed to source control)
+- 60-second timeout with structured error handling and logging
+- See `docs/guides/aws-ai-credentials.md` for setup
 
 ## Getting Started
 

@@ -34,9 +34,10 @@ public partial class BoolFilterSelect<T> : ComponentBase
 
     /// <summary>
     /// Reference to the parent <see cref="MudDataGrid{T}"/> for triggering server-side reload.
+    /// May be null during initial render; filter changes are still applied via FilterContext.
     /// </summary>
     [Parameter]
-    public MudDataGrid<T> DataGrid { get; set; } = default!;
+    public MudDataGrid<T>? DataGrid { get; set; }
 
     /// <summary>
     /// Display text for the <c>true</c> value. Defaults to "Yes".
@@ -90,7 +91,8 @@ public partial class BoolFilterSelect<T> : ComponentBase
             FilterContext.FilterDefinition.Operator = FilterOperator.Boolean.Is;
         }
 
-        await DataGrid.ReloadServerData();
+        if (DataGrid is not null)
+            await DataGrid.ReloadServerData();
     }
 
     #endregion

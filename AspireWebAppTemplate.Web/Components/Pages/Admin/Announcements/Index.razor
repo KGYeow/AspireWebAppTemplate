@@ -58,7 +58,7 @@
         </MudStack>
     }
 
-    <MudDataGrid T="AnnouncementDto"
+    <MudDataGrid T="AnnouncementViewModel"
                  @ref="_dataGrid"
                  ServerData="ServerReload"
                  MultiSelection="true"
@@ -76,11 +76,16 @@
             <MudText Typo="Typo.body2">Loading announcements...</MudText>
         </LoadingContent>
         <Columns>
-            <SelectColumn T="AnnouncementDto" />
+            <SelectColumn T="AnnouncementViewModel" />
+            <TemplateColumn Title="#" Sortable="false" Filterable="false">
+                <CellTemplate>
+                    @context.Item.LineNumber
+                </CellTemplate>
+            </TemplateColumn>
             <PropertyColumn Property="a => a.Title" Title="Title" />
             <PropertyColumn Property="a => a.DisplayType" Title="Display Type" Filterable="true">
                 <FilterTemplate>
-                    <EnumFilterSelect T="AnnouncementDto"
+                    <EnumFilterSelect T="AnnouncementViewModel"
                                       TEnum="AnnouncementDisplayType"
                                       FilterContext="context"
                                       DataGrid="_dataGrid" />
@@ -93,7 +98,7 @@
             </PropertyColumn>
             <PropertyColumn Property="a => a.Severity" Title="Severity" Filterable="true">
                 <FilterTemplate>
-                    <EnumFilterSelect T="AnnouncementDto"
+                    <EnumFilterSelect T="AnnouncementViewModel"
                                       TEnum="AnnouncementSeverity"
                                       FilterContext="context"
                                       DataGrid="_dataGrid" />
@@ -106,7 +111,7 @@
             </PropertyColumn>
             <PropertyColumn Property="a => a.Status" Title="Status" Filterable="true">
                 <FilterTemplate>
-                    <StringFilterSelect T="AnnouncementDto"
+                    <StringFilterSelect T="AnnouncementViewModel"
                                         FilterContext="context"
                                         DataGrid="_dataGrid"
                                         Options="@(new[] { "Active", "Scheduled", "Expired", "Draft" })" />
@@ -149,7 +154,7 @@
             </TemplateColumn>
         </Columns>
         <PagerContent>
-            <MudDataGridPager T="AnnouncementDto" />
+            <MudDataGridPager T="AnnouncementViewModel" />
         </PagerContent>
     </MudDataGrid>
 </MudPaper>

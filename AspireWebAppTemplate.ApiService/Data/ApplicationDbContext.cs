@@ -69,6 +69,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     // public DbSet<Order> Orders { get; set; } = null!;
     // public DbSet<Invoice> Invoices { get; set; } = null!;
 
+    /// All email templates (system and business) stored in the database (one per EmailType).
+    /// </summary>
+    public DbSet<EmailTemplate> EmailTemplates { get; set; } = null!;
+
     #endregion
 
     /// <summary>

@@ -2,7 +2,6 @@ using AspireWebAppTemplate.ApiService.Authentication;
 using AspireWebAppTemplate.ApiService.Data;
 using AspireWebAppTemplate.ApiService.Data.Entities;
 using AspireWebAppTemplate.ApiService.Extensions;
-using AspireWebAppTemplate.ApiService.Services.Infrastructure;
 using AspireWebAppTemplate.Options;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
@@ -59,9 +58,6 @@ builder.Services.AddApplicationServices();
 
 // [LDAP] LDAP configuration — remove this block if LDAP is not needed
 builder.Services.Configure<LdapSettings>(builder.Configuration.GetSection("LDAP"));
-
-// Email sender (no-op — replace with real implementation when needed)
-builder.Services.AddSingleton<IEmailSender<ApplicationUser>, NoOpEmailSender>();
 
 // EPPlus license configuration
 OfficeOpenXml.ExcelPackage.License.SetNonCommercialOrganization("AspireWebAppTemplate");

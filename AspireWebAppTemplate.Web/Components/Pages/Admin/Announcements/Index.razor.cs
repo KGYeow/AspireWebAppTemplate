@@ -42,21 +42,21 @@ public partial class Index : ComponentBase
     /// <summary>
     /// Reference to the MudDataGrid component for triggering server-side reloads.
     /// </summary>
-    private MudDataGrid<AnnouncementDto> _dataGrid = null!;
+    private MudDataGrid<AnnouncementViewModel> _dataGrid = null!;
 
     /// <summary>
     /// Server-side helper that applies column filters, multi-sort, global search,
     /// and pagination based on <see cref="GridState{T}"/>.
     /// Maps each filterable/sortable column to its corresponding property selector.
     /// </summary>
-    private readonly DataGridUtils<AnnouncementDto> _dataGridUtils = new DataGridUtils<AnnouncementDto>()
-        .MapString(nameof(AnnouncementDto.Title), x => x.Title)
-        .MapString(nameof(AnnouncementDto.DisplayType), x => x.DisplayType.ToString())
-        .MapString(nameof(AnnouncementDto.Severity), x => x.Severity.ToString())
-        .MapString(nameof(AnnouncementDto.Status), x => x.Status)
-        .MapDateTime(nameof(AnnouncementDto.StartsAtUtc), x => x.StartsAtUtc)
-        .MapDateTime(nameof(AnnouncementDto.ExpiresAtUtc), x => x.ExpiresAtUtc)
-        .MapDateTime(nameof(AnnouncementDto.CreatedAtUtc), x => x.CreatedAtUtc);
+    private readonly DataGridUtils<AnnouncementViewModel> _dataGridUtils = new DataGridUtils<AnnouncementViewModel>()
+        .MapString(nameof(AnnouncementViewModel.Title), x => x.Title)
+        .MapEnum(nameof(AnnouncementViewModel.DisplayType), x => x.DisplayType)
+        .MapEnum(nameof(AnnouncementViewModel.Severity), x => x.Severity)
+        .MapString(nameof(AnnouncementViewModel.Status), x => x.Status)
+        .MapDateTime(nameof(AnnouncementViewModel.StartsAtUtc), x => x.StartsAtUtc)
+        .MapDateTime(nameof(AnnouncementViewModel.ExpiresAtUtc), x => x.ExpiresAtUtc)
+        .MapDateTime(nameof(AnnouncementViewModel.CreatedAtUtc), x => x.CreatedAtUtc);
 
     #endregion
 
@@ -66,7 +66,7 @@ public partial class Index : ComponentBase
     /// The set of currently selected announcements in the data grid.
     /// Bound via <c>@bind-SelectedItems</c>.
     /// </summary>
-    private HashSet<AnnouncementDto> _selectedItems = new();
+    private HashSet<AnnouncementViewModel> _selectedItems = new();
 
     #endregion
 
@@ -93,43 +93,48 @@ public partial class Index : ComponentBase
     /// Loads all announcements from the API, then delegates column filtering,
     /// sorting, and pagination to <see cref="DataGridUtils{T}.ServerReloadAsync"/>.
     /// </summary>
-    private async Task<GridData<AnnouncementDto>> ServerReload(GridState<AnnouncementDto> state, CancellationToken cancellationToken)
+    private async Task<GridData<AnnouncementViewModel>> ServerReload(GridState<AnnouncementViewModel> state, CancellationToken cancellationToken)
     {
         _isLoading = true;
 
         try
         {
-            // Loader function: fetches all announcements from API (no pre-filter)
-            async Task<IEnumerable<AnnouncementDto>> loader()
+            // Loader function: fetches all announcements from API and wraps in ViewModels
+            async Task<IEnumerable<AnnouncementViewModel>> loader()
             {
                 var result = await AnnouncementService.GetAllAsync();
-                return result.Succeeded ? result.Data ?? [] : [];
+                return result.Succeeded
+                    ? (result.Data ?? []).Select(a => new AnnouncementViewModel { Announcement = a })
+                    : [];
             }
 
             // Global search fields — searches across all visible columns using the same
             // formatted values displayed in the grid (timezone-converted dates)
-            IEnumerable<string> GlobalFields(AnnouncementDto a) => new[]
+            IEnumerable<string> GlobalFields(AnnouncementViewModel vm) => new[]
             {
-                a.Title,
-                a.DisplayType.ToString(),
-                a.Severity.ToString(),
-                a.Status,
-                UserTimeZone.FormatDateTime(a.StartsAtUtc),
-                UserTimeZone.FormatDateTime(a.ExpiresAtUtc),
-                UserTimeZone.FormatDateTime(a.CreatedAtUtc)
+                vm.Title,
+                vm.DisplayType.ToString(),
+                vm.Severity.ToString(),
+                vm.Status,
+                UserTimeZone.FormatDateTime(vm.StartsAtUtc),
+                UserTimeZone.FormatDateTime(vm.ExpiresAtUtc),
+                UserTimeZone.FormatDateTime(vm.CreatedAtUtc)
             };
+
+            void SetLine(AnnouncementViewModel item, int lineNo) => item.LineNumber = lineNo;
 
             return await _dataGridUtils.ServerReloadAsync(
                 state,
                 loader,
                 globalSearchTerm: _searchString,
-                globalSearchFieldSelector: GlobalFields);
+                globalSearchFieldSelector: GlobalFields,
+                setLineNumber: SetLine);
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error loading announcements.");
             Snackbar.Add("An unexpected error occurred while loading announcements.", Severity.Error);
-            return new GridData<AnnouncementDto> { Items = [], TotalItems = 0 };
+            return new GridData<AnnouncementViewModel> { Items = [], TotalItems = 0 };
         }
         finally
         {
@@ -146,7 +151,7 @@ public partial class Index : ComponentBase
     /// </summary>
     private void ClearSelection()
     {
-        _selectedItems = new HashSet<AnnouncementDto>();
+        _selectedItems = new HashSet<AnnouncementViewModel>();
     }
 
     /// <summary>
@@ -154,7 +159,7 @@ public partial class Index : ComponentBase
     /// </summary>
     private async Task ClearSelectionAndReloadAsync()
     {
-        _selectedItems = new HashSet<AnnouncementDto>();
+        _selectedItems = new HashSet<AnnouncementViewModel>();
         await _dataGrid.ReloadServerData();
     }
 
@@ -179,9 +184,9 @@ public partial class Index : ComponentBase
         if (result is null || result.Canceled) return;
 
         int success = 0, failed = 0;
-        foreach (var announcement in _selectedItems)
+        foreach (var vm in _selectedItems)
         {
-            var deleteResult = await AnnouncementService.DeleteAsync(announcement.Id);
+            var deleteResult = await AnnouncementService.DeleteAsync(vm.Id);
             if (deleteResult.Succeeded) success++;
             else failed++;
         }
@@ -226,11 +231,11 @@ public partial class Index : ComponentBase
     /// <summary>
     /// Opens the edit announcement dialog pre-populated with the selected announcement's values.
     /// </summary>
-    private async Task OpenEditDialogAsync(AnnouncementDto announcement)
+    private async Task OpenEditDialogAsync(AnnouncementViewModel vm)
     {
         var parameters = new DialogParameters<AnnouncementFormDialog>
         {
-            { x => x.ExistingAnnouncement, announcement }
+            { x => x.ExistingAnnouncement, vm.Announcement }
         };
 
         var options = new DialogOptions { CloseButton = true, CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
@@ -247,11 +252,11 @@ public partial class Index : ComponentBase
     /// <summary>
     /// Shows a confirmation dialog and deletes the announcement if confirmed.
     /// </summary>
-    private async Task DeleteAnnouncementAsync(AnnouncementDto announcement)
+    private async Task DeleteAnnouncementAsync(AnnouncementViewModel vm)
     {
         var parameters = new DialogParameters<ConfirmationDialog>
         {
-            { x => x.ContentText, $"Are you sure you want to delete the announcement '{announcement.Title}'? This action cannot be undone." },
+            { x => x.ContentText, $"Are you sure you want to delete the announcement '{vm.Title}'? This action cannot be undone." },
             { x => x.SubmitBtnText, "Delete" },
             { x => x.DialogIcon, Icons.Material.Rounded.DeleteForever },
             { x => x.DialogIconColor, Color.Error }
@@ -262,7 +267,7 @@ public partial class Index : ComponentBase
         var result = await dialog.Result;
         if (result is null || result.Canceled) return;
 
-        var deleteResult = await AnnouncementService.DeleteAsync(announcement.Id);
+        var deleteResult = await AnnouncementService.DeleteAsync(vm.Id);
         if (deleteResult.Succeeded)
         {
             Snackbar.Add("Announcement deleted successfully.", Severity.Success);
@@ -300,6 +305,60 @@ public partial class Index : ComponentBase
         "Draft" => Color.Default,
         _ => Color.Default
     };
+
+    #endregion
+
+    #region View Model
+
+    /// <summary>
+    /// View model wrapping <see cref="AnnouncementDto"/> with a display line number.
+    /// </summary>
+    private sealed class AnnouncementViewModel
+    {
+        /// <summary>Row number displayed in the "#" column.</summary>
+        public int LineNumber { get; set; }
+
+        /// <summary>The underlying announcement DTO.</summary>
+        public AnnouncementDto Announcement { get; set; } = default!;
+
+        /// <summary>The unique identifier of the announcement.</summary>
+        public Guid Id => Announcement.Id;
+
+        /// <summary>The plain-text title of the announcement.</summary>
+        public string Title => Announcement.Title;
+
+        /// <summary>The display type controlling where the announcement is surfaced.</summary>
+        public AnnouncementDisplayType DisplayType => Announcement.DisplayType;
+
+        /// <summary>The severity level indicating announcement urgency.</summary>
+        public AnnouncementSeverity Severity => Announcement.Severity;
+
+        /// <summary>The computed status of the announcement.</summary>
+        public string Status => Announcement.Status;
+
+        /// <summary>The optional UTC timestamp when the announcement becomes active.</summary>
+        public DateTime? StartsAtUtc => Announcement.StartsAtUtc;
+
+        /// <summary>The optional UTC timestamp when the announcement expires.</summary>
+        public DateTime? ExpiresAtUtc => Announcement.ExpiresAtUtc;
+
+        /// <summary>The UTC timestamp when the announcement was created.</summary>
+        public DateTime CreatedAtUtc => Announcement.CreatedAtUtc;
+
+        /// <summary>Whether the announcement is manually activated.</summary>
+        public bool IsActive => Announcement.IsActive;
+
+        /// <summary>
+        /// Determines equality by comparing the announcement's unique identifier.
+        /// Required for MudDataGrid multi-selection to track items correctly across reloads.
+        /// </summary>
+        public override bool Equals(object? obj) => obj is AnnouncementViewModel other && Id == other.Id;
+
+        /// <summary>
+        /// Returns a hash code based on the announcement's unique identifier.
+        /// </summary>
+        public override int GetHashCode() => Id.GetHashCode();
+    }
 
     #endregion
 }

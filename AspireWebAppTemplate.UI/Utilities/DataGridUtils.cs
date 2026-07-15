@@ -37,6 +37,7 @@ public sealed class DataGridUtils<T>
     private readonly Dictionary<string, Func<T, long?>> _longSelectors = new();
     private readonly Dictionary<string, Func<T, DateTime?>> _dateSelectors = new();
     private readonly Dictionary<string, Func<T, bool?>> _boolSelectors = new();
+    private readonly Dictionary<string, Func<T, string>> _enumSelectors = new();
 
     #endregion
 
@@ -113,6 +114,18 @@ public sealed class DataGridUtils<T>
     /// <returns>This instance for fluent chaining.</returns>
     public DataGridUtils<T> MapBool(string propertyName, Func<T, bool?> selector)
     { _boolSelectors[propertyName] = selector; return this; }
+
+    /// <summary>
+    /// Registers an enum property selector for filtering and sorting.
+    /// Stores the enum's <c>ToString()</c> representation for comparison against filter values
+    /// set by <c>EnumFilterSelect</c> (which uses <c>FilterOperator.Enum.Is</c>).
+    /// </summary>
+    /// <typeparam name="TEnum">The enum type of the property.</typeparam>
+    /// <param name="propertyName">The column's <c>PropertyName</c> (typically <c>nameof(T.Property)</c>).</param>
+    /// <param name="selector">A function that extracts the enum value from an item.</param>
+    /// <returns>This instance for fluent chaining.</returns>
+    public DataGridUtils<T> MapEnum<TEnum>(string propertyName, Func<T, TEnum> selector) where TEnum : struct, Enum
+    { _enumSelectors[propertyName] = x => selector(x).ToString(); return this; }
 
     #endregion
 
@@ -209,6 +222,14 @@ public sealed class DataGridUtils<T>
                 continue;
             }
 
+            // Enum (mapped via MapEnum — compares enum ToString() against filter value)
+            if (_enumSelectors.TryGetValue(propertyName, out var enumSelector))
+            {
+                var enumVal = val is Enum ? val.ToString() ?? string.Empty : Convert.ToString(val) ?? string.Empty;
+                result = ApplyEnumFilter(result, enumSelector, op, enumVal);
+                continue;
+            }
+
             // DateTime
             if (_dateSelectors.TryGetValue(propertyName, out var dtSelector))
             {
@@ -272,6 +293,21 @@ public sealed class DataGridUtils<T>
             FilterOperator.String.EndsWith    => s => s?.EndsWith(val, StringComparison.OrdinalIgnoreCase) == true,
             FilterOperator.String.Empty       => s => string.IsNullOrEmpty(s),
             FilterOperator.String.NotEmpty    => s => !string.IsNullOrEmpty(s),
+            _ => _ => true
+        };
+        return source.Where(x => predicate(sel(x)));
+    }
+
+    /// <summary>
+    /// Applies an enum filter operator (is, is not). Compares the item's enum ToString()
+    /// value against the filter value using case-insensitive string comparison.
+    /// </summary>
+    private static IEnumerable<T> ApplyEnumFilter(IEnumerable<T> source, Func<T, string> sel, string op, string val)
+    {
+        Func<string, bool> predicate = op switch
+        {
+            FilterOperator.Enum.Is    => s => string.Equals(s, val, StringComparison.OrdinalIgnoreCase),
+            FilterOperator.Enum.IsNot => s => !string.Equals(s, val, StringComparison.OrdinalIgnoreCase),
             _ => _ => true
         };
         return source.Where(x => predicate(sel(x)));
@@ -394,6 +430,7 @@ public sealed class DataGridUtils<T>
     private Func<T, object?>? TryGetSortKeySelector(string propertyName)
     {
         if (_stringSelectors.TryGetValue(propertyName, out var s))   return x => s(x);
+        if (_enumSelectors.TryGetValue(propertyName, out var e))     return x => e(x);
         if (_dateSelectors.TryGetValue(propertyName, out var d))     return x => d(x);
         if (_boolSelectors.TryGetValue(propertyName, out var b))     return x => b(x);
         if (_intSelectors.TryGetValue(propertyName, out var i))      return x => i(x);

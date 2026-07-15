@@ -34,9 +34,10 @@ public partial class StringFilterSelect<T> : ComponentBase
 
     /// <summary>
     /// Reference to the parent <see cref="MudDataGrid{T}"/> for triggering server-side reload.
+    /// May be null during initial render; filter changes are still applied via FilterContext.
     /// </summary>
     [Parameter]
-    public MudDataGrid<T> DataGrid { get; set; } = default!;
+    public MudDataGrid<T>? DataGrid { get; set; }
 
     /// <summary>
     /// The set of valid option strings to display in the dropdown.
@@ -81,7 +82,8 @@ public partial class StringFilterSelect<T> : ComponentBase
             FilterContext.FilterDefinition.Operator = FilterOperator.String.Equal;
         }
 
-        await DataGrid.ReloadServerData();
+        if (DataGrid is not null)
+            await DataGrid.ReloadServerData();
     }
 
     #endregion

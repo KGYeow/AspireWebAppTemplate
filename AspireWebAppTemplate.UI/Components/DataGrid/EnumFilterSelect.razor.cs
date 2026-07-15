@@ -35,9 +35,10 @@ public partial class EnumFilterSelect<T, TEnum> : ComponentBase where TEnum : st
 
     /// <summary>
     /// Reference to the parent <see cref="MudDataGrid{T}"/> for triggering server-side reload.
+    /// May be null during initial render; filter changes are still applied via FilterContext.
     /// </summary>
     [Parameter]
-    public MudDataGrid<T> DataGrid { get; set; } = default!;
+    public MudDataGrid<T>? DataGrid { get; set; }
 
     /// <summary>
     /// Placeholder text shown when no filter is selected. Defaults to "All".
@@ -51,16 +52,20 @@ public partial class EnumFilterSelect<T, TEnum> : ComponentBase where TEnum : st
 
     /// <summary>
     /// Gets the current display value from the filter definition.
+    /// Handles both enum and string value types stored in the filter.
     /// </summary>
     /// <returns>The enum name string, or <c>null</c> if no filter is active.</returns>
     private string? GetValue()
     {
-        return FilterContext.FilterDefinition?.Value as string;
+        var val = FilterContext.FilterDefinition?.Value;
+        if (val is null) return null;
+        if (val is TEnum enumVal) return enumVal.ToString();
+        return val.ToString();
     }
 
     /// <summary>
     /// Sets the filter value from the dropdown selection and triggers grid reload.
-    /// Uses the "equals" operator for exact string matching.
+    /// Parses the string back to the enum value to satisfy MudBlazor's type expectations.
     /// </summary>
     /// <param name="value">The selected enum name, or <c>null</c> to clear the filter.</param>
     private async Task SetValue(string? value)
@@ -72,11 +77,14 @@ public partial class EnumFilterSelect<T, TEnum> : ComponentBase where TEnum : st
         }
         else
         {
-            FilterContext.FilterDefinition!.Value = value;
-            FilterContext.FilterDefinition.Operator = FilterOperator.String.Equal;
+            // MudBlazor expects the filter value to match the column's property type (enum),
+            // not a string. Parse the enum name back to the actual enum value.
+            FilterContext.FilterDefinition!.Value = Enum.Parse<TEnum>(value);
+            FilterContext.FilterDefinition.Operator = FilterOperator.Enum.Is;
         }
 
-        await DataGrid.ReloadServerData();
+        if (DataGrid is not null)
+            await DataGrid.ReloadServerData();
     }
 
     #endregion

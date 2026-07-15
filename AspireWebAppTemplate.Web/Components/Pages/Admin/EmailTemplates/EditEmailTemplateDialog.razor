@@ -1,0 +1,109 @@
+@using AspireWebAppTemplate.Core.Contracts.Email
+@using Radzen.Blazor
+
+<ModalDialog Title="Edit Email Template">
+    <ContentArea>
+        <EditForm EditContext="_editContext" OnValidSubmit="OnSubmitAsync">
+            <DataAnnotationsValidator />
+
+            <MudGrid Spacing="4">
+                <!-- Display Name -->
+                <MudItem xs="12">
+                    <MudInputLabel>Display Name *</MudInputLabel>
+                    <MudTextField T="string"
+                                  @bind-Value="_model.DisplayName"
+                                  Placeholder="Template display name"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  Typo="Typo.body2"
+                                  Counter="200"
+                                  MaxLength="200"
+                                  For="@(() => _model.DisplayName)" />
+                </MudItem>
+
+                <!-- Subject -->
+                <MudItem xs="12">
+                    <MudInputLabel>Subject *</MudInputLabel>
+                    <MudTextField T="string"
+                                  @bind-Value="_model.Subject"
+                                  Placeholder="Email subject line (supports {{placeholders}})"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  Typo="Typo.body2"
+                                  Counter="500"
+                                  MaxLength="500"
+                                  For="@(() => _model.Subject)" />
+                </MudItem>
+
+                <!-- HTML Body (Radzen HtmlEditor) -->
+                <MudItem xs="12">
+                    <MudInputLabel>HTML Body *</MudInputLabel>
+                    <MudField Variant="Variant.Outlined"
+                              Error="@_htmlBodyHasError"
+                              ErrorText="HTML body is required."
+                              Class="my-1">
+                        <RadzenHtmlEditor @bind-Value="_model.HtmlBody" Style="height: 300px; border: none; margin: -18.5px -14px;">
+                            <RadzenHtmlEditorBold />
+                            <RadzenHtmlEditorItalic />
+                            <RadzenHtmlEditorUnderline />
+                            <RadzenHtmlEditorSeparator />
+                            <RadzenHtmlEditorFormatBlock />
+                            <RadzenHtmlEditorSeparator />
+                            <RadzenHtmlEditorOrderedList />
+                            <RadzenHtmlEditorUnorderedList />
+                            <RadzenHtmlEditorSeparator />
+                            <RadzenHtmlEditorLink />
+                            <RadzenHtmlEditorUnlink />
+                        </RadzenHtmlEditor>
+                    </MudField>
+                </MudItem>
+
+                <!-- Placeholder Hints (read-only guidance) -->
+                @if (!string.IsNullOrWhiteSpace(Template?.PlaceholderHints))
+                {
+                    <MudItem xs="12">
+                        <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense NoIcon="false">
+                            <MudText Typo="Typo.caption" Class="fw-bold">Available Placeholders</MudText>
+                            <MudText Typo="Typo.body2">
+                                Use these variables in the Subject and Body: @FormatPlaceholderHints(Template.PlaceholderHints)
+                            </MudText>
+                        </MudAlert>
+                    </MudItem>
+                }
+
+                <!-- Active toggle -->
+                <MudItem xs="12">
+                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <div>
+                            <MudInputLabel>Active</MudInputLabel>
+                            <MudText Class="mud-input-helper-text">
+                                When active, this template is available for sending emails.
+                            </MudText>
+                        </div>
+                        <MudSwitch @bind-Value="_model.IsActive" Color="Color.Primary" />
+                    </MudStack>
+                </MudItem>
+
+                <!-- Error Alert -->
+                <MudItem xs="12" Class="@(string.IsNullOrEmpty(_statusMessage) ? "d-none" : "")">
+                    <StatusAlert @bind-Message="_statusMessage" Dismissible="false" />
+                </MudItem>
+            </MudGrid>
+        </EditForm>
+    </ContentArea>
+
+    <ActionsTemplate>
+        <MudButton Disabled="@_isBusy" OnClick="() => MudDialog.Cancel()">Cancel</MudButton>
+        <MudButton Color="Color.Primary"
+                   Variant="Variant.Filled"
+                   Disabled="@_isBusy"
+                   OnClick="OnSubmitAsync"
+                   DropShadow="false">
+            @if (_isBusy)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate Class="me-2" />
+            }
+            Save Changes
+        </MudButton>
+    </ActionsTemplate>
+</ModalDialog>

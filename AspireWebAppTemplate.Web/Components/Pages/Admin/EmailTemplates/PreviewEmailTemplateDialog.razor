@@ -1,0 +1,39 @@
+@using AspireWebAppTemplate.Core.Contracts.Email
+
+<ModalDialog Title="@($"Preview: {Template.DisplayName}")">
+    <ContentArea>
+        @if (_isLoading)
+        {
+            <MudStack AlignItems="AlignItems.Center" Class="pa-8">
+                <MudProgressCircular Indeterminate Size="Size.Large" />
+                <MudText Typo="Typo.body2" Class="mt-2">Loading preview...</MudText>
+            </MudStack>
+        }
+        else if (!string.IsNullOrEmpty(_errorMessage))
+        {
+            <MudAlert Severity="Severity.Error" Class="my-2">@_errorMessage</MudAlert>
+        }
+        else
+        {
+            <!-- Subject line -->
+            <MudText Typo="Typo.body2">
+                <strong>Subject:</strong> @_renderedSubject
+            </MudText>
+
+            <MudDivider Class="my-3" />
+
+            <!-- Rendered HTML Body -->
+            <MudPaper Elevation="0" Class="overflow-hidden" Outlined>
+                <iframe srcdoc="@_renderedHtmlBody"
+                        class="d-block"
+                        style="width: 100%; height: 400px; border: none;"
+                        sandbox="allow-same-origin"
+                        title="Email template preview" />
+            </MudPaper>
+        }
+    </ContentArea>
+
+    <ActionsTemplate>
+        <MudButton OnClick="() => MudDialog.Cancel()">Close</MudButton>
+    </ActionsTemplate>
+</ModalDialog>

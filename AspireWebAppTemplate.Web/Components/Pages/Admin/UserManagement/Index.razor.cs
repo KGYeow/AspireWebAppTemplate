@@ -886,14 +886,12 @@ public partial class Index : ComponentBase
         /// Determines equality by <see cref="Id"/> so the grid can match selected items
         /// across page reloads.
         /// </summary>
-        public override bool Equals(object? obj)
-            => obj is UserViewModel other && Id == other.Id;
+        public override bool Equals(object? obj) => obj is UserViewModel other && Id == other.Id;
 
         /// <summary>
         /// Returns a hash code based on <see cref="Id"/>.
         /// </summary>
-        public override int GetHashCode()
-            => Id.GetHashCode();
+        public override int GetHashCode() => Id.GetHashCode();
     }
 
     #endregion
