@@ -1,3 +1,4 @@
+using AspireWebAppTemplate.Core.Contracts.Roles;
 using AspireWebAppTemplate.UI.Components.Shared;
 using AspireWebAppTemplate.UI.Utilities;
 using AspireWebAppTemplate.Web.Services;
@@ -134,19 +135,7 @@ public partial class Index : ComponentBase
         var result = await RoleService.GetRolesAsync();
         if (!result.Succeeded || result.Data is null) return [];
 
-        return result.Data.Select(r => new RoleViewModel
-        {
-            Id = r.Id,
-            Name = r.Name,
-            DisplayName = r.DisplayName ?? "",
-            Description = r.Description ?? "",
-            IsActive = r.IsActive,
-            UserCount = r.UserCount,
-            CreatedUtc = r.CreatedUtc,
-            UpdatedUtc = r.UpdatedUtc,
-            IsSystem = r.IsSystem,
-            Position = r.Position,
-        });
+        return result.Data.Select(r => new RoleViewModel { Role = r });
     }
 
     #endregion
@@ -472,54 +461,57 @@ public partial class Index : ComponentBase
     #region View Models
 
     /// <summary>
-    /// Flattened view model for the role data grid.
+    /// Wrapper view model for the role data grid.
+    /// Holds a <see cref="RoleDto"/> reference and delegates properties.
     /// </summary>
     public class RoleViewModel
     {
         /// <summary>Display line number (1-based, page-aware).</summary>
         public int LineNumber { get; set; }
 
+        /// <summary>The underlying role DTO.</summary>
+        public RoleDto Role { get; set; } = default!;
+
+        // Delegated from DTO
         /// <summary>The role's Identity ID.</summary>
-        public string Id { get; set; } = "";
+        public string Id => Role.Id;
 
         /// <summary>The technical role name.</summary>
-        public string Name { get; set; } = "";
+        public string Name => Role.Name;
 
         /// <summary>The human-readable display name.</summary>
-        public string DisplayName { get; set; } = "";
+        public string DisplayName => Role.DisplayName ?? "";
 
         /// <summary>The role description.</summary>
-        public string? Description { get; set; }
+        public string? Description => Role.Description;
 
         /// <summary>Whether the role is active.</summary>
-        public bool IsActive { get; set; }
+        public bool IsActive => Role.IsActive;
 
         /// <summary>Whether the role is a protected system role.</summary>
-        public bool IsSystem { get; set; }
+        public bool IsSystem => Role.IsSystem;
 
         /// <summary>The role's position value indicating authority level.</summary>
-        public int Position { get; set; }
+        public int Position => Role.Position;
 
         /// <summary>Number of users currently assigned to this role.</summary>
-        public int UserCount { get; set; }
+        public int UserCount => Role.UserCount;
 
         /// <summary>When the role was created (UTC).</summary>
-        public DateTime CreatedUtc { get; set; }
+        public DateTime CreatedUtc => Role.CreatedUtc;
 
         /// <summary>When the role was last updated (UTC).</summary>
-        public DateTime? UpdatedUtc { get; set; }
+        public DateTime? UpdatedUtc => Role.UpdatedUtc;
 
         /// <summary>
         /// Determines equality by <see cref="Id"/>.
         /// </summary>
-        public override bool Equals(object? obj)
-            => obj is RoleViewModel other && Id == other.Id;
+        public override bool Equals(object? obj) => obj is RoleViewModel other && Id == other.Id;
 
         /// <summary>
         /// Returns a hash code based on <see cref="Id"/>.
         /// </summary>
-        public override int GetHashCode()
-            => Id.GetHashCode();
+        public override int GetHashCode() => Id.GetHashCode();
     }
 
     #endregion

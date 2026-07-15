@@ -1,4 +1,5 @@
 using AspireWebAppTemplate.Core.Contracts.Roles;
+using AspireWebAppTemplate.Core.Contracts.Users;
 using AspireWebAppTemplate.UI.Components.Shared;
 using AspireWebAppTemplate.UI.Utilities;
 using AspireWebAppTemplate.Web.Services;
@@ -267,14 +268,7 @@ public partial class Index : ComponentBase
 
         return users.Select(u => new UserViewModel
         {
-            Id = u.Id,
-            UserName = u.UserName,
-            DisplayName = u.DisplayName ?? "",
-            JobTitle = u.JobTitle ?? "",
-            Email = u.Email ?? "",
-            Department = u.Department ?? "",
-            IsActive = u.IsActive,
-            Roles = u.Roles.OrderBy(r => r).ToList(),
+            User = u,
             IsSelf = string.Equals(u.UserName, currentUserName, StringComparison.OrdinalIgnoreCase)
         });
     }
@@ -848,37 +842,43 @@ public partial class Index : ComponentBase
     #region View Model
 
     /// <summary>
-    /// Flattened view model for the user data grid.
+    /// Wrapper view model for the user data grid.
+    /// Holds a <see cref="UserDto"/> reference and delegates properties.
     /// </summary>
     public class UserViewModel
     {
         /// <summary>Display line number (1-based, page-aware).</summary>
         public int LineNumber { get; set; }
 
+        /// <summary>The underlying user DTO.</summary>
+        public UserDto User { get; set; } = default!;
+
+        // Delegated from DTO
         /// <summary>The user's Identity ID.</summary>
-        public string Id { get; set; } = "";
+        public string Id => User.Id;
 
         /// <summary>The username.</summary>
-        public string UserName { get; set; } = "";
+        public string UserName => User.UserName;
 
         /// <summary>The display name.</summary>
-        public string DisplayName { get; set; } = "";
+        public string DisplayName => User.DisplayName ?? "";
 
         /// <summary>The job title.</summary>
-        public string JobTitle { get; set; } = "";
+        public string JobTitle => User.JobTitle ?? "";
 
         /// <summary>The email address.</summary>
-        public string Email { get; set; } = "";
+        public string Email => User.Email ?? "";
 
         /// <summary>The department.</summary>
-        public string Department { get; set; } = "";
+        public string Department => User.Department ?? "";
 
         /// <summary>Whether the user is active.</summary>
-        public bool IsActive { get; set; }
+        public bool IsActive => User.IsActive;
 
         /// <summary>The user's assigned role names.</summary>
-        public List<string> Roles { get; set; } = [];
+        public List<string> Roles => User.Roles;
 
+        // Computed (not on DTO)
         /// <summary>Whether this is the currently logged-in user.</summary>
         public bool IsSelf { get; set; }
 
