@@ -37,6 +37,13 @@
         <MudMenuItem Class=""
                      Icon="material-symbols-rounded/logout"
                      Label="Log Out"
-                     Href="Account/Logout" />
+                     OnClick="Logout" />
     </MudMenu>
 </AuthorizeView>
+
+@code {
+    private void Logout()
+    {
+        NavManager.NavigateTo("Account/Logout", forceLoad: true);
+    }
+}

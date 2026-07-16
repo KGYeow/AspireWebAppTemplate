@@ -1,6 +1,7 @@
 using AspireWebAppTemplate.Abstractions;
 using AspireWebAppTemplate.ApiService.Data;
 using AspireWebAppTemplate.ApiService.Data.Entities;
+using AspireWebAppTemplate.Core.Extensions;
 using AspireWebAppTemplate.Core.Common.Defaults;
 using AspireWebAppTemplate.Core.Contracts;
 using AspireWebAppTemplate.Core.Contracts.AuditLog;
@@ -130,7 +131,7 @@ public class AuditLogService : IAuditLogService
         var totalCount = await query.CountAsync();
 
         var entries = await query
-            .OrderByDescending(e => e.Timestamp)
+            .ApplySort(queryParams.SortBy, queryParams.SortDescending, q => q.OrderByDescending(e => e.Timestamp))
             .Skip(queryParams.Page * queryParams.PageSize)
             .Take(queryParams.PageSize)
             .Select(e => new AuditLogEntryDto

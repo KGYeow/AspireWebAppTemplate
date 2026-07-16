@@ -68,7 +68,7 @@ public static class AuthEndpoints
             new AuthenticationProperties
             {
                 IsPersistent = result.Data.RememberMe,
-                ExpiresUtc = DateTimeOffset.UtcNow.AddDays(result.Data.RememberMe ? 7 : 0)
+                ExpiresUtc = result.Data.RememberMe ? DateTimeOffset.UtcNow.AddDays(7) : null
             });
 
         return Results.Redirect(result.Data.ReturnUrl ?? "/");
@@ -76,20 +76,23 @@ public static class AuthEndpoints
 
     /// <summary>
     /// Clears the authentication cookie and redirects to the login page (GET).
+    /// Uses HttpContext.Response.Redirect directly to bypass Blazor's enhanced navigation
+    /// interception which can cause a blank page in InteractiveServer mode.
     /// </summary>
-    private static async Task<IResult> HandleLogoutGet(HttpContext context)
+    private static async Task HandleLogoutGet(HttpContext context)
     {
         await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        return Results.Redirect("/Account/Login");
+        context.Response.Redirect("/Account/Login");
     }
 
     /// <summary>
     /// Clears the authentication cookie and redirects to the login page (POST).
+    /// Uses HttpContext.Response.Redirect directly to bypass Blazor's enhanced navigation.
     /// </summary>
-    private static async Task<IResult> HandleLogoutPost(HttpContext context)
+    private static async Task HandleLogoutPost(HttpContext context)
     {
         await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        return Results.Redirect("/Account/Login");
+        context.Response.Redirect("/Account/Login");
     }
 
     #endregion

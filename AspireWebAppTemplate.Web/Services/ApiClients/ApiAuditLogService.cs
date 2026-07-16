@@ -1,11 +1,7 @@
 using System.Net.Http.Json;
 using AspireWebAppTemplate.Core.Common;
 using AspireWebAppTemplate.Core.Contracts;
-using AspireWebAppTemplate.Core.Contracts.Auth;
 using AspireWebAppTemplate.Core.Contracts.AuditLog;
-using AspireWebAppTemplate.Core.Contracts.Roles;
-using AspireWebAppTemplate.Core.Contracts.Users;
-using AspireWebAppTemplate.Core.Domain.Enums;
 
 namespace AspireWebAppTemplate.Web.Services;
 
@@ -36,28 +32,29 @@ public class ApiAuditLogService
     #region Query
 
     /// <summary>
-    /// Returns a paged list of audit log entries with optional filtering by search term, action type, entity type, and date range.
+    /// Returns a paged list of audit log entries using the specified query parameters
+    /// for filtering, sorting, and pagination.
     /// </summary>
-    public async Task<ApiResult<PagedResult<AuditLogEntryDto>>> GetPagedAsync(
-        int page = 0,
-        int pageSize = 10,
-        string? searchTerm = null,
-        AuditActionType? actionType = null,
-        AuditEntityType? entityType = null,
-        DateTime? dateStart = null,
-        DateTime? dateEnd = null)
+    /// <param name="queryParams">The query parameters containing page, pageSize, filters, and sort options.</param>
+    /// <returns>An <see cref="ApiResult{T}"/> containing the paged audit log entries on success.</returns>
+    public async Task<ApiResult<PagedResult<AuditLogEntryDto>>> GetPagedAsync(AuditLogQueryParams queryParams)
     {
-        var url = $"/api/audit-log?page={page}&pageSize={pageSize}";
-        if (!string.IsNullOrWhiteSpace(searchTerm))
-            url += $"&searchTerm={Uri.EscapeDataString(searchTerm)}";
-        if (actionType.HasValue)
-            url += $"&actionType={actionType.Value}";
-        if (entityType.HasValue)
-            url += $"&entityType={entityType.Value}";
-        if (dateStart.HasValue)
-            url += $"&dateStart={dateStart.Value:O}";
-        if (dateEnd.HasValue)
-            url += $"&dateEnd={dateEnd.Value:O}";
+        var url = $"/api/audit-log?page={queryParams.Page}&pageSize={queryParams.PageSize}";
+        if (!string.IsNullOrWhiteSpace(queryParams.SearchTerm))
+            url += $"&searchTerm={Uri.EscapeDataString(queryParams.SearchTerm)}";
+        if (queryParams.ActionType.HasValue)
+            url += $"&actionType={queryParams.ActionType.Value}";
+        if (queryParams.EntityType.HasValue)
+            url += $"&entityType={queryParams.EntityType.Value}";
+        if (queryParams.DateStart.HasValue)
+            url += $"&dateStart={queryParams.DateStart.Value:O}";
+        if (queryParams.DateEnd.HasValue)
+            url += $"&dateEnd={queryParams.DateEnd.Value:O}";
+        if (!string.IsNullOrWhiteSpace(queryParams.SortBy))
+            url += $"&sortBy={Uri.EscapeDataString(queryParams.SortBy)}";
+        if (!queryParams.SortDescending)
+            url += "&sortDescending=false";
+
         var response = await _http.GetAsync(url);
         if (response.IsSuccessStatusCode)
             return ApiResult<PagedResult<AuditLogEntryDto>>.Success(await response.Content.ReadFromJsonAsync<PagedResult<AuditLogEntryDto>>()!);
@@ -80,26 +77,23 @@ public class ApiAuditLogService
     #region Export
 
     /// <summary>
-    /// Exports filtered audit log entries as an Excel file.
+    /// Exports filtered audit log entries as an Excel file using the specified query parameters.
     /// </summary>
-    public async Task<ApiResult<byte[]>> ExportExcelAsync(
-        string? searchTerm = null,
-        AuditActionType? actionType = null,
-        AuditEntityType? entityType = null,
-        DateTime? dateStart = null,
-        DateTime? dateEnd = null)
+    /// <param name="queryParams">The query parameters containing filters for the export.</param>
+    /// <returns>An <see cref="ApiResult{T}"/> containing the Excel file bytes on success.</returns>
+    public async Task<ApiResult<byte[]>> ExportExcelAsync(AuditLogQueryParams queryParams)
     {
         var url = "/api/audit-log/export?";
-        if (!string.IsNullOrWhiteSpace(searchTerm))
-            url += $"&searchTerm={Uri.EscapeDataString(searchTerm)}";
-        if (actionType.HasValue)
-            url += $"&actionType={actionType.Value}";
-        if (entityType.HasValue)
-            url += $"&entityType={entityType.Value}";
-        if (dateStart.HasValue)
-            url += $"&dateStart={dateStart.Value:O}";
-        if (dateEnd.HasValue)
-            url += $"&dateEnd={dateEnd.Value:O}";
+        if (!string.IsNullOrWhiteSpace(queryParams.SearchTerm))
+            url += $"&searchTerm={Uri.EscapeDataString(queryParams.SearchTerm)}";
+        if (queryParams.ActionType.HasValue)
+            url += $"&actionType={queryParams.ActionType.Value}";
+        if (queryParams.EntityType.HasValue)
+            url += $"&entityType={queryParams.EntityType.Value}";
+        if (queryParams.DateStart.HasValue)
+            url += $"&dateStart={queryParams.DateStart.Value:O}";
+        if (queryParams.DateEnd.HasValue)
+            url += $"&dateEnd={queryParams.DateEnd.Value:O}";
 
         var response = await _http.GetAsync(url);
         if (response.IsSuccessStatusCode)

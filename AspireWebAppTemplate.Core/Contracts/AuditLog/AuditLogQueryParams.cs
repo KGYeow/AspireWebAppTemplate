@@ -42,4 +42,15 @@ public sealed class AuditLogQueryParams
     /// Optional end date for the timestamp range filter (inclusive).
     /// </summary>
     public DateTime? DateEnd { get; set; }
+
+    /// <summary>
+    /// Optional property name to sort by (e.g., "Timestamp", "ActionType", "UserDisplayName").
+    /// When null or empty, defaults to Timestamp descending.
+    /// </summary>
+    public string? SortBy { get; set; }
+
+    /// <summary>
+    /// Whether to sort in descending order. Defaults to true (newest first).
+    /// </summary>
+    public bool SortDescending { get; set; } = true;
 }

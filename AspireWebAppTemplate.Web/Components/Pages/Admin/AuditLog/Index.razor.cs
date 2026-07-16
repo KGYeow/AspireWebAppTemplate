@@ -182,15 +182,31 @@ public partial class Index : ComponentBase, IDisposable
             // Use default page size if not yet initialized by the grid
             var pageSize = state.PageSize > 0 ? state.PageSize : 10;
 
-            // Send local dates to the API — the API converts to UTC using the user's timezone
-            var apiResult = await AuditLogService.GetPagedAsync(
-                page: state.Page,
-                pageSize: pageSize,
-                searchTerm: _searchString,
-                actionType: _actionTypeFilter,
-                entityType: _entityTypeFilter,
-                dateStart: TimeZoneContext.ConvertToUtc(_dateRange?.Start),
-                dateEnd: TimeZoneContext.ConvertToUtc(_dateRange?.End?.Date.AddDays(1).AddTicks(-1)));
+            // Extract sort state from the grid (single-column sort)
+            string? sortBy = null;
+            var sortDescending = true;
+            var firstSort = state.SortDefinitions.FirstOrDefault();
+            if (firstSort is not null && !string.IsNullOrWhiteSpace(firstSort.SortBy))
+            {
+                sortBy = firstSort.SortBy;
+                sortDescending = firstSort.Descending;
+            }
+
+            // Build query parameters for the API call
+            var queryParams = new Core.Contracts.AuditLog.AuditLogQueryParams
+            {
+                Page = state.Page,
+                PageSize = pageSize,
+                SearchTerm = _searchString,
+                ActionType = _actionTypeFilter,
+                EntityType = _entityTypeFilter,
+                DateStart = TimeZoneContext.ConvertToUtc(_dateRange?.Start),
+                DateEnd = TimeZoneContext.ConvertToUtc(_dateRange?.End?.Date.AddDays(1).AddTicks(-1)),
+                SortBy = sortBy,
+                SortDescending = sortDescending
+            };
+
+            var apiResult = await AuditLogService.GetPagedAsync(queryParams);
 
             if (!apiResult.Succeeded || apiResult.Data is null)
             {
@@ -308,12 +324,14 @@ public partial class Index : ComponentBase, IDisposable
 
         try
         {
-            var exportResult = await AuditLogService.ExportExcelAsync(
-                searchTerm: _searchString,
-                actionType: _actionTypeFilter,
-                entityType: _entityTypeFilter,
-                dateStart: TimeZoneContext.ConvertToUtc(_dateRange?.Start),
-                dateEnd: TimeZoneContext.ConvertToUtc(_dateRange?.End?.Date.AddDays(1).AddTicks(-1)));
+            var exportResult = await AuditLogService.ExportExcelAsync(new Core.Contracts.AuditLog.AuditLogQueryParams
+            {
+                SearchTerm = _searchString,
+                ActionType = _actionTypeFilter,
+                EntityType = _entityTypeFilter,
+                DateStart = TimeZoneContext.ConvertToUtc(_dateRange?.Start),
+                DateEnd = TimeZoneContext.ConvertToUtc(_dateRange?.End?.Date.AddDays(1).AddTicks(-1))
+            });
 
             if (!exportResult.Succeeded || exportResult.Data is null || exportResult.Data.Length == 0)
             {

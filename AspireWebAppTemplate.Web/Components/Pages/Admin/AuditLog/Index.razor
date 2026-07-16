@@ -117,11 +117,11 @@
                     @context.Item.LineNumber
                 </CellTemplate>
             </TemplateColumn>
-            <TemplateColumn Title="Timestamp" Sortable="false">
+            <PropertyColumn Property="x => x.Timestamp" Title="Timestamp">
                 <CellTemplate>
                     @TimeZoneContext.FormatDateTime(context.Item.Timestamp)
                 </CellTemplate>
-            </TemplateColumn>
+            </PropertyColumn>
             <PropertyColumn Property="x => x.UserDisplayName" Title="User" />
             <PropertyColumn Property="x => x.ActionType" Title="Action Type" />
             <PropertyColumn Property="x => x.EntityType" Title="Entity Type" />
