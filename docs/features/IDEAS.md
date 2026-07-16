@@ -24,6 +24,7 @@ A curated list of pages and features that would complement the existing template
 ### Recently Completed (This Session)
 
 - **AWS AI Integration** — Provider-agnostic AI text generation service via Amazon Bedrock (Nova 2 Lite), with three-tier credential resolution, Aspire parameter-based secrets, and structured error handling
+- **Email Templates & SMTP** — All-in-database template architecture with unified EmailType enum, SMTP sending, admin-editable business templates, read-only system templates, Identity integration
 - StatusAlert component created and deployed across all pages
 - Service registration extensions (`AddApiClients()`, `AddApplicationServices()`)
 - SystemPageDefaults expanded (all self-service pages bypass permissions)
@@ -39,12 +40,14 @@ A curated list of pages and features that would complement the existing template
 
 ## High Priority — Common in Every Internal/Enterprise App
 
-### 1. Email Templates & SMTP Configuration 🔧 IN PROGRESS
-- Replace `NoOpEmailSender` with real SMTP implementation
-- Two-tier template architecture: system security (codebase) + business (database, admin-editable)
-- Preview/test email sending from admin UI
+### 1. Email Templates & SMTP Configuration ✅ COMPLETE
+- SMTP email sending with database-stored templates (all-in-database architecture)
+- Unified `EmailType` enum for template resolution — no file-based templates
+- `IEmailService.SendEmailAsync(EmailType, ...)` as primary sending interface
+- `EmailService` implements both `IEmailService` and `IEmailSender<ApplicationUser>` (Identity integration)
+- Two categories: System (security emails, read-only) and Business (admin-editable)
+- Admin page at `/admin/email-templates` — edit-only (no create/delete), DataGrid with inline navigation to edit form
 - Aspire parameter-based secret management for SMTP credentials
-- Route: `/admin/email-templates`
 - **Spec:** `.kiro/specs/email-smtp-integration/`
 
 #### Deferred Email Templates (Future Enhancement)
@@ -205,13 +208,11 @@ The following templates are not in the initial implementation but should be adde
 
 Based on what's built and what would add the most value:
 
-1. **Email Templates & SMTP** (#1) — Low-to-medium effort. Replaces `NoOpEmailSender` with a real implementation, making password resets and account confirmations actually work.
+1. **Dashboard Widgets** (#8) — The home page is currently empty. Adding a few widgets (recent notifications, quick stats) makes the template feel complete and demonstrates component composition.
 
-2. **Dashboard Widgets** (#8) — The home page is currently empty. Adding a few widgets (recent notifications, quick stats) makes the template feel complete and demonstrates component composition.
+2. **Application Settings** (#2) — Admin-configurable site settings stored in DB. Enables runtime changes without redeployment.
 
-3. **Application Settings** (#2) — Admin-configurable site settings stored in DB. Enables runtime changes without redeployment.
-
-4. **User Invitation System** (#4) — Admin sends invite link via email. Natural next step after SMTP is configured.
+3. **User Invitation System** (#4) — Admin sends invite link via email. Natural next step now that SMTP is configured and working.
 
 ---
 

@@ -1,10 +1,12 @@
 // Feature: email-smtp-integration, Property 2: SMTP credentials are applied if and only if both username and password are present
 using System.Reflection;
 using AspireWebAppTemplate.ApiService.Abstractions;
+using AspireWebAppTemplate.ApiService.Data;
 using AspireWebAppTemplate.ApiService.Services;
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
@@ -49,8 +51,11 @@ public class SmtpCredentialPropertyTests
 
         var mockTemplateService = new Mock<IEmailTemplateService>();
         var logger = NullLogger<EmailService>.Instance;
+        var dbContext = new ApplicationDbContext(new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseSqlite("DataSource=:memory:")
+            .Options);
 
-        return new EmailService(mockTemplateService.Object, configuration, logger);
+        return new EmailService(mockTemplateService.Object, dbContext, configuration, logger);
     }
 
     /// <summary>

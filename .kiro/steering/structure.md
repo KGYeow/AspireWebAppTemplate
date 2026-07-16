@@ -24,11 +24,12 @@ AspireWebAppTemplate.Core/
 │   ├── Announcements/          ← AnnouncementDto, CreateAnnouncementRequest, UpdateAnnouncementRequest, AnnouncementQueryParams
 │   ├── AuditLog/
 │   ├── Auth/
+│   ├── Email/                  ← EmailTemplateDto, UpdateEmailTemplateRequest, EmailTemplateQueryParams
 │   ├── Notifications/          ← NotificationDto, CreateNotificationRequest, NotificationPushRequest, etc.
 │   ├── PagePermissions/
 │   ├── Roles/
 │   └── Users/
-├── Domain/Enums/               ← AuditActionType, AuditEntityType, ThemePreference, NotificationCategory, AnnouncementDisplayType, AnnouncementSeverity, etc.
+├── Domain/Enums/               ← AuditActionType, AuditEntityType, ThemePreference, NotificationCategory, AnnouncementDisplayType, AnnouncementSeverity, EmailType, EmailTemplateCategory, etc.
 ├── Extensions/                 ← Extension methods
 └── Utilities/                  ← Shared utility classes (SecureConnectionString)
     └── Attributes/             ← Custom validation/metadata attributes (ExportColumnAttribute, OptionalPhoneAttribute)
@@ -40,16 +41,22 @@ AspireWebAppTemplate.ApiService/
 ├── Abstractions/               ← Service interfaces (IAuditLogService, IRoleService, IUserService, IAuthService, etc.)
 ├── Controllers/                ← Thin REST API controllers (extend BaseController, delegate to services)
 ├── Data/
-│   ├── Entities/               ← EF Core entities (ApplicationUser, ApplicationRole, AuditLogEntry, Announcement, etc.)
+│   ├── Entities/               ← EF Core entities (ApplicationUser, ApplicationRole, AuditLogEntry, Announcement, EmailTemplate, etc.)
 │   ├── Configurations/         ← IEntityTypeConfiguration<T> classes (one per entity)
-│   ├── ApplicationDbContext.cs
-│   └── SeedData.cs
+│   ├── SeedData/               ← Partial class seed data files
+│   │   ├── SeedData.cs                    ← Entry point (orchestrates all seed methods)
+│   │   ├── SeedData.Roles.cs              ← Default roles
+│   │   ├── SeedData.Users.cs              ← Default admin/user accounts
+│   │   ├── SeedData.PagePermissions.cs    ← Default page permission records
+│   │   ├── SeedData.EmailTemplates.cs     ← Default email templates (all EmailType values)
+│   │   └── SeedData.Announcements.cs      ← Sample announcements
+│   └── ApplicationDbContext.cs
 ├── Extensions/                 ← DI registration extensions (ApplicationServiceExtensions)
 ├── Services/                   ← Business logic and supporting infrastructure
 │   ├── Clients/                ← Typed HttpClients (WebCallbackClient)
 │   ├── Handlers/               ← Delegating handlers (InternalApiKeyDelegatingHandler)
-│   ├── Infrastructure/         ← Accessors, adapters, stubs (CurrentUserAccessor, NoOpEmailSender)
-│   └── *.cs                    ← Business service implementations (NotificationService, AuthService, etc.)
+│   ├── Infrastructure/         ← Accessors, adapters (CurrentUserAccessor)
+│   └── *.cs                    ← Business service implementations (NotificationService, AuthService, EmailService, EmailTemplateService, etc.)
 └── Utilities/                  ← AuditChangeHelper, etc.
 ```
 
@@ -70,7 +77,7 @@ AspireWebAppTemplate.Web/
 │   │   └── Shared/             ← ReconnectModal, etc.
 │   ├── Pages/
 │   │   ├── Account/            ← Profile, Settings, Auth, Manage, Notifications
-│   │   ├── Admin/              ← AuditLog, UserManagement, RoleManagement, PagePermissions, Announcements
+│   │   ├── Admin/              ← AuditLog, UserManagement, RoleManagement, PagePermissions, Announcements, EmailTemplates
 │   │   ├── Announcements/      ← User-facing announcement list page (master-detail)
 │   │   └── Example/            ← Counter, Weather, Auth demo
 │   └── Shared/                 ← Web-specific shared components
@@ -101,6 +108,7 @@ AspireWebAppTemplate.Tests/
 ├── Announcements/              ← Property + unit tests for announcement features
 ├── ControllerServiceRefactor/  ← Property + unit tests for service layer
 ├── AuditLog/                   ← Property + unit tests for audit features
+├── Email/                      ← Property + unit tests for email template/service features
 ├── Notifications/              ← Property + unit tests for notification features
 ├── PagePermissions/            ← Property + unit tests for page permissions
 ├── Services/                   ← Service-level unit tests
@@ -113,6 +121,7 @@ docs/
 ├── features/                   ← Completed feature specs (requirements, design, tasks)
 │   ├── audit-log/
 │   ├── controller-service-refactor/
+│   ├── email-smtp-integration/
 │   ├── page-access-permissions/
 │   ├── role-management/
 │   └── ...

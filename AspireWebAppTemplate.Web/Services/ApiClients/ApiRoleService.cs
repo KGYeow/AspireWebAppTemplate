@@ -12,8 +12,26 @@ namespace AspireWebAppTemplate.Web.Services;
 /// HTTP client service for role management operations.
 /// Calls the API's RolesController endpoints.
 /// </summary>
-public class ApiRoleService(HttpClient http)
+public class ApiRoleService
 {
+    #region Constructor
+
+    /// <summary>
+    /// The underlying HttpClient configured with the ApiService base address.
+    /// </summary>
+    private readonly HttpClient _http;
+
+    /// <summary>
+    /// Initializes a new instance of <see cref="ApiRoleService"/> with the configured HttpClient.
+    /// </summary>
+    /// <param name="http">The HttpClient instance configured via Aspire service discovery.</param>
+    public ApiRoleService(HttpClient http)
+    {
+        _http = http;
+    }
+
+    #endregion
+
     #region CRUD Operations
 
     /// <summary>
@@ -21,7 +39,7 @@ public class ApiRoleService(HttpClient http)
     /// </summary>
     public async Task<ApiResult<List<RoleDto>>> GetRolesAsync()
     {
-        var response = await http.GetAsync("/api/roles");
+        var response = await _http.GetAsync("/api/roles");
         if (response.IsSuccessStatusCode)
             return ApiResult<List<RoleDto>>.Success(await response.Content.ReadFromJsonAsync<List<RoleDto>>()!);
         return ApiResult<List<RoleDto>>.Failure(await response.Content.ReadAsStringAsync());
@@ -32,7 +50,7 @@ public class ApiRoleService(HttpClient http)
     /// </summary>
     public async Task<ApiResult<RoleDto>> GetRoleAsync(string id)
     {
-        var response = await http.GetAsync($"/api/roles/{id}");
+        var response = await _http.GetAsync($"/api/roles/{id}");
         if (response.IsSuccessStatusCode)
             return ApiResult<RoleDto>.Success(await response.Content.ReadFromJsonAsync<RoleDto>()!);
         return ApiResult<RoleDto>.Failure(await response.Content.ReadAsStringAsync());
@@ -43,7 +61,7 @@ public class ApiRoleService(HttpClient http)
     /// </summary>
     public async Task<ApiResult> CreateRoleAsync(CreateRoleRequest request)
     {
-        var response = await http.PostAsJsonAsync("/api/roles", request);
+        var response = await _http.PostAsJsonAsync("/api/roles", request);
         if (response.IsSuccessStatusCode) return ApiResult.Success();
         return ApiResult.Failure(await response.Content.ReadAsStringAsync());
     }
@@ -53,7 +71,7 @@ public class ApiRoleService(HttpClient http)
     /// </summary>
     public async Task<ApiResult> UpdateRoleAsync(string id, CreateRoleRequest request)
     {
-        var response = await http.PutAsJsonAsync($"/api/roles/{id}", request);
+        var response = await _http.PutAsJsonAsync($"/api/roles/{id}", request);
         if (response.IsSuccessStatusCode) return ApiResult.Success();
         return ApiResult.Failure(await response.Content.ReadAsStringAsync());
     }
@@ -63,7 +81,7 @@ public class ApiRoleService(HttpClient http)
     /// </summary>
     public async Task<ApiResult> DeleteRoleAsync(string id)
     {
-        var response = await http.DeleteAsync($"/api/roles/{id}");
+        var response = await _http.DeleteAsync($"/api/roles/{id}");
         if (response.IsSuccessStatusCode) return ApiResult.Success();
         return ApiResult.Failure(await response.Content.ReadAsStringAsync());
     }
@@ -77,7 +95,7 @@ public class ApiRoleService(HttpClient http)
     /// </summary>
     public async Task<ApiResult> ActivateRoleAsync(string id)
     {
-        var response = await http.PostAsync($"/api/roles/{id}/activate", null);
+        var response = await _http.PostAsync($"/api/roles/{id}/activate", null);
         if (response.IsSuccessStatusCode) return ApiResult.Success();
         return ApiResult.Failure(await response.Content.ReadAsStringAsync());
     }
@@ -87,7 +105,7 @@ public class ApiRoleService(HttpClient http)
     /// </summary>
     public async Task<ApiResult> DeactivateRoleAsync(string id)
     {
-        var response = await http.PostAsync($"/api/roles/{id}/deactivate", null);
+        var response = await _http.PostAsync($"/api/roles/{id}/deactivate", null);
         if (response.IsSuccessStatusCode) return ApiResult.Success();
         return ApiResult.Failure(await response.Content.ReadAsStringAsync());
     }
@@ -101,7 +119,7 @@ public class ApiRoleService(HttpClient http)
     /// </summary>
     public async Task<ApiResult<List<UserDto>>> GetUsersInRoleAsync(string id)
     {
-        var response = await http.GetAsync($"/api/roles/{id}/users");
+        var response = await _http.GetAsync($"/api/roles/{id}/users");
         if (response.IsSuccessStatusCode)
             return ApiResult<List<UserDto>>.Success(await response.Content.ReadFromJsonAsync<List<UserDto>>()!);
         return ApiResult<List<UserDto>>.Failure(await response.Content.ReadAsStringAsync());
@@ -112,7 +130,7 @@ public class ApiRoleService(HttpClient http)
     /// </summary>
     public async Task<ApiResult> AssignUsersToRoleAsync(string roleId, string[] userIds)
     {
-        var response = await http.PostAsJsonAsync($"/api/roles/{roleId}/users", userIds);
+        var response = await _http.PostAsJsonAsync($"/api/roles/{roleId}/users", userIds);
         if (response.IsSuccessStatusCode) return ApiResult.Success();
         return ApiResult.Failure(await response.Content.ReadAsStringAsync());
     }
@@ -122,7 +140,7 @@ public class ApiRoleService(HttpClient http)
     /// </summary>
     public async Task<ApiResult> RemoveUserFromRoleAsync(string roleId, string userId)
     {
-        var response = await http.DeleteAsync($"/api/roles/{roleId}/users/{userId}");
+        var response = await _http.DeleteAsync($"/api/roles/{roleId}/users/{userId}");
         if (response.IsSuccessStatusCode) return ApiResult.Success();
         return ApiResult.Failure(await response.Content.ReadAsStringAsync());
     }

@@ -1,9 +1,11 @@
 using System.Net;
 using System.Net.Mail;
 using AspireWebAppTemplate.ApiService.Abstractions;
+using AspireWebAppTemplate.ApiService.Data;
 using AspireWebAppTemplate.ApiService.Data.Entities;
 using AspireWebAppTemplate.Core.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace AspireWebAppTemplate.ApiService.Services;
 
@@ -35,6 +37,11 @@ public class EmailService : IEmailService, IEmailSender<ApplicationUser>
     /// The email template service used to resolve and render templates before sending.
     /// </summary>
     private readonly IEmailTemplateService _templateService;
+
+    /// <summary>
+    /// The application database context for querying notification preferences.
+    /// </summary>
+    private readonly ApplicationDbContext _dbContext;
 
     /// <summary>
     /// The application configuration providing SMTP settings from appsettings.json and environment variables.
@@ -91,14 +98,17 @@ public class EmailService : IEmailService, IEmailSender<ApplicationUser>
     /// Reads SMTP configuration and logs a warning if the service falls back to no-op mode.
     /// </summary>
     /// <param name="templateService">The template service for resolving and rendering email templates.</param>
+    /// <param name="dbContext">The application database context for querying notification preferences.</param>
     /// <param name="configuration">The application configuration providing SMTP settings.</param>
     /// <param name="logger">The logger instance for email operation logging.</param>
     public EmailService(
         IEmailTemplateService templateService,
+        ApplicationDbContext dbContext,
         IConfiguration configuration,
         ILogger<EmailService> logger)
     {
         _templateService = templateService;
+        _dbContext = dbContext;
         _configuration = configuration;
         _logger = logger;
 
@@ -126,7 +136,73 @@ public class EmailService : IEmailService, IEmailSender<ApplicationUser>
     public async Task SendEmailAsync(EmailType emailType, string recipientEmail, Dictionary<string, string> variables)
     {
         var rendered = await _templateService.RenderAsync(emailType, variables);
-        await SendEmailInternalAsync(recipientEmail, rendered.Subject, rendered.HtmlBody, emailType.ToString());
+        var maskedRecipient = MaskEmailAddress(recipientEmail);
+
+        if (!_isEnabled)
+        {
+            _logger.LogInformation(
+                "Email send (no-op mode) — Template: {Template}, Recipient: {Recipient}, Subject: {Subject}",
+                emailType.ToString(), maskedRecipient, rendered.Subject);
+            return;
+        }
+
+        try
+        {
+            using var smtpClient = CreateSmtpClient();
+            using var mailMessage = new MailMessage
+            {
+                From = new MailAddress(_fromAddress, _fromName),
+                Subject = rendered.Subject,
+                Body = rendered.HtmlBody,
+                IsBodyHtml = true
+            };
+
+            mailMessage.To.Add(new MailAddress(recipientEmail));
+
+            await smtpClient.SendMailAsync(mailMessage);
+
+            _logger.LogInformation(
+                "Email sent successfully — Template: {Template}, Recipient: {Recipient}",
+                emailType.ToString(), maskedRecipient);
+        }
+        catch (SmtpException ex)
+        {
+            _logger.LogError(ex,
+                "SMTP error sending email — Template: {Template}, Recipient: {Recipient}, StatusCode: {StatusCode}",
+                emailType.ToString(), maskedRecipient, ex.StatusCode);
+
+            throw new InvalidOperationException(
+                $"Failed to send email via SMTP. Template: {emailType}, Status: {ex.StatusCode}. {ex.Message}", ex);
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task TrySendEmailAsync(string userId, string? recipientEmail, NotificationCategory category, EmailType emailType, Dictionary<string, string> variables)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(recipientEmail))
+                return;
+
+            // Check the user's email preference for this category.
+            // If no preference record exists, default to EmailEnabled = true.
+            var preference = await _dbContext.NotificationPreferences
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.UserId == userId && p.Category == category);
+
+            var emailEnabled = preference?.EmailEnabled ?? true;
+            if (!emailEnabled)
+                return;
+
+            await SendEmailAsync(emailType, recipientEmail, variables);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex,
+                "Failed to send {EmailType} email to user '{UserId}'. Email delivery is best-effort.",
+                emailType,
+                userId);
+        }
     }
 
     #endregion
@@ -193,61 +269,6 @@ public class EmailService : IEmailService, IEmailSender<ApplicationUser>
     #endregion
 
     #region Private Helpers
-
-    /// <summary>
-    /// Composes and sends an email message via SMTP, or logs the email details in no-op mode.
-    /// Handles SMTP errors (connection, authentication, delivery) by logging at Error level
-    /// and wrapping in <see cref="InvalidOperationException"/>.
-    /// </summary>
-    /// <param name="recipientEmail">The recipient's email address.</param>
-    /// <param name="subject">The email subject line.</param>
-    /// <param name="htmlBody">The rendered HTML body content.</param>
-    /// <param name="templateIdentifier">The template name or type used for logging purposes.</param>
-    /// <returns>A task representing the asynchronous send operation.</returns>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown when SMTP connection, authentication, or delivery fails.
-    /// </exception>
-    private async Task SendEmailInternalAsync(string recipientEmail, string subject, string htmlBody, string templateIdentifier)
-    {
-        var maskedRecipient = MaskEmailAddress(recipientEmail);
-
-        if (!_isEnabled)
-        {
-            _logger.LogInformation(
-                "Email send (no-op mode) — Template: {Template}, Recipient: {Recipient}, Subject: {Subject}",
-                templateIdentifier, maskedRecipient, subject);
-            return;
-        }
-
-        try
-        {
-            using var smtpClient = CreateSmtpClient();
-            using var mailMessage = new MailMessage
-            {
-                From = new MailAddress(_fromAddress, _fromName),
-                Subject = subject,
-                Body = htmlBody,
-                IsBodyHtml = true
-            };
-
-            mailMessage.To.Add(new MailAddress(recipientEmail));
-
-            await smtpClient.SendMailAsync(mailMessage);
-
-            _logger.LogInformation(
-                "Email sent successfully — Template: {Template}, Recipient: {Recipient}",
-                templateIdentifier, maskedRecipient);
-        }
-        catch (SmtpException ex)
-        {
-            _logger.LogError(ex,
-                "SMTP error sending email — Template: {Template}, Recipient: {Recipient}, StatusCode: {StatusCode}",
-                templateIdentifier, maskedRecipient, ex.StatusCode);
-
-            throw new InvalidOperationException(
-                $"Failed to send email via SMTP. Template: {templateIdentifier}, Status: {ex.StatusCode}. {ex.Message}", ex);
-        }
-    }
 
     /// <summary>
     /// Creates and configures a new <see cref="SmtpClient"/> instance with the stored SMTP settings.

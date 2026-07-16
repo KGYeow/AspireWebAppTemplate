@@ -12,8 +12,26 @@ namespace AspireWebAppTemplate.Web.Services;
 /// HTTP client service for user management operations.
 /// Calls the API's UsersController endpoints.
 /// </summary>
-public class ApiUserService(HttpClient http)
+public class ApiUserService
 {
+    #region Constructor
+
+    /// <summary>
+    /// The underlying HttpClient configured with the ApiService base address.
+    /// </summary>
+    private readonly HttpClient _http;
+
+    /// <summary>
+    /// Initializes a new instance of <see cref="ApiUserService"/> with the configured HttpClient.
+    /// </summary>
+    /// <param name="http">The HttpClient instance configured via Aspire service discovery.</param>
+    public ApiUserService(HttpClient http)
+    {
+        _http = http;
+    }
+
+    #endregion
+
     #region CRUD Operations
 
     /// <summary>
@@ -24,7 +42,7 @@ public class ApiUserService(HttpClient http)
         var url = $"/api/users?page={page}&pageSize={pageSize}";
         if (!string.IsNullOrWhiteSpace(searchTerm))
             url += $"&searchTerm={Uri.EscapeDataString(searchTerm)}";
-        var response = await http.GetAsync(url);
+        var response = await _http.GetAsync(url);
         if (response.IsSuccessStatusCode)
             return ApiResult<PagedResult<UserDto>>.Success(await response.Content.ReadFromJsonAsync<PagedResult<UserDto>>()!);
         return ApiResult<PagedResult<UserDto>>.Failure(await response.Content.ReadAsStringAsync());
@@ -38,7 +56,7 @@ public class ApiUserService(HttpClient http)
         var url = "/api/users";
         if (!string.IsNullOrWhiteSpace(searchTerm))
             url += $"?searchTerm={Uri.EscapeDataString(searchTerm)}";
-        var response = await http.GetAsync(url);
+        var response = await _http.GetAsync(url);
         if (response.IsSuccessStatusCode)
         {
             var result = await response.Content.ReadFromJsonAsync<PagedResult<UserDto>>();
@@ -52,7 +70,7 @@ public class ApiUserService(HttpClient http)
     /// </summary>
     public async Task<ApiResult<UserDto>> GetUserAsync(string id)
     {
-        var response = await http.GetAsync($"/api/users/{id}");
+        var response = await _http.GetAsync($"/api/users/{id}");
         if (response.IsSuccessStatusCode)
             return ApiResult<UserDto>.Success(await response.Content.ReadFromJsonAsync<UserDto>()!);
         return ApiResult<UserDto>.Failure(await response.Content.ReadAsStringAsync());
@@ -63,7 +81,7 @@ public class ApiUserService(HttpClient http)
     /// </summary>
     public async Task<ApiResult> CreateUserAsync(CreateUserRequest request)
     {
-        var response = await http.PostAsJsonAsync("/api/users", request);
+        var response = await _http.PostAsJsonAsync("/api/users", request);
         if (response.IsSuccessStatusCode) return ApiResult.Success();
         return ApiResult.Failure(await response.Content.ReadAsStringAsync());
     }
@@ -73,7 +91,7 @@ public class ApiUserService(HttpClient http)
     /// </summary>
     public async Task<ApiResult> UpdateUserAsync(string id, UpdateUserRequest request)
     {
-        var response = await http.PutAsJsonAsync($"/api/users/{id}", request);
+        var response = await _http.PutAsJsonAsync($"/api/users/{id}", request);
         if (response.IsSuccessStatusCode) return ApiResult.Success();
         return ApiResult.Failure(await response.Content.ReadAsStringAsync());
     }
@@ -83,7 +101,7 @@ public class ApiUserService(HttpClient http)
     /// </summary>
     public async Task<ApiResult> DeleteUserAsync(string id)
     {
-        var response = await http.DeleteAsync($"/api/users/{id}");
+        var response = await _http.DeleteAsync($"/api/users/{id}");
         if (response.IsSuccessStatusCode) return ApiResult.Success();
         return ApiResult.Failure(await response.Content.ReadAsStringAsync());
     }
@@ -97,7 +115,7 @@ public class ApiUserService(HttpClient http)
     /// </summary>
     public async Task<ApiResult> ActivateUserAsync(string id)
     {
-        var response = await http.PostAsync($"/api/users/{id}/activate", null);
+        var response = await _http.PostAsync($"/api/users/{id}/activate", null);
         if (response.IsSuccessStatusCode) return ApiResult.Success();
         return ApiResult.Failure(await response.Content.ReadAsStringAsync());
     }
@@ -107,7 +125,7 @@ public class ApiUserService(HttpClient http)
     /// </summary>
     public async Task<ApiResult> DeactivateUserAsync(string id)
     {
-        var response = await http.PostAsync($"/api/users/{id}/deactivate", null);
+        var response = await _http.PostAsync($"/api/users/{id}/deactivate", null);
         if (response.IsSuccessStatusCode) return ApiResult.Success();
         return ApiResult.Failure(await response.Content.ReadAsStringAsync());
     }
@@ -117,7 +135,7 @@ public class ApiUserService(HttpClient http)
     /// </summary>
     public async Task<ApiResult> SetRolesAsync(string id, string[] roleNames)
     {
-        var response = await http.PostAsJsonAsync($"/api/users/{id}/roles", roleNames);
+        var response = await _http.PostAsJsonAsync($"/api/users/{id}/roles", roleNames);
         if (response.IsSuccessStatusCode) return ApiResult.Success();
         return ApiResult.Failure(await response.Content.ReadAsStringAsync());
     }
@@ -127,7 +145,7 @@ public class ApiUserService(HttpClient http)
     /// </summary>
     public async Task<ApiResult<List<RoleDto>>> GetRolesMetadataAsync()
     {
-        var response = await http.GetAsync("/api/users/roles-metadata");
+        var response = await _http.GetAsync("/api/users/roles-metadata");
         if (response.IsSuccessStatusCode)
             return ApiResult<List<RoleDto>>.Success(await response.Content.ReadFromJsonAsync<List<RoleDto>>()!);
         return ApiResult<List<RoleDto>>.Failure(await response.Content.ReadAsStringAsync());
@@ -142,7 +160,7 @@ public class ApiUserService(HttpClient http)
     /// </summary>
     public async Task<ApiResult<LdapUserAttributes>> LdapLookupAsync(string identifier)
     {
-        var response = await http.GetAsync($"/api/users/ldap-lookup?identifier={Uri.EscapeDataString(identifier)}");
+        var response = await _http.GetAsync($"/api/users/ldap-lookup?identifier={Uri.EscapeDataString(identifier)}");
         if (response.IsSuccessStatusCode)
             return ApiResult<LdapUserAttributes>.Success(await response.Content.ReadFromJsonAsync<LdapUserAttributes>()!);
         return ApiResult<LdapUserAttributes>.Failure(await response.Content.ReadAsStringAsync());
@@ -153,7 +171,7 @@ public class ApiUserService(HttpClient http)
     /// </summary>
     public async Task<ApiResult> CreateLdapUserAsync(LdapUserAttributes attributes)
     {
-        var response = await http.PostAsJsonAsync("/api/users/ldap-create", attributes);
+        var response = await _http.PostAsJsonAsync("/api/users/ldap-create", attributes);
         if (response.IsSuccessStatusCode) return ApiResult.Success();
         return ApiResult.Failure(await response.Content.ReadAsStringAsync());
     }
@@ -165,7 +183,7 @@ public class ApiUserService(HttpClient http)
     public async IAsyncEnumerable<LdapSyncProgressItem?> SyncLdapUsersStreamAsync([System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         using var request = new HttpRequestMessage(HttpMethod.Post, "/api/users/ldap-sync");
-        using var response = await http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+        using var response = await _http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
             yield break;

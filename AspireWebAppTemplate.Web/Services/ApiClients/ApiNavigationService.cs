@@ -9,9 +9,26 @@ namespace AspireWebAppTemplate.Web.Services.ApiClients;
 /// for the authenticated user. Uses Aspire service discovery ("https+http://apiservice")
 /// and <see cref="UserIdentityDelegatingHandler"/> for authentication propagation.
 /// </summary>
-/// <param name="http">The configured <see cref="HttpClient"/> injected by the typed client factory.</param>
-public class ApiNavigationService(HttpClient http)
+public class ApiNavigationService
 {
+    #region Constructor
+
+    /// <summary>
+    /// The underlying HttpClient configured with the ApiService base address.
+    /// </summary>
+    private readonly HttpClient _http;
+
+    /// <summary>
+    /// Initializes a new instance of <see cref="ApiNavigationService"/> with the configured HttpClient.
+    /// </summary>
+    /// <param name="http">The HttpClient instance configured via Aspire service discovery.</param>
+    public ApiNavigationService(HttpClient http)
+    {
+        _http = http;
+    }
+
+    #endregion
+
     /// <summary>
     /// Retrieves the filtered navigation tree for the currently authenticated user.
     /// The API applies authentication filtering, permission filtering, group visibility
@@ -26,7 +43,7 @@ public class ApiNavigationService(HttpClient http)
     {
         try
         {
-            var response = await http.GetAsync("/api/navigation");
+            var response = await _http.GetAsync("/api/navigation");
             if (response.IsSuccessStatusCode)
                 return ApiResult<List<NavItem>>.Success(await response.Content.ReadFromJsonAsync<List<NavItem>>() ?? []);
             return ApiResult<List<NavItem>>.Failure(await response.Content.ReadAsStringAsync());

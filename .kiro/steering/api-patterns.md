@@ -188,8 +188,15 @@ private static readonly (string Key, Func<ApplicationUser, object?> Getter)[] Us
 ### HttpClient Services (Web project)
 Located in `Web/Services/ApiClients/`:
 ```csharp
-public class ApiUserService(HttpClient http)
+public class ApiUserService
 {
+    private readonly HttpClient _http;
+
+    public ApiUserService(HttpClient http)
+    {
+        _http = http;
+    }
+
     // Methods return ApiResult<T> — never throw on HTTP errors
 }
 ```

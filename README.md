@@ -34,7 +34,7 @@ Shared configuration for health checks, telemetry (OpenTelemetry), resilience, a
 ASP.NET Core Web API with business logic, data access, and Identity:
 - **Controllers/** — API endpoints (Auth, Users, Roles, AuditLog)
 - **Data/** — EF Core DbContext, entities, migrations, seed data
-- **Services/** — Business logic (Login, Register, LDAP, AuditLog, ExcelExport)
+- **Services/** — Business logic (Login, Register, LDAP, AuditLog, ExcelExport, Email, EmailTemplate)
 - **Abstractions/** — Service interfaces
 - **Options/** — Configuration classes (LdapSettings)
 
@@ -47,17 +47,18 @@ Blazor Server frontend (Global InteractiveServer mode):
   - `Admin/RoleManagement/` — Admin role CRUD
   - `Admin/Announcements/` — Admin announcement CRUD with DataGrid, rich text editor
   - `Admin/AuditLog/` — Searchable audit log with export
+  - `Admin/EmailTemplates/` — Email template management (view/edit database-stored templates)
   - `Announcements/` — User-facing announcement list with master-detail layout
   - `Account/Notifications/` — Notification list with master-detail layout
   - `Settings/` — User preferences (theme, timezone, date format)
   - `Example/` — Demo pages (Auth, Counter, Weather)
 - **Components/Layout/** — MainLayout, AuthLayout, ManageLayout, NavMenu, Topbar
-- **Services/** — HTTP client services (ApiAuth, ApiUser, ApiRole, ApiAuditLog)
+- **Services/** — HTTP client services (ApiAuth, ApiUser, ApiRole, ApiAuditLog, ApiEmailTemplate)
 - **Abstractions/** — Frontend service interfaces
 
 ### 5. **AspireWebAppTemplate.Core** (Shared Domain)
 Shared between frontend and backend:
-- **Domain/Enums/** — Business enumerations (AuditActionType, AuthSource, ThemePreference)
+- **Domain/Enums/** — Business enumerations (AuditActionType, AuthSource, ThemePreference, EmailType, EmailTemplateCategory)
 - **Contracts/** — DTOs shared between API and frontend, organized by feature:
   - `Auth/` — Login, Register, Password, 2FA, Passkeys, External Logins
   - `Users/` — UserDto, CRUD requests, LDAP, Preferences, Profile
@@ -73,10 +74,11 @@ Reusable Blazor components and themes:
 - **Components/Shared/** — ConfirmationDialog, PageHeader, ModalDialog, PillToggle, StatusAlert
 - **Components/DataGrid/** — BoolFilterSelect, EnumFilterSelect, StringFilterSelect
 - **Theme/** — ApplicationTheme
-- **Utilities/** — DataGridUtils<T> (client-side filtering/sorting/pagination)
+- **Utilities/** — DataGridUtils<T> (client-side filtering/sorting/pagination, MapEnum for enum column filtering)
 
 ### 7. **AspireWebAppTemplate.Tests** (Test Project)
 - **AuditLog/** — Property-based tests (FsCheck)
+- **Email/** — Property-based tests for email template/service features
 - **Announcements/** — Property-based tests for announcement service (status, CRUD, dismissal, notifications)
 - Integration and unit tests
 
@@ -88,6 +90,7 @@ Reusable Blazor components and themes:
 - **Backend**: ASP.NET Core Web API with Controllers
 - **Database**: SQL Server with Entity Framework Core 10.0
 - **Authentication**: Cookie-based (Web) + ASP.NET Core Identity (API)
+- **Email**: SMTP with database-stored templates (MailKit)
 - **LDAP**: Active Directory integration via System.DirectoryServices.Protocols
 - **Excel Export**: EPPlus
 - **AI Integration**: AWSSDK.BedrockRuntime (Amazon Bedrock Converse API)
@@ -126,6 +129,15 @@ Reusable Blazor components and themes:
 - Admin management: DataGrid with built-in filtering, sorting, pagination, bulk delete
 - User list page: responsive master-detail layout with infinite scroll and severity filter
 - Collaborative administration: all authorized admins manage the shared announcement pool
+
+### Email Templates & SMTP
+- SMTP email sending with database-stored templates (all-in-database architecture)
+- Unified `EmailType` enum for template resolution — every email maps to exactly one template
+- Two categories: System (security emails like password reset, email confirmation — read-only) and Business (welcome, account deactivation — admin-editable)
+- `EmailService` implements both custom `IEmailService` and `IEmailSender<ApplicationUser>` for ASP.NET Core Identity integration
+- Admin management page at `/admin/email-templates` with DataGrid filtering and edit form
+- Placeholder token system for dynamic content (e.g., `{{UserName}}`, `{{ResetLink}}`)
+- Aspire parameter-based SMTP credential management
 
 ### Settings & Preferences
 - Theme (Light/Dark/System)

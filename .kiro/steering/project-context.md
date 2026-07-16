@@ -11,6 +11,7 @@
 - **Server-side hub connection with cookie forwarding**: In Blazor Server, hub connections from server-side code back to the same host require manually forwarding the user's auth cookie (captured from `IHttpContextAccessor` during SSR). `UserIdentityDelegatingHandler` is NOT involved — it only handles Web→API HttpClient calls.
 - **Whitelist authorization**: Page access controlled via database records (PagePermission entity). Record exists = access granted; absence = denied.
 - **Audit logging**: A service-layer responsibility. Services call `IAuditLogService.LogAsync(AuditLogRequest)` with old/new value change tracking using `AuditChangeHelper`. Only security-sensitive operations are audited (admin actions, password changes, 2FA changes, account deletion). Personal profile edits and preference changes are not audited.
+- **Email service**: `IEmailService` / `EmailService` implements both a custom interface and `IEmailSender<ApplicationUser>` for Identity integration. All templates stored in database, resolved by `EmailType` enum. `EmailTemplateCategory` determines editability (System=read-only, Business=admin-editable). Admin page at `/admin/email-templates`.
 
 ## Project Responsibilities (Summary)
 
@@ -19,3 +20,14 @@
 - **Web** — Blazor pages, layout shell, API client services, authorization handlers
 - **UI** — reusable MudBlazor components, grid utilities, theme config
 - **Tests** — property-based + unit tests per feature
+
+## Key Design Decisions
+
+- **No domain events / MediatR** — direct service calls are sufficient at current scale. Introduce when >15 cross-cutting triggers exist.
+- **No repository pattern** — services access `ApplicationDbContext` directly. EF Core IS the repository/unit-of-work.
+- **No FluentValidation** — DataAnnotations on DTOs + service-layer throws for business rules. Simpler for a template.
+- **All email templates in database** — both system and business templates. No file-based templates. `EmailTemplateCategory` determines editability, not storage.
+- **Edit-only template model** — admins customize content, cannot create/delete template types. Set defined by `EmailType` enum + seed data.
+- **Wrapper ViewModel pattern** — all DataGrid pages use a ViewModel wrapping the DTO reference (not flat property copy). `vm.Dto` gives instant access for dialog parameters.
+- **Best-effort email delivery** — `TrySendEmailAsync` checks user preferences, never throws. Primary operations are never blocked by email failures.
+- **`ServerData` for all admin grids** — consistent filtering/sorting/pagination via `DataGridUtils<T>`, even for small datasets. Simplifies maintenance and makes the pattern uniform.

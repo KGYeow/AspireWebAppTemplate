@@ -44,6 +44,7 @@ public class UserService : IUserService
     private readonly ICurrentUserAccessor _currentUser;
     private readonly ILdapAuthService _ldapAuthService;
     private readonly INotificationService _notificationService;
+    private readonly IEmailService _emailService;
 
     /// <summary>
     /// Static field definitions used by <see cref="AuditChangeHelper.Snapshot{T}"/> to capture
@@ -70,13 +71,15 @@ public class UserService : IUserService
     /// <param name="currentUser">The current user accessor for identity and IP address resolution.</param>
     /// <param name="ldapAuthService">The LDAP authentication service for directory attribute fetching.</param>
     /// <param name="notificationService">The notification service for sending in-app notifications to affected users.</param>
+    /// <param name="emailService">The email service for sending business notification emails to users.</param>
     public UserService(
         UserManager<ApplicationUser> userManager,
         RoleManager<ApplicationRole> roleManager,
         IAuditLogService auditLogService,
         ICurrentUserAccessor currentUser,
         ILdapAuthService ldapAuthService,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        IEmailService emailService)
     {
         _userManager = userManager;
         _roleManager = roleManager;
@@ -84,6 +87,7 @@ public class UserService : IUserService
         _currentUser = currentUser;
         _ldapAuthService = ldapAuthService;
         _notificationService = notificationService;
+        _emailService = emailService;
     }
 
     #endregion
@@ -347,6 +351,13 @@ public class UserService : IUserService
             Title = "Account Deactivated",
             Message = "Your account has been deactivated by an administrator. You will no longer be able to sign in."
         });
+
+        // Send account deactivation email (best-effort, respects EmailEnabled preference)
+        await _emailService.TrySendEmailAsync(user.Id, user.Email, NotificationCategory.Account, EmailType.AccountDeactivated, new Dictionary<string, string>
+        {
+            ["UserName"] = user.DisplayName ?? user.UserName ?? string.Empty,
+            ["DeactivationReason"] = "Deactivated by an administrator."
+        });
     }
 
     /// <inheritdoc />
@@ -384,6 +395,12 @@ public class UserService : IUserService
             Category = NotificationCategory.Account,
             Title = "Password Reset",
             Message = "Your password has been reset by an administrator. Please sign in with your new password."
+        });
+
+        // Send password changed email (best-effort, respects EmailEnabled preference)
+        await _emailService.TrySendEmailAsync(user.Id, user.Email, NotificationCategory.Account, EmailType.PasswordChanged, new Dictionary<string, string>
+        {
+            ["UserName"] = user.DisplayName ?? user.UserName ?? string.Empty
         });
     }
 

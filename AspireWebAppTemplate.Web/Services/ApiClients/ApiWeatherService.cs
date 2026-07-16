@@ -9,8 +9,26 @@ namespace AspireWebAppTemplate.Web.Services;
 /// HTTP client service for the Weather/testing page.
 /// Retrieves weather forecasts and provides feature testing utilities (e.g., notification creation).
 /// </summary>
-public class ApiWeatherService(HttpClient httpClient)
+public class ApiWeatherService
 {
+    #region Constructor
+
+    /// <summary>
+    /// The underlying HttpClient configured with the ApiService base address.
+    /// </summary>
+    private readonly HttpClient _http;
+
+    /// <summary>
+    /// Initializes a new instance of <see cref="ApiWeatherService"/> with the configured HttpClient.
+    /// </summary>
+    /// <param name="http">The HttpClient instance configured via Aspire service discovery.</param>
+    public ApiWeatherService(HttpClient http)
+    {
+        _http = http;
+    }
+
+    #endregion
+
     #region Weather
 
     /// <summary>
@@ -20,7 +38,7 @@ public class ApiWeatherService(HttpClient httpClient)
     {
         List<WeatherForecast>? forecasts = null;
 
-        await foreach (var forecast in httpClient.GetFromJsonAsAsyncEnumerable<WeatherForecast>("/WeatherForecast", cancellationToken))
+        await foreach (var forecast in _http.GetFromJsonAsAsyncEnumerable<WeatherForecast>("/WeatherForecast", cancellationToken))
         {
             if (forecasts?.Count >= maxItems)
             {
@@ -48,7 +66,7 @@ public class ApiWeatherService(HttpClient httpClient)
     /// <returns>An <see cref="ApiResult"/> indicating success or failure.</returns>
     public async Task<ApiResult> SendNotificationAsync(CreateNotificationRequest request)
     {
-        var response = await httpClient.PostAsJsonAsync("/WeatherForecast/send-notification", request);
+        var response = await _http.PostAsJsonAsync("/WeatherForecast/send-notification", request);
         if (response.IsSuccessStatusCode) return ApiResult.Success();
         return ApiResult.Failure(await response.Content.ReadAsStringAsync());
     }

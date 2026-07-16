@@ -170,13 +170,20 @@ _hubConnection = new HubConnectionBuilder()
 - C# files: PascalCase matching the class name
 - CSS classes: kebab-case
 
+### DateTime Conventions
+- ALL DateTime properties use UTC and include a `Utc` suffix (e.g., `CreatedAtUtc`, `UpdatedAtUtc`).
+- Use `DateTime` (NOT `DateTimeOffset`) — matches the existing entity and DTO convention.
+- Store as UTC in the database, display in the user's timezone via `IUserTimeZoneContext.FormatDateTime()`.
+- Never use `DateTime.Now` — always `DateTime.UtcNow`.
+- Nullable `DateTime?` for optional timestamps (e.g., `UpdatedAtUtc` which is null until first edit).
+
 ### MudBlazor
 - Use `MudDrawerHeader` for sidebar headers (not custom divs)
 - Use MudBlazor utility classes for spacing/flex (`d-flex`, `align-center`, `pa-4`, etc.)
 - Prefer `Elevation="0"` on MudPaper for flat card style with border
 
 ### Service Registration Extensions
-- Web project: `Extensions/ApiClientServiceExtensions.cs` exposes `AddApiClients(this IServiceCollection)` — registers all typed HttpClient services.
+- Web project: `Extensions/ApiClientServiceExtensions.cs` exposes `AddApiClients(this IServiceCollection)` — registers all typed HttpClient services. Uses a `private const string ApiServiceBaseAddress` for the Aspire service discovery URL (`"https+http://apiservice"`).
 - Web project: `Extensions/ApplicationServiceExtensions.cs` exposes `AddApplicationServices(this IServiceCollection)` — registers scoped services, handlers, contexts.
 - API project: `Extensions/ApplicationServiceExtensions.cs` exposes `AddApplicationServices(this IServiceCollection)` — registers all business services.
 - `Program.cs` calls these extension methods instead of inline registrations.
@@ -198,6 +205,13 @@ _hubConnection = new HubConnectionBuilder()
 - Unit tests: xUnit + Moq
 - Database tests: Microsoft.EntityFrameworkCore.Sqlite in-memory
 - Test tag format: `// Feature: {feature-name}, Property {N}: {title}`
+
+### Seed Data
+- Seed data lives in `Data/SeedData/` as partial class files (`SeedData.{Feature}.cs`).
+- Each feature's seed method is wrapped in `#region {Feature}`.
+- The main `SeedData.cs` contains `InitializeAsync` (orchestrates all seed methods) and shared helpers.
+- Use upsert pattern: seed only if record doesn't already exist (preserve admin customizations on redeployment).
+- System/reference data uses deterministic checks (e.g., `EmailType` enum value). Sample data uses existence checks (e.g., `if (await dbContext.Announcements.AnyAsync()) return;`).
 
 ### Specs & Docs
 - `.kiro/specs/{feature-name}/` — active spec documents (requirements.md, design.md, tasks.md)

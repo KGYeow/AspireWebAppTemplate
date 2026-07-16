@@ -21,6 +21,7 @@ An enterprise Blazor Server web application template built on .NET Aspire. It pr
 - **Settings & Preferences** — per-user theme, timezone, date/time format
 - **Profile Management** — user profile viewing and editing
 - **Authentication** — local Identity + optional LDAP/Active Directory integration
+- **Email Templates & SMTP** — SMTP email sending with database-stored templates, admin-editable business templates, system security templates (read-only), unified EmailType-based resolution
 - **Excel Export** — audit log export with server-side filtering
 
 ## Optional / Custom Extensions

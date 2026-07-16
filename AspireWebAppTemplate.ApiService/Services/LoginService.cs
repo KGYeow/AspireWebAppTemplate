@@ -1,5 +1,7 @@
 using AspireWebAppTemplate.Abstractions;
+using AspireWebAppTemplate.ApiService.Abstractions;
 using AspireWebAppTemplate.Core.Contracts.Auth;
+using AspireWebAppTemplate.Core.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Caching.Memory;
 using AspireWebAppTemplate.ApiService.Data.Entities;
@@ -20,6 +22,7 @@ public sealed class LoginService : ILoginService
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IMemoryCache _memoryCache;
     private readonly ILogger<LoginService> _logger;
+    private readonly IEmailService _emailService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="LoginService"/> class.
@@ -28,12 +31,14 @@ public sealed class LoginService : ILoginService
     /// <param name="signInManager">The sign-in manager for <c>CanSignInAsync</c> checks.</param>
     /// <param name="memoryCache">The memory cache for storing single-use login tokens.</param>
     /// <param name="logger">The logger instance.</param>
-    public LoginService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IMemoryCache memoryCache, ILogger<LoginService> logger)
+    /// <param name="emailService">The email service for sending lockout notifications.</param>
+    public LoginService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IMemoryCache memoryCache, ILogger<LoginService> logger, IEmailService emailService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _memoryCache = memoryCache;
         _logger = logger;
+        _emailService = emailService;
     }
 
     #endregion
@@ -62,6 +67,19 @@ public sealed class LoginService : ILoginService
         {
             // Increment failed access count for lockout tracking
             await _userManager.AccessFailedAsync(user);
+
+            // Check if this attempt caused the account to become locked out.
+            // If so, send a lockout notification email (best-effort).
+            if (await _userManager.IsLockedOutAsync(user))
+            {
+                var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
+                await _emailService.TrySendEmailAsync(user.Id, user.Email, NotificationCategory.Account, EmailType.AccountLockout, new Dictionary<string, string>
+                {
+                    ["UserName"] = user.DisplayName ?? user.UserName ?? string.Empty,
+                    ["LockoutEnd"] = lockoutEnd?.UtcDateTime.ToString("g") ?? "Unknown"
+                });
+            }
+
             return new LoginResult { ErrorMessage = "Invalid email or password." };
         }
 

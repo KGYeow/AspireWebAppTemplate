@@ -13,8 +13,26 @@ namespace AspireWebAppTemplate.Web.Services;
 /// HTTP client service for audit log querying and export.
 /// Calls the API's AuditLogController endpoints.
 /// </summary>
-public class ApiAuditLogService(HttpClient http)
+public class ApiAuditLogService
 {
+    #region Constructor
+
+    /// <summary>
+    /// The underlying HttpClient configured with the ApiService base address.
+    /// </summary>
+    private readonly HttpClient _http;
+
+    /// <summary>
+    /// Initializes a new instance of <see cref="ApiAuditLogService"/> with the configured HttpClient.
+    /// </summary>
+    /// <param name="http">The HttpClient instance configured via Aspire service discovery.</param>
+    public ApiAuditLogService(HttpClient http)
+    {
+        _http = http;
+    }
+
+    #endregion
+
     #region Query
 
     /// <summary>
@@ -40,7 +58,7 @@ public class ApiAuditLogService(HttpClient http)
             url += $"&dateStart={dateStart.Value:O}";
         if (dateEnd.HasValue)
             url += $"&dateEnd={dateEnd.Value:O}";
-        var response = await http.GetAsync(url);
+        var response = await _http.GetAsync(url);
         if (response.IsSuccessStatusCode)
             return ApiResult<PagedResult<AuditLogEntryDto>>.Success(await response.Content.ReadFromJsonAsync<PagedResult<AuditLogEntryDto>>()!);
         return ApiResult<PagedResult<AuditLogEntryDto>>.Failure(await response.Content.ReadAsStringAsync());
@@ -51,7 +69,7 @@ public class ApiAuditLogService(HttpClient http)
     /// </summary>
     public async Task<ApiResult<AuditLogEntryDto>> GetByIdAsync(Guid id)
     {
-        var response = await http.GetAsync($"/api/audit-log/{id}");
+        var response = await _http.GetAsync($"/api/audit-log/{id}");
         if (response.IsSuccessStatusCode)
             return ApiResult<AuditLogEntryDto>.Success(await response.Content.ReadFromJsonAsync<AuditLogEntryDto>()!);
         return ApiResult<AuditLogEntryDto>.Failure(await response.Content.ReadAsStringAsync());
@@ -83,7 +101,7 @@ public class ApiAuditLogService(HttpClient http)
         if (dateEnd.HasValue)
             url += $"&dateEnd={dateEnd.Value:O}";
 
-        var response = await http.GetAsync(url);
+        var response = await _http.GetAsync(url);
         if (response.IsSuccessStatusCode)
             return ApiResult<byte[]>.Success(await response.Content.ReadAsByteArrayAsync());
         return ApiResult<byte[]>.Failure(await response.Content.ReadAsStringAsync());

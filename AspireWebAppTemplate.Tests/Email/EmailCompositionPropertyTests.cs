@@ -1,11 +1,13 @@
 // Feature: email-smtp-integration, Property 1: Email message composition includes all required fields from configuration
 using AspireWebAppTemplate.ApiService.Abstractions;
+using AspireWebAppTemplate.ApiService.Data;
 using AspireWebAppTemplate.ApiService.Services;
 using AspireWebAppTemplate.Core.Contracts.Email;
 using AspireWebAppTemplate.Core.Domain.Enums;
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -128,7 +130,10 @@ public class EmailCompositionPropertyTests
                 var mockLogger = new Mock<ILogger<EmailService>>();
 
                 // Act: create the service (no-op mode due to empty host) and send.
-                var service = new EmailService(mockTemplateService.Object, configuration, mockLogger.Object);
+                var dbContext = new ApplicationDbContext(new DbContextOptionsBuilder<ApplicationDbContext>()
+                    .UseSqlite("DataSource=:memory:")
+                    .Options);
+                var service = new EmailService(mockTemplateService.Object, dbContext, configuration, mockLogger.Object);
                 service.SendEmailAsync(input.EmailType, input.Recipient, new Dictionary<string, string>())
                     .GetAwaiter().GetResult();
 

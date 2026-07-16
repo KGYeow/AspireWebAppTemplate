@@ -63,11 +63,11 @@ Use flat style (Elevation 0) for content sections:
 ```
 
 ### Data Grids
-- Use `MudDataGrid<T>` with `ServerData` callback for large datasets (audit log).
-- Use `MudDataGrid<T>` with `Items` for small in-memory datasets (role management).
+- ALL admin DataGrid pages use `MudDataGrid<T>` with `ServerData` callback and `DataGridUtils<T>` for consistent filtering, sorting, and pagination — regardless of dataset size.
+- Use `QueryableDataGridUtils<T>` for database-level filtering/sorting/pagination (audit log with thousands of rows).
+- Use `DataGridUtils<T>` for in-memory filtering/sorting/pagination (all other admin pages — roles, users, announcements, email templates).
 - Always include `<NoRecordsContent>` and `<LoadingContent>`.
-- Use `QueryableDataGridUtils<T>` for database-level filtering/sorting/pagination.
-- Use `DataGridUtils<T>` for in-memory filtering/sorting/pagination.
+- `Items` binding is reserved for truly static lists (e.g., settings dropdowns, enum selectors) — NOT for admin management grids.
 
 ### Dialogs
 Use `ConfirmationDialog` from UI shared library for destructive actions:
@@ -158,3 +158,34 @@ Centralized asset paths via `AssetDefaults` (in `Web/Common/Defaults/`):
 ```
 - All logo and background image paths referenced through static properties.
 - Single place to update when swapping branding assets.
+
+## DataGrid ViewModel Pattern
+
+All admin DataGrid pages use a wrapper ViewModel that holds the DTO reference:
+```razor
+private sealed class ItemViewModel
+{
+    public int LineNumber { get; set; }
+    public ItemDto Item { get; set; } = default!;
+    public string Id => Item.Id;
+    // ... delegated properties
+    public override bool Equals(object? obj) => obj is ItemViewModel other && Id == other.Id;
+    public override int GetHashCode() => Id.GetHashCode();
+}
+```
+- Mapping: `new ItemViewModel { Item = dto }`
+- `Equals`/`GetHashCode` required for multi-selection pages
+- Computed properties (not on DTO) stay as settable fields on the ViewModel
+
+## Enum Column Filtering
+
+For enum property columns, use `EnumFilterSelect` with `MapEnum` in DataGridUtils:
+```razor
+<PropertyColumn Property="t => t.Category" Title="Category" Filterable="true">
+    <FilterTemplate>
+        <EnumFilterSelect T="ItemViewModel" TEnum="MyEnum" FilterContext="context" DataGrid="_dataGrid" />
+    </FilterTemplate>
+</PropertyColumn>
+```
+- DataGridUtils mapping: `.MapEnum(nameof(ItemViewModel.Category), x => x.Category)`
+- Filter select components (`BoolFilterSelect`, `EnumFilterSelect`, `StringFilterSelect`) have nullable `DataGrid` parameter with null guard for safe initialization

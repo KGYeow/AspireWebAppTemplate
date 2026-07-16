@@ -10,8 +10,26 @@ namespace AspireWebAppTemplate.Web.Services;
 /// Uses Aspire service discovery and <see cref="UserIdentityDelegatingHandler"/> for auth propagation.
 /// Wraps calls to the ApiService's NotificationController endpoints.
 /// </summary>
-public class ApiNotificationService(HttpClient http)
+public class ApiNotificationService
 {
+    #region Constructor
+
+    /// <summary>
+    /// The underlying HttpClient configured with the ApiService base address.
+    /// </summary>
+    private readonly HttpClient _http;
+
+    /// <summary>
+    /// Initializes a new instance of <see cref="ApiNotificationService"/> with the configured HttpClient.
+    /// </summary>
+    /// <param name="http">The HttpClient instance configured via Aspire service discovery.</param>
+    public ApiNotificationService(HttpClient http)
+    {
+        _http = http;
+    }
+
+    #endregion
+
     #region Query
 
     /// <summary>
@@ -32,7 +50,7 @@ public class ApiNotificationService(HttpClient http)
         if (queryParams.IsRead.HasValue)
             url += $"&isRead={queryParams.IsRead.Value}";
 
-        var response = await http.GetAsync(url);
+        var response = await _http.GetAsync(url);
         if (response.IsSuccessStatusCode)
             return ApiResult<PagedResult<NotificationDto>>.Success(await response.Content.ReadFromJsonAsync<PagedResult<NotificationDto>>()!);
         return ApiResult<PagedResult<NotificationDto>>.Failure(await response.Content.ReadAsStringAsync());
@@ -48,7 +66,7 @@ public class ApiNotificationService(HttpClient http)
     /// </returns>
     public async Task<ApiResult<int>> GetUnreadCountAsync()
     {
-        var response = await http.GetAsync("/api/notifications/unread-count");
+        var response = await _http.GetAsync("/api/notifications/unread-count");
         if (response.IsSuccessStatusCode)
             return ApiResult<int>.Success(await response.Content.ReadFromJsonAsync<int>());
         return ApiResult<int>.Failure(await response.Content.ReadAsStringAsync());
@@ -64,7 +82,7 @@ public class ApiNotificationService(HttpClient http)
     /// </returns>
     public async Task<ApiResult<List<NotificationDto>>> GetRecentAsync()
     {
-        var response = await http.GetAsync("/api/notifications/recent");
+        var response = await _http.GetAsync("/api/notifications/recent");
         if (response.IsSuccessStatusCode)
             return ApiResult<List<NotificationDto>>.Success(await response.Content.ReadFromJsonAsync<List<NotificationDto>>() ?? []);
         return ApiResult<List<NotificationDto>>.Failure(await response.Content.ReadAsStringAsync());
@@ -84,7 +102,7 @@ public class ApiNotificationService(HttpClient http)
     /// </returns>
     public async Task<ApiResult> MarkAsReadAsync(Guid notificationId)
     {
-        var response = await http.PutAsync($"/api/notifications/{notificationId}/read", null);
+        var response = await _http.PutAsync($"/api/notifications/{notificationId}/read", null);
         if (response.IsSuccessStatusCode) return ApiResult.Success();
         return ApiResult.Failure(await response.Content.ReadAsStringAsync());
     }
@@ -99,7 +117,7 @@ public class ApiNotificationService(HttpClient http)
     /// </returns>
     public async Task<ApiResult> MarkAsUnreadAsync(Guid notificationId)
     {
-        var response = await http.PutAsync($"/api/notifications/{notificationId}/unread", null);
+        var response = await _http.PutAsync($"/api/notifications/{notificationId}/unread", null);
         if (response.IsSuccessStatusCode) return ApiResult.Success();
         return ApiResult.Failure(await response.Content.ReadAsStringAsync());
     }
@@ -114,7 +132,7 @@ public class ApiNotificationService(HttpClient http)
     /// </returns>
     public async Task<ApiResult<int>> MarkAllAsReadAsync()
     {
-        var response = await http.PutAsync("/api/notifications/read-all", null);
+        var response = await _http.PutAsync("/api/notifications/read-all", null);
         if (response.IsSuccessStatusCode)
             return ApiResult<int>.Success(await response.Content.ReadFromJsonAsync<int>());
         return ApiResult<int>.Failure(await response.Content.ReadAsStringAsync());
@@ -131,7 +149,7 @@ public class ApiNotificationService(HttpClient http)
     /// </returns>
     public async Task<ApiResult<int>> BulkDismissAsync(BulkDismissRequest request)
     {
-        var response = await http.PostAsJsonAsync("/api/notifications/dismiss", request);
+        var response = await _http.PostAsJsonAsync("/api/notifications/dismiss", request);
         if (response.IsSuccessStatusCode)
             return ApiResult<int>.Success(await response.Content.ReadFromJsonAsync<int>());
         return ApiResult<int>.Failure(await response.Content.ReadAsStringAsync());
@@ -151,7 +169,7 @@ public class ApiNotificationService(HttpClient http)
     /// </returns>
     public async Task<ApiResult<List<NotificationPreferenceDto>>> GetPreferencesAsync()
     {
-        var response = await http.GetAsync("/api/notifications/preferences");
+        var response = await _http.GetAsync("/api/notifications/preferences");
         if (response.IsSuccessStatusCode)
             return ApiResult<List<NotificationPreferenceDto>>.Success(await response.Content.ReadFromJsonAsync<List<NotificationPreferenceDto>>() ?? []);
         return ApiResult<List<NotificationPreferenceDto>>.Failure(await response.Content.ReadAsStringAsync());
@@ -167,7 +185,7 @@ public class ApiNotificationService(HttpClient http)
     /// </returns>
     public async Task<ApiResult> UpdatePreferenceAsync(UpdateNotificationPreferenceRequest request)
     {
-        var response = await http.PutAsJsonAsync("/api/notifications/preferences", request);
+        var response = await _http.PutAsJsonAsync("/api/notifications/preferences", request);
         if (response.IsSuccessStatusCode) return ApiResult.Success();
         return ApiResult.Failure(await response.Content.ReadAsStringAsync());
     }

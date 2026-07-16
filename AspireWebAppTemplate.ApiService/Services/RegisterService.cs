@@ -1,15 +1,10 @@
 using System.Text;
 using System.Text.Encodings.Web;
 using AspireWebAppTemplate.Abstractions;
-using AspireWebAppTemplate.ApiService.Data;
-using AspireWebAppTemplate.Core.Contracts;
+using AspireWebAppTemplate.ApiService.Abstractions;
 using AspireWebAppTemplate.Core.Contracts.Auth;
-using AspireWebAppTemplate.Core.Contracts.AuditLog;
-using AspireWebAppTemplate.Core.Contracts.Roles;
-using AspireWebAppTemplate.Core.Contracts.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Logging;
 using AspireWebAppTemplate.ApiService.Data.Entities;
 
 namespace AspireWebAppTemplate.ApiService.Services;
@@ -27,6 +22,7 @@ public sealed class RegisterService : IRegisterService
     private readonly RoleManager<ApplicationRole> _roleManager;
     private readonly IUserStore<ApplicationUser> _userStore;
     private readonly IEmailSender<ApplicationUser> _emailSender;
+    private readonly IEmailService _emailService;
     private readonly ILogger<RegisterService> _logger;
 
     /// <summary>
@@ -36,13 +32,15 @@ public sealed class RegisterService : IRegisterService
     /// <param name="roleManager">The role manager for querying the default role.</param>
     /// <param name="userStore">The user store for setting username and email.</param>
     /// <param name="emailSender">The email sender for confirmation emails.</param>
+    /// <param name="emailService">The email service for sending business notification emails (e.g., welcome email).</param>
     /// <param name="logger">The logger instance.</param>
-    public RegisterService(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, IUserStore<ApplicationUser> userStore, IEmailSender<ApplicationUser> emailSender, ILogger<RegisterService> logger)
+    public RegisterService(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, IUserStore<ApplicationUser> userStore, IEmailSender<ApplicationUser> emailSender, IEmailService emailService, ILogger<RegisterService> logger)
     {
         _userManager = userManager;
         _roleManager = roleManager;
         _userStore = userStore;
         _emailSender = emailSender;
+        _emailService = emailService;
         _logger = logger;
     }
 
@@ -89,6 +87,12 @@ public sealed class RegisterService : IRegisterService
 
         var callbackUrl = BuildCallbackUrl(confirmEmailBaseUri, userId, code, returnUrl);
         await _emailSender.SendConfirmationLinkAsync(user, email, HtmlEncoder.Default.Encode(callbackUrl));
+
+        // Send welcome email (best-effort, respects EmailEnabled preference)
+        await _emailService.TrySendEmailAsync(userId, email, Core.Domain.Enums.NotificationCategory.Account, Core.Domain.Enums.EmailType.WelcomeEmail, new Dictionary<string, string>
+        {
+            ["UserName"] = user.DisplayName ?? user.UserName ?? email
+        });
 
         return new RegisterResult
         {
