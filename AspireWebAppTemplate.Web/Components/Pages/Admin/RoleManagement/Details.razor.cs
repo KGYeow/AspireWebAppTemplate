@@ -1,4 +1,5 @@
 using AspireWebAppTemplate.Core.Contracts.Roles;
+using AspireWebAppTemplate.Core.Contracts.Users;
 using AspireWebAppTemplate.UI.Components.Shared;
 using AspireWebAppTemplate.UI.Utilities;
 using AspireWebAppTemplate.Web.Services;
@@ -129,13 +130,7 @@ public partial class Details : ComponentBase
         var result = await RoleService.GetUsersInRoleAsync(Role.Id);
         if (!result.Succeeded || result.Data is null) return [];
 
-        return result.Data.Select(u => new UserViewModel
-        {
-            Id = u.Id,
-            UserName = u.UserName,
-            DisplayName = u.DisplayName ?? "",
-            Email = u.Email ?? ""
-        });
+        return result.Data.Select(u => new UserViewModel { User = u });
     }
 
     /// <summary>
@@ -330,21 +325,26 @@ public partial class Details : ComponentBase
     #region View Model
 
     /// <summary>
-    /// View model for users in the data grid.
+    /// Wrapper view model for the users-in-role data grid.
+    /// Holds a <see cref="UserDto"/> reference and delegates properties.
     /// </summary>
     public class UserViewModel
     {
+        /// <summary>Display line number (1-based, page-aware).</summary>
         public int LineNumber { get; set; }
-        public string Id { get; set; } = "";
-        public string UserName { get; set; } = "";
-        public string DisplayName { get; set; } = "";
-        public string Email { get; set; } = "";
 
-        public override bool Equals(object? obj)
-            => obj is UserViewModel other && Id == other.Id;
+        /// <summary>The underlying user DTO.</summary>
+        public UserDto User { get; set; } = default!;
 
-        public override int GetHashCode()
-            => Id.GetHashCode();
+        // Delegated from DTO
+        public string Id => User.Id;
+        public string UserName => User.UserName;
+        public string DisplayName => User.DisplayName ?? "";
+        public string Email => User.Email ?? "";
+
+        public override bool Equals(object? obj) => obj is UserViewModel other && Id == other.Id;
+
+        public override int GetHashCode() => Id.GetHashCode();
     }
 
     #endregion

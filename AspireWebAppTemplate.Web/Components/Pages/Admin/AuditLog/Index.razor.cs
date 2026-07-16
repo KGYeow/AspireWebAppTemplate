@@ -1,3 +1,4 @@
+using AspireWebAppTemplate.Core.Contracts.AuditLog;
 using AspireWebAppTemplate.Core.Domain.Enums;
 using AspireWebAppTemplate.Web.Services;
 using AspireWebAppTemplate.Web.Abstractions;
@@ -220,13 +221,7 @@ public partial class Index : ComponentBase, IDisposable
             var viewModels = result.Items.Select((entry, index) => new AuditLogViewModel
             {
                 LineNumber = state.Page * state.PageSize + index + 1,
-                Id = entry.Id,
-                Timestamp = entry.Timestamp,
-                UserDisplayName = entry.UserDisplayName,
-                ActionType = entry.ActionType,
-                EntityType = entry.EntityType,
-                EntityName = entry.EntityName,
-                Description = entry.Description
+                Entry = entry
             }).ToList();
 
             return new GridData<AuditLogViewModel>
@@ -362,18 +357,25 @@ public partial class Index : ComponentBase, IDisposable
     #region View Model
 
     /// <summary>
-    /// Flattened view model for the audit log data grid.
+    /// Wrapper view model for the audit log data grid.
+    /// Holds an <see cref="AuditLogEntryDto"/> reference and delegates properties.
     /// </summary>
     public class AuditLogViewModel
     {
+        /// <summary>Display line number (1-based, page-aware).</summary>
         public int LineNumber { get; set; }
-        public Guid Id { get; set; }
-        public DateTime Timestamp { get; set; }
-        public string UserDisplayName { get; set; } = string.Empty;
-        public AuditActionType ActionType { get; set; }
-        public AuditEntityType EntityType { get; set; }
-        public string EntityName { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
+
+        /// <summary>The underlying audit log entry DTO.</summary>
+        public AuditLogEntryDto Entry { get; set; } = default!;
+
+        // Delegated from DTO
+        public Guid Id => Entry.Id;
+        public DateTime Timestamp => Entry.Timestamp;
+        public string UserDisplayName => Entry.UserDisplayName;
+        public AuditActionType ActionType => Entry.ActionType;
+        public AuditEntityType EntityType => Entry.EntityType;
+        public string EntityName => Entry.EntityName;
+        public string Description => Entry.Description;
     }
 
     #endregion

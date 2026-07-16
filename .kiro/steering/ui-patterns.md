@@ -168,7 +168,7 @@ private sealed class ItemViewModel
     public int LineNumber { get; set; }
     public ItemDto Item { get; set; } = default!;
     public string Id => Item.Id;
-    // ... delegated properties
+    // ... only properties consumed by the view
     public override bool Equals(object? obj) => obj is ItemViewModel other && Id == other.Id;
     public override int GetHashCode() => Id.GetHashCode();
 }
@@ -176,6 +176,7 @@ private sealed class ItemViewModel
 - Mapping: `new ItemViewModel { Item = dto }`
 - `Equals`/`GetHashCode` required for multi-selection pages
 - Computed properties (not on DTO) stay as settable fields on the ViewModel
+- **Only delegate properties that the view actually consumes** (grid columns, event handlers, filters). Do NOT mirror every DTO property — the underlying DTO is accessible via `vm.Item` when needed (e.g., passing to dialogs).
 
 ## Enum Column Filtering
 

@@ -497,12 +497,6 @@ public partial class Index : ComponentBase
         /// <summary>Number of users currently assigned to this role.</summary>
         public int UserCount => Role.UserCount;
 
-        /// <summary>When the role was created (UTC).</summary>
-        public DateTime CreatedUtc => Role.CreatedUtc;
-
-        /// <summary>When the role was last updated (UTC).</summary>
-        public DateTime? UpdatedUtc => Role.UpdatedUtc;
-
         /// <summary>
         /// Determines equality by <see cref="Id"/>.
         /// </summary>

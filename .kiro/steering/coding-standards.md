@@ -213,6 +213,13 @@ _hubConnection = new HubConnectionBuilder()
 - Use upsert pattern: seed only if record doesn't already exist (preserve admin customizations on redeployment).
 - System/reference data uses deterministic checks (e.g., `EmailType` enum value). Sample data uses existence checks (e.g., `if (await dbContext.Announcements.AnyAsync()) return;`).
 
+### Server-Side Sorting & Pagination (Large Datasets)
+- For pages with large datasets (audit log, future reporting), use true server-side sorting via `QueryableExtensions.ApplySort<T>` in `Core/Extensions/`.
+- Query param DTOs (e.g., `AuditLogQueryParams`) include `SortBy` (string?) and `SortDescending` (bool) properties.
+- Frontend extracts sort from `state.SortDefinitions.FirstOrDefault()` and sets the DTO properties.
+- Typed HttpClient services accept the query param DTO as a single object (not flat parameters) for complex queries.
+- `ApplySort` uses Expression trees for type-safe, EF Core-translatable dynamic ordering with a fallback default sort.
+
 ### Specs & Docs
 - `.kiro/specs/{feature-name}/` — active spec documents (requirements.md, design.md, tasks.md)
 - `docs/features/{feature-name}/` — archived/completed feature documentation

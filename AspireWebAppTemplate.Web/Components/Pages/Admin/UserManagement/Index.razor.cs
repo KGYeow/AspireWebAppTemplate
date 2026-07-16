@@ -866,9 +866,6 @@ public partial class Index : ComponentBase
         /// <summary>The job title.</summary>
         public string JobTitle => User.JobTitle ?? "";
 
-        /// <summary>The email address.</summary>
-        public string Email => User.Email ?? "";
-
         /// <summary>The department.</summary>
         public string Department => User.Department ?? "";
 

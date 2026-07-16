@@ -30,7 +30,7 @@ AspireWebAppTemplate.Core/
 │   ├── Roles/
 │   └── Users/
 ├── Domain/Enums/               ← AuditActionType, AuditEntityType, ThemePreference, NotificationCategory, AnnouncementDisplayType, AnnouncementSeverity, EmailType, EmailTemplateCategory, etc.
-├── Extensions/                 ← Extension methods
+├── Extensions/                 ← Extension methods (NavigationProviderExtensions, QueryableExtensions)
 └── Utilities/                  ← Shared utility classes (SecureConnectionString)
     └── Attributes/             ← Custom validation/metadata attributes (ExportColumnAttribute, OptionalPhoneAttribute)
 ```
