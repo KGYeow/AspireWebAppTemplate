@@ -5,8 +5,8 @@ using AspireWebAppTemplate.Web.Components;
 using AspireWebAppTemplate.Web.Endpoints;
 using AspireWebAppTemplate.Web.Extensions;
 using AspireWebAppTemplate.Web.Services;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Radzen;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -19,17 +19,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add service defaults & Aspire client integrations.
 builder.AddServiceDefaults();
 
-// >>> ADD THIS HOOK TO APPLY THE SSL BYPASS CALLBACK TO ALL DISCOVERED CLIENTS <<<
-builder.Services.ConfigureHttpClientDefaults(http =>
-{
-    http.ConfigurePrimaryHttpMessageHandler(() =>
-    {
-        return new HttpClientHandler
-        {
-            ServerCertificateCustomValidationCallback = RemoteServerCertificateValidationCallback
-        };
-    });
-});
+// Trust internal corporate TLS certificates for outbound HttpClient calls (Web → ApiService).
+builder.Services.AddInternalCertificateTrust();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -137,14 +128,3 @@ app.MapRazorComponents<App>()
 app.MapDefaultEndpoints();
 
 app.Run();
-
-// >>> PASTE RemoteServerCertificateValidationCallback METHOD AT THE VERY BOTTOM <<<
-bool RemoteServerCertificateValidationCallback(
-    object sender,
-    System.Security.Cryptography.X509Certificates.X509Certificate? certificate,
-    System.Security.Cryptography.X509Certificates.X509Chain? chain,
-    System.Net.Security.SslPolicyErrors sslPolicyErrors)
-{
-    //Force trust, sonarqube enable ssl must be true
-    return true;
-}
