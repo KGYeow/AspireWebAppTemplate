@@ -1,8 +1,7 @@
 using System.Net.Http.Json;
-using AspireWebAppTemplate.Core.Common;
-using AspireWebAppTemplate.Core.Contracts;
-using AspireWebAppTemplate.Core.Contracts.Announcements;
-using AspireWebAppTemplate.Core.Domain.Enums;
+using AspireWebAppTemplate.Application.Common;
+using AspireWebAppTemplate.Application.Contracts.Announcements;
+using AspireWebAppTemplate.Domain.Enums;
 
 namespace AspireWebAppTemplate.Web.Services;
 

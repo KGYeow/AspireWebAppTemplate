@@ -1,5 +1,5 @@
-using AspireWebAppTemplate.Core.Contracts.Email;
-using AspireWebAppTemplate.Core.Domain.Enums;
+using AspireWebAppTemplate.Application.Contracts.Email;
+using AspireWebAppTemplate.Domain.Enums;
 using AspireWebAppTemplate.UI.Utilities;
 using AspireWebAppTemplate.Web.Abstractions;
 using AspireWebAppTemplate.Web.Services;

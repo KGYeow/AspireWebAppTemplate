@@ -1,7 +1,7 @@
 // Feature: controller-service-refactor, Property 1: CurrentUserAccessor claim extraction round-trip
 using System.Net;
 using System.Security.Claims;
-using AspireWebAppTemplate.ApiService.Services.Infrastructure;
+using AspireWebAppTemplate.Infrastructure.Utilities;
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;

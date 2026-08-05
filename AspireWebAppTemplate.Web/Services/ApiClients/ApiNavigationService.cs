@@ -1,5 +1,5 @@
 using System.Net.Http.Json;
-using AspireWebAppTemplate.Core.Common;
+using AspireWebAppTemplate.Application.Common;
 
 namespace AspireWebAppTemplate.Web.Services.ApiClients;
 

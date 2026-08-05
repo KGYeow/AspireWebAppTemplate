@@ -1,12 +1,12 @@
 // Feature: announcement-banner-system, Property 3: Creation rejects invalid input
-using AspireWebAppTemplate.Abstractions;
-using AspireWebAppTemplate.ApiService.Abstractions;
-using AspireWebAppTemplate.ApiService.Data;
-using AspireWebAppTemplate.ApiService.Data.Entities;
-using AspireWebAppTemplate.ApiService.Services;
-using AspireWebAppTemplate.Core.Contracts.Announcements;
-using AspireWebAppTemplate.Core.Contracts.AuditLog;
-using AspireWebAppTemplate.Core.Domain.Enums;
+using AspireWebAppTemplate.Application.Abstractions;
+using AspireWebAppTemplate.Infrastructure.Data;
+using AspireWebAppTemplate.Infrastructure.Data.Entities;
+using AspireWebAppTemplate.Infrastructure.Identity;
+using AspireWebAppTemplate.Infrastructure.Services;
+using AspireWebAppTemplate.Application.Contracts.Announcements;
+using AspireWebAppTemplate.Application.Contracts.AuditLog;
+using AspireWebAppTemplate.Domain.Enums;
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;
@@ -88,7 +88,7 @@ public class AnnouncementValidationPropertyTests
         mockAuditLog.Setup(x => x.LogAsync(It.IsAny<AuditLogRequest>())).Returns(Task.CompletedTask);
 
         var mockNotification = new Mock<INotificationService>();
-        mockNotification.Setup(x => x.CreateNotificationAsync(It.IsAny<Core.Contracts.Notifications.CreateNotificationRequest>()))
+        mockNotification.Setup(x => x.CreateNotificationAsync(It.IsAny<Application.Contracts.Notifications.CreateNotificationRequest>()))
             .Returns(Task.CompletedTask);
 
         var logger = NullLogger<AnnouncementService>.Instance;

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
-using AspireWebAppTemplate.Core.Contracts.Announcements;
-using AspireWebAppTemplate.Core.Domain.Enums;
+using AspireWebAppTemplate.Application.Contracts.Announcements;
+using AspireWebAppTemplate.Domain.Enums;
 using AspireWebAppTemplate.Web.Abstractions;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;

@@ -1,8 +1,8 @@
 // Feature: announcement-banner-system, Property 13: Context dismissal removes from cached banner list
 using System.Net;
 using System.Text.Json;
-using AspireWebAppTemplate.Core.Contracts.Announcements;
-using AspireWebAppTemplate.Core.Domain.Enums;
+using AspireWebAppTemplate.Application.Contracts.Announcements;
+using AspireWebAppTemplate.Domain.Enums;
 using AspireWebAppTemplate.Web.Services;
 using FsCheck;
 using FsCheck.Fluent;

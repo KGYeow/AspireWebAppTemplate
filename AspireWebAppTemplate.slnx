@@ -1,7 +1,9 @@
 <Solution>
   <Project Path="AspireWebAppTemplate.ApiService/AspireWebAppTemplate.ApiService.csproj" />
   <Project Path="AspireWebAppTemplate.AppHost/AspireWebAppTemplate.AppHost.csproj" />
-  <Project Path="AspireWebAppTemplate.Core/AspireWebAppTemplate.Core.csproj" />
+  <Project Path="AspireWebAppTemplate.Application/AspireWebAppTemplate.Application.csproj" />
+  <Project Path="AspireWebAppTemplate.Domain/AspireWebAppTemplate.Domain.csproj" />
+  <Project Path="AspireWebAppTemplate.Infrastructure/AspireWebAppTemplate.Infrastructure.csproj" />
   <Project Path="AspireWebAppTemplate.ServiceDefaults/AspireWebAppTemplate.ServiceDefaults.csproj" />
   <Project Path="AspireWebAppTemplate.Tests/AspireWebAppTemplate.Tests.csproj" />
   <Project Path="AspireWebAppTemplate.UI/AspireWebAppTemplate.UI.csproj" />

@@ -1,7 +1,7 @@
-using AspireWebAppTemplate.ApiService.Abstractions;
-using AspireWebAppTemplate.Core.Contracts;
-using AspireWebAppTemplate.Core.Contracts.Announcements;
-using AspireWebAppTemplate.Core.Domain.Enums;
+using AspireWebAppTemplate.Application.Abstractions;
+using AspireWebAppTemplate.Application.Common;
+using AspireWebAppTemplate.Application.Contracts.Announcements;
+using AspireWebAppTemplate.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

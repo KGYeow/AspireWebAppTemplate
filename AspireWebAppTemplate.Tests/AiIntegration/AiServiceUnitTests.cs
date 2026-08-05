@@ -1,8 +1,8 @@
 using Amazon.BedrockRuntime;
 using Amazon.BedrockRuntime.Model;
-using AspireWebAppTemplate.ApiService.Extensions;
-using AspireWebAppTemplate.ApiService.Services;
-using AspireWebAppTemplate.Core.Contracts.Ai;
+using AspireWebAppTemplate.Infrastructure.Extensions;
+using AspireWebAppTemplate.Infrastructure.Services;
+using AspireWebAppTemplate.Application.Contracts.Ai;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -80,7 +80,7 @@ public class AiServiceUnitTests
         });
         services.AddSingleton<IConfiguration>(configuration);
         services.AddLogging();
-        services.AddApplicationServices();
+        services.AddInfrastructureServices();
 
         var provider = services.BuildServiceProvider();
 
@@ -286,7 +286,7 @@ public class AiServiceUnitTests
         });
         services.AddSingleton<IConfiguration>(configuration);
         services.AddLogging();
-        services.AddApplicationServices();
+        services.AddInfrastructureServices();
 
         var provider = services.BuildServiceProvider();
 
@@ -315,7 +315,7 @@ public class AiServiceUnitTests
         });
         services.AddSingleton<IConfiguration>(configuration);
         services.AddLogging();
-        services.AddApplicationServices();
+        services.AddInfrastructureServices();
 
         var provider = services.BuildServiceProvider();
 
@@ -342,7 +342,7 @@ public class AiServiceUnitTests
         });
         services.AddSingleton<IConfiguration>(configuration);
         services.AddLogging();
-        services.AddApplicationServices();
+        services.AddInfrastructureServices();
 
         var provider = services.BuildServiceProvider();
 

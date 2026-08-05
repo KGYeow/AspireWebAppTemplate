@@ -1,6 +1,6 @@
-using AspireWebAppTemplate.ApiService.Abstractions;
-using AspireWebAppTemplate.Core.Contracts.Roles;
-using AspireWebAppTemplate.Core.Contracts.Users;
+using AspireWebAppTemplate.Application.Abstractions;
+using AspireWebAppTemplate.Application.Contracts.Roles;
+using AspireWebAppTemplate.Application.Contracts.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

@@ -1,4 +1,4 @@
-using AspireWebAppTemplate.Core.Contracts.Email;
+using AspireWebAppTemplate.Application.Contracts.Email;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;

@@ -1,4 +1,4 @@
-using AspireWebAppTemplate.Core.Domain.Enums;
+using AspireWebAppTemplate.Domain.Enums;
 
 namespace AspireWebAppTemplate.Abstractions;
 

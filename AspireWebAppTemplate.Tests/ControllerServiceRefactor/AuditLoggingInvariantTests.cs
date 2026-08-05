@@ -1,8 +1,7 @@
 // Feature: controller-service-refactor, Property 16: Audit logging invariant
-using AspireWebAppTemplate.Abstractions;
-using AspireWebAppTemplate.ApiService.Abstractions;
-using AspireWebAppTemplate.Core.Contracts.AuditLog;
-using AspireWebAppTemplate.Core.Domain.Enums;
+using AspireWebAppTemplate.Application.Abstractions;
+using AspireWebAppTemplate.Application.Contracts.AuditLog;
+using AspireWebAppTemplate.Domain.Enums;
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;

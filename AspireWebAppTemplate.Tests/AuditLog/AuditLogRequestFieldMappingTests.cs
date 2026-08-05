@@ -1,9 +1,10 @@
 // Feature: audit-log-old-new-values, Property 1: LogAsync Field Mapping Correctness
-using AspireWebAppTemplate.ApiService.Data;
-using AspireWebAppTemplate.ApiService.Data.Entities;
-using AspireWebAppTemplate.ApiService.Services;
-using AspireWebAppTemplate.Core.Contracts.AuditLog;
-using AspireWebAppTemplate.Core.Domain.Enums;
+using AspireWebAppTemplate.Infrastructure.Data;
+using AspireWebAppTemplate.Infrastructure.Data.Entities;
+using AspireWebAppTemplate.Infrastructure.Identity;
+using AspireWebAppTemplate.Infrastructure.Services;
+using AspireWebAppTemplate.Application.Contracts.AuditLog;
+using AspireWebAppTemplate.Domain.Enums;
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;

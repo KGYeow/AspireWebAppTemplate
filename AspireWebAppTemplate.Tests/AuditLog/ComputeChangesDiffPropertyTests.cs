@@ -1,6 +1,6 @@
 // Feature: audit-log-old-new-values, Property 2: ComputeChanges Includes Only and All Differing Fields
 using System.Text.Json;
-using AspireWebAppTemplate.ApiService.Utilities;
+using AspireWebAppTemplate.Infrastructure.Utilities;
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;

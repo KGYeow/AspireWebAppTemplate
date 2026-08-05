@@ -1,5 +1,5 @@
-using AspireWebAppTemplate.Core.Contracts.Notifications;
-using AspireWebAppTemplate.Core.Domain.Enums;
+using AspireWebAppTemplate.Application.Contracts.Notifications;
+using AspireWebAppTemplate.Domain.Enums;
 using AspireWebAppTemplate.Web.Authentication;
 using AspireWebAppTemplate.Web.Hubs;
 using Microsoft.AspNetCore.SignalR;

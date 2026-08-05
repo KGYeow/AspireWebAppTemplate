@@ -1,8 +1,8 @@
 // Feature: controller-service-refactor, Property 11: User CRUD round-trip
 // Feature: controller-service-refactor, Property 12: User search filter correctness
-using AspireWebAppTemplate.ApiService.Abstractions;
-using AspireWebAppTemplate.Core.Contracts;
-using AspireWebAppTemplate.Core.Contracts.Users;
+using AspireWebAppTemplate.Application.Abstractions;
+using AspireWebAppTemplate.Application.Common;
+using AspireWebAppTemplate.Application.Contracts.Users;
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;

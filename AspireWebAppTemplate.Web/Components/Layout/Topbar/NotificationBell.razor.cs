@@ -1,5 +1,5 @@
-using AspireWebAppTemplate.Core.Contracts.Notifications;
-using AspireWebAppTemplate.Core.Domain.Enums;
+using AspireWebAppTemplate.Application.Contracts.Notifications;
+using AspireWebAppTemplate.Domain.Enums;
 using AspireWebAppTemplate.UI.Components.Shared;
 using AspireWebAppTemplate.UI.Utilities;
 using AspireWebAppTemplate.Web.Abstractions;

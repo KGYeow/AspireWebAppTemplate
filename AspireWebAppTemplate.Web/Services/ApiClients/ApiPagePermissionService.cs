@@ -1,6 +1,6 @@
 using System.Net.Http.Json;
-using AspireWebAppTemplate.Core.Common;
-using AspireWebAppTemplate.Core.Contracts.PagePermissions;
+using AspireWebAppTemplate.Application.Common;
+using AspireWebAppTemplate.Application.Contracts.PagePermissions;
 
 namespace AspireWebAppTemplate.Web.Services;
 

@@ -1,5 +1,5 @@
 // Feature: api-nav-filtering, Property 5: Orphan Decoration Removal
-using AspireWebAppTemplate.Core.Common;
+using AspireWebAppTemplate.Application.Common;
 using AspireWebAppTemplate.Tests.Navigation.Generators;
 using FsCheck;
 using FsCheck.Fluent;

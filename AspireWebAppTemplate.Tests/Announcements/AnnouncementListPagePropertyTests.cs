@@ -1,13 +1,13 @@
 // Feature: announcement-banner-system, Property 12: List page query includes active plus expired within 30 days
-using AspireWebAppTemplate.Abstractions;
-using AspireWebAppTemplate.ApiService.Abstractions;
-using AspireWebAppTemplate.ApiService.Data;
-using AspireWebAppTemplate.ApiService.Data.Entities;
-using AspireWebAppTemplate.ApiService.Services;
-using AspireWebAppTemplate.Core.Contracts;
-using AspireWebAppTemplate.Core.Contracts.Announcements;
-using AspireWebAppTemplate.Core.Contracts.AuditLog;
-using AspireWebAppTemplate.Core.Domain.Enums;
+using AspireWebAppTemplate.Application.Abstractions;
+using AspireWebAppTemplate.Infrastructure.Data;
+using AspireWebAppTemplate.Infrastructure.Data.Entities;
+using AspireWebAppTemplate.Infrastructure.Identity;
+using AspireWebAppTemplate.Infrastructure.Services;
+using AspireWebAppTemplate.Application.Common;
+using AspireWebAppTemplate.Application.Contracts.Announcements;
+using AspireWebAppTemplate.Application.Contracts.AuditLog;
+using AspireWebAppTemplate.Domain.Enums;
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;

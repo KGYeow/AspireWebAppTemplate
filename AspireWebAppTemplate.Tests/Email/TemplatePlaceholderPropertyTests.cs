@@ -1,8 +1,8 @@
 // Feature: email-smtp-integration, Property 3: Template placeholder replacement produces correct output
-using AspireWebAppTemplate.ApiService.Data;
-using AspireWebAppTemplate.ApiService.Data.Entities;
-using AspireWebAppTemplate.ApiService.Services;
-using AspireWebAppTemplate.Core.Domain.Enums;
+using AspireWebAppTemplate.Infrastructure.Data;
+using AspireWebAppTemplate.Domain.Entities;
+using AspireWebAppTemplate.Infrastructure.Services;
+using AspireWebAppTemplate.Domain.Enums;
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;

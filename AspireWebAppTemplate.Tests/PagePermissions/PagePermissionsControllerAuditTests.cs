@@ -1,6 +1,6 @@
 using System.Text.Json;
-using AspireWebAppTemplate.ApiService.Utilities;
-using AspireWebAppTemplate.Core.Domain.Enums;
+using AspireWebAppTemplate.Infrastructure.Utilities;
+using AspireWebAppTemplate.Domain.Enums;
 
 namespace AspireWebAppTemplate.Tests.PagePermissions;
 

@@ -1,0 +1,724 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Create Domain project and add to solution": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822232484
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822250615
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822465533
+      }
+    ],
+    "1.2 Create Application project and add to solution": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822232629
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822250701
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822465800
+      }
+    ],
+    "1.3 Create Infrastructure project and add to solution": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822232793
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822250773
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822465714
+      }
+    ],
+    "1.4 Update ApiService.csproj references (bridge phase)": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822232880
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822476989
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822639606
+      }
+    ],
+    "2. Checkpoint - Verify solution compiles with empty new projects": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822232974
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822654294
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822720873
+      }
+    ],
+    "3.1 Move enum files from Core to Domain": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822233094
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822729746
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822903408
+      }
+    ],
+    "3.2 Move constants from Core to Domain": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822233254
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822730167
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822903509
+      }
+    ],
+    "3.3 Move attributes from Core to Domain": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822233353
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822729906
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822903602
+      }
+    ],
+    "3.4 Move EmailTemplate entity from ApiService to Domain": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822233442
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822730039
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822903706
+      }
+    ],
+    "3.5 Update using statements across solution for Domain types": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822233531
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822911055
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785823739807
+      }
+    ],
+    "4. Checkpoint - Verify solution compiles with Domain populated": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822233611
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785823746907
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785823786275
+      }
+    ],
+    "5.1 Move service interfaces from ApiService/Abstractions to Application": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822233757
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785823796091
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785824855732
+      }
+    ],
+    "5.2 Move shared abstractions from Core to Application": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822233843
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785823796178
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785824855647
+      }
+    ],
+    "5.3 Move DTOs/Contracts from Core to Application": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822233927
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785823796381
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785824855801
+      }
+    ],
+    "5.4 Move Common types from Core to Application": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822234020
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785823796309
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785824855987
+      }
+    ],
+    "5.5 Move Extensions from Core to Application": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822234130
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785823796437
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785824855925
+      }
+    ],
+    "5.6 Update using statements across solution for Application types": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822234239
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785824861784
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785826536891
+      }
+    ],
+    "6. Checkpoint - Verify solution compiles with Application populated": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822234321
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785826544147
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785826550524
+      }
+    ],
+    "7.1 Move Identity entities to Infrastructure": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822234412
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785826557718
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785826760812
+      }
+    ],
+    "7.2 Move data entities to Infrastructure": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822234543
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785826557667
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785826760955
+      }
+    ],
+    "7.3 Move ApplicationDbContext to Infrastructure": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822234635
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785826771543
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785827911846
+      }
+    ],
+    "7.4 Move EF Core configurations to Infrastructure": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822234714
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785826771923
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785827911981
+      }
+    ],
+    "7.5 Move EF Core migrations to Infrastructure": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822234793
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785826771814
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785827912137
+      }
+    ],
+    "7.6 Move seed data to Infrastructure": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822234923
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785826771641
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785827912064
+      }
+    ],
+    "7.7 Move service implementations to Infrastructure": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822235007
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785827920252
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785828471138
+      }
+    ],
+    "7.8 Move clients, handlers, and utilities to Infrastructure": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822235110
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785827920442
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785828471229
+      }
+    ],
+    "7.9 Create InfrastructureServiceExtensions.cs": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822235203
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785828478789
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785829517766
+      }
+    ],
+    "7.10 Update using statements across solution for Infrastructure types": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822235278
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785828478900
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785829517857
+      }
+    ],
+    "8. Checkpoint - Verify solution compiles with Infrastructure populated": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822235408
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785829526209
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785829533849
+      }
+    ],
+    "9.1 Update Program.cs": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822235497
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785829544652
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785829729867
+      }
+    ],
+    "9.2 Remove emptied directories from ApiService": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822235574
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785829544840
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785829730130
+      }
+    ],
+    "9.3 Finalize ApiService.csproj": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822235664
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785829544746
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785829729973
+      }
+    ],
+    "10.1 Update Web.csproj": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822235810
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785829544969
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785829730049
+      }
+    ],
+    "10.2 Update Web using statements": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822235893
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785829545084
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785829730182
+      }
+    ],
+    "11.1 Update Tests.csproj": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822235978
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785829740277
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785829930429
+      }
+    ],
+    "11.2 Update Tests using statements": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822236072
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785829740210
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785829930557
+      }
+    ],
+    "12.1 Remove Core from solution and disk": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822236192
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785829936753
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785830029405
+      }
+    ],
+    "12.2 Verify no remaining Core references": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822236294
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785830036301
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785830090473
+      }
+    ],
+    "13. Final checkpoint - Verify complete solution compilability": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822236387
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785830096408
+      },
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785830699422
+      }
+    ],
+    "1. Create new project shells and add to solution": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785822639762
+      }
+    ],
+    "3. Populate Domain project (move from Core + ApiService)": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785823739928
+      }
+    ],
+    "5. Populate Application project (move from Core + ApiService)": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785826537040
+      }
+    ],
+    "12. Remove Core project from solution": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785830090562
+      }
+    ],
+    "7. Populate Infrastructure project (move from ApiService + Core)": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785830719966
+      }
+    ],
+    "10. Update Web project references": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785830720046
+      }
+    ],
+    "9. Update ApiService composition root and slim project": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785830720218
+      }
+    ],
+    "11. Update Tests project references": [
+      {
+        "executionId": "e97ef271-d58f-4ab8-8df5-a20119b9452c",
+        "chatSessionId": "sess_9556880c-29cb-4a29-9cde-8519ec88740e",
+        "timestamp": 1785830720298
+      }
+    ]
+  }
+}

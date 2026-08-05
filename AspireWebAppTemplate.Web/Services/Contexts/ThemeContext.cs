@@ -1,5 +1,6 @@
 using AspireWebAppTemplate.Abstractions;
-using AspireWebAppTemplate.Core.Domain.Enums;
+using AspireWebAppTemplate.Application.Abstractions;
+using AspireWebAppTemplate.Domain.Enums;
 
 namespace AspireWebAppTemplate.Web.Services;
 

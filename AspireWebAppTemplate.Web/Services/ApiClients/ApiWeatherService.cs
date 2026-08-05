@@ -1,7 +1,6 @@
 using System.Net.Http.Json;
-using AspireWebAppTemplate.Core.Common;
-using AspireWebAppTemplate.Core.Contracts;
-using AspireWebAppTemplate.Core.Contracts.Notifications;
+using AspireWebAppTemplate.Application.Common;
+using AspireWebAppTemplate.Application.Contracts.Notifications;
 
 namespace AspireWebAppTemplate.Web.Services;
 

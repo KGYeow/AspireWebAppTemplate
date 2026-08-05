@@ -1,5 +1,5 @@
 // Feature: page-access-permissions, Property 5: Case-Insensitive Permission Lookup
-using AspireWebAppTemplate.Core.Common;
+using AspireWebAppTemplate.Application.Common;
 using AspireWebAppTemplate.Web.Services;
 using FsCheck;
 using FsCheck.Fluent;

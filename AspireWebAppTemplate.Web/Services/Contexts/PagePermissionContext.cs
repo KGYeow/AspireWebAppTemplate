@@ -1,4 +1,4 @@
-using AspireWebAppTemplate.Core.Common.Defaults;
+using AspireWebAppTemplate.Domain.Constants;
 using AspireWebAppTemplate.Web.Abstractions;
 using Microsoft.AspNetCore.Components.Authorization;
 

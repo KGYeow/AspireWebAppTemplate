@@ -1,6 +1,6 @@
 // Feature: email-smtp-integration, Property 7: Email recipient address is masked in log entries
 using System.Reflection;
-using AspireWebAppTemplate.ApiService.Services;
+using AspireWebAppTemplate.Infrastructure.Services;
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;

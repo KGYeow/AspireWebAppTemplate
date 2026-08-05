@@ -1,4 +1,4 @@
-using AspireWebAppTemplate.Core.Contracts.Notifications;
+using AspireWebAppTemplate.Application.Contracts.Notifications;
 using AspireWebAppTemplate.Web.Endpoints;
 using AspireWebAppTemplate.Web.Hubs;
 using Microsoft.AspNetCore.Http.HttpResults;

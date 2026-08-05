@@ -1,5 +1,5 @@
-using AspireWebAppTemplate.ApiService.Abstractions;
-using AspireWebAppTemplate.Core.Contracts.Notifications;
+using AspireWebAppTemplate.Application.Abstractions;
+using AspireWebAppTemplate.Application.Contracts.Notifications;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

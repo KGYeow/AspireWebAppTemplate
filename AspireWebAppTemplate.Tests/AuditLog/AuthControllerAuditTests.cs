@@ -1,5 +1,5 @@
 using System.Text.Json;
-using AspireWebAppTemplate.ApiService.Utilities;
+using AspireWebAppTemplate.Infrastructure.Utilities;
 
 namespace AspireWebAppTemplate.Tests.AuditLog;
 

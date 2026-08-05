@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Sync Spec to Docs",
+      "description": "Automatically syncs completed spec documents (requirements.md, design.md, tasks.md) from .kiro/specs/ to docs/features/ when all tasks in a spec are marked complete.",
+      "trigger": "PostTaskExec",
+      "action": {
+        "type": "agent",
+        "prompt": "Check if ALL tasks in the current spec's tasks.md are now marked complete. If yes, copy requirements.md, design.md, and tasks.md from .kiro/specs/{feature-name}/ to docs/features/{feature-name}/, creating the folder if needed. If not all tasks are complete, do nothing."
+      },
+      "enabled": true
+    }
+  ]
+}

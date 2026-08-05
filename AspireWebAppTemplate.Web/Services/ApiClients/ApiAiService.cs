@@ -1,6 +1,6 @@
 using System.Net.Http.Json;
-using AspireWebAppTemplate.Core.Common;
-using AspireWebAppTemplate.Core.Contracts.Ai;
+using AspireWebAppTemplate.Application.Common;
+using AspireWebAppTemplate.Application.Contracts.Ai;
 
 namespace AspireWebAppTemplate.Web.Services;
 

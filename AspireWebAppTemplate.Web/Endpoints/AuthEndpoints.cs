@@ -1,4 +1,4 @@
-using AspireWebAppTemplate.Core.Common;
+using AspireWebAppTemplate.Application.Common;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;

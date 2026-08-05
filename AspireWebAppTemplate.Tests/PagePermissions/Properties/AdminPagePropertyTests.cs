@@ -1,6 +1,6 @@
 // Feature: page-access-permissions, Property 11: System Pages Excluded From Admin Matrix
-using AspireWebAppTemplate.Core.Application.Abstractions;
-using AspireWebAppTemplate.Core.Common;
+using AspireWebAppTemplate.Application.Abstractions;
+using AspireWebAppTemplate.Application.Common;
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;

@@ -12,7 +12,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AspireWebAppTemplate.ServiceDefaults\AspireWebAppTemplate.ServiceDefaults.csproj" />
-    <ProjectReference Include="..\AspireWebAppTemplate.Core\AspireWebAppTemplate.Core.csproj" />
+    <ProjectReference Include="..\AspireWebAppTemplate.Application\AspireWebAppTemplate.Application.csproj" />
+    <ProjectReference Include="..\AspireWebAppTemplate.Infrastructure\AspireWebAppTemplate.Infrastructure.csproj" />
     <ProjectReference Include="..\AspireWebAppTemplate.UI\AspireWebAppTemplate.UI.csproj" />
   </ItemGroup>
 

@@ -1,8 +1,9 @@
 using AspireWebAppTemplate.ApiService.Authentication;
-using AspireWebAppTemplate.ApiService.Data;
-using AspireWebAppTemplate.ApiService.Data.Entities;
-using AspireWebAppTemplate.ApiService.Extensions;
-using AspireWebAppTemplate.Options;
+using AspireWebAppTemplate.Infrastructure.Data;
+using AspireWebAppTemplate.Infrastructure.Identity;
+using AspireWebAppTemplate.Infrastructure.Extensions;
+using AspireWebAppTemplate.Infrastructure.Data.SeedData;
+using AspireWebAppTemplate.Infrastructure.Options;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -21,7 +22,7 @@ builder.Services.AddOpenApi();
 // Database
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(connectionString, b => b.MigrationsAssembly("AspireWebAppTemplate.Infrastructure")));
 
 // Identity (core services only — UserManager, SignInManager, stores).
 // Using AddIdentityCore instead of AddIdentity to avoid registering Identity's cookie auth
@@ -54,7 +55,7 @@ builder.Services.AddHttpContextAccessor();
 
 
 // Application services
-builder.Services.AddApplicationServices();
+builder.Services.AddInfrastructureServices();
 
 // [LDAP] LDAP configuration — remove this block if LDAP is not needed
 builder.Services.Configure<LdapSettings>(builder.Configuration.GetSection("LDAP"));

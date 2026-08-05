@@ -1,4 +1,4 @@
-﻿// Feature: aws-ai-integration, Property 1: Valid prompt produces mapped response
+// Feature: aws-ai-integration, Property 1: Valid prompt produces mapped response
 // Feature: aws-ai-integration, Property 2: Whitespace-only prompts are rejected
 // Feature: aws-ai-integration, Property 3: Known AWS errors map to descriptive exceptions
 // Feature: aws-ai-integration, Property 4: Unexpected exceptions do not leak internal details
@@ -6,8 +6,8 @@
 using Amazon.BedrockRuntime;
 using Amazon.BedrockRuntime.Model;
 using Amazon.Runtime;
-using AspireWebAppTemplate.ApiService.Services;
-using AspireWebAppTemplate.Core.Contracts.Ai;
+using AspireWebAppTemplate.Infrastructure.Services;
+using AspireWebAppTemplate.Application.Contracts.Ai;
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;

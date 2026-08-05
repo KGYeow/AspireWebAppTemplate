@@ -1,6 +1,6 @@
 // Feature: api-nav-filtering, Generators for Property Tests
-using AspireWebAppTemplate.Core.Common;
-using AspireWebAppTemplate.Core.Common.Defaults;
+using AspireWebAppTemplate.Application.Common;
+using AspireWebAppTemplate.Domain.Constants;
 using FsCheck;
 using FsCheck.Fluent;
 using Gen = FsCheck.Fluent.Gen;

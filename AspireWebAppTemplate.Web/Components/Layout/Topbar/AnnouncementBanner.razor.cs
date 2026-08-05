@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
-using AspireWebAppTemplate.Core.Contracts.Announcements;
-using AspireWebAppTemplate.Core.Domain.Enums;
+using AspireWebAppTemplate.Application.Contracts.Announcements;
+using AspireWebAppTemplate.Domain.Enums;
 using AspireWebAppTemplate.Web.Abstractions;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;

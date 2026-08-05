@@ -1,4 +1,4 @@
-using AspireWebAppTemplate.Core.Common;
+using AspireWebAppTemplate.Application.Common;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;

@@ -1,7 +1,7 @@
-using AspireWebAppTemplate.Core.Application.Abstractions;
-using AspireWebAppTemplate.Core.Contracts.PagePermissions;
-using AspireWebAppTemplate.Core.Contracts.Roles;
-using AspireWebAppTemplate.Core.Extensions;
+using AspireWebAppTemplate.Application.Abstractions;
+using AspireWebAppTemplate.Application.Contracts.PagePermissions;
+using AspireWebAppTemplate.Application.Contracts.Roles;
+using AspireWebAppTemplate.Application.Extensions;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;

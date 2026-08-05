@@ -1,6 +1,6 @@
 // Feature: audit-log-old-new-values, Property 5: Null Values Preserved as JSON Null
 using System.Text.Json;
-using AspireWebAppTemplate.ApiService.Utilities;
+using AspireWebAppTemplate.Infrastructure.Utilities;
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;

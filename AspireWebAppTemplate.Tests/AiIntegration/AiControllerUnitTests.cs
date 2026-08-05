@@ -1,7 +1,7 @@
 using System.Reflection;
-using AspireWebAppTemplate.ApiService.Abstractions;
+using AspireWebAppTemplate.Application.Abstractions;
 using AspireWebAppTemplate.ApiService.Controllers;
-using AspireWebAppTemplate.Core.Contracts.Ai;
+using AspireWebAppTemplate.Application.Contracts.Ai;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Moq;

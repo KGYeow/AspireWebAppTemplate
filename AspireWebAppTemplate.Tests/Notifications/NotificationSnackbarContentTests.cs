@@ -61,7 +61,7 @@ public class NotificationSnackbarContentTests
         var result = GetPrivateProperty<string>(_component, "CategoryColorClass");
 
         // Assert
-        Assert.Equal("mud-error mud-theme-dark", result);
+        Assert.Equal("mud-error", result);
     }
 
     /// <summary>
@@ -95,7 +95,7 @@ public class NotificationSnackbarContentTests
         var result = GetPrivateProperty<string>(_component, "CategoryColorClass");
 
         // Assert
-        Assert.Equal("mud-primary mud-theme-dark", result);
+        Assert.Equal("mud-primary", result);
     }
 
     /// <summary>
@@ -129,7 +129,7 @@ public class NotificationSnackbarContentTests
         var result = GetPrivateProperty<string>(_component, "CategoryColorClass");
 
         // Assert
-        Assert.Equal("mud-info mud-theme-dark", result);
+        Assert.Equal("mud-info", result);
     }
 
     #endregion

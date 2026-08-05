@@ -1,6 +1,6 @@
 // Feature: audit-log-old-new-values, Property 4: CamelCase Naming in Serialized Output
 using System.Text.Json;
-using AspireWebAppTemplate.ApiService.Utilities;
+using AspireWebAppTemplate.Infrastructure.Utilities;
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;

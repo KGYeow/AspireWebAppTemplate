@@ -1,5 +1,5 @@
-using AspireWebAppTemplate.ApiService.Abstractions;
-using AspireWebAppTemplate.Core.Contracts.Email;
+using AspireWebAppTemplate.Application.Abstractions;
+using AspireWebAppTemplate.Application.Contracts.Email;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,7 +13,7 @@ namespace AspireWebAppTemplate.ApiService.Controllers;
 /// </summary>
 /// <remarks>
 /// <para>
-/// The template set is fixed by the <see cref="Core.Domain.Enums.EmailType"/> enum and seed data.
+/// The template set is fixed by the <see cref="Domain.Enums.EmailType"/> enum and seed data.
 /// This controller does NOT expose POST (create) or DELETE endpoints — administrators
 /// can only edit existing business templates.
 /// </para>

@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using AspireWebAppTemplate.Core.Contracts.Roles;
+using AspireWebAppTemplate.Application.Contracts.Roles;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;

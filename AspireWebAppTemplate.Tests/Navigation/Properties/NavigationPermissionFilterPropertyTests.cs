@@ -1,6 +1,6 @@
 // Feature: api-nav-filtering, Property 3: Permission Filtering Correctness
-using AspireWebAppTemplate.Core.Common;
-using AspireWebAppTemplate.Core.Common.Defaults;
+using AspireWebAppTemplate.Application.Common;
+using AspireWebAppTemplate.Domain.Constants;
 using AspireWebAppTemplate.Tests.Navigation.Generators;
 using FsCheck;
 using FsCheck.Fluent;

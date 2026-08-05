@@ -1,5 +1,5 @@
-using AspireWebAppTemplate.Core.Application.Abstractions;
-using AspireWebAppTemplate.Core.Common.Defaults;
+using AspireWebAppTemplate.Application.Abstractions;
+using AspireWebAppTemplate.Domain.Constants;
 using AspireWebAppTemplate.Web.Abstractions;
 
 namespace AspireWebAppTemplate.Web.Services;
