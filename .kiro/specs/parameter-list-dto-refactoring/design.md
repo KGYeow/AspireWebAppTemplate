@@ -2,7 +2,7 @@
 
 ## Overview
 
-This design describes the refactoring of 8 service and API client methods that currently accept long parameter lists into methods that accept a single DTO parameter. The refactoring follows the established `Core/Contracts/{Feature}/` DTO pattern already used throughout the solution (e.g., `LoginRequest`, `ChangePasswordRequest`, `AuditLogQueryParams`).
+This design describes the refactoring of 8 service and API client methods that currently accept long parameter lists into methods that accept a single DTO parameter. The refactoring follows the established `Application/Contracts/{Feature}/` DTO pattern already used throughout the solution (e.g., `LoginRequest`, `ChangePasswordRequest`, `AuditLogQueryParams`).
 
 The refactoring is purely structural — no business logic changes. Each method preserves its existing behavior exactly; only the parameter passing mechanism changes from positional arguments to a single strongly-typed object.
 
@@ -25,7 +25,7 @@ graph LR
         C[Controllers] --> D[Service Interfaces]
         D --> E[Service Implementations]
     end
-    subgraph "Core Project"
+    subgraph "Application Project"
         F[Contracts/DTOs]
     end
     B --> C
@@ -36,9 +36,9 @@ graph LR
 ```
 
 **Change scope per layer:**
-1. **Core/Contracts/** — Add 4 new DTO classes (`TrySendEmailRequest`, `SendEmailRequest`, `RegisterRequest`, `UserQueryParams`)
-2. **ApiService/Abstractions/** — Update 5 interface method signatures to accept DTOs
-3. **ApiService/Services/** — Update implementations to extract properties from DTOs
+1. **Application/Contracts/** — Add 4 new DTO classes (`TrySendEmailRequest`, `SendEmailRequest`, `RegisterRequest`, `UserQueryParams`)
+2. **Application/Abstractions/** — Update 5 interface method signatures to accept DTOs
+3. **Infrastructure/Services/** — Update implementations to extract properties from DTOs
 4. **ApiService/Controllers/** — Update callers to pass DTOs instead of individual args
 5. **Web/Services/ApiClients/** — Update `ApiAuthService` and `ApiUserService` method signatures
 
@@ -50,18 +50,18 @@ No changes to HTTP wire format, database schema, or routing.
 
 | DTO | Namespace | Purpose |
 |-----|-----------|---------|
-| `TrySendEmailRequest` | `Core.Contracts.Email` | Encapsulates the 5 params of `IEmailService.TrySendEmailAsync` |
-| `SendEmailRequest` | `Core.Contracts.Email` | Encapsulates the 3 params of `IEmailService.SendEmailAsync` |
-| `RegisterRequest` | `Core.Contracts.Auth` | Encapsulates the 4 params of `IRegisterService.RegisterUserAsync` |
-| `UserQueryParams` | `Core.Contracts.Users` | Encapsulates the 3 params of `IUserService.SearchAsync` |
+| `TrySendEmailRequest` | `Application.Contracts.Email` | Encapsulates the 5 params of `IEmailService.TrySendEmailAsync` |
+| `SendEmailRequest` | `Application.Contracts.Email` | Encapsulates the 3 params of `IEmailService.SendEmailAsync` |
+| `RegisterRequest` | `Application.Contracts.Auth` | Encapsulates the 4 params of `IRegisterService.RegisterUserAsync` |
+| `UserQueryParams` | `Application.Contracts.Users` | Encapsulates the 3 params of `IUserService.SearchAsync` |
 
 ### Reused DTOs (3 existing classes)
 
 | DTO | Namespace | Reused By |
 |-----|-----------|-----------|
-| `LoginRequest` | `Core.Contracts.Auth` | `ILoginService.ValidateAndGenerateTokenAsync`, `ILdapLoginService.ValidateAndGenerateTokenAsync` |
-| `ResetPasswordRequest` | `Core.Contracts.Auth` | `ApiAuthService.ResetPasswordAsync` |
-| `ConfirmEmailRequest` | `Core.Contracts.Auth` | `ApiAuthService.ConfirmEmailAsync` |
+| `LoginRequest` | `Application.Contracts.Auth` | `ILoginService.ValidateAndGenerateTokenAsync`, `ILdapLoginService.ValidateAndGenerateTokenAsync` |
+| `ResetPasswordRequest` | `Application.Contracts.Auth` | `ApiAuthService.ResetPasswordAsync` |
+| `ConfirmEmailRequest` | `Application.Contracts.Auth` | `ApiAuthService.ConfirmEmailAsync` |
 
 ### Interface Changes
 
@@ -139,7 +139,7 @@ Task<ApiResult<PagedResult<UserDto>>> GetUsersAsync(UserQueryParams queryParams)
 ### TrySendEmailRequest
 
 ```csharp
-namespace AspireWebAppTemplate.Core.Contracts.Email;
+namespace AspireWebAppTemplate.Application.Contracts.Email;
 
 /// <summary>
 /// Request payload for attempting to send an email notification to a user,
@@ -178,7 +178,7 @@ public sealed class TrySendEmailRequest
 ### SendEmailRequest
 
 ```csharp
-namespace AspireWebAppTemplate.Core.Contracts.Email;
+namespace AspireWebAppTemplate.Application.Contracts.Email;
 
 /// <summary>
 /// Request payload for sending an email of a specific type to a recipient.
@@ -207,7 +207,7 @@ public sealed class SendEmailRequest
 ### RegisterRequest
 
 ```csharp
-namespace AspireWebAppTemplate.Core.Contracts.Auth;
+namespace AspireWebAppTemplate.Application.Contracts.Auth;
 
 /// <summary>
 /// Request payload for registering a new user account. Contains all parameters
@@ -241,7 +241,7 @@ public sealed class RegisterRequest
 ### UserQueryParams
 
 ```csharp
-namespace AspireWebAppTemplate.Core.Contracts.Users;
+namespace AspireWebAppTemplate.Application.Contracts.Users;
 
 /// <summary>
 /// Query parameters for paginated user search. Supports filtering by

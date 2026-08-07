@@ -29,7 +29,7 @@
 - **Aspire.Hosting.Testing** — integration test hosting
 
 ## Key Libraries
-- **EPPlus** — Excel export (in ApiService)
+- **EPPlus** — Excel export (in Infrastructure)
 - **AWSSDK.BedrockRuntime** — Amazon Bedrock AI model invocation (Converse API)
 - **Ganss.Xss.HtmlSanitizer** — server-side HTML content sanitization (announcement content)
 - **System.Text.Json** — JSON serialization (camelCase policy for audit values)

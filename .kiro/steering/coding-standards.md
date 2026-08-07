@@ -185,7 +185,7 @@ _hubConnection = new HubConnectionBuilder()
 ### Service Registration Extensions
 - Web project: `Extensions/ApiClientServiceExtensions.cs` exposes `AddApiClients(this IServiceCollection)` — registers all typed HttpClient services. Uses a `private const string ApiServiceBaseAddress` for the Aspire service discovery URL (`"https+http://apiservice"`).
 - Web project: `Extensions/ApplicationServiceExtensions.cs` exposes `AddApplicationServices(this IServiceCollection)` — registers scoped services, handlers, contexts.
-- API project: `Extensions/ApplicationServiceExtensions.cs` exposes `AddApplicationServices(this IServiceCollection)` — registers all business services.
+- API project: `Infrastructure/Extensions/InfrastructureServiceExtensions.cs` exposes `AddInfrastructureServices(this IServiceCollection)` — registers all business services, DbContext, Identity, and infrastructure concerns.
 - `Program.cs` calls these extension methods instead of inline registrations.
 - Group related registrations (e.g., all API clients together, all scoped services together) within the extension method.
 
@@ -207,14 +207,14 @@ _hubConnection = new HubConnectionBuilder()
 - Test tag format: `// Feature: {feature-name}, Property {N}: {title}`
 
 ### Seed Data
-- Seed data lives in `Data/SeedData/` as partial class files (`SeedData.{Feature}.cs`).
+- Seed data lives in `Infrastructure/Data/SeedData/` as partial class files (`SeedData.{Feature}.cs`).
 - Each feature's seed method is wrapped in `#region {Feature}`.
 - The main `SeedData.cs` contains `InitializeAsync` (orchestrates all seed methods) and shared helpers.
 - Use upsert pattern: seed only if record doesn't already exist (preserve admin customizations on redeployment).
 - System/reference data uses deterministic checks (e.g., `EmailType` enum value). Sample data uses existence checks (e.g., `if (await dbContext.Announcements.AnyAsync()) return;`).
 
 ### Server-Side Sorting & Pagination (Large Datasets)
-- For pages with large datasets (audit log, future reporting), use true server-side sorting via `QueryableExtensions.ApplySort<T>` in `Core/Extensions/`.
+- For pages with large datasets (audit log, future reporting), use true server-side sorting via `QueryableExtensions.ApplySort<T>` in `Application/Extensions/`.
 - Query param DTOs (e.g., `AuditLogQueryParams`) include `SortBy` (string?) and `SortDescending` (bool) properties.
 - Frontend extracts sort from `state.SortDefinitions.FirstOrDefault()` and sets the DTO properties.
 - Typed HttpClient services accept the query param DTO as a single object (not flat parameters) for complex queries.

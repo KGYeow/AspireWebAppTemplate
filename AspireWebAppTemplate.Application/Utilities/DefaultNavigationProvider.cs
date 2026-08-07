@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using AspireWebAppTemplate.Application.Abstractions;
 using AspireWebAppTemplate.Application.Common;
 
-namespace AspireWebAppTemplate.Infrastructure.Services;
+namespace AspireWebAppTemplate.Application.Utilities;
 
 /// <summary>
 /// Default, code-based navigation provider.

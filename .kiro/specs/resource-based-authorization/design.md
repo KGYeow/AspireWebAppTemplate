@@ -62,21 +62,21 @@ graph TD
 
 ## Components and Interfaces
 
-### Data Layer (ApiService)
+### Data Layer (Infrastructure)
 
 | Component | Location | Responsibility |
 |-----------|----------|----------------|
-| `Permission` (entity) | `Data/Entities/Permission.cs` | EF Core entity for permission definitions |
-| `RolePermission` (entity) | `Data/Entities/RolePermission.cs` | EF Core join entity linking roles to permissions |
-| `ApplicationDbContext` (update) | `Data/ApplicationDbContext.cs` | Add `DbSet<Permission>`, `DbSet<RolePermission>`, configure entity |
-| `SeedData` (update) | `Data/SeedData.cs` | Seed 15 permissions + Admin role assignments + migrate PagePermission records |
+| `Permission` (entity) | `Infrastructure/Data/Entities/Permission.cs` | EF Core entity for permission definitions |
+| `RolePermission` (entity) | `Infrastructure/Data/Entities/RolePermission.cs` | EF Core join entity linking roles to permissions |
+| `ApplicationDbContext` (update) | `Infrastructure/Data/ApplicationDbContext.cs` | Add `DbSet<Permission>`, `DbSet<RolePermission>`, configure entity |
+| `SeedData` (update) | `Infrastructure/Data/SeedData/SeedData.cs` | Seed 15 permissions + Admin role assignments + migrate PagePermission records |
 
-### Service Layer (ApiService)
+### Service Layer (Infrastructure)
 
 | Component | Location | Responsibility |
 |-----------|----------|----------------|
-| `IPermissionService` | `Abstractions/IPermissionService.cs` | Interface for permission CRUD, role-permission assignment, permission evaluation |
-| `PermissionService` | `Services/PermissionService.cs` | Implementation: queries, validation, audit logging |
+| `IPermissionService` | `Application/Abstractions/IPermissionService.cs` | Interface for permission CRUD, role-permission assignment, permission evaluation |
+| `PermissionService` | `Infrastructure/Services/PermissionService.cs` | Implementation: queries, validation, audit logging |
 
 ### Authorization Infrastructure (ApiService)
 
@@ -115,14 +115,14 @@ graph TD
 |-----------|----------|----------------|
 | `PermissionManagement.razor` | `Components/Pages/Admin/PermissionManagement.razor` | Matrix UI for permission-role assignments |
 
-### Core Project DTOs
+### Application Project DTOs
 
 | Component | Location | Responsibility |
 |-----------|----------|----------------|
-| `PermissionDto` | `Contracts/Permissions/PermissionDto.cs` | Permission definition DTO |
-| `PermissionGroupDto` | `Contracts/Permissions/PermissionGroupDto.cs` | Permissions grouped by module |
-| `UpdateRolePermissionsRequest` | `Contracts/Permissions/UpdateRolePermissionsRequest.cs` | PUT request body with permission keys |
-| `PageModuleMappingDto` | `Contracts/Permissions/PageModuleMappingDto.cs` | Page path → module mapping entry |
+| `PermissionDto` | `Application/Contracts/Permissions/PermissionDto.cs` | Permission definition DTO |
+| `PermissionGroupDto` | `Application/Contracts/Permissions/PermissionGroupDto.cs` | Permissions grouped by module |
+| `UpdateRolePermissionsRequest` | `Application/Contracts/Permissions/UpdateRolePermissionsRequest.cs` | PUT request body with permission keys |
+| `PageModuleMappingDto` | `Application/Contracts/Permissions/PageModuleMappingDto.cs` | Page path → module mapping entry |
 
 ### Key Interfaces
 

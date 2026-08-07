@@ -31,7 +31,7 @@ Update `AspireWebAppTemplate.ApiService/appsettings.Development.json`:
 ### 3. Apply migrations
 
 ```bash
-dotnet ef database update --project AspireWebAppTemplate.ApiService --startup-project AspireWebAppTemplate.ApiService
+dotnet ef database update --project AspireWebAppTemplate.Infrastructure --startup-project AspireWebAppTemplate.ApiService
 ```
 
 ### 4. Run the application
@@ -78,5 +78,6 @@ dotnet test AspireWebAppTemplate.Tests
 
 Tests use:
 - xUnit as the test framework
-- FsCheck 3.1.0 for property-based testing
-- In-memory database providers for data layer tests
+- FsCheck 3.3.3 for property-based testing
+- SQLite in-memory for data layer tests
+- Aspire.Hosting.Testing for integration tests

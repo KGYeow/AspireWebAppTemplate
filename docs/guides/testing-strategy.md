@@ -5,11 +5,11 @@
 | Tool | Purpose |
 |------|---------|
 | xUnit | Test runner and assertions |
-| FsCheck 3.1.0 | Property-based testing (randomized input generation) |
+| FsCheck 3.3.3 | Property-based testing (randomized input generation) |
 | FsCheck.Xunit | xUnit integration for FsCheck properties |
-| bUnit 2.0.33 | Blazor component testing |
 | Moq 4.20.72 | Mocking dependencies |
-| EF Core InMemory | Database test doubles |
+| Microsoft.EntityFrameworkCore.Sqlite | SQLite in-memory for data layer tests |
+| Aspire.Hosting.Testing | Integration test hosting |
 
 ## When to Use Each Approach
 
@@ -29,35 +29,25 @@ Use for:
 - Simple CRUD operations with known inputs/outputs
 - Error handling paths
 
-### Component Tests (bUnit)
-Use for:
-- Verifying rendered output structure
-- Component interaction (button clicks, state changes)
-- Conditional rendering logic
-
 ### Integration Tests
 Use for:
 - Database constraint behavior (FK restrict delete)
 - Multi-component workflows (auth → page → service → DB)
 - Route authorization
+- End-to-end Aspire hosting scenarios
 
 ## Test File Organization
 
 ```
 AspireWebAppTemplate.Tests/
-├── Profile/                    (Profile page tests)
-│   ├── CancelDiscardsModificationsPropertyTests.cs
-│   ├── TimeZoneAutoSavePropertyTests.cs
-│   └── ...
-├── Preferences/                (Settings page tests)
-│   ├── NullFieldDisplayDashPropertyTests.cs
-│   ├── TimeZoneSearchFilteringPropertyTests.cs
-│   └── ...
-├── Theme/                      (Theme service tests)
-│   └── ThemeStateServiceTests.cs
-└── AuditLog/                   (Audit log tests — planned)
-    ├── EntityPersistenceRoundTripPropertyTests.cs
-    └── ...
+├── Announcements/              ← Announcement feature tests
+├── ControllerServiceRefactor/  ← Service layer tests
+├── AuditLog/                   ← Audit log tests
+├── Email/                      ← Email template/service tests
+├── Notifications/              ← Notification feature tests
+├── PagePermissions/            ← Page permission tests
+├── Services/                   ← Service-level unit tests
+└── Layout/                     ← Layout/component tests
 ```
 
 ## Correctness Properties

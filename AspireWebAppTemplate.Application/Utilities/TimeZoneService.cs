@@ -1,6 +1,6 @@
 using AspireWebAppTemplate.Application.Abstractions;
 
-namespace AspireWebAppTemplate.Infrastructure.Services;
+namespace AspireWebAppTemplate.Application.Utilities;
 
 /// <summary>
 /// Provides timezone conversion and display utilities using IANA identifiers.

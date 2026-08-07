@@ -27,7 +27,7 @@ LdapSettings__Host=prod-ldap.company.com
 
 Apply migrations before first deployment:
 ```bash
-dotnet ef database update --project AspireWebAppTemplate.ApiService --startup-project AspireWebAppTemplate.ApiService --connection "Server=prod-sql;..."
+dotnet ef database update --project AspireWebAppTemplate.Infrastructure --startup-project AspireWebAppTemplate.ApiService --connection "Server=prod-sql;..."
 ```
 
 Or use `MigrateAsync()` in Program.cs for automatic migration on startup (development only).

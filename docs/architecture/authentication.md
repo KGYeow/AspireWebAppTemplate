@@ -37,12 +37,11 @@ sequenceDiagram
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| `ILoginService` | ApiService/Abstractions/ | Login orchestration interface |
-| `LoginService` | ApiService/Services/ | Coordinates local vs LDAP auth |
-| `ILdapAuthService` | ApiService/Abstractions/ | LDAP authentication interface |
-| `LdapAuthService` | ApiService/Services/ | Active Directory binding and attribute fetching |
-| `CustomUserClaimsPrincipalFactory` | ApiService/Services/ | Adds custom claims (DisplayName, AuthSource) |
-| `IdentityRevalidatingAuthenticationStateProvider` | Web/Components/Account/ | Revalidates auth state in SignalR circuits |
+| `ILoginService` | `Application/Abstractions/` | Login orchestration interface |
+| `LoginService` | `Infrastructure/Services/` | Coordinates local vs LDAP auth |
+| `ILdapAuthService` | `Application/Abstractions/` | LDAP authentication interface |
+| `LdapAuthService` | `Infrastructure/Services/` | Active Directory binding and attribute fetching |
+| `IdentityRevalidatingAuthenticationStateProvider` | `Web/Components/Account/` | Revalidates auth state in SignalR circuits |
 
 ## ApplicationUser Entity
 

@@ -15,7 +15,7 @@ Components/Pages/{FeatureName}/
 
 ```razor
 @page "/{route}"
-@using AspireWebAppTemplate.Core.Common.Defaults
+@using AspireWebAppTemplate.Domain.Constants
 @attribute [Authorize]  // or [Authorize(Roles = "Admin")]
 
 <PageTitle>Feature Name</PageTitle>
@@ -39,31 +39,27 @@ Components/Pages/{FeatureName}/
 
 ## Code-Behind Template
 
+In the Clean Architecture, the Web project does not reference Identity directly. Pages use typed HttpClient services (API clients) to fetch user data from the API.
+
 ```csharp
 namespace AspireWebAppTemplate.Web.Components.Pages.{FeatureName};
 
 [Authorize]
 public partial class Index : ComponentBase
 {
-    [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
+    [Inject] private ApiUserService UserService { get; set; } = default!;
     [Inject] private NavigationManager NavigationManager { get; set; } = default!;
     [Inject] private ILogger<Index> Logger { get; set; } = default!;
 
     [CascadingParameter]
     private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
 
-    private ApplicationUser? User { get; set; }
     protected string? StatusMessage { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        var authState = await AuthStateTask;
-        User = await UserManager.GetUserAsync(authState.User);
-        if (User is null)
-        {
-            NavigationManager.NavigateTo("Account/InvalidUser", forceLoad: true);
-            return;
-        }
+        // Use API client services to fetch data — Web project
+        // does not inject UserManager or DbContext directly.
     }
 }
 ```
@@ -79,6 +75,6 @@ For admin pages with MudDataGrid, follow the pattern in UserManagement or RoleMa
 
 ## Navigation
 
-- Admin pages: Add to `DefaultNavigationProvider` in the Administration group
+- Admin pages: Add to `DefaultNavigationProvider` in `Infrastructure/Services/` within the Administration group
 - User pages: Add to DropdownProfile menu
 - Never add user-specific pages (Profile, Settings) to sidebar navigation

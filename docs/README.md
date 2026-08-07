@@ -7,7 +7,7 @@
 
 ## Overview
 
-This documentation covers the design, requirements, and implementation of the **AspireWebAppTemplate** — an enterprise web application template featuring a multi-tier architecture with separated frontend (Blazor Server) and backend (ASP.NET Core Web API), orchestrated by .NET Aspire.
+This documentation covers the design, requirements, and implementation of the **AspireWebAppTemplate** — an enterprise web application template featuring a Clean Architecture with separated frontend (Blazor Server) and backend (ASP.NET Core Web API), orchestrated by .NET Aspire.
 
 The template provides a production-ready foundation for internal tools and admin portals, featuring user management, role-based access control, LDAP integration, audit logging, and a modern responsive UI.
 
@@ -20,9 +20,20 @@ docs/
 ├── architecture/       System-level technical documentation
 ├── guides/             Developer onboarding and reference guides
 ├── features/           Feature specifications (requirements, design, tasks)
+│   ├── announcement-banner-system/
 │   ├── audit-log/
+│   ├── aws-ai-integration/
+│   ├── clean-architecture-migration/
+│   ├── email-smtp-integration/
+│   ├── navigation-filtering/
+│   ├── notification-push-deep-link/
+│   ├── notification-snackbar-popup/
+│   ├── notification-system/
+│   ├── page-access-permissions/
+│   ├── realtime-notifications/
 │   ├── role-management/
 │   ├── settings-page/
+│   ├── status-alert/
 │   ├── user-management/
 │   └── user-profile/
 ├── profiles/           Context-specific deployment & branding
@@ -48,12 +59,12 @@ High-level system documentation and design decisions.
 | Utility | Location | Description |
 |---------|----------|-------------|
 | `DataGridUtils<T>` | AspireWebAppTemplate.UI/Utilities | In-memory MudDataGrid filtering, sorting, pagination |
-| `ExcelExportService` | AspireWebAppTemplate.ApiService/Services | Excel/CSV export using EPPlus with `[ExportColumn]` attribute |
-| `AuditLogService` | AspireWebAppTemplate.ApiService/Services | Audit trail recording with fire-and-forget error handling |
+| `ExcelExportService` | AspireWebAppTemplate.Infrastructure/Services | Excel/CSV export using EPPlus with `[ExportColumn]` attribute |
+| `AuditLogService` | AspireWebAppTemplate.Infrastructure/Services | Audit trail recording with fire-and-forget error handling |
 | `BaseController` | AspireWebAppTemplate.ApiService/Controllers | Shared controller base with `CurrentUserId`, `ClientIpAddress` |
 | `InternalAuthenticationHandler` | AspireWebAppTemplate.ApiService/Authentication | Service-to-service auth via X-User-* headers |
-| `UserIdentityDelegatingHandler` | AspireWebAppTemplate.Web/Services | Forwards user identity from Web to API on outbound HTTP calls |
-| `ApiResult<T>` | AspireWebAppTemplate.Core/Common | Standard typed result wrapper for all API operations |
+| `UserIdentityDelegatingHandler` | AspireWebAppTemplate.Web/Services/Handlers | Forwards user identity from Web to API on outbound HTTP calls |
+| `ApiResult<T>` | AspireWebAppTemplate.Application/Common | Standard typed result wrapper for all API operations |
 
 ---
 
@@ -106,5 +117,5 @@ See [Profiles README](./profiles/README.md) for details on adding new profiles.
 | Project README | [`README.md`](../README.md) |
 | Test Project | `AspireWebAppTemplate.Tests/` |
 | DataGridUtils | `AspireWebAppTemplate.UI/Utilities/DataGridUtils.cs` |
-| ExcelExportService | `AspireWebAppTemplate.ApiService/Services/ExcelExportService.cs` |
-| ApiResult | `AspireWebAppTemplate.Core/Common/ApiResult.cs` |
+| ExcelExportService | `AspireWebAppTemplate.Infrastructure/Services/ExcelExportService.cs` |
+| ApiResult | `AspireWebAppTemplate.Application/Common/ApiResult.cs` |

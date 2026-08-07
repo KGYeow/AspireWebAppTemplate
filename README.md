@@ -1,10 +1,10 @@
 # AspireWebAppTemplate
 
-A comprehensive .NET Aspire web application template built with .NET 10.0, featuring a multi-tier architecture with separated frontend and API backend, modern UI with MudBlazor, authentication (local Identity + LDAP), and full audit logging.
+A comprehensive .NET Aspire web application template built with .NET 10.0, featuring a Clean Architecture with separated frontend and API backend, modern UI with MudBlazor, authentication (local Identity + LDAP), and full audit logging.
 
 ## Overview
 
-This is a full-featured .NET Aspire application template designed to kickstart enterprise-level web applications with a clean 3-tier architecture. The frontend (Blazor Server) communicates with the backend (ASP.NET Core Web API) via HTTP, orchestrated by .NET Aspire for service discovery, health checks, and telemetry.
+This is a full-featured .NET Aspire application template designed to kickstart enterprise-level web applications with a Clean Architecture organized into 4 layers: Domain, Application, Infrastructure, and Host. The frontend (Blazor Server) communicates with the backend (ASP.NET Core Web API) via HTTP, orchestrated by .NET Aspire for service discovery, health checks, and telemetry.
 
 ## Architecture
 
@@ -14,15 +14,22 @@ Browser ←SignalR→ [Web: Blazor Server + MudBlazor]
                     HttpClient (Aspire service discovery)
                          │
                          ↓
-                  [ApiService: Controllers + Services + EF Core + Identity]
+                  [ApiService: Thin Controllers]
                          │
-                         ↓
+                    ┌─────┴─────┐
+                    ↓           ↓
+          [Application]  [Infrastructure: EF Core + Identity + Services]
+                    │           │
+                    └─────┬─────┘
+                          ↓
+                      [Domain]
+                          ↓
                     [SQL Server]
 ```
 
 ## Project Structure
 
-The solution is organized into seven projects:
+The solution is organized into nine projects:
 
 ### 1. **AspireWebAppTemplate.AppHost** (Aspire Orchestrator)
 Defines and orchestrates all services, databases, and their references using .NET Aspire.
@@ -30,15 +37,48 @@ Defines and orchestrates all services, databases, and their references using .NE
 ### 2. **AspireWebAppTemplate.ServiceDefaults** (Shared Aspire Configuration)
 Shared configuration for health checks, telemetry (OpenTelemetry), resilience, and service discovery.
 
-### 3. **AspireWebAppTemplate.ApiService** (Backend API)
-ASP.NET Core Web API with business logic, data access, and Identity:
-- **Controllers/** — API endpoints (Auth, Users, Roles, AuditLog)
-- **Data/** — EF Core DbContext, entities, migrations, seed data
-- **Services/** — Business logic (Login, Register, LDAP, AuditLog, ExcelExport, Email, EmailTemplate)
-- **Abstractions/** — Service interfaces
-- **Options/** — Configuration classes (LdapSettings)
+### 3. **AspireWebAppTemplate.Domain** (Domain Layer)
+Pure domain primitives with zero external dependencies:
+- **Enums/** — All domain enumerations (AuditActionType, AuditEntityType, ThemePreference, NotificationCategory, AnnouncementDisplayType, AnnouncementSeverity, EmailType, EmailTemplateCategory, AuthSource, ExportScope)
+- **Constants/** — Shared constants (SystemPageDefaults, DateTimeFormatDefaults, ExportDefaults)
+- **Attributes/** — Custom validation/metadata attributes (ExportColumnAttribute, OptionalPhoneAttribute)
+- **Entities/** — Pure domain entities without Identity dependencies (EmailTemplate)
 
-### 4. **AspireWebAppTemplate.Web** (Frontend)
+### 4. **AspireWebAppTemplate.Application** (Application Layer)
+Service interfaces, DTOs, and contracts (depends on Domain only):
+- **Abstractions/** — All service interfaces (IAuditLogService, IRoleService, IUserService, IAuthService, INavigationProvider, ITimeZoneService, ICurrentUserAccessor, etc.)
+- **Common/** — Shared models (ApiResult, NavItem, PagedResult)
+- **Contracts/** — DTOs grouped by feature:
+  - `Ai/` — AI-related request/response DTOs
+  - `Announcements/` — AnnouncementDto, CreateAnnouncementRequest, UpdateAnnouncementRequest, AnnouncementQueryParams
+  - `AuditLog/` — AuditLogDto, AuditLogQueryParams, AuditLogRequest
+  - `Auth/` — LoginRequest, RegisterResponse, etc.
+  - `Email/` — EmailTemplateDto, UpdateEmailTemplateRequest, EmailTemplateQueryParams
+  - `Notifications/` — NotificationDto, CreateNotificationRequest, NotificationPushRequest, etc.
+  - `PagePermissions/` — PagePermissionDto, UpdatePagePermissionsRequest
+  - `Roles/` — RoleDto, CreateRoleRequest, UpdateRoleRequest, RoleQueryParams
+  - `Users/` — UserDto, CreateUserRequest, UpdateUserRequest, UserQueryParams
+- **Extensions/** — Extension methods (NavigationProviderExtensions, QueryableExtensions)
+- **Utilities/** — Pure-logic implementations (DefaultNavigationProvider, TimeZoneService)
+
+### 5. **AspireWebAppTemplate.Infrastructure** (Infrastructure Layer)
+EF Core, Identity, service implementations, and data access (depends on Application):
+- **Data/** — ApplicationDbContext, Configurations, Entities, Migrations, SeedData
+- **Identity/** — ASP.NET Core Identity entities (ApplicationUser, ApplicationRole)
+- **Services/** — All business service implementations (NotificationService, AuthService, EmailService, etc.)
+- **Clients/** — Typed HttpClients (WebCallbackClient)
+- **Handlers/** — Delegating handlers (InternalApiKeyDelegatingHandler)
+- **Extensions/** — DI registration (InfrastructureServiceExtensions)
+- **Options/** — Configuration option classes (LdapSettings)
+- **Utilities/** — Helper classes (AuditChangeHelper, CurrentUserAccessor, SecureConnectionString)
+
+### 6. **AspireWebAppTemplate.ApiService** (API Host)
+Thin HTTP host layer: Controllers, Authentication, and Program.cs (depends on Application + Infrastructure):
+- **Controllers/** — Thin REST API controllers (extend BaseController, delegate to services)
+- **Authentication/** — InternalAuthenticationHandler (service-to-service auth)
+- **Program.cs** — Composition root (DI, middleware, Identity, EF Core configuration)
+
+### 7. **AspireWebAppTemplate.Web** (Frontend)
 Blazor Server frontend (Global InteractiveServer mode):
 - **Components/Pages/** — Application pages
   - `Account/Auth/` — Login, Register, ForgotPassword, ResetPassword, etc.
@@ -53,34 +93,28 @@ Blazor Server frontend (Global InteractiveServer mode):
   - `Settings/` — User preferences (theme, timezone, date format)
   - `Example/` — Demo pages (Auth, Counter, Weather)
 - **Components/Layout/** — MainLayout, AuthLayout, ManageLayout, NavMenu, Topbar
-- **Services/** — HTTP client services (ApiAuth, ApiUser, ApiRole, ApiAuditLog, ApiEmailTemplate)
-- **Abstractions/** — Frontend service interfaces
+- **Services/** — HTTP client services, contexts, handlers
+- **Extensions/** — DI registration extensions (ApiClientServiceExtensions, ApplicationServiceExtensions)
+- **Hubs/** — SignalR hubs (NotificationHub)
+- **Endpoints/** — Minimal API endpoints (NotificationCallbackEndpoint)
+- **Authorization/** — PagePermissionHandler, requirements
 
-### 5. **AspireWebAppTemplate.Core** (Shared Domain)
-Shared between frontend and backend:
-- **Domain/Enums/** — Business enumerations (AuditActionType, AuthSource, ThemePreference, EmailType, EmailTemplateCategory)
-- **Contracts/** — DTOs shared between API and frontend, organized by feature:
-  - `Auth/` — Login, Register, Password, 2FA, Passkeys, External Logins
-  - `Users/` — UserDto, CRUD requests, LDAP, Preferences, Profile
-  - `Roles/` — RoleDto, CreateRoleRequest
-  - `AuditLog/` — AuditLogEntryDto, QueryParams
-  - `PagedResult.cs` — Generic paged response wrapper
-- **Common/** — ApiResult<T>, ExportDefaults, NavModels, DateTimeFormatDefaults
-- **Application/** — Navigation provider, TimeZoneService
-- **Utilities/** — ExportColumnAttribute, SecureConnectionString, OptionalPhone
-
-### 6. **AspireWebAppTemplate.UI** (Shared UI Components)
+### 8. **AspireWebAppTemplate.UI** (Shared UI Components)
 Reusable Blazor components and themes:
-- **Components/Shared/** — ConfirmationDialog, PageHeader, ModalDialog, PillToggle, StatusAlert
+- **Components/Shared/** — ConfirmationDialog, PageHeader, ModalDialog, PillToggle, StatusAlert, PageContent, LoadingOverlay
 - **Components/DataGrid/** — BoolFilterSelect, EnumFilterSelect, StringFilterSelect
-- **Theme/** — ApplicationTheme
-- **Utilities/** — DataGridUtils<T> (client-side filtering/sorting/pagination, MapEnum for enum column filtering)
+- **Theme/** — DefaultTheme (neutral blue) + JabilTheme (corporate brand)
+- **Utilities/** — DataGridUtils<T>, QueryableDataGridUtils<T>
 
-### 7. **AspireWebAppTemplate.Tests** (Test Project)
-- **AuditLog/** — Property-based tests (FsCheck)
+### 9. **AspireWebAppTemplate.Tests** (Test Project)
+- **Announcements/** — Property-based tests (FsCheck) for announcement service
+- **AuditLog/** — Property-based tests for audit features
+- **ControllerServiceRefactor/** — Property + unit tests for service layer
 - **Email/** — Property-based tests for email template/service features
-- **Announcements/** — Property-based tests for announcement service (status, CRUD, dismissal, notifications)
-- Integration and unit tests
+- **Notifications/** — Property + unit tests for notification features
+- **PagePermissions/** — Property + unit tests for page permissions
+- **Services/** — Service-level unit tests
+- **Layout/** — Layout/component tests
 
 ## Technology Stack
 
@@ -88,7 +122,7 @@ Reusable Blazor components and themes:
 - **Frontend**: Blazor Server (Global InteractiveServer)
 - **UI Components**: MudBlazor 9.5.0, Radzen.Blazor (HtmlEditor only)
 - **Backend**: ASP.NET Core Web API with Controllers
-- **Database**: SQL Server with Entity Framework Core 10.0
+- **Database**: SQL Server with Entity Framework Core 10.0.9
 - **Authentication**: Cookie-based (Web) + ASP.NET Core Identity (API)
 - **Email**: SMTP with database-stored templates (MailKit)
 - **LDAP**: Active Directory integration via System.DirectoryServices.Protocols
@@ -146,6 +180,7 @@ Reusable Blazor components and themes:
 - Instant-save on change
 
 ### Architecture Benefits
+- **Clean Architecture**: Domain → Application → Infrastructure → Host dependency flow enforces separation of concerns
 - **Scalability**: Frontend and backend can scale independently
 - **Service Discovery**: Aspire handles inter-service communication
 - **Resilience**: Built-in retry and circuit breaker patterns
@@ -195,7 +230,7 @@ Features built on top of the template for specific project needs. Not part of th
    ```
    Get these values from the AWS console (Option 3: "Use individual values in your AWS service client"). Session tokens expire — see `docs/guides/aws-ai-credentials.md` for details.
 
-3. **Configure the database connection**
+4. **Configure the database connection**
    Update `AspireWebAppTemplate.ApiService/appsettings.json`:
    ```json
    {
@@ -205,23 +240,23 @@ Features built on top of the template for specific project needs. Not part of th
    }
    ```
 
-4. **Run with Aspire (recommended)**
+5. **Run with Aspire (recommended)**
    ```bash
    dotnet run --project AspireWebAppTemplate.AppHost
    ```
    Aspire dashboard opens at `https://localhost:17024` with links to both services.
 
-5. **Or run ApiService standalone** (for EF migrations)
+6. **Or run ApiService standalone** (for EF migrations)
    ```bash
    dotnet run --project AspireWebAppTemplate.ApiService
    ```
 
-6. **Database migrations**
+7. **Database migrations**
    - Auto-migrates on startup in Development mode
-   - Manual: `Update-Database -Project AspireWebAppTemplate.ApiService -StartupProject AspireWebAppTemplate.ApiService`
-   - CLI: `dotnet ef database update --project AspireWebAppTemplate.ApiService --startup-project AspireWebAppTemplate.ApiService`
+   - Manual: `Update-Database -Project AspireWebAppTemplate.Infrastructure -StartupProject AspireWebAppTemplate.ApiService`
+   - CLI: `dotnet ef database update --project AspireWebAppTemplate.Infrastructure --startup-project AspireWebAppTemplate.ApiService`
 
-7. **Default accounts** (seeded automatically)
+8. **Default accounts** (seeded automatically)
    - Admin: `admin@example.com` / `Admin123#`
    - User: `user@example.com` / `User123#`
 
@@ -253,16 +288,18 @@ Features built on top of the template for specific project needs. Not part of th
 ## Development Workflow
 
 ### Adding New Features
-1. Add DTOs to `AspireWebAppTemplate.Core/Contracts/`
-2. Add API endpoints to `AspireWebAppTemplate.ApiService/Controllers/`
-3. Add HTTP client methods to `AspireWebAppTemplate.Web/Services/`
-4. Create UI pages in `AspireWebAppTemplate.Web/Components/Pages/`
+1. Add DTOs to `AspireWebAppTemplate.Application/Contracts/`
+2. Add service interface to `AspireWebAppTemplate.Application/Abstractions/`
+3. Add service implementation to `AspireWebAppTemplate.Infrastructure/Services/`
+4. Add API endpoints to `AspireWebAppTemplate.ApiService/Controllers/`
+5. Add HTTP client methods to `AspireWebAppTemplate.Web/Services/`
+6. Create UI pages in `AspireWebAppTemplate.Web/Components/Pages/`
 
 ### Database Changes
-1. Modify entities in `ApiService/Data/Entities/`
+1. Modify entities in `Infrastructure/Data/Entities/` or `Infrastructure/Identity/` or `Domain/Entities/`
 2. Update `ApplicationDbContext.cs`
-3. Add migration: `Add-Migration MigrationName -Project AspireWebAppTemplate.ApiService -StartupProject AspireWebAppTemplate.ApiService`
-4. Apply: `Update-Database -Project AspireWebAppTemplate.ApiService -StartupProject AspireWebAppTemplate.ApiService`
+3. Add migration: `Add-Migration MigrationName -Project AspireWebAppTemplate.Infrastructure -StartupProject AspireWebAppTemplate.ApiService`
+4. Apply: `Update-Database -Project AspireWebAppTemplate.Infrastructure -StartupProject AspireWebAppTemplate.ApiService`
 
 ## License
 

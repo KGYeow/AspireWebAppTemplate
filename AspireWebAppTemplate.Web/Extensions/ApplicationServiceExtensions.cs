@@ -1,6 +1,6 @@
 using AspireWebAppTemplate.Abstractions;
 using AspireWebAppTemplate.Application.Abstractions;
-using AspireWebAppTemplate.Infrastructure.Services;
+using AspireWebAppTemplate.Application.Utilities;
 using AspireWebAppTemplate.Web.Abstractions;
 using AspireWebAppTemplate.Web.Services;
 

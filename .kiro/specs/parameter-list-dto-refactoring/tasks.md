@@ -6,20 +6,20 @@ This plan refactors 8 service and API client methods from long parameter lists i
 
 ## Tasks
 
-- [ ] 1. Create new DTO classes in Core/Contracts
-  - [ ] 1.1 Create TrySendEmailRequest and SendEmailRequest in Core/Contracts/Email
-    - Create `AspireWebAppTemplate.Core/Contracts/Email/TrySendEmailRequest.cs` as a sealed class with properties: `UserId` (string), `RecipientEmail` (string?), `Category` (NotificationCategory), `EmailType` (EmailType), `Variables` (Dictionary<string, string>)
-    - Create `AspireWebAppTemplate.Core/Contracts/Email/SendEmailRequest.cs` as a sealed class with properties: `EmailType` (EmailType), `RecipientEmail` (string), `Variables` (Dictionary<string, string>)
+- [ ] 1. Create new DTO classes in Application/Contracts
+  - [ ] 1.1 Create TrySendEmailRequest and SendEmailRequest in Application/Contracts/Email
+    - Create `AspireWebAppTemplate.Application/Contracts/Email/TrySendEmailRequest.cs` as a sealed class with properties: `UserId` (string), `RecipientEmail` (string?), `Category` (NotificationCategory), `EmailType` (EmailType), `Variables` (Dictionary<string, string>)
+    - Create `AspireWebAppTemplate.Application/Contracts/Email/SendEmailRequest.cs` as a sealed class with properties: `EmailType` (EmailType), `RecipientEmail` (string), `Variables` (Dictionary<string, string>)
     - Include full XML documentation on classes and all properties
     - _Requirements: 1.1, 1.2, 8.1, 8.2_
 
-  - [ ] 1.2 Create RegisterRequest in Core/Contracts/Auth
-    - Create `AspireWebAppTemplate.Core/Contracts/Auth/RegisterRequest.cs` as a sealed class with properties: `Email` (string), `Password` (string), `ConfirmEmailBaseUri` (string), `ReturnUrl` (string?)
+  - [ ] 1.2 Create RegisterRequest in Application/Contracts/Auth
+    - Create `AspireWebAppTemplate.Application/Contracts/Auth/RegisterRequest.cs` as a sealed class with properties: `Email` (string), `Password` (string), `ConfirmEmailBaseUri` (string), `ReturnUrl` (string?)
     - Include full XML documentation on class and all properties
     - _Requirements: 4.1, 4.2_
 
-  - [ ] 1.3 Create UserQueryParams in Core/Contracts/Users
-    - Create `AspireWebAppTemplate.Core/Contracts/Users/UserQueryParams.cs` as a sealed class with properties: `Page` (int, default 0), `PageSize` (int, default 10), `SearchTerm` (string?)
+  - [ ] 1.3 Create UserQueryParams in Application/Contracts/Users
+    - Create `AspireWebAppTemplate.Application/Contracts/Users/UserQueryParams.cs` as a sealed class with properties: `Page` (int, default 0), `PageSize` (int, default 10), `SearchTerm` (string?)
     - Include full XML documentation on class and all properties
     - _Requirements: 5.1, 5.2_
 
@@ -63,7 +63,7 @@ This plan refactors 8 service and API client methods from long parameter lists i
 
 - [ ] 3. Refactor ILoginService and LoginService
   - [ ] 3.1 Update ILoginService interface signature
-    - Change `ValidateAndGenerateTokenAsync` to accept a single `LoginRequest` parameter (reuse existing `Core/Contracts/Auth/LoginRequest`)
+    - Change `ValidateAndGenerateTokenAsync` to accept a single `LoginRequest` parameter (reuse existing `Application/Contracts/Auth/LoginRequest`)
     - Remove old 4-parameter signature
     - _Requirements: 2.1, 2.6_
 
@@ -83,7 +83,7 @@ This plan refactors 8 service and API client methods from long parameter lists i
 
 - [ ] 4. Refactor ILdapLoginService and LdapLoginService
   - [ ] 4.1 Update ILdapLoginService interface signature
-    - Change `ValidateAndGenerateTokenAsync` to accept a single `LoginRequest` parameter (reuse existing `Core/Contracts/Auth/LoginRequest`)
+    - Change `ValidateAndGenerateTokenAsync` to accept a single `LoginRequest` parameter (reuse existing `Application/Contracts/Auth/LoginRequest`)
     - Remove old 4-parameter signature
     - _Requirements: 3.1, 3.6_
 

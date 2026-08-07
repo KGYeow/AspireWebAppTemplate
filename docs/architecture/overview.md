@@ -2,17 +2,32 @@
 
 ## Solution Structure
 
-The AspireWebAppTemplate solution follows a multi-tier architecture orchestrated by .NET Aspire, with seven projects:
+The AspireWebAppTemplate solution follows a Clean Architecture pattern with four layers (Domain → Application → Infrastructure → Host), orchestrated by .NET Aspire. The solution contains nine projects:
 
 ```
 AspireWebAppTemplate.slnx
-├── AspireWebAppTemplate.AppHost/        (Aspire orchestrator)
+├── AspireWebAppTemplate.AppHost/         (Aspire orchestrator)
 ├── AspireWebAppTemplate.ServiceDefaults/ (Shared Aspire config)
-├── AspireWebAppTemplate.ApiService/     (Backend API)
-├── AspireWebAppTemplate.Web/            (Frontend - Blazor Server)
-├── AspireWebAppTemplate.Core/           (Shared domain & contracts)
+├── AspireWebAppTemplate.Domain/          (Domain layer — enums, constants, attributes, pure entities)
+├── AspireWebAppTemplate.Application/     (Application layer — interfaces, DTOs, contracts, extensions)
+├── AspireWebAppTemplate.Infrastructure/  (Infrastructure layer — EF Core, Identity, services, data access)
+├── AspireWebAppTemplate.ApiService/      (API host — thin controllers, authentication, composition root)
+├── AspireWebAppTemplate.Web/             (Frontend — Blazor Server)
 ├── AspireWebAppTemplate.UI/             (Shared UI components)
 └── AspireWebAppTemplate.Tests/          (Test project)
+```
+
+## Dependency Flow
+
+```
+Domain (zero dependencies)
+  ↑
+Application (depends on Domain)
+  ↑
+Infrastructure (depends on Application)
+  ↑
+ApiService (depends on Application + Infrastructure + ServiceDefaults)
+Web (depends on Application + UI + ServiceDefaults)
 ```
 
 ### AspireWebAppTemplate.AppHost (Aspire Orchestrator)
@@ -23,47 +38,75 @@ Defines and orchestrates all services, databases, and their references using .NE
 
 Shared configuration for health checks, telemetry (OpenTelemetry), resilience, and service discovery.
 
-### AspireWebAppTemplate.ApiService (Backend API)
+### AspireWebAppTemplate.Domain (Domain Layer)
 
-ASP.NET Core Web API with business logic, data access, and Identity.
+Pure domain primitives with zero external dependencies.
 
 | Folder | Purpose |
 |--------|---------|
-| `Controllers/` | API endpoints (Auth, Users, Roles, AuditLog, Notifications) |
-| `Data/` | ApplicationDbContext, entities, migrations, seed data |
-| `Extensions/` | DI registration extensions (ApplicationServiceExtensions) |
-| `Services/` | Business logic (LoginService, AuditLogService, LdapAuthService, ExcelExportService, NotificationService, etc.) |
-| `Abstractions/` | Service interfaces (IAuditLogService, ILoginService, INotificationService, etc.) |
+| `Enums/` | Business enumerations (AuditActionType, AuditEntityType, ThemePreference, NotificationCategory, AnnouncementDisplayType, AnnouncementSeverity, EmailType, EmailTemplateCategory, AuthSource, ExportScope) |
+| `Constants/` | Shared constants (SystemPageDefaults, DateTimeFormatDefaults, ExportDefaults) |
+| `Attributes/` | Custom validation/metadata attributes (ExportColumnAttribute, OptionalPhoneAttribute) |
+| `Entities/` | Pure domain entities without Identity dependencies (EmailTemplate) |
+| `ValueObjects/` | Value objects (reserved for future use) |
+
+### AspireWebAppTemplate.Application (Application Layer)
+
+Service contracts, DTOs, shared logic, and pure-logic utilities. Depends only on Domain.
+
+| Folder | Purpose |
+|--------|---------|
+| `Abstractions/` | All service interfaces (IAuditLogService, IRoleService, IUserService, IAuthService, INavigationProvider, ITimeZoneService, ICurrentUserAccessor, etc.) |
+| `Common/` | Shared models (ApiResult, NavItem, PagedResult) |
+| `Contracts/` | DTOs grouped by feature (Ai, Announcements, AuditLog, Auth, Email, Notifications, PagePermissions, Roles, Users) |
+| `Extensions/` | Extension methods (NavigationProviderExtensions, QueryableExtensions) |
+| `Utilities/` | Pure-logic implementations with no external dependencies (DefaultNavigationProvider, TimeZoneService) |
+
+### AspireWebAppTemplate.Infrastructure (Infrastructure Layer)
+
+Implements Application interfaces. Contains all data access, Identity, and external service integrations.
+
+| Folder | Purpose |
+|--------|---------|
+| `Data/` | ApplicationDbContext, entity configurations, migrations, seed data |
+| `Data/Entities/` | EF Core entities with Identity FK dependencies (Announcement, AuditLogEntry, Notification, PagePermission, etc.) |
+| `Data/SeedData/` | Partial class seed data files (roles, users, page permissions, email templates, announcements) |
+| `Identity/` | ASP.NET Core Identity entities (ApplicationUser, ApplicationRole) |
+| `Services/` | All business service implementations (NotificationService, AuthService, EmailService, AuditLogService, ExcelExportService, etc.) |
+| `Clients/` | Typed HttpClients (WebCallbackClient) |
+| `Handlers/` | Delegating handlers (InternalApiKeyDelegatingHandler) |
+| `Extensions/` | DI registration (InfrastructureServiceExtensions → AddInfrastructureServices()) |
 | `Options/` | Configuration option classes (LdapSettings) |
+| `Utilities/` | Helper classes (AuditChangeHelper, CurrentUserAccessor, SecureConnectionString) |
+
+### AspireWebAppTemplate.ApiService (API Host)
+
+Thin HTTP host layer. Controllers delegate all work to Infrastructure services.
+
+| Folder | Purpose |
+|--------|---------|
+| `Controllers/` | Thin REST API controllers (Auth, Users, Roles, AuditLog, Notifications, Announcements, EmailTemplates, etc.) |
 | `Authentication/` | InternalAuthenticationHandler for service-to-service auth |
+| `Program.cs` | Composition root (DI, middleware, Identity, EF Core configuration) |
 
 ### AspireWebAppTemplate.Web (Frontend)
 
-Blazor Server frontend (Global InteractiveServer mode) — no database or Identity dependencies.
+Blazor Server frontend (Global InteractiveServer mode) — no database, Identity, or Infrastructure dependencies.
 
 | Folder | Purpose |
 |--------|---------|
-| `Components/Pages/` | Feature pages organized by domain (Profile, Settings, UserManagement, RoleManagement, AuditLog, Notifications) |
-| `Components/Layout/` | MainLayout, DropdownProfile, navigation components |
-| `Components/Account/` | Login, Register, Manage pages (calls API via HTTP) |
+| `Components/Pages/` | Feature pages organized by domain (Profile, Settings, UserManagement, RoleManagement, AuditLog, Notifications, Announcements, EmailTemplates) |
+| `Components/Layout/` | Region-based layout (MainLayout, Topbar, Sidebar, Footer) |
 | `Common/Defaults/` | Centralized constants (AssetDefaults — logo/background paths) |
 | `Extensions/` | DI registration extensions (ApiClientServiceExtensions, ApplicationServiceExtensions) |
-| `Services/` | HTTP client services (ApiAuthService, ApiUserService, ApiRoleService, ApiAuditLogService, etc.) |
-| `Abstractions/` | Frontend service interfaces |
+| `Services/ApiClients/` | Typed HttpClient services (ApiUserService, ApiNotificationService, ApiAnnouncementService, etc.) |
+| `Services/Contexts/` | Per-circuit scoped state (NotificationContext, AnnouncementContext, CircuitUserContext) |
+| `Services/Handlers/` | Delegating handlers (UserIdentityDelegatingHandler) |
+| `Endpoints/` | Minimal API endpoints (NotificationCallbackEndpoint) |
+| `Hubs/` | SignalR hubs (NotificationHub) |
+| `Authorization/` | PagePermissionHandler, requirements |
+| `Authentication/` | InternalApiKeyAuthenticationHandler (service-to-service) |
 | `wwwroot/` | Static assets, JS interop modules (timezone.js, theme.js) |
-
-### AspireWebAppTemplate.Core (Shared Layer)
-
-Platform-independent business logic, domain models, contracts, and utilities shared between frontend and backend.
-
-| Folder | Purpose |
-|--------|---------|
-| `Domain/Enums/` | Business enumerations (ThemePreference, AuditActionType, AuditEntityType) |
-| `Contracts/` | DTOs shared between API and frontend (Auth, Users, Roles, AuditLog) |
-| `Common/` | ApiResult<T>, Navigation models, constants |
-| `Application/Services/` | Shared services (TimeZoneService, DefaultNavigationProvider) |
-| `Application/Abstractions/` | Shared service interfaces (ITimeZoneService) |
-| `Utilities/` | Helper classes (OptionalPhoneAttribute, ExportColumnAttribute, SecureConnectionString) |
 
 ### AspireWebAppTemplate.UI (UI Components)
 
@@ -71,10 +114,10 @@ Reusable Blazor components and theming shared across the application.
 
 | Folder | Purpose |
 |--------|---------|
-| `Components/DataGrid/` | BoolFilterSelect and other grid components |
-| `Components/Shared/` | PillToggle, PillToggleItem, StatusAlert, and other generic components |
+| `Components/DataGrid/` | BoolFilterSelect, EnumFilterSelect, StringFilterSelect |
+| `Components/Shared/` | PageContent, LoadingOverlay, PageHeader, StatusAlert, PillToggle, ModalDialog, etc. |
 | `Theme/` | DefaultTheme (neutral blue), JabilTheme (corporate brand) — dual palette themes |
-| `Utilities/` | DataGridUtils<T> (in-memory filtering/sorting/pagination) |
+| `Utilities/` | DataGridUtils<T>, QueryableDataGridUtils<T> |
 
 ### AspireWebAppTemplate.Tests (Test Project)
 
@@ -82,10 +125,14 @@ xUnit test project with FsCheck property-based testing.
 
 | Folder | Purpose |
 |--------|---------|
-| `Profile/` | Profile page property tests |
-| `Preferences/` | Settings page property tests |
-| `Theme/` | ThemeStateService unit tests |
-| `AuditLog/` | Audit log property tests |
+| `Announcements/` | Announcement feature property + unit tests |
+| `ControllerServiceRefactor/` | Service layer property + unit tests |
+| `AuditLog/` | Audit log property + unit tests |
+| `Email/` | Email template/service property + unit tests |
+| `Notifications/` | Notification feature property + unit tests |
+| `PagePermissions/` | Page permissions property + unit tests |
+| `Services/` | Service-level unit tests |
+| `Layout/` | Layout/component tests |
 
 ## Request Pipeline
 
@@ -93,19 +140,23 @@ xUnit test project with FsCheck property-based testing.
 graph LR
     Browser -->|SignalR WebSocket| Web[AspireWebAppTemplate.Web]
     Web -->|HttpClient via Aspire service discovery| ApiService[AspireWebAppTemplate.ApiService]
-    ApiService --> EFCore
+    ApiService --> Infrastructure[AspireWebAppTemplate.Infrastructure]
+    Infrastructure --> EFCore
     EFCore --> SQLServer
 ```
 
 ## Key Patterns
 
+- **Clean Architecture**: Domain → Application → Infrastructure → Host layers with strict inward dependency flow
 - **Feature-per-folder**: Each feature lives in its own folder under `Components/Pages/`
 - **Code-behind**: All pages use `Index.razor` + `Index.razor.cs` separation
 - **HTTP client services**: Frontend pages call API via typed HTTP client services (no direct DB access)
 - **ApiResult<T>**: Typed result wrapper for all API operations
 - **BaseController**: Shared controller base with `CurrentUserId`, `ClientIpAddress`
 - **In-memory data grids**: `DataGridUtils<T>` for MudDataGrid client-side filtering, sorting, pagination
+- **Queryable data grids**: `QueryableDataGridUtils<T>` for true server-side filtering/sorting/pagination (audit log)
 - **Scoped state services**: ThemeStateService (theme), UserTimeZoneContext (timezone/format) — one per SignalR circuit
 - **Instant-save**: Settings page saves on value change (no Save button)
 - **View/Edit mode**: Profile page uses unified layout toggle
 - **MudPaper containers**: Flat cards (Elevation="0") for section grouping
+- **Real-time notifications**: API → Web callback → SignalR hub → browser

@@ -36,5 +36,5 @@ Features built on top of the template for specific project needs. These are not 
 - **Convention over configuration**: follow established patterns rather than inventing new ones
 - **Comprehensive documentation**: all code includes XML docs and inline comments
 - **Testable**: property-based tests for correctness properties, unit tests for specific cases
-- **Separation of concerns**: clear boundaries between Core, API, Web, and UI projects
+- **Clean Architecture**: 4-layer structure (Domain → Application → Infrastructure → Host) with strict inward dependency flow, enforcing separation of business logic from data access and presentation
 - **Privacy by design**: only security-sensitive operations are audited; personal preferences and profile edits are not logged

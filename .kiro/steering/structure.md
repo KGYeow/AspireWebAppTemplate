@@ -5,59 +5,77 @@
 ```
 AspireWebAppTemplate/
 ├── AspireWebAppTemplate.AppHost/         ← Aspire orchestrator (dev entry point)
-├── AspireWebAppTemplate.ApiService/      ← Backend REST API
+├── AspireWebAppTemplate.Domain/          ← Domain layer (enums, constants, attributes, pure entities)
+├── AspireWebAppTemplate.Application/     ← Application layer (interfaces, DTOs, contracts, extensions)
+├── AspireWebAppTemplate.Infrastructure/  ← Infrastructure layer (EF Core, Identity, services, data access)
+├── AspireWebAppTemplate.ApiService/      ← API host (thin controllers, authentication, Program.cs)
 ├── AspireWebAppTemplate.Web/             ← Blazor Server frontend
 ├── AspireWebAppTemplate.UI/              ← Shared Razor Class Library
-├── AspireWebAppTemplate.Core/            ← Shared domain (DTOs, enums, interfaces)
 ├── AspireWebAppTemplate.ServiceDefaults/ ← Aspire defaults (telemetry, health)
 ├── AspireWebAppTemplate.Tests/           ← All tests (property, unit, integration)
 ├── docs/                                 ← Feature documentation
 └── .kiro/                                ← Specs and steering files
 ```
 
-## Core Project
+## Domain Project
 ```
-AspireWebAppTemplate.Core/
-├── Application/Abstractions/   ← Shared interfaces (INavigationProvider, etc.)
-├── Common/                     ← NavModels, Defaults, shared models
+AspireWebAppTemplate.Domain/
+├── Attributes/                 ← Custom validation/metadata attributes (ExportColumnAttribute, OptionalPhoneAttribute)
+├── Constants/                  ← Shared constants (SystemPageDefaults, DateTimeFormatDefaults, ExportDefaults)
+├── Entities/                   ← Pure domain entities without Identity dependencies (EmailTemplate)
+├── Enums/                      ← All domain enumerations (AuditActionType, AuditEntityType, ThemePreference, NotificationCategory, AnnouncementDisplayType, AnnouncementSeverity, EmailType, EmailTemplateCategory, AuthSource, ExportScope)
+└── ValueObjects/               ← Value objects (reserved for future use)
+```
+
+## Application Project
+```
+AspireWebAppTemplate.Application/
+├── Abstractions/               ← All service interfaces (IAuditLogService, IRoleService, IUserService, IAuthService, INavigationProvider, ITimeZoneService, ICurrentUserAccessor, etc.)
+├── Common/                     ← Shared models (ApiResult, NavItem, PagedResult)
 ├── Contracts/                  ← DTOs grouped by feature
+│   ├── Ai/                     ← AI-related request/response DTOs
 │   ├── Announcements/          ← AnnouncementDto, CreateAnnouncementRequest, UpdateAnnouncementRequest, AnnouncementQueryParams
-│   ├── AuditLog/
-│   ├── Auth/
+│   ├── AuditLog/               ← AuditLogDto, AuditLogQueryParams, AuditLogRequest
+│   ├── Auth/                   ← LoginRequest, RegisterResponse, etc.
 │   ├── Email/                  ← EmailTemplateDto, UpdateEmailTemplateRequest, EmailTemplateQueryParams
 │   ├── Notifications/          ← NotificationDto, CreateNotificationRequest, NotificationPushRequest, etc.
-│   ├── PagePermissions/
-│   ├── Roles/
-│   └── Users/
-├── Domain/Enums/               ← AuditActionType, AuditEntityType, ThemePreference, NotificationCategory, AnnouncementDisplayType, AnnouncementSeverity, EmailType, EmailTemplateCategory, etc.
+│   ├── PagePermissions/        ← PagePermissionDto, UpdatePagePermissionsRequest
+│   ├── Roles/                  ← RoleDto, CreateRoleRequest, UpdateRoleRequest, RoleQueryParams
+│   └── Users/                  ← UserDto, CreateUserRequest, UpdateUserRequest, UserQueryParams
 ├── Extensions/                 ← Extension methods (NavigationProviderExtensions, QueryableExtensions)
-└── Utilities/                  ← Shared utility classes (SecureConnectionString)
-    └── Attributes/             ← Custom validation/metadata attributes (ExportColumnAttribute, OptionalPhoneAttribute)
+└── Utilities/                  ← Pure-logic implementations (DefaultNavigationProvider, TimeZoneService)
+```
+
+## Infrastructure Project
+```
+AspireWebAppTemplate.Infrastructure/
+├── Clients/                    ← Typed HttpClients (WebCallbackClient)
+├── Data/
+│   ├── ApplicationDbContext.cs ← EF Core DbContext
+│   ├── Configurations/         ← IEntityTypeConfiguration<T> classes (one per entity)
+│   ├── Entities/               ← EF Core entities with Identity FK dependencies (Announcement, AnnouncementDismissal, AuditLogEntry, Notification, NotificationPreference, PagePermission)
+│   ├── Migrations/             ← EF Core migration files
+│   └── SeedData/               ← Partial class seed data files
+│       ├── SeedData.cs                    ← Entry point (orchestrates all seed methods)
+│       ├── SeedData.Roles.cs              ← Default roles
+│       ├── SeedData.Users.cs              ← Default admin/user accounts
+│       ├── SeedData.PagePermissions.cs    ← Default page permission records
+│       ├── SeedData.EmailTemplates.cs     ← Default email templates (all EmailType values)
+│       └── SeedData.Announcements.cs      ← Sample announcements
+├── Extensions/                 ← DI registration (InfrastructureServiceExtensions)
+├── Handlers/                   ← Delegating handlers (InternalApiKeyDelegatingHandler)
+├── Identity/                   ← ASP.NET Core Identity entities (ApplicationUser, ApplicationRole)
+├── Options/                    ← Configuration option classes (LdapSettings)
+├── Services/                   ← All business service implementations (NotificationService, AuthService, EmailService, etc.)
+└── Utilities/                  ← Helper classes (AuditChangeHelper, CurrentUserAccessor, SecureConnectionString)
 ```
 
 ## ApiService Project
 ```
 AspireWebAppTemplate.ApiService/
-├── Abstractions/               ← Service interfaces (IAuditLogService, IRoleService, IUserService, IAuthService, etc.)
+├── Authentication/             ← InternalAuthenticationHandler (service-to-service auth)
 ├── Controllers/                ← Thin REST API controllers (extend BaseController, delegate to services)
-├── Data/
-│   ├── Entities/               ← EF Core entities (ApplicationUser, ApplicationRole, AuditLogEntry, Announcement, EmailTemplate, etc.)
-│   ├── Configurations/         ← IEntityTypeConfiguration<T> classes (one per entity)
-│   ├── SeedData/               ← Partial class seed data files
-│   │   ├── SeedData.cs                    ← Entry point (orchestrates all seed methods)
-│   │   ├── SeedData.Roles.cs              ← Default roles
-│   │   ├── SeedData.Users.cs              ← Default admin/user accounts
-│   │   ├── SeedData.PagePermissions.cs    ← Default page permission records
-│   │   ├── SeedData.EmailTemplates.cs     ← Default email templates (all EmailType values)
-│   │   └── SeedData.Announcements.cs      ← Sample announcements
-│   └── ApplicationDbContext.cs
-├── Extensions/                 ← DI registration extensions (ApplicationServiceExtensions)
-├── Services/                   ← Business logic and supporting infrastructure
-│   ├── Clients/                ← Typed HttpClients (WebCallbackClient)
-│   ├── Handlers/               ← Delegating handlers (InternalApiKeyDelegatingHandler)
-│   ├── Infrastructure/         ← Accessors, adapters (CurrentUserAccessor)
-│   └── *.cs                    ← Business service implementations (NotificationService, AuthService, EmailService, EmailTemplateService, etc.)
-└── Utilities/                  ← AuditChangeHelper, etc.
+└── Program.cs                  ← Composition root (DI, middleware, Identity, EF Core configuration)
 ```
 
 ## Web Project
@@ -119,12 +137,22 @@ AspireWebAppTemplate.Tests/
 ```
 docs/
 ├── features/                   ← Completed feature specs (requirements, design, tasks)
+│   ├── announcement-banner-system/
 │   ├── audit-log/
-│   ├── controller-service-refactor/
+│   ├── aws-ai-integration/
+│   ├── clean-architecture-migration/
 │   ├── email-smtp-integration/
+│   ├── navigation-filtering/
+│   ├── notification-push-deep-link/
+│   ├── notification-snackbar-popup/
+│   ├── notification-system/
 │   ├── page-access-permissions/
+│   ├── realtime-notifications/
 │   ├── role-management/
-│   └── ...
+│   ├── settings-page/
+│   ├── status-alert/
+│   ├── user-management/
+│   └── user-profile/
 ├── architecture/               ← Architecture decisions
 ├── guides/                     ← Developer guides
 └── README.md

@@ -84,15 +84,14 @@ catch (ArgumentException ex)         { return BadRequest(ex.Message); }
 ## Service Layer
 
 ### Interface Location
-- Service interfaces: `ApiService/Abstractions/` (e.g., `IAuditLogService`, `IRoleService`, `IUserService`, `IAuthService`)
-- Shared interfaces: `Core/Application/Abstractions/` (e.g., `INavigationProvider`)
+- Service interfaces: `Application/Abstractions/` (e.g., `IAuditLogService`, `IRoleService`, `IUserService`, `IAuthService`, `INavigationProvider`, `ITimeZoneService`, `ICurrentUserAccessor`)
 
 ### Implementation Location
-- `ApiService/Services/` — business logic implementations
+- `Infrastructure/Services/` — business logic implementations
 
 ### DI Registration
 - Services registered as **scoped** (aligns with per-request DbContext lifetime).
-- API project: registered via `Extensions/ApplicationServiceExtensions.cs` → `AddApplicationServices()`.
+- API project: registered via `Infrastructure/Extensions/InfrastructureServiceExtensions.cs` → `AddInfrastructureServices()`.
 - Web project: HTTP clients via `Extensions/ApiClientServiceExtensions.cs` → `AddApiClients()`; other services via `Extensions/ApplicationServiceExtensions.cs` → `AddApplicationServices()`.
 - `Program.cs` calls these extension methods — no inline service registrations.
 
@@ -164,7 +163,7 @@ private static readonly (string Key, Func<ApplicationUser, object?> Getter)[] Us
 ## DTO Conventions
 
 ### Location
-- `Core/Contracts/{Feature}/` — grouped by feature (e.g., `Contracts/AuditLog/`, `Contracts/Users/`)
+- `Application/Contracts/{Feature}/` — grouped by feature (e.g., `Contracts/AuditLog/`, `Contracts/Users/`)
 
 ### Naming
 - Request DTOs: `{Action}Request` (e.g., `UpdateProfileRequest`, `CreateUserRequest`)
@@ -215,8 +214,8 @@ Registered with Aspire: `"https+http://apiservice"` base address.
 The API project calls back to the Web project for real-time notification delivery. This is a reverse direction from the normal Web→API flow.
 
 ### Components
-- **`WebCallbackClient`** (`ApiService/Services/WebCallbackClient.cs`) — typed HttpClient that POSTs to the Web project's internal endpoint
-- **`InternalApiKeyDelegatingHandler`** (`ApiService/Services/Handlers/`) — attaches `X-Internal-Api-Key` header to outbound requests
+- **`WebCallbackClient`** (`Infrastructure/Clients/WebCallbackClient.cs`) — typed HttpClient that POSTs to the Web project's internal endpoint
+- **`InternalApiKeyDelegatingHandler`** (`Infrastructure/Handlers/`) — attaches `X-Internal-Api-Key` header to outbound requests
 - **`InternalApiKeyAuthenticationHandler`** (`Web/Authentication/`) — validates the API key on the Web side
 - **`NotificationCallbackEndpoint`** (`Web/Endpoints/`) — minimal API endpoint that receives the callback and pushes to SignalR
 

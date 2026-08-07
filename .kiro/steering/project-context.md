@@ -2,7 +2,8 @@
 
 ## Key Architectural Patterns
 
-- **Thin Controller / Full Service Layer**: Controllers handle ONLY HTTP concerns (request parsing, status code mapping). All business logic, database access, audit logging, and entity mapping lives in service classes under `ApiService/Services/`.
+- **Clean Architecture (4-layer)**: Domain → Application → Infrastructure → Host projects. Dependencies flow inward only. Domain has zero dependencies; Application depends on Domain; Infrastructure depends on Application; host projects (ApiService) depend on Application + Infrastructure; Web depends on Application + UI + ServiceDefaults.
+- **Thin Controller / Full Service Layer**: Controllers handle ONLY HTTP concerns (request parsing, status code mapping). All business logic, database access, audit logging, and entity mapping lives in service classes under `Infrastructure/Services/`.
 - **ICurrentUserAccessor**: A scoped service that provides the authenticated user's `UserId`, `UserName`, and `IpAddress` to service-layer components. Services inject this directly — no need to pass identity through method parameters.
 - **Web ↔ ApiService communication**: HTTP calls via typed HttpClient services with Aspire service discovery (`https+http://apiservice`). Identity propagated via `UserIdentityDelegatingHandler` which forwards user claims and client IP (`X-Client-Ip` header).
 - **Per-circuit caching**: Scoped services in Blazor Server (e.g., `PagePermissionContext`, `NotificationContext`) load data once per SignalR circuit and provide synchronous in-memory lookups.
@@ -15,14 +16,19 @@
 
 ## Project Responsibilities (Summary)
 
-- **Core** — domain enums, DTOs, shared interfaces, navigation models (no dependencies)
-- **ApiService** — thin controllers (HTTP layer), service interfaces (`Abstractions/`), service implementations (`Services/`), EF Core, LDAP, seed data
-- **Web** — Blazor pages, layout shell, API client services, authorization handlers
+- **Domain** — domain enums, constants, custom attributes, pure entities (zero dependencies)
+- **Application** — service interfaces, DTOs/contracts, shared models, extension methods, pure-logic utilities (depends on Domain only)
+- **Infrastructure** — EF Core DbContext, Identity entities, service implementations, data access, typed HttpClients, delegating handlers, utilities (depends on Application)
+- **ApiService** — thin REST controllers (HTTP layer), authentication handler, composition root / Program.cs (depends on Application + Infrastructure + ServiceDefaults)
+- **Web** — Blazor pages, layout shell, API client services, authorization handlers (depends on Application + UI + ServiceDefaults)
 - **UI** — reusable MudBlazor components, grid utilities, theme config
+- **ServiceDefaults** — Aspire shared configuration (telemetry, health, resilience)
+- **AppHost** — Aspire orchestrator (dev entry point, service discovery wiring)
 - **Tests** — property-based + unit tests per feature
 
 ## Key Design Decisions
 
+- **Clean Architecture layers** — Domain/Application/Infrastructure separation enforces dependency inversion. Infrastructure implements Application interfaces; host projects compose the full dependency graph.
 - **No domain events / MediatR** — direct service calls are sufficient at current scale. Introduce when >15 cross-cutting triggers exist.
 - **No repository pattern** — services access `ApplicationDbContext` directly. EF Core IS the repository/unit-of-work.
 - **No FluentValidation** — DataAnnotations on DTOs + service-layer throws for business rules. Simpler for a template.
