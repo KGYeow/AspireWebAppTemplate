@@ -46,7 +46,7 @@ Pure domain primitives with zero external dependencies:
 
 ### 4. **AspireWebAppTemplate.Application** (Application Layer)
 Service interfaces, DTOs, and contracts (depends on Domain only):
-- **Abstractions/** — All service interfaces (IAuditLogService, IRoleService, IUserService, IAuthService, INavigationProvider, ITimeZoneService, ICurrentUserAccessor, etc.)
+- **Abstractions/** — All service interfaces (IAuditLogService, IRoleService, IUserService, IAuthService, INavigationProvider, ITimeZoneHelper, ICurrentUserAccessor, etc.)
 - **Common/** — Shared models (ApiResult, NavItem, PagedResult)
 - **Contracts/** — DTOs grouped by feature:
   - `Ai/` — AI-related request/response DTOs
@@ -59,7 +59,7 @@ Service interfaces, DTOs, and contracts (depends on Domain only):
   - `Roles/` — RoleDto, CreateRoleRequest, UpdateRoleRequest, RoleQueryParams
   - `Users/` — UserDto, CreateUserRequest, UpdateUserRequest, UserQueryParams
 - **Extensions/** — Extension methods (NavigationProviderExtensions, QueryableExtensions)
-- **Utilities/** — Pure-logic implementations (DefaultNavigationProvider, TimeZoneService)
+- **Utilities/** — Pure-logic implementations (DefaultNavigationProvider, TimeZoneHelper)
 
 ### 5. **AspireWebAppTemplate.Infrastructure** (Infrastructure Layer)
 EF Core, Identity, service implementations, and data access (depends on Application):
@@ -104,7 +104,7 @@ Reusable Blazor components and themes:
 - **Components/Shared/** — ConfirmationDialog, PageHeader, ModalDialog, PillToggle, StatusAlert, PageContent, LoadingOverlay
 - **Components/DataGrid/** — BoolFilterSelect, EnumFilterSelect, StringFilterSelect
 - **Theme/** — DefaultTheme (neutral blue) + JabilTheme (corporate brand)
-- **Utilities/** — DataGridUtils<T>, QueryableDataGridUtils<T>
+- **Utilities/** — DataGridHelper<T>, QueryableDataGridHelper<T>
 
 ### 9. **AspireWebAppTemplate.Tests** (Test Project)
 - **Announcements/** — Property-based tests (FsCheck) for announcement service

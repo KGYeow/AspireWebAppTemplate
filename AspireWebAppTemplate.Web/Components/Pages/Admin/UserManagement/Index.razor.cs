@@ -13,7 +13,7 @@ namespace AspireWebAppTemplate.Web.Components.Pages.Admin.UserManagement;
 /// <summary>
 /// User management page. Lists all users with multi-role management,
 /// activation toggle, delete actions, and bulk operations. Admin role required.
-/// Uses server-side filtering, sorting, and pagination via <see cref="DataGridUtils{T}"/>.
+/// Uses server-side filtering, sorting, and pagination via <see cref="DataGridHelper{T}"/>.
 /// All operations are delegated to the API via <see cref="ApiUserService"/> and <see cref="ApiRoleService"/>.
 /// </summary>
 public partial class Index : ComponentBase
@@ -59,7 +59,7 @@ public partial class Index : ComponentBase
     /// and pagination based on <see cref="GridState{T}"/>.
     /// Maps each filterable/sortable column to its corresponding property selector.
     /// </summary>
-    private readonly DataGridUtils<UserViewModel> _dataGridUtils = new DataGridUtils<UserViewModel>()
+    private readonly DataGridHelper<UserViewModel> _dataGridUtils = new DataGridHelper<UserViewModel>()
         .MapString(nameof(UserViewModel.UserName),    x => x.UserName)
         .MapString(nameof(UserViewModel.DisplayName), x => x.DisplayName)
         .MapString(nameof(UserViewModel.JobTitle),    x => x.JobTitle)
@@ -118,7 +118,7 @@ public partial class Index : ComponentBase
 
     /// <summary>
     /// The current global search term for the toolbar search box.
-    /// Applied across all searchable fields via <see cref="DataGridUtils{T}"/>.
+    /// Applied across all searchable fields via <see cref="DataGridHelper{T}"/>.
     /// </summary>
     private string? searchString;
 
@@ -231,7 +231,7 @@ public partial class Index : ComponentBase
     /// <summary>
     /// Server-side reload callback for <see cref="MudDataGrid{T}"/>.
     /// Loads all users from the API, then delegates filtering, sorting, and pagination
-    /// to <see cref="DataGridUtils{T}.ServerReloadAsync"/>.
+    /// to <see cref="DataGridHelper{T}.ServerReloadAsync"/>.
     /// </summary>
     private async Task<GridData<UserViewModel>> ServerReload(GridState<UserViewModel> state, CancellationToken cancellationToken)
     {

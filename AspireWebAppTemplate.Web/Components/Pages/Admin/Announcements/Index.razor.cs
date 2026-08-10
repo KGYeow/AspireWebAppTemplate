@@ -13,7 +13,7 @@ namespace AspireWebAppTemplate.Web.Components.Pages.Admin.Announcements;
 /// Admin management page for announcements. Provides full CRUD operations
 /// with a global search box, grid-native column filtering, and bulk delete.
 /// Uses MudDataGrid with server-side filtering, sorting, and pagination
-/// via <see cref="DataGridUtils{T}"/>, matching the User/Role Management pattern.
+/// via <see cref="DataGridHelper{T}"/>, matching the User/Role Management pattern.
 /// All operations are delegated to the API via <see cref="ApiAnnouncementService"/>.
 /// </summary>
 public partial class Index : ComponentBase
@@ -49,7 +49,7 @@ public partial class Index : ComponentBase
     /// and pagination based on <see cref="GridState{T}"/>.
     /// Maps each filterable/sortable column to its corresponding property selector.
     /// </summary>
-    private readonly DataGridUtils<AnnouncementViewModel> _dataGridUtils = new DataGridUtils<AnnouncementViewModel>()
+    private readonly DataGridHelper<AnnouncementViewModel> _dataGridUtils = new DataGridHelper<AnnouncementViewModel>()
         .MapString(nameof(AnnouncementViewModel.Title), x => x.Title)
         .MapEnum(nameof(AnnouncementViewModel.DisplayType), x => x.DisplayType)
         .MapEnum(nameof(AnnouncementViewModel.Severity), x => x.Severity)
@@ -80,7 +80,7 @@ public partial class Index : ComponentBase
 
     /// <summary>
     /// The current global search term for the toolbar search box.
-    /// Applied across Title and Message fields via <see cref="DataGridUtils{T}"/>.
+    /// Applied across Title and Message fields via <see cref="DataGridHelper{T}"/>.
     /// </summary>
     private string? _searchString;
 
@@ -91,7 +91,7 @@ public partial class Index : ComponentBase
     /// <summary>
     /// Server-side reload callback for <see cref="MudDataGrid{T}"/>.
     /// Loads all announcements from the API, then delegates column filtering,
-    /// sorting, and pagination to <see cref="DataGridUtils{T}.ServerReloadAsync"/>.
+    /// sorting, and pagination to <see cref="DataGridHelper{T}.ServerReloadAsync"/>.
     /// </summary>
     private async Task<GridData<AnnouncementViewModel>> ServerReload(GridState<AnnouncementViewModel> state, CancellationToken cancellationToken)
     {

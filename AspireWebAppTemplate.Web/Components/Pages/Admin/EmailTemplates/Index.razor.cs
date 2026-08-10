@@ -13,7 +13,7 @@ namespace AspireWebAppTemplate.Web.Components.Pages.Admin.EmailTemplates;
 /// (system and business) in a data grid. System templates are shown as read-only
 /// with a lock icon; business templates have an edit action for content customization.
 /// Provides preview functionality for all templates.
-/// Uses server-side filtering, sorting, and pagination via <see cref="DataGridUtils{T}"/>.
+/// Uses server-side filtering, sorting, and pagination via <see cref="DataGridHelper{T}"/>.
 /// All operations are delegated to the API via <see cref="ApiEmailTemplateService"/>.
 /// </summary>
 public partial class Index : ComponentBase
@@ -48,7 +48,7 @@ public partial class Index : ComponentBase
     /// Server-side helper that applies column filters, multi-sort, global search,
     /// and pagination based on <see cref="GridState{T}"/>.
     /// </summary>
-    private readonly DataGridUtils<EmailTemplateViewModel> _dataGridUtils = new DataGridUtils<EmailTemplateViewModel>()
+    private readonly DataGridHelper<EmailTemplateViewModel> _dataGridUtils = new DataGridHelper<EmailTemplateViewModel>()
         .MapString(nameof(EmailTemplateViewModel.DisplayName), x => x.DisplayName)
         .MapEnum(nameof(EmailTemplateViewModel.Category), x => x.Category)
         .MapBool(nameof(EmailTemplateViewModel.IsActive), x => x.IsActive);
@@ -84,7 +84,7 @@ public partial class Index : ComponentBase
     /// <summary>
     /// Server-side reload callback for <see cref="MudDataGrid{T}"/>.
     /// Loads all templates from the API, then delegates filtering, sorting, and pagination
-    /// to <see cref="DataGridUtils{T}.ServerReloadAsync"/>.
+    /// to <see cref="DataGridHelper{T}.ServerReloadAsync"/>.
     /// </summary>
     private async Task<GridData<EmailTemplateViewModel>> ServerReload(GridState<EmailTemplateViewModel> state, CancellationToken cancellationToken)
     {

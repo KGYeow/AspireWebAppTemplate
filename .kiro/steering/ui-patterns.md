@@ -63,9 +63,9 @@ Use flat style (Elevation 0) for content sections:
 ```
 
 ### Data Grids
-- ALL admin DataGrid pages use `MudDataGrid<T>` with `ServerData` callback and `DataGridUtils<T>` for consistent filtering, sorting, and pagination — regardless of dataset size.
-- Use `QueryableDataGridUtils<T>` for database-level filtering/sorting/pagination (audit log with thousands of rows).
-- Use `DataGridUtils<T>` for in-memory filtering/sorting/pagination (all other admin pages — roles, users, announcements, email templates).
+- ALL admin DataGrid pages use `MudDataGrid<T>` with `ServerData` callback and `DataGridHelper<T>` for consistent filtering, sorting, and pagination — regardless of dataset size.
+- Use `QueryableDataGridHelper<T>` for database-level filtering/sorting/pagination (audit log with thousands of rows).
+- Use `DataGridHelper<T>` for in-memory filtering/sorting/pagination (all other admin pages — roles, users, announcements, email templates).
 - Always include `<NoRecordsContent>` and `<LoadingContent>`.
 - `Items` binding is reserved for truly static lists (e.g., settings dropdowns, enum selectors) — NOT for admin management grids.
 
@@ -180,7 +180,7 @@ private sealed class ItemViewModel
 
 ## Enum Column Filtering
 
-For enum property columns, use `EnumFilterSelect` with `MapEnum` in DataGridUtils:
+For enum property columns, use `EnumFilterSelect` with `MapEnum` in DataGridHelper:
 ```razor
 <PropertyColumn Property="t => t.Category" Title="Category" Filterable="true">
     <FilterTemplate>
@@ -188,5 +188,5 @@ For enum property columns, use `EnumFilterSelect` with `MapEnum` in DataGridUtil
     </FilterTemplate>
 </PropertyColumn>
 ```
-- DataGridUtils mapping: `.MapEnum(nameof(ItemViewModel.Category), x => x.Category)`
+- DataGridHelper mapping: `.MapEnum(nameof(ItemViewModel.Category), x => x.Category)`
 - Filter select components (`BoolFilterSelect`, `EnumFilterSelect`, `StringFilterSelect`) have nullable `DataGrid` parameter with null guard for safe initialization

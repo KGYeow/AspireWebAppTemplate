@@ -21,7 +21,7 @@ public static class ApplicationServiceExtensions
         #region Template
 
         services.AddSingleton<INavigationProvider, DefaultNavigationProvider>();
-        services.AddSingleton<ITimeZoneService, TimeZoneService>();
+        services.AddSingleton<ITimeZoneHelper, TimeZoneHelper>();
         services.AddScoped<IUserTimeZoneContext, UserTimeZoneContext>();
         services.AddScoped<IThemeContext, ThemeContext>();
         services.AddScoped<IPagePermissionContext, PagePermissionContext>();

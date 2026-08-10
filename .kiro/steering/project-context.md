@@ -36,4 +36,4 @@
 - **Edit-only template model** — admins customize content, cannot create/delete template types. Set defined by `EmailType` enum + seed data.
 - **Wrapper ViewModel pattern** — all DataGrid pages use a ViewModel wrapping the DTO reference (not flat property copy). `vm.Dto` gives instant access for dialog parameters.
 - **Best-effort email delivery** — `TrySendEmailAsync` checks user preferences, never throws. Primary operations are never blocked by email failures.
-- **`ServerData` for all admin grids** — consistent filtering/sorting/pagination via `DataGridUtils<T>`, even for small datasets. Simplifies maintenance and makes the pattern uniform.
+- **`ServerData` for all admin grids** — consistent filtering/sorting/pagination via `DataGridHelper<T>`, even for small datasets. Simplifies maintenance and makes the pattern uniform.

@@ -58,7 +58,7 @@ High-level system documentation and design decisions.
 
 | Utility | Location | Description |
 |---------|----------|-------------|
-| `DataGridUtils<T>` | AspireWebAppTemplate.UI/Utilities | In-memory MudDataGrid filtering, sorting, pagination |
+| `DataGridHelper<T>` | AspireWebAppTemplate.UI/Utilities | In-memory MudDataGrid filtering, sorting, pagination |
 | `ExcelExportService` | AspireWebAppTemplate.Infrastructure/Services | Excel/CSV export using EPPlus with `[ExportColumn]` attribute |
 | `AuditLogService` | AspireWebAppTemplate.Infrastructure/Services | Audit trail recording with fire-and-forget error handling |
 | `BaseController` | AspireWebAppTemplate.ApiService/Controllers | Shared controller base with `CurrentUserId`, `ClientIpAddress` |
@@ -116,6 +116,6 @@ See [Profiles README](./profiles/README.md) for details on adding new profiles.
 | Feature Ideas & Roadmap | [`docs/features/IDEAS.md`](./features/IDEAS.md) |
 | Project README | [`README.md`](../README.md) |
 | Test Project | `AspireWebAppTemplate.Tests/` |
-| DataGridUtils | `AspireWebAppTemplate.UI/Utilities/DataGridUtils.cs` |
+| DataGridHelper | `AspireWebAppTemplate.UI/Utilities/DataGridHelper.cs` |
 | ExcelExportService | `AspireWebAppTemplate.Infrastructure/Services/ExcelExportService.cs` |
 | ApiResult | `AspireWebAppTemplate.Application/Common/ApiResult.cs` |

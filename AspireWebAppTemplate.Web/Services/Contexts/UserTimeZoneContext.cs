@@ -26,14 +26,14 @@ namespace AspireWebAppTemplate.Web.Services;
 public sealed class UserTimeZoneContext : IUserTimeZoneContext
 {
     private readonly ApiAuthService _authService;
-    private readonly ITimeZoneService _timeZoneService;
+    private readonly ITimeZoneHelper _timeZoneService;
 
     /// <summary>
     /// Initializes a new instance of <see cref="UserTimeZoneContext"/>.
     /// </summary>
     /// <param name="authService">The API auth service for loading user preferences.</param>
     /// <param name="timeZoneService">The singleton time zone service for UTC-to-local conversion.</param>
-    public UserTimeZoneContext(ApiAuthService authService, ITimeZoneService timeZoneService)
+    public UserTimeZoneContext(ApiAuthService authService, ITimeZoneHelper timeZoneService)
     {
         _authService = authService;
         _timeZoneService = timeZoneService;

@@ -84,7 +84,7 @@ catch (ArgumentException ex)         { return BadRequest(ex.Message); }
 ## Service Layer
 
 ### Interface Location
-- Service interfaces: `Application/Abstractions/` (e.g., `IAuditLogService`, `IRoleService`, `IUserService`, `IAuthService`, `INavigationProvider`, `ITimeZoneService`, `ICurrentUserAccessor`)
+- Service interfaces: `Application/Abstractions/` (e.g., `IAuditLogService`, `IRoleService`, `IUserService`, `IAuthService`, `INavigationProvider`, `ITimeZoneHelper`, `ICurrentUserAccessor`)
 
 ### Implementation Location
 - `Infrastructure/Services/` — business logic implementations

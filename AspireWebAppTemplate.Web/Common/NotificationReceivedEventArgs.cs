@@ -1,4 +1,4 @@
-namespace AspireWebAppTemplate.Web.Models;
+namespace AspireWebAppTemplate.Web.Common;
 
 /// <summary>
 /// Event arguments raised when a new notification is received via the SignalR hub.

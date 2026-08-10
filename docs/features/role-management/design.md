@@ -2,7 +2,7 @@
 
 ## Architecture
 
-- Same `DataGridUtils<T>` + `ServerData` pattern as UserManagement
+- Same `DataGridHelper<T>` + `ServerData` pattern as UserManagement
 - `RoleViewModel` with `Equals`/`GetHashCode` by `Id` for selection persistence
 - `ModalDialog` shared component for Add/Edit dialogs
 - `ApplicationRole` extends `IdentityRole` with: DisplayName, Description, IsActive, IsSystem, RequiresMinimumUser, IsDefault, Position, CreatedUtc, UpdatedUtc
@@ -25,6 +25,6 @@
 
 ## Data Flow
 
-1. `ServerReload` → `LoadRoleViewModelsAsync` → `DataGridUtils.ServerReloadAsync`
-2. Details page: `ServerReloadUsers` → `LoadUsersInRoleAsync` (maps to UserViewModel) → `DataGridUtils.ServerReloadAsync`
+1. `ServerReload` → `LoadRoleViewModelsAsync` → `DataGridHelper.ServerReloadAsync`
+2. Details page: `ServerReloadUsers` → `LoadUsersInRoleAsync` (maps to UserViewModel) → `DataGridHelper.ServerReloadAsync`
 3. Mutations → `dataGrid.ReloadServerData()` / `usersDataGrid.ReloadServerData()`

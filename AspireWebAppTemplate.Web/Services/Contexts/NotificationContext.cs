@@ -1,5 +1,5 @@
 using AspireWebAppTemplate.Web.Abstractions;
-using AspireWebAppTemplate.Web.Models;
+using AspireWebAppTemplate.Web.Common;
 using Microsoft.AspNetCore.SignalR.Client;
 
 namespace AspireWebAppTemplate.Web.Services;

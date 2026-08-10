@@ -17,7 +17,7 @@ namespace AspireWebAppTemplate.Application.Utilities;
 /// Register as a singleton to avoid rebuilding the list on every request.
 /// </para>
 /// </remarks>
-public sealed class TimeZoneService : ITimeZoneService
+public sealed class TimeZoneHelper : ITimeZoneHelper
 {
     /// <summary>
     /// Lazily-built, cached list of all available IANA time zones.

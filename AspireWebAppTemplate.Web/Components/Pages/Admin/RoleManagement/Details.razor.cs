@@ -61,7 +61,7 @@ public partial class Details : ComponentBase
     /// Server-side helper that applies column filters, multi-sort, global search,
     /// and pagination for the users grid.
     /// </summary>
-    private readonly DataGridUtils<UserViewModel> _usersDataGridUtils = new DataGridUtils<UserViewModel>()
+    private readonly DataGridHelper<UserViewModel> _usersDataGridUtils = new DataGridHelper<UserViewModel>()
         .MapString(nameof(UserViewModel.UserName), x => x.UserName)
         .MapString(nameof(UserViewModel.DisplayName), x => x.DisplayName)
         .MapString(nameof(UserViewModel.Email), x => x.Email);

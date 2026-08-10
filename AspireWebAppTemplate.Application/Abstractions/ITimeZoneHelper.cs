@@ -4,7 +4,7 @@ namespace AspireWebAppTemplate.Application.Abstractions;
 /// Provides timezone conversion utilities for displaying UTC dates
 /// in the user's configured timezone.
 /// </summary>
-public interface ITimeZoneService
+public interface ITimeZoneHelper
 {
     /// <summary>
     /// Converts a UTC DateTime to the specified IANA timezone.

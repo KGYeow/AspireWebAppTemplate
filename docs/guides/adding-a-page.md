@@ -69,7 +69,7 @@ public partial class Index : ComponentBase
 For admin pages with MudDataGrid, follow the pattern in UserManagement or RoleManagement:
 - Inject data source service
 - Use `MudDataGrid<TViewModel>` with `ServerData` callback
-- Use `DataGridUtils<T>` for filtering/sorting/pagination
+- Use `DataGridHelper<T>` for filtering/sorting/pagination
 - Add SelectColumn for bulk actions
 - Toolbar: search + filters + bulk action buttons
 

@@ -60,7 +60,7 @@ The compiler enforces this via `ProjectReference` — if a reference doesn't exi
 - **Common/** — Shared models (ApiResult, NavItem, PagedResult)
 - **Contracts/** — DTOs grouped by feature (Auth/, Users/, Roles/, AuditLog/, Notifications/, Announcements/, Email/, PagePermissions/, Ai/)
 - **Extensions/** — Extension methods (NavigationProviderExtensions, QueryableExtensions)
-- **Utilities/** — Pure-logic implementations with no external dependencies (DefaultNavigationProvider, TimeZoneService)
+- **Utilities/** — Pure-logic implementations with no external dependencies (DefaultNavigationProvider, TimeZoneHelper)
 
 ### Infrastructure (depends on Application)
 - **Identity/** — ASP.NET Core Identity entities (ApplicationUser, ApplicationRole)
@@ -99,7 +99,7 @@ dotnet ef database update --project AspireWebAppTemplate.Infrastructure --startu
 
 ## Web Project Access
 
-The Web project references Application (for interfaces, DTOs, contracts, and pure-logic utilities like DefaultNavigationProvider and TimeZoneService) and UI (for shared Blazor components). Web never references Infrastructure or Domain directly.
+The Web project references Application (for interfaces, DTOs, contracts, and pure-logic utilities like DefaultNavigationProvider and TimeZoneHelper) and UI (for shared Blazor components). Web never references Infrastructure or Domain directly.
 
 ## Decisions NOT Taken
 

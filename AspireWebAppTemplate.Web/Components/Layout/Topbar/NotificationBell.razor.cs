@@ -3,7 +3,7 @@ using AspireWebAppTemplate.Domain.Enums;
 using AspireWebAppTemplate.UI.Components.Shared;
 using AspireWebAppTemplate.UI.Utilities;
 using AspireWebAppTemplate.Web.Abstractions;
-using AspireWebAppTemplate.Web.Models;
+using AspireWebAppTemplate.Web.Common;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;

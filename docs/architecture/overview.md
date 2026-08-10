@@ -56,11 +56,11 @@ Service contracts, DTOs, shared logic, and pure-logic utilities. Depends only on
 
 | Folder | Purpose |
 |--------|---------|
-| `Abstractions/` | All service interfaces (IAuditLogService, IRoleService, IUserService, IAuthService, INavigationProvider, ITimeZoneService, ICurrentUserAccessor, etc.) |
+| `Abstractions/` | All service interfaces (IAuditLogService, IRoleService, IUserService, IAuthService, INavigationProvider, ITimeZoneHelper, ICurrentUserAccessor, etc.) |
 | `Common/` | Shared models (ApiResult, NavItem, PagedResult) |
 | `Contracts/` | DTOs grouped by feature (Ai, Announcements, AuditLog, Auth, Email, Notifications, PagePermissions, Roles, Users) |
 | `Extensions/` | Extension methods (NavigationProviderExtensions, QueryableExtensions) |
-| `Utilities/` | Pure-logic implementations with no external dependencies (DefaultNavigationProvider, TimeZoneService) |
+| `Utilities/` | Pure-logic implementations with no external dependencies (DefaultNavigationProvider, TimeZoneHelper) |
 
 ### AspireWebAppTemplate.Infrastructure (Infrastructure Layer)
 
@@ -117,7 +117,7 @@ Reusable Blazor components and theming shared across the application.
 | `Components/DataGrid/` | BoolFilterSelect, EnumFilterSelect, StringFilterSelect |
 | `Components/Shared/` | PageContent, LoadingOverlay, PageHeader, StatusAlert, PillToggle, ModalDialog, etc. |
 | `Theme/` | DefaultTheme (neutral blue), JabilTheme (corporate brand) — dual palette themes |
-| `Utilities/` | DataGridUtils<T>, QueryableDataGridUtils<T> |
+| `Utilities/` | DataGridHelper<T>, QueryableDataGridHelper<T> |
 
 ### AspireWebAppTemplate.Tests (Test Project)
 
@@ -153,8 +153,8 @@ graph LR
 - **HTTP client services**: Frontend pages call API via typed HTTP client services (no direct DB access)
 - **ApiResult<T>**: Typed result wrapper for all API operations
 - **BaseController**: Shared controller base with `CurrentUserId`, `ClientIpAddress`
-- **In-memory data grids**: `DataGridUtils<T>` for MudDataGrid client-side filtering, sorting, pagination
-- **Queryable data grids**: `QueryableDataGridUtils<T>` for true server-side filtering/sorting/pagination (audit log)
+- **In-memory data grids**: `DataGridHelper<T>` for MudDataGrid client-side filtering, sorting, pagination
+- **Queryable data grids**: `QueryableDataGridHelper<T>` for true server-side filtering/sorting/pagination (audit log)
 - **Scoped state services**: ThemeStateService (theme), UserTimeZoneContext (timezone/format) — one per SignalR circuit
 - **Instant-save**: Settings page saves on value change (no Save button)
 - **View/Edit mode**: Profile page uses unified layout toggle

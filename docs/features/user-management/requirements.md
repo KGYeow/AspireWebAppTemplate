@@ -8,7 +8,7 @@ Admin-only page (`/user-management`) for managing user accounts, roles, and stat
 
 ## Requirements
 
-- Server-side filtering, sorting, and pagination via `DataGridUtils<T>`
+- Server-side filtering, sorting, and pagination via `DataGridHelper<T>`
 - Global search across username, display name, job title, department, and roles
 - Per-column filtering (string columns + bool Status column with `BoolFilterSelect`)
 - Page-aware line numbering

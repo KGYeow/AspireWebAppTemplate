@@ -2,7 +2,7 @@
 
 ## Phase 1 — Grid Improvements
 
-- [x] Remove Created Date column and update DataGridUtils mapping
+- [x] Remove Created Date column and update DataGridHelper mapping
 - [x] Make Description column hideable
 - [x] Update GlobalFields to include Status Text and remove Created Date
 - [x] Add View Details icon button to Actions column

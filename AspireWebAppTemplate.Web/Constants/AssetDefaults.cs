@@ -1,4 +1,4 @@
-namespace AspireWebAppTemplate.Web.Common.Defaults;
+namespace AspireWebAppTemplate.Web.Constants;
 
 /// <summary>
 /// Centralized static asset paths used across the application.

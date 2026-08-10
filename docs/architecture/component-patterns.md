@@ -2,11 +2,11 @@
 
 ## MudDataGrid with Server-Side Data
 
-All admin pages use `MudDataGrid<T>` with the `ServerData` callback pattern via `DataGridUtils<T>`.
+All admin pages use `MudDataGrid<T>` with the `ServerData` callback pattern via `DataGridHelper<T>`.
 
-### DataGridUtils<T>
+### DataGridHelper<T>
 
-Located at `AspireWebAppTemplate.UI/Utilities/DataGridUtils.cs`.
+Located at `AspireWebAppTemplate.UI/Utilities/DataGridHelper.cs`.
 
 Provides:
 - Server-side filtering (global search + per-column)

@@ -15,8 +15,8 @@ The Settings page at `/settings` provides authenticated users with instant-save 
 - **UserManager**: The ASP.NET Core Identity service (`UserManager<ApplicationUser>`) used to load and persist user data.
 - **DropdownProfile**: The existing Blazor component at `Components/Layout/DropdownProfile.razor` that renders the user profile dropdown menu in the application header, containing navigation links (Profile, Settings, Log Out).
 - **Time_Zone_Alias**: An IANA time zone identifier (e.g., "Asia/Kuala_Lumpur") that is a valid alias for a canonical time zone (e.g., "Asia/Singapore") but does not appear in the list returned by `TimeZoneInfo.GetSystemTimeZones()`. Aliases are resolvable via `TimeZoneInfo.FindSystemTimeZoneById()`.
-- **Canonical_Time_Zone_List**: The list of time zone entries built by `TimeZoneService`, which converts Windows-style IDs to IANA identifiers via `TimeZoneInfo.TryConvertWindowsIdToIanaId()`.
-- **ITimeZoneService**: A singleton service providing the canonical time zone list and stateless UTC-to-local conversion.
+- **Canonical_Time_Zone_List**: The list of time zone entries built by `TimeZoneHelper`, which converts Windows-style IDs to IANA identifiers via `TimeZoneInfo.TryConvertWindowsIdToIanaId()`.
+- **ITimeZoneHelper**: A singleton service providing the canonical time zone list and stateless UTC-to-local conversion.
 - **IUserTimeZoneContext**: A scoped service (one per Blazor Server circuit) that holds the current user's time zone ID and preferred date/time format, and provides `FormatDateTime` overloads for user-aware datetime formatting.
 - **ThemeStateService**: A scoped service (`Services/ThemeStateService.cs`) implementing `IThemeStateService` that holds the current `IsDarkMode` boolean state per SignalR circuit and fires an `OnChange` event when the theme changes. Acts as a pub/sub mechanism between the Settings page and the MainLayout.
 - **IThemeStateService**: The interface (`Abstractions/IThemeStateService.cs`) defining the contract for theme state management: `IsDarkMode` property, `OnChange` event, `SetDarkMode(bool)` method, and `SetThemePreference(ThemePreference, bool)` method.
@@ -97,9 +97,9 @@ The Settings page at `/settings` provides authenticated users with instant-save 
 1. WHEN the user types in the Time_Zone_Field, THE Settings_Page SHALL filter available time zones by performing a case-insensitive substring match of the search text against both the display name and the IANA identifier, displaying only matching results.
 2. WHEN the search text is empty or contains only whitespace, THE Time_Zone_Field SHALL display all available time zones ordered by UTC offset ascending, then alphabetically by IANA identifier.
 3. WHEN the user selects a time zone from the autocomplete results, THE Time_Zone_Field SHALL display the selected time zone's display name in the format "(UTC±HH:mm) IANA_Identifier".
-4. THE ITimeZoneService SHALL convert Windows-style time zone IDs to IANA identifiers using `TimeZoneInfo.TryConvertWindowsIdToIanaId()` when building the canonical time zone list.
-5. THE ITimeZoneService SHALL deduplicate entries where multiple Windows IDs map to the same IANA ID.
-6. THE ITimeZoneService SHALL format all display names in the pattern "(UTC±HH:mm) IANA_Identifier".
+4. THE ITimeZoneHelper SHALL convert Windows-style time zone IDs to IANA identifiers using `TimeZoneInfo.TryConvertWindowsIdToIanaId()` when building the canonical time zone list.
+5. THE ITimeZoneHelper SHALL deduplicate entries where multiple Windows IDs map to the same IANA ID.
+6. THE ITimeZoneHelper SHALL format all display names in the pattern "(UTC±HH:mm) IANA_Identifier".
 
 ### Requirement 6: Time Zone Alias Handling
 

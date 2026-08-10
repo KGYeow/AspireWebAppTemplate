@@ -74,7 +74,7 @@ This plan migrates the solution from 7 projects to 9 projects by creating Domain
     - _Requirements: 2.3_
 
   - [x] 5.2 Move shared abstractions from Core to Application
-    - Move `Core/Application/Abstractions/INavigationProvider.cs` and `ITimeZoneService.cs` to `Application/Abstractions/`
+    - Move `Core/Application/Abstractions/INavigationProvider.cs` and `ITimeZoneHelper.cs` to `Application/Abstractions/`
     - Update namespace from `AspireWebAppTemplate.Core.Application.Abstractions` to `AspireWebAppTemplate.Application.Abstractions`
     - _Requirements: 2.3_
 
@@ -145,7 +145,7 @@ This plan migrates the solution from 7 projects to 9 projects by creating Domain
 
   - [x] 7.7 Move service implementations to Infrastructure
     - Move all service `.cs` files from `ApiService/Services/` (AiService, AnnouncementService, AuditLogService, AuthService, EmailService, EmailTemplateService, ExcelExportService, LdapAuthService, LdapLoginService, LoginService, NavigationService, NotificationService, PagePermissionService, RegisterService, RoleService, UserService) to `Infrastructure/Services/`
-    - Move `Core/Application/Services/DefaultNavigationProvider.cs` and `TimeZoneService.cs` to `Infrastructure/Services/`
+    - Move `Core/Application/Services/DefaultNavigationProvider.cs` and `TimeZoneHelper.cs` to `Infrastructure/Services/`
     - Update namespace from `AspireWebAppTemplate.ApiService.Services` and `AspireWebAppTemplate.Core.Application.Services` to `AspireWebAppTemplate.Infrastructure.Services`
     - Update all `using` statements within service files to reference new namespaces (Application.Abstractions, Infrastructure.Data, Infrastructure.Identity, etc.)
     - _Requirements: 3.9_

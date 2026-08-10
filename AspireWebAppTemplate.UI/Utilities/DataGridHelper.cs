@@ -17,7 +17,7 @@ namespace AspireWebAppTemplate.UI.Utilities;
 /// <c>ServerData</c> callback on <see cref="MudDataGrid{T}"/>.</para>
 /// <para>Example:</para>
 /// <code>
-/// private readonly DataGridUtils&lt;MyItem&gt; _gridUtils = new DataGridUtils&lt;MyItem&gt;()
+/// private readonly DataGridHelper&lt;MyItem&gt; _gridUtils = new DataGridHelper&lt;MyItem&gt;()
 ///     .MapString(nameof(MyItem.Name), x =&gt; x.Name)
 ///     .MapInt(nameof(MyItem.Id), x =&gt; x.Id)
 ///     .MapDateTime(nameof(MyItem.CreatedAt), x =&gt; x.CreatedAt);
@@ -26,7 +26,7 @@ namespace AspireWebAppTemplate.UI.Utilities;
 ///     =&gt; _gridUtils.ServerReloadAsync(state, () =&gt; myService.GetAllAsync());
 /// </code>
 /// </remarks>
-public sealed class DataGridUtils<T>
+public sealed class DataGridHelper<T>
 {
     #region Selector Registries
 
@@ -49,7 +49,7 @@ public sealed class DataGridUtils<T>
     /// <param name="propertyName">The column's <c>PropertyName</c> (typically <c>nameof(T.Property)</c>).</param>
     /// <param name="selector">A function that extracts the string value from an item.</param>
     /// <returns>This instance for fluent chaining.</returns>
-    public DataGridUtils<T> MapString(string propertyName, Func<T, string?> selector)
+    public DataGridHelper<T> MapString(string propertyName, Func<T, string?> selector)
     { _stringSelectors[propertyName] = selector; return this; }
 
     /// <summary>
@@ -58,7 +58,7 @@ public sealed class DataGridUtils<T>
     /// <param name="propertyName">The column's <c>PropertyName</c>.</param>
     /// <param name="selector">A function that extracts the int value from an item.</param>
     /// <returns>This instance for fluent chaining.</returns>
-    public DataGridUtils<T> MapInt(string propertyName, Func<T, int> selector)
+    public DataGridHelper<T> MapInt(string propertyName, Func<T, int> selector)
     { _intSelectors[propertyName] = x => selector(x); return this; }
 
     /// <summary>
@@ -67,7 +67,7 @@ public sealed class DataGridUtils<T>
     /// <param name="propertyName">The column's <c>PropertyName</c>.</param>
     /// <param name="selector">A function that extracts the nullable int value from an item.</param>
     /// <returns>This instance for fluent chaining.</returns>
-    public DataGridUtils<T> MapNullableInt(string propertyName, Func<T, int?> selector)
+    public DataGridHelper<T> MapNullableInt(string propertyName, Func<T, int?> selector)
     { _intSelectors[propertyName] = selector; return this; }
 
     /// <summary>
@@ -76,7 +76,7 @@ public sealed class DataGridUtils<T>
     /// <param name="propertyName">The column's <c>PropertyName</c>.</param>
     /// <param name="selector">A function that extracts the nullable decimal value from an item.</param>
     /// <returns>This instance for fluent chaining.</returns>
-    public DataGridUtils<T> MapDecimal(string propertyName, Func<T, decimal?> selector)
+    public DataGridHelper<T> MapDecimal(string propertyName, Func<T, decimal?> selector)
     { _decimalSelectors[propertyName] = selector; return this; }
 
     /// <summary>
@@ -85,7 +85,7 @@ public sealed class DataGridUtils<T>
     /// <param name="propertyName">The column's <c>PropertyName</c>.</param>
     /// <param name="selector">A function that extracts the nullable double value from an item.</param>
     /// <returns>This instance for fluent chaining.</returns>
-    public DataGridUtils<T> MapDouble(string propertyName, Func<T, double?> selector)
+    public DataGridHelper<T> MapDouble(string propertyName, Func<T, double?> selector)
     { _doubleSelectors[propertyName] = selector; return this; }
 
     /// <summary>
@@ -94,7 +94,7 @@ public sealed class DataGridUtils<T>
     /// <param name="propertyName">The column's <c>PropertyName</c>.</param>
     /// <param name="selector">A function that extracts the nullable long value from an item.</param>
     /// <returns>This instance for fluent chaining.</returns>
-    public DataGridUtils<T> MapLong(string propertyName, Func<T, long?> selector)
+    public DataGridHelper<T> MapLong(string propertyName, Func<T, long?> selector)
     { _longSelectors[propertyName] = selector; return this; }
 
     /// <summary>
@@ -103,7 +103,7 @@ public sealed class DataGridUtils<T>
     /// <param name="propertyName">The column's <c>PropertyName</c>.</param>
     /// <param name="selector">A function that extracts the nullable DateTime value from an item.</param>
     /// <returns>This instance for fluent chaining.</returns>
-    public DataGridUtils<T> MapDateTime(string propertyName, Func<T, DateTime?> selector)
+    public DataGridHelper<T> MapDateTime(string propertyName, Func<T, DateTime?> selector)
     { _dateSelectors[propertyName] = selector; return this; }
 
     /// <summary>
@@ -112,7 +112,7 @@ public sealed class DataGridUtils<T>
     /// <param name="propertyName">The column's <c>PropertyName</c>.</param>
     /// <param name="selector">A function that extracts the nullable bool value from an item.</param>
     /// <returns>This instance for fluent chaining.</returns>
-    public DataGridUtils<T> MapBool(string propertyName, Func<T, bool?> selector)
+    public DataGridHelper<T> MapBool(string propertyName, Func<T, bool?> selector)
     { _boolSelectors[propertyName] = selector; return this; }
 
     /// <summary>
@@ -124,7 +124,7 @@ public sealed class DataGridUtils<T>
     /// <param name="propertyName">The column's <c>PropertyName</c> (typically <c>nameof(T.Property)</c>).</param>
     /// <param name="selector">A function that extracts the enum value from an item.</param>
     /// <returns>This instance for fluent chaining.</returns>
-    public DataGridUtils<T> MapEnum<TEnum>(string propertyName, Func<T, TEnum> selector) where TEnum : struct, Enum
+    public DataGridHelper<T> MapEnum<TEnum>(string propertyName, Func<T, TEnum> selector) where TEnum : struct, Enum
     { _enumSelectors[propertyName] = x => selector(x).ToString(); return this; }
 
     #endregion

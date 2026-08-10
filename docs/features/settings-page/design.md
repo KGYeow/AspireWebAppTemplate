@@ -6,7 +6,7 @@ The Settings page at `/settings` provides authenticated users with instant-save 
 
 - **Instant-save pattern** — All fields save immediately on value change with optimistic UI and revert-on-failure. No Save button, no EditForm.
 - **ThemeStateService pub/sub** — A scoped service shared within a SignalR circuit propagates theme changes from the Settings page to the MainLayout without page reloads.
-- **ITimeZoneService singleton** — Provides the canonical IANA time zone list with Windows-to-IANA conversion.
+- **ITimeZoneHelper singleton** — Provides the canonical IANA time zone list with Windows-to-IANA conversion.
 - **IUserTimeZoneContext scoped service** — Holds the user's time zone ID and preferred date/time format per circuit for user-aware datetime formatting across all pages.
 - **PillToggle\<T\> component** — A generic reusable pill-shaped toggle wrapping MudToggleGroup\<T\> for theme selection.
 - **ApplicationTheme dual palettes** — MudTheme subclass defining PaletteLight and PaletteDark for real-time theme switching via MudThemeProvider.
@@ -22,7 +22,7 @@ graph TD
         TSS -->|"OnChange event"| ML[MainLayout]
         ML -->|"IsDarkMode binding"| MTP[MudThemeProvider]
         ML -->|"Initialize once per circuit"| UTC[IUserTimeZoneContext]
-        UTC -->|"Delegates conversion"| TZS[ITimeZoneService - Singleton]
+        UTC -->|"Delegates conversion"| TZS[ITimeZoneHelper - Singleton]
     end
 
     subgraph "Client Browser"
@@ -41,7 +41,7 @@ graph TD
 
 | Service | Lifetime | Responsibility |
 |---------|----------|----------------|
-| `ITimeZoneService` | Singleton | Canonical IANA zone list, stateless UTC→local conversion |
+| `ITimeZoneHelper` | Singleton | Canonical IANA zone list, stateless UTC→local conversion |
 | `IUserTimeZoneContext` | Scoped | Holds user's TimeZoneId and DateTimeFormat per circuit, provides `FormatDateTime` overloads |
 | `IThemeStateService` | Scoped | Holds current `IsDarkMode` boolean per circuit, fires `OnChange` event on state transitions |
 
@@ -50,8 +50,8 @@ graph TD
 1. **Remove View/Edit mode entirely** — The page always renders editable form controls. This eliminates the `IsEditing` state flag, `EnterEditMode()`, and `CancelEdit()` methods. (Supersedes original Phase 1 design.)
 2. **Instant save for ALL fields** — No Save button, no EditForm with OnValidSubmit. Each preference field saves immediately on value change using individual async save methods that follow the optimistic-UI-with-revert pattern.
 3. **Single card with dividers** — Preferences and Appearance are rendered within a single `MudPaper` container (with `Class="pa-4"` and `Elevation="0"`), separated by a `MudDivider Class="my-6"`.
-4. **Singleton + Scoped separation** — `ITimeZoneService` is stateless (zone list cached in static `Lazy<T>`). `IUserTimeZoneContext` holds per-user state and delegates conversion to the singleton.
-5. **IANA conversion at source** — `TimeZoneService.BuildTimeZoneList()` converts Windows IDs to IANA via `TryConvertWindowsIdToIanaId()` so all consumers get IANA IDs without additional logic.
+4. **Singleton + Scoped separation** — `ITimeZoneHelper` is stateless (zone list cached in static `Lazy<T>`). `IUserTimeZoneContext` holds per-user state and delegates conversion to the singleton.
+5. **IANA conversion at source** — `TimeZoneHelper.BuildTimeZoneList()` converts Windows IDs to IANA via `TryConvertWindowsIdToIanaId()` so all consumers get IANA IDs without additional logic.
 6. **Circuit-level initialization** — `IUserTimeZoneContext.InitializeAsync()` is called once from `MainLayout.OnAfterRenderAsync` — no per-page auth state resolution needed.
 7. **Scoped pub/sub for theme** — `ThemeStateService` decouples the Settings page (publisher) from the MainLayout (subscriber), allowing instant UI updates without tight component coupling.
 8. **JS interop for OS detection** — Bridges the gap between server-rendered Blazor and client-side `matchMedia` API for "System" theme preference.
@@ -112,11 +112,11 @@ public interface IUserTimeZoneContext
 
 **Location:** `AspireWebAppTemplate.Web/Services/UserTimeZoneContext.cs`
 
-Scoped implementation that injects `UserManager<ApplicationUser>` and `ITimeZoneService`. Loads user's `TimeZoneId` and `DateTimeFormat` once via `InitializeAsync`, then formats dates using the cached values. Uses `format ?? DateTimeFormat ?? "yyyy-MM-dd HH:mm"` as effective format.
+Scoped implementation that injects `UserManager<ApplicationUser>` and `ITimeZoneHelper`. Loads user's `TimeZoneId` and `DateTimeFormat` once via `InitializeAsync`, then formats dates using the cached values. Uses `format ?? DateTimeFormat ?? "yyyy-MM-dd HH:mm"` as effective format.
 
-### ITimeZoneService / TimeZoneService
+### ITimeZoneHelper / TimeZoneHelper
 
-**Location:** `AspireWebAppTemplate.Core/Application/Abstractions/ITimeZoneService.cs` and `AspireWebAppTemplate.Core/Application/Services/TimeZoneService.cs`
+**Location:** `AspireWebAppTemplate.Application/Abstractions/ITimeZoneHelper.cs` and `AspireWebAppTemplate.Application/Utilities/TimeZoneHelper.cs`
 
 - Converts Windows IDs to IANA via `TryConvertWindowsIdToIanaId()`
 - Deduplicates entries with `.DistinctBy(tz => tz.Id)`
@@ -143,7 +143,7 @@ public partial class Index : ComponentBase
     [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
     [Inject] private NavigationManager NavigationManager { get; set; } = default!;
     [Inject] private ILogger<Index> Logger { get; set; } = default!;
-    [Inject] private ITimeZoneService TimeZoneService { get; set; } = default!;
+    [Inject] private ITimeZoneHelper TimeZoneService { get; set; } = default!;
     [Inject] private IThemeStateService ThemeState { get; set; } = default!;
     [Inject] private IJSRuntime JS { get; set; } = default!;
 

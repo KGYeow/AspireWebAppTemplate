@@ -6,7 +6,7 @@ Admin-only page (`/role-management`) for managing application roles, their descr
 
 ## Core Requirements
 
-- Server-side filtering, sorting, and pagination via `DataGridUtils<T>`
+- Server-side filtering, sorting, and pagination via `DataGridHelper<T>`
 - Global search across role name, display name, description, user count, and status text
 - Per-column filtering (string columns + bool Status column with `BoolFilterSelect`)
 - Page-aware line numbering
@@ -22,7 +22,7 @@ Admin-only page (`/role-management`) for managing application roles, their descr
 
 - Displays role metadata: Name, Display Name, Description, Status, Position, Created Date, Updated Date
 - Shows IsSystem, IsDefault, RequiresMinimumUser as read-only badges
-- Users data grid (server-side with DataGridUtils<UserViewModel>): Username, Display Name, Email, Remove action
+- Users data grid (server-side with DataGridHelper<UserViewModel>): Username, Display Name, Email, Remove action
 - Multi-select bulk deassign users from role
 - Assign multiple users dialog (searchable, excludes already-assigned)
 - UsersInRoleCount in section title (unfiltered)

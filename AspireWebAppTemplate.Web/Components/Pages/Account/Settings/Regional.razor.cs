@@ -32,7 +32,7 @@ public partial class Regional : ComponentBase
     /// <summary>
     /// Provides timezone list and conversion utilities for the timezone autocomplete.
     /// </summary>
-    [Inject] private ITimeZoneService TimeZoneService { get; set; } = default!;
+    [Inject] private ITimeZoneHelper TimeZoneService { get; set; } = default!;
 
     /// <summary>
     /// Provides navigation actions (e.g., redirecting to InvalidUser on load failure).

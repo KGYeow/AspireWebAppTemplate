@@ -54,7 +54,7 @@ Always use separate `.razor.cs` files — no `@code` blocks in Razor files.
 
 | Lifetime | Use for |
 |----------|---------|
-| Singleton | Stateless services (TimeZoneService) |
+| Singleton | Stateless services (TimeZoneHelper) |
 | Scoped | Per-circuit state (ThemeStateService, UserTimeZoneContext, AuditLogService) |
 | Transient | Avoid unless specifically needed |
 

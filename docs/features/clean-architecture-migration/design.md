@@ -130,7 +130,7 @@ AspireWebAppTemplate.Application/
 │   ├── IPagePermissionService.cs
 │   ├── IRegisterService.cs
 │   ├── IRoleService.cs
-│   ├── ITimeZoneService.cs
+│   ├── ITimeZoneHelper.cs
 │   └── IUserService.cs
 ├── Contracts/
 │   ├── Ai/
@@ -223,7 +223,7 @@ AspireWebAppTemplate.Infrastructure/
 │   ├── PagePermissionService.cs
 │   ├── RegisterService.cs
 │   ├── RoleService.cs
-│   ├── TimeZoneService.cs
+│   ├── TimeZoneHelper.cs
 │   └── UserService.cs
 ├── Clients/
 │   └── WebCallbackClient.cs
@@ -424,7 +424,7 @@ sequenceDiagram
     Note over S: Phase 4 — Populate Infrastructure
     Api-->>I: Move DbContext, entities, configs, migrations, seed data
     Api-->>I: Move services, clients, handlers, utilities
-    Core-->>I: Move SecureConnectionString, DefaultNavigationProvider, TimeZoneService
+    Core-->>I: Move SecureConnectionString, DefaultNavigationProvider, TimeZoneHelper
     Note over S: ApiService adds ref to Infrastructure
     Note over S: Solution compiles
 

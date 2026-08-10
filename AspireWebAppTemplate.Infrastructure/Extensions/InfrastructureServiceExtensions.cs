@@ -8,7 +8,6 @@ using AspireWebAppTemplate.Infrastructure.Identity;
 using AspireWebAppTemplate.Infrastructure.Services;
 using AspireWebAppTemplate.Infrastructure.Clients;
 using AspireWebAppTemplate.Infrastructure.Handlers;
-using AspireWebAppTemplate.Infrastructure.Utilities;
 using Ganss.Xss;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;

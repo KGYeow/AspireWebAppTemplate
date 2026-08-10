@@ -128,7 +128,7 @@ Complete implementation history of the Settings page feature across all phases: 
 
 - The page was originally created with View/Edit mode (Phase 1) and later redesigned to instant-save (Phase 4)
 - Form model classes were renamed from `PreferencesFormModel` → `ProfileFormModel` → `InputModel` → removed (replaced by direct backing fields)
-- `ITimeZoneService` remains a singleton; `IUserTimeZoneContext` and `IThemeStateService` are scoped (one per circuit)
+- `ITimeZoneHelper` remains a singleton; `IUserTimeZoneContext` and `IThemeStateService` are scoped (one per circuit)
 - Time zone alias handling is in the Settings page helpers, not the shared service
 - IANA conversion uses built-in .NET 6+ `TryConvertWindowsIdToIanaId()` — no external packages needed
 - Property tests use FsCheck 3.1.0 with `[Property(MaxTest = 100)]`

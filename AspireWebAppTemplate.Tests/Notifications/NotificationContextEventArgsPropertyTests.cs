@@ -2,7 +2,7 @@
 using System.Net;
 using System.Reflection;
 using System.Text;
-using AspireWebAppTemplate.Web.Models;
+using AspireWebAppTemplate.Web.Common;
 using AspireWebAppTemplate.Web.Services;
 using FsCheck;
 using FsCheck.Fluent;

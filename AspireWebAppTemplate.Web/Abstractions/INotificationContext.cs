@@ -1,4 +1,4 @@
-using AspireWebAppTemplate.Web.Models;
+using AspireWebAppTemplate.Web.Common;
 
 namespace AspireWebAppTemplate.Web.Abstractions;
 

@@ -30,7 +30,7 @@ AspireWebAppTemplate.Domain/
 ## Application Project
 ```
 AspireWebAppTemplate.Application/
-├── Abstractions/               ← All service interfaces (IAuditLogService, IRoleService, IUserService, IAuthService, INavigationProvider, ITimeZoneService, ICurrentUserAccessor, etc.)
+├── Abstractions/               ← All service interfaces (IAuditLogService, IRoleService, IUserService, IAuthService, INavigationProvider, ITimeZoneHelper, ICurrentUserAccessor, etc.)
 ├── Common/                     ← Shared models (ApiResult, NavItem, PagedResult)
 ├── Contracts/                  ← DTOs grouped by feature
 │   ├── Ai/                     ← AI-related request/response DTOs
@@ -43,7 +43,7 @@ AspireWebAppTemplate.Application/
 │   ├── Roles/                  ← RoleDto, CreateRoleRequest, UpdateRoleRequest, RoleQueryParams
 │   └── Users/                  ← UserDto, CreateUserRequest, UpdateUserRequest, UserQueryParams
 ├── Extensions/                 ← Extension methods (NavigationProviderExtensions, QueryableExtensions)
-└── Utilities/                  ← Pure-logic implementations (DefaultNavigationProvider, TimeZoneService)
+└── Utilities/                  ← Pure-logic implementations (DefaultNavigationProvider, TimeZoneHelper)
 ```
 
 ## Infrastructure Project
@@ -116,7 +116,7 @@ AspireWebAppTemplate.Web/
 AspireWebAppTemplate.UI/
 ├── Components/Shared/          ← Reusable components (PageContent, LoadingOverlay, PageHeader, StatusAlert, PillToggle, ModalDialog, etc.)
 ├── Components/DataGrid/        ← DataGrid filter components (BoolFilterSelect, EnumFilterSelect, StringFilterSelect)
-├── Utilities/                  ← DataGridUtils, QueryableDataGridUtils
+├── Utilities/                  ← DataGridHelper, QueryableDataGridHelper
 └── Theme/                      ← DefaultTheme (neutral blue) + JabilTheme (corporate brand)
 ```
 

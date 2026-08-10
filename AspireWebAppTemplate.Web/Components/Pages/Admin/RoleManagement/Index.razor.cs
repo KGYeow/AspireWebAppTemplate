@@ -10,7 +10,7 @@ namespace AspireWebAppTemplate.Web.Components.Pages.Admin.RoleManagement;
 /// <summary>
 /// Role management page. Lists all roles with multi-role management,
 /// add/edit/delete actions, and bulk operations. Admin role required.
-/// Uses server-side filtering, sorting, and pagination via <see cref="DataGridUtils{T}"/>.
+/// Uses server-side filtering, sorting, and pagination via <see cref="DataGridHelper{T}"/>.
 /// All operations are delegated to the API via <see cref="ApiRoleService"/>.
 /// </summary>
 public partial class Index : ComponentBase
@@ -40,7 +40,7 @@ public partial class Index : ComponentBase
     /// Server-side helper that applies column filters, multi-sort, global search,
     /// and pagination based on <see cref="GridState{T}"/>.
     /// </summary>
-    private readonly DataGridUtils<RoleViewModel> _dataGridUtils = new DataGridUtils<RoleViewModel>()
+    private readonly DataGridHelper<RoleViewModel> _dataGridUtils = new DataGridHelper<RoleViewModel>()
         .MapString(nameof(RoleViewModel.Name),          x => x.Name)
         .MapString(nameof(RoleViewModel.DisplayName),   x => x.DisplayName)
         .MapString(nameof(RoleViewModel.Description),   x => x.Description)
@@ -102,7 +102,7 @@ public partial class Index : ComponentBase
     /// <summary>
     /// Server-side reload callback for <see cref="MudDataGrid{T}"/>.
     /// Loads all roles from the API, then delegates filtering, sorting, and pagination
-    /// to <see cref="DataGridUtils{T}.ServerReloadAsync"/>.
+    /// to <see cref="DataGridHelper{T}.ServerReloadAsync"/>.
     /// </summary>
     private async Task<GridData<RoleViewModel>> ServerReload(GridState<RoleViewModel> state, CancellationToken cancellationToken)
     {
