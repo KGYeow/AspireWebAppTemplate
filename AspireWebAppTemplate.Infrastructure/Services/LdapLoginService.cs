@@ -44,8 +44,13 @@ public sealed class LdapLoginService : ILdapLoginService
     #region Operations
 
     /// <inheritdoc />
-    public async Task<LoginResult> ValidateAndGenerateTokenAsync(string identifier, string password, bool rememberMe, string returnUrl)
+    public async Task<LoginResult> ValidateAndGenerateTokenAsync(LoginRequest request)
     {
+        var identifier = request.Email;
+        var password = request.Password;
+        var rememberMe = request.RememberMe;
+        var returnUrl = request.ReturnUrl ?? "/";
+
         // Authenticate against LDAP
         var ldapResult = await _ldapAuth.AuthenticateAsync(identifier, password);
         if (!ldapResult.Succeeded || ldapResult.Attributes is null)

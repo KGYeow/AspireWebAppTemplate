@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using AspireWebAppTemplate.Application.Abstractions;
 using AspireWebAppTemplate.Application.Contracts.Auth;
+using AspireWebAppTemplate.Application.Contracts.Email;
 using AspireWebAppTemplate.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Caching.Memory;
@@ -46,8 +47,13 @@ public sealed class LoginService : ILoginService
     #region Operations
 
     /// <inheritdoc />
-    public async Task<LoginResult> ValidateAndGenerateTokenAsync(string email, string password, bool rememberMe, string returnUrl)
+    public async Task<LoginResult> ValidateAndGenerateTokenAsync(LoginRequest request)
     {
+        var email = request.Email;
+        var password = request.Password;
+        var rememberMe = request.RememberMe;
+        var returnUrl = request.ReturnUrl ?? "/";
+
         var user = await _userManager.FindByEmailAsync(email);
         if (user is null)
         {
@@ -73,10 +79,17 @@ public sealed class LoginService : ILoginService
             if (await _userManager.IsLockedOutAsync(user))
             {
                 var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
-                await _emailService.TrySendEmailAsync(user.Id, user.Email, NotificationCategory.Account, EmailType.AccountLockout, new Dictionary<string, string>
+                await _emailService.TrySendEmailAsync(new TrySendEmailRequest
                 {
-                    ["UserName"] = user.DisplayName ?? user.UserName ?? string.Empty,
-                    ["LockoutEnd"] = lockoutEnd?.UtcDateTime.ToString("g") ?? "Unknown"
+                    UserId = user.Id,
+                    RecipientEmail = user.Email,
+                    Category = NotificationCategory.Account,
+                    EmailType = EmailType.AccountLockout,
+                    Variables = new Dictionary<string, string>
+                    {
+                        ["UserName"] = user.DisplayName ?? user.UserName ?? string.Empty,
+                        ["LockoutEnd"] = lockoutEnd?.UtcDateTime.ToString("g") ?? "Unknown"
+                    }
                 });
             }
 

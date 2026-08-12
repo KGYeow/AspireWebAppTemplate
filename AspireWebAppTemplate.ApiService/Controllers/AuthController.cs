@@ -85,20 +85,17 @@ public class AuthController : BaseController
         if (_ldapSettings.Enabled)
         {
             // Try LDAP first
-            result = await _ldapLoginService.ValidateAndGenerateTokenAsync(
-                request.Email, request.Password, request.RememberMe, request.ReturnUrl ?? "/");
+            result = await _ldapLoginService.ValidateAndGenerateTokenAsync(request);
 
             // If LDAP fails (user not in directory), fall back to local Identity
             if (!result.Succeeded && !result.IsDeactivated && !result.IsLockedOut)
             {
-                result = await _loginService.ValidateAndGenerateTokenAsync(
-                    request.Email, request.Password, request.RememberMe, request.ReturnUrl ?? "/");
+                result = await _loginService.ValidateAndGenerateTokenAsync(request);
             }
         }
         else
         {
-            result = await _loginService.ValidateAndGenerateTokenAsync(
-                request.Email, request.Password, request.RememberMe, request.ReturnUrl ?? "/");
+            result = await _loginService.ValidateAndGenerateTokenAsync(request);
         }
 
         if (result.Succeeded)
@@ -139,9 +136,14 @@ public class AuthController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<RegisterResult>> Register([FromBody] LoginRequest request)
     {
-        var baseUri = $"{Request.Scheme}://{Request.Host}/Account/ConfirmEmail";
-        var result = await _registerService.RegisterUserAsync(
-            request.Email, request.Password, baseUri, null);
+        var registerRequest = new RegisterRequest
+        {
+            Email = request.Email,
+            Password = request.Password,
+            ConfirmEmailBaseUri = $"{Request.Scheme}://{Request.Host}/Account/ConfirmEmail",
+            ReturnUrl = request.ReturnUrl
+        };
+        var result = await _registerService.RegisterUserAsync(registerRequest);
 
         // If registration succeeded and email confirmation is NOT required,
         // generate a login token so the frontend can auto-sign-in

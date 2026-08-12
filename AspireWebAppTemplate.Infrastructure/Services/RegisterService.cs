@@ -49,8 +49,22 @@ public sealed class RegisterService : IRegisterService
     #region Operations
 
     /// <inheritdoc />
-    public async Task<RegisterResult> RegisterUserAsync(string email, string password, string confirmEmailBaseUri, string? returnUrl)
+    public async Task<RegisterResult> RegisterUserAsync(RegisterRequest request)
     {
+        // Guard: reject requests with missing email or password
+        if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
+        {
+            return new RegisterResult
+            {
+                ErrorMessage = "Email and password are required."
+            };
+        }
+
+        var email = request.Email;
+        var password = request.Password;
+        var confirmEmailBaseUri = request.ConfirmEmailBaseUri;
+        var returnUrl = request.ReturnUrl;
+
         var user = CreateUser();
 
         await _userStore.SetUserNameAsync(user, email, CancellationToken.None);
@@ -89,9 +103,16 @@ public sealed class RegisterService : IRegisterService
         await _emailSender.SendConfirmationLinkAsync(user, email, HtmlEncoder.Default.Encode(callbackUrl));
 
         // Send welcome email (best-effort, respects EmailEnabled preference)
-        await _emailService.TrySendEmailAsync(userId, email, Domain.Enums.NotificationCategory.Account, Domain.Enums.EmailType.WelcomeEmail, new Dictionary<string, string>
+        await _emailService.TrySendEmailAsync(new Application.Contracts.Email.TrySendEmailRequest
         {
-            ["UserName"] = user.DisplayName ?? user.UserName ?? email
+            UserId = userId,
+            RecipientEmail = email,
+            Category = Domain.Enums.NotificationCategory.Account,
+            EmailType = Domain.Enums.EmailType.WelcomeEmail,
+            Variables = new Dictionary<string, string>
+            {
+                ["UserName"] = user.DisplayName ?? user.UserName ?? email
+            }
         });
 
         return new RegisterResult

@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 using AspireWebAppTemplate.Application.Common;
+using AspireWebAppTemplate.Application.Contracts.Auth;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -115,7 +116,12 @@ public partial class ResetPassword : ComponentBase
 
         try
         {
-            var result = await AuthService.ResetPasswordAsync(Input.Email, decodedCode, Input.Password);
+            var result = await AuthService.ResetPasswordAsync(new ResetPasswordRequest
+            {
+                Email = Input.Email,
+                Code = decodedCode,
+                NewPassword = Input.Password
+            });
             if (result.Succeeded)
             {
                 NavigationManager.NavigateTo("Account/ResetPasswordConfirmation", forceLoad: true);

@@ -153,11 +153,12 @@ public class UserServiceTests
             };
 
             mockService
-                .Setup(s => s.SearchAsync(It.IsAny<int?>(), It.IsAny<int?>(), searchTerm))
+                .Setup(s => s.SearchAsync(It.Is<UserQueryParams>(q => q.SearchTerm == searchTerm)))
                 .ReturnsAsync(pagedResult);
 
             // Act
-            var result = mockService.Object.SearchAsync(0, 10, searchTerm).GetAwaiter().GetResult();
+            var queryParams = new UserQueryParams { Page = 0, PageSize = 10, SearchTerm = searchTerm };
+            var result = mockService.Object.SearchAsync(queryParams).GetAwaiter().GetResult();
 
             // Assert: every item contains the search term in at least one searchable field
             var allMatch = result.Items.All(user =>

@@ -50,21 +50,16 @@ public class UsersController : BaseController
 
     /// <summary>
     /// Returns a list of users with their assigned roles.
-    /// When page/pageSize are provided, returns a paged subset; otherwise returns all users.
+    /// Supports pagination and optional search filtering via query string parameters.
     /// </summary>
-    /// <param name="page">The zero-based page index. Defaults to null (return all).</param>
-    /// <param name="pageSize">The maximum number of items per page. Defaults to null (return all).</param>
-    /// <param name="searchTerm">Optional search term for filtering users by username, display name, email, first name, last name, or department.</param>
+    /// <param name="queryParams">Query parameters for pagination and search filtering, bound from the query string.</param>
     /// <returns>A paged result containing matching users and total count metadata.</returns>
     /// <response code="200">Returns the paged user list.</response>
     [HttpGet]
     [ProducesResponseType(typeof(PagedResult<UserDto>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<PagedResult<UserDto>>> GetUsers(
-        [FromQuery] int? page = null,
-        [FromQuery] int? pageSize = null,
-        [FromQuery] string? searchTerm = null)
+    public async Task<ActionResult<PagedResult<UserDto>>> GetUsers([FromQuery] UserQueryParams queryParams)
     {
-        var result = await _userService.SearchAsync(page, pageSize, searchTerm);
+        var result = await _userService.SearchAsync(queryParams);
         return Ok(result);
     }
 

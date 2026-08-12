@@ -3,6 +3,7 @@ using AspireWebAppTemplate.Infrastructure.Identity;
 using AspireWebAppTemplate.Infrastructure.Utilities;
 using AspireWebAppTemplate.Application.Common;
 using AspireWebAppTemplate.Application.Contracts.AuditLog;
+using AspireWebAppTemplate.Application.Contracts.Email;
 using AspireWebAppTemplate.Application.Contracts.Notifications;
 using AspireWebAppTemplate.Application.Contracts.Roles;
 using AspireWebAppTemplate.Application.Contracts.Users;
@@ -94,14 +95,14 @@ public class UserService : IUserService
     #region CRUD Operations
 
     /// <inheritdoc />
-    public async Task<PagedResult<UserDto>> SearchAsync(int? page, int? pageSize, string? searchTerm)
+    public async Task<PagedResult<UserDto>> SearchAsync(UserQueryParams queryParams)
     {
         var query = _userManager.Users.AsNoTracking();
 
         // Apply case-insensitive search filter across multiple user fields
-        if (!string.IsNullOrWhiteSpace(searchTerm))
+        if (!string.IsNullOrWhiteSpace(queryParams.SearchTerm))
         {
-            var term = searchTerm.ToLower();
+            var term = queryParams.SearchTerm.ToLower();
             query = query.Where(u =>
                 (u.UserName != null     && u.UserName.ToLower().Contains(term)) ||
                 (u.DisplayName != null  && u.DisplayName.ToLower().Contains(term)) ||
@@ -113,21 +114,16 @@ public class UserService : IUserService
 
         var totalCount = await query.CountAsync();
 
-        var orderedQuery = query.OrderBy(u => u.UserName);
+        // Apply pagination only when both Page and PageSize are provided;
+        // otherwise return all matching results.
+        var page = queryParams.Page ?? 0;
+        var pageSize = queryParams.PageSize ?? totalCount;
 
-        // Apply pagination only when both page and pageSize are provided
-        List<ApplicationUser> users;
-        if (page.HasValue && pageSize.HasValue)
-        {
-            users = await orderedQuery
-                .Skip(page.Value * pageSize.Value)
-                .Take(pageSize.Value)
-                .ToListAsync();
-        }
-        else
-        {
-            users = await orderedQuery.ToListAsync();
-        }
+        var users = await query
+            .OrderBy(u => u.UserName)
+            .Skip(page * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
 
         // Map each user to a DTO including their roles
         var items = new List<UserDto>(users.Count);
@@ -141,8 +137,8 @@ public class UserService : IUserService
         {
             Items = items,
             TotalCount = totalCount,
-            Page = page ?? 0,
-            PageSize = pageSize ?? totalCount
+            Page = page,
+            PageSize = pageSize
         };
     }
 
@@ -352,10 +348,17 @@ public class UserService : IUserService
         });
 
         // Send account deactivation email (best-effort, respects EmailEnabled preference)
-        await _emailService.TrySendEmailAsync(user.Id, user.Email, NotificationCategory.Account, EmailType.AccountDeactivated, new Dictionary<string, string>
+        await _emailService.TrySendEmailAsync(new TrySendEmailRequest
         {
-            ["UserName"] = user.DisplayName ?? user.UserName ?? string.Empty,
-            ["DeactivationReason"] = "Deactivated by an administrator."
+            UserId = user.Id,
+            RecipientEmail = user.Email,
+            Category = NotificationCategory.Account,
+            EmailType = EmailType.AccountDeactivated,
+            Variables = new Dictionary<string, string>
+            {
+                ["UserName"] = user.DisplayName ?? user.UserName ?? string.Empty,
+                ["DeactivationReason"] = "Deactivated by an administrator."
+            }
         });
     }
 
@@ -397,9 +400,16 @@ public class UserService : IUserService
         });
 
         // Send password changed email (best-effort, respects EmailEnabled preference)
-        await _emailService.TrySendEmailAsync(user.Id, user.Email, NotificationCategory.Account, EmailType.PasswordChanged, new Dictionary<string, string>
+        await _emailService.TrySendEmailAsync(new TrySendEmailRequest
         {
-            ["UserName"] = user.DisplayName ?? user.UserName ?? string.Empty
+            UserId = user.Id,
+            RecipientEmail = user.Email,
+            Category = NotificationCategory.Account,
+            EmailType = EmailType.PasswordChanged,
+            Variables = new Dictionary<string, string>
+            {
+                ["UserName"] = user.DisplayName ?? user.UserName ?? string.Empty
+            }
         });
     }
 

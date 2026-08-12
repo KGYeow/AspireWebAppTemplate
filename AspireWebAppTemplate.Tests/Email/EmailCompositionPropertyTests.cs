@@ -134,8 +134,12 @@ public class EmailCompositionPropertyTests
                     .UseSqlite("DataSource=:memory:")
                     .Options);
                 var service = new EmailService(mockTemplateService.Object, dbContext, configuration, mockLogger.Object);
-                service.SendEmailAsync(input.EmailType, input.Recipient, new Dictionary<string, string>())
-                    .GetAwaiter().GetResult();
+                service.SendEmailAsync(new SendEmailRequest
+                {
+                    EmailType = input.EmailType,
+                    RecipientEmail = input.Recipient,
+                    Variables = new Dictionary<string, string>()
+                }).GetAwaiter().GetResult();
 
                 // Assert: Verify the logger was called at Information level.
                 mockLogger.Verify(

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Net.Mail;
 using AspireWebAppTemplate.Application.Abstractions;
+using AspireWebAppTemplate.Application.Contracts.Email;
 using AspireWebAppTemplate.Infrastructure.Data;
 using AspireWebAppTemplate.Infrastructure.Identity;
 using AspireWebAppTemplate.Domain.Entities;
@@ -136,16 +137,16 @@ public class EmailService : IEmailService, IEmailSender<ApplicationUser>
     #region Email Operations
 
     /// <inheritdoc />
-    public async Task SendEmailAsync(EmailType emailType, string recipientEmail, Dictionary<string, string> variables)
+    public async Task SendEmailAsync(SendEmailRequest request)
     {
-        var rendered = await _templateService.RenderAsync(emailType, variables);
-        var maskedRecipient = MaskEmailAddress(recipientEmail);
+        var rendered = await _templateService.RenderAsync(request.EmailType, request.Variables);
+        var maskedRecipient = MaskEmailAddress(request.RecipientEmail);
 
         if (!_isEnabled)
         {
             _logger.LogInformation(
                 "Email send (no-op mode) — Template: {Template}, Recipient: {Recipient}, Subject: {Subject}",
-                emailType.ToString(), maskedRecipient, rendered.Subject);
+                request.EmailType.ToString(), maskedRecipient, rendered.Subject);
             return;
         }
 
@@ -160,51 +161,56 @@ public class EmailService : IEmailService, IEmailSender<ApplicationUser>
                 IsBodyHtml = true
             };
 
-            mailMessage.To.Add(new MailAddress(recipientEmail));
+            mailMessage.To.Add(new MailAddress(request.RecipientEmail));
 
             await smtpClient.SendMailAsync(mailMessage);
 
             _logger.LogInformation(
                 "Email sent successfully — Template: {Template}, Recipient: {Recipient}",
-                emailType.ToString(), maskedRecipient);
+                request.EmailType.ToString(), maskedRecipient);
         }
         catch (SmtpException ex)
         {
             _logger.LogError(ex,
                 "SMTP error sending email — Template: {Template}, Recipient: {Recipient}, StatusCode: {StatusCode}",
-                emailType.ToString(), maskedRecipient, ex.StatusCode);
+                request.EmailType.ToString(), maskedRecipient, ex.StatusCode);
 
             throw new InvalidOperationException(
-                $"Failed to send email via SMTP. Template: {emailType}, Status: {ex.StatusCode}. {ex.Message}", ex);
+                $"Failed to send email via SMTP. Template: {request.EmailType}, Status: {ex.StatusCode}. {ex.Message}", ex);
         }
     }
 
     /// <inheritdoc />
-    public async Task TrySendEmailAsync(string userId, string? recipientEmail, NotificationCategory category, EmailType emailType, Dictionary<string, string> variables)
+    public async Task TrySendEmailAsync(TrySendEmailRequest request)
     {
         try
         {
-            if (string.IsNullOrWhiteSpace(recipientEmail))
+            if (string.IsNullOrWhiteSpace(request.RecipientEmail))
                 return;
 
             // Check the user's email preference for this category.
             // If no preference record exists, default to EmailEnabled = true.
             var preference = await _dbContext.NotificationPreferences
                 .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.UserId == userId && p.Category == category);
+                .FirstOrDefaultAsync(p => p.UserId == request.UserId && p.Category == request.Category);
 
             var emailEnabled = preference?.EmailEnabled ?? true;
             if (!emailEnabled)
                 return;
 
-            await SendEmailAsync(emailType, recipientEmail, variables);
+            await SendEmailAsync(new SendEmailRequest
+            {
+                EmailType = request.EmailType,
+                RecipientEmail = request.RecipientEmail,
+                Variables = request.Variables
+            });
         }
         catch (Exception ex)
         {
             _logger.LogWarning(ex,
                 "Failed to send {EmailType} email to user '{UserId}'. Email delivery is best-effort.",
-                emailType,
-                userId);
+                request.EmailType,
+                request.UserId);
         }
     }
 
@@ -228,7 +234,12 @@ public class EmailService : IEmailService, IEmailSender<ApplicationUser>
             ["ConfirmationLink"] = confirmationLink
         };
 
-        await SendEmailAsync(EmailType.EmailConfirmation, email, variables);
+        await SendEmailAsync(new SendEmailRequest
+        {
+            EmailType = EmailType.EmailConfirmation,
+            RecipientEmail = email,
+            Variables = variables
+        });
     }
 
     /// <summary>
@@ -247,7 +258,12 @@ public class EmailService : IEmailService, IEmailSender<ApplicationUser>
             ["ResetLink"] = resetLink
         };
 
-        await SendEmailAsync(EmailType.PasswordReset, email, variables);
+        await SendEmailAsync(new SendEmailRequest
+        {
+            EmailType = EmailType.PasswordReset,
+            RecipientEmail = email,
+            Variables = variables
+        });
     }
 
     /// <summary>
@@ -266,7 +282,12 @@ public class EmailService : IEmailService, IEmailSender<ApplicationUser>
             ["TwoFactorCode"] = resetCode
         };
 
-        await SendEmailAsync(EmailType.TwoFactorCode, email, variables);
+        await SendEmailAsync(new SendEmailRequest
+        {
+            EmailType = EmailType.TwoFactorCode,
+            RecipientEmail = email,
+            Variables = variables
+        });
     }
 
     #endregion

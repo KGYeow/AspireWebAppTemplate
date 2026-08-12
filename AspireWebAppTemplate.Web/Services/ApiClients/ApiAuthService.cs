@@ -141,9 +141,9 @@ public class ApiAuthService
     /// <summary>
     /// Resets the user's password using a previously generated reset code.
     /// </summary>
-    public async Task<ApiResult> ResetPasswordAsync(string email, string code, string newPassword)
+    public async Task<ApiResult> ResetPasswordAsync(ResetPasswordRequest request)
     {
-        var response = await _http.PostAsJsonAsync("/api/auth/reset-password", new { Email = email, Code = code, NewPassword = newPassword });
+        var response = await _http.PostAsJsonAsync("/api/auth/reset-password", request);
         if (response.IsSuccessStatusCode) return ApiResult.Success();
         return ApiResult.Failure(await response.Content.ReadAsStringAsync());
     }
@@ -151,9 +151,9 @@ public class ApiAuthService
     /// <summary>
     /// Confirms a user's email address using a confirmation code.
     /// </summary>
-    public async Task<ApiResult> ConfirmEmailAsync(string userId, string code)
+    public async Task<ApiResult> ConfirmEmailAsync(ConfirmEmailRequest request)
     {
-        var response = await _http.PostAsJsonAsync("/api/auth/confirm-email", new { UserId = userId, Code = code });
+        var response = await _http.PostAsJsonAsync("/api/auth/confirm-email", request);
         if (response.IsSuccessStatusCode) return ApiResult.Success();
         return ApiResult.Failure(await response.Content.ReadAsStringAsync());
     }

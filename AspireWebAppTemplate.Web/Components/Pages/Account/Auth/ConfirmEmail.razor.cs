@@ -1,4 +1,5 @@
 using AspireWebAppTemplate.Application.Common;
+using AspireWebAppTemplate.Application.Contracts.Auth;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
@@ -75,7 +76,7 @@ public partial class ConfirmEmail : ComponentBase
 
         try
         {
-            var result = await AuthService.ConfirmEmailAsync(UserId, Code);
+            var result = await AuthService.ConfirmEmailAsync(new ConfirmEmailRequest { UserId = UserId, Code = Code });
             if (result.Succeeded)
             {
                 IsSuccess = true;

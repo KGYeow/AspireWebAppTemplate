@@ -36,11 +36,17 @@ public class ApiUserService
     /// <summary>
     /// Returns a paged list of users with optional search filtering.
     /// </summary>
-    public async Task<ApiResult<PagedResult<UserDto>>> GetUsersAsync(int page, int pageSize, string? searchTerm = null)
+    /// <param name="queryParams">Query parameters containing page index, page size, and optional search term.</param>
+    public async Task<ApiResult<PagedResult<UserDto>>> GetUsersAsync(UserQueryParams queryParams)
     {
-        var url = $"/api/users?page={page}&pageSize={pageSize}";
-        if (!string.IsNullOrWhiteSpace(searchTerm))
-            url += $"&searchTerm={Uri.EscapeDataString(searchTerm)}";
+        var queryStringParts = new List<string>();
+        if (queryParams.Page.HasValue)
+            queryStringParts.Add($"page={queryParams.Page.Value}");
+        if (queryParams.PageSize.HasValue)
+            queryStringParts.Add($"pageSize={queryParams.PageSize.Value}");
+        if (!string.IsNullOrWhiteSpace(queryParams.SearchTerm))
+            queryStringParts.Add($"searchTerm={Uri.EscapeDataString(queryParams.SearchTerm)}");
+        var url = queryStringParts.Count > 0 ? $"/api/users?{string.Join("&", queryStringParts)}" : "/api/users";
         var response = await _http.GetAsync(url);
         if (response.IsSuccessStatusCode)
             return ApiResult<PagedResult<UserDto>>.Success(await response.Content.ReadFromJsonAsync<PagedResult<UserDto>>()!);

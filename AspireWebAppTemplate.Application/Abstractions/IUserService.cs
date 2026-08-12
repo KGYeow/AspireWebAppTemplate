@@ -22,17 +22,15 @@ public interface IUserService
     /// username, display name, email, first name, last name, and department fields.
     /// Results are ordered by display name ascending.
     /// </summary>
-    /// <param name="page">The zero-based page index. Defaults to 0 if null.</param>
-    /// <param name="pageSize">The maximum number of items per page. Defaults to a system default if null.</param>
-    /// <param name="searchTerm">
-    /// An optional search term for case-insensitive partial matching against user fields.
-    /// When null or empty, all users are returned (paginated).
+    /// <param name="queryParams">
+    /// A <see cref="UserQueryParams"/> containing pagination (Page, PageSize) and an optional
+    /// SearchTerm for case-insensitive partial matching against user fields.
     /// </param>
     /// <returns>
     /// A task that resolves to a <see cref="PagedResult{T}"/> of <see cref="UserDto"/>
     /// containing the matching users and total count metadata.
     /// </returns>
-    Task<PagedResult<UserDto>> SearchAsync(int? page, int? pageSize, string? searchTerm);
+    Task<PagedResult<UserDto>> SearchAsync(UserQueryParams queryParams);
 
     /// <summary>
     /// Retrieves a single user by their unique identifier, including roles and all profile fields.

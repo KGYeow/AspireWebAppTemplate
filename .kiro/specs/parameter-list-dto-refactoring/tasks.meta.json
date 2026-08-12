@@ -1,0 +1,458 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Create TrySendEmailRequest and SendEmailRequest in Application/Contracts/Email": [
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503290946
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503306856
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503397734
+      }
+    ],
+    "1.2 Create RegisterRequest in Application/Contracts/Auth": [
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503291470
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503307061
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503397905
+      }
+    ],
+    "1.3 Create UserQueryParams in Application/Contracts/Users": [
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503291628
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503306932
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503398017
+      }
+    ],
+    "2.1 Update IEmailService interface signatures": [
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503291791
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503414211
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503512989
+      }
+    ],
+    "2.2 Update EmailService implementation for SendEmailAsync": [
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503292050
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503657528
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503831752
+      }
+    ],
+    "2.3 Update EmailService implementation for TrySendEmailAsync": [
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503292240
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503927132
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786504092572
+      }
+    ],
+    "2.4 Update all callers of TrySendEmailAsync (RegisterService, UserService, LoginService)": [
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503292373
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786504100921
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786504272404
+      }
+    ],
+    "2.5 Update Identity integration methods calling SendEmailAsync": [
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503292492
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786504100800
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786504272520
+      }
+    ],
+    "3.1 Update ILoginService interface signature": [
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503292625
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503414330
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503513252
+      }
+    ],
+    "3.2 Update LoginService implementation": [
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503292739
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503657714
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503832015
+      }
+    ],
+    "3.3 Update AuthController caller for LoginService": [
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503292846
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503927017
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786504092800
+      }
+    ],
+    "4.1 Update ILdapLoginService interface signature": [
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503292940
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503414076
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503513153
+      }
+    ],
+    "4.2 Update LdapLoginService implementation": [
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503293107
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503658085
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503831327
+      }
+    ],
+    "4.3 Update AuthController caller for LdapLoginService": [
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503293282
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503926867
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786504092453
+      }
+    ],
+    "5. Checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503293374
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786504318390
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786504626213
+      }
+    ],
+    "6.1 Update IRegisterService interface signature": [
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503293445
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503414420
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503513344
+      }
+    ],
+    "6.2 Update RegisterService implementation": [
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503293511
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503657949
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503831893
+      }
+    ],
+    "6.3 Update AuthController caller for RegisterService": [
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503293575
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503927446
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786504092686
+      }
+    ],
+    "7.1 Update IUserService interface signature": [
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503293644
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503414512
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503512868
+      }
+    ],
+    "7.2 Update UserService implementation": [
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503293720
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503657843
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503832199
+      }
+    ],
+    "7.3 Update UsersController to bind UserQueryParams from query string": [
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503293793
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503854771
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503917240
+      }
+    ],
+    "7.4 Update ApiUserService (Web project) to accept UserQueryParams": [
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503293857
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503927317
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786504093026
+      }
+    ],
+    "8.1 Update ApiAuthService.ResetPasswordAsync to accept ResetPasswordRequest DTO": [
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503293971
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503519752
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503636009
+      }
+    ],
+    "8.2 Update ApiAuthService.ConfirmEmailAsync to accept ConfirmEmailRequest DTO": [
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503294027
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503519644
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503636171
+      }
+    ],
+    "9. Final checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786503294365
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786504645166
+      },
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786504879687
+      }
+    ],
+    "6. Refactor IRegisterService and RegisterService": [
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786504092899
+      }
+    ],
+    "4. Refactor ILdapLoginService and LdapLoginService": [
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786504093141
+      }
+    ],
+    "3. Refactor ILoginService and LoginService": [
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786504093278
+      }
+    ],
+    "7. Refactor IUserService.SearchAsync and related callers": [
+      {
+        "executionId": "d1f1f263-d3de-4ad7-8876-11f7e9edc9a3",
+        "chatSessionId": "sess_8fb18d36-d965-474c-aef2-3893d28b3fec",
+        "timestamp": 1786504093381
+      }
+    ]
+  }
+}
