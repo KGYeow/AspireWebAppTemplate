@@ -1,7 +1,11 @@
 using AspireWebAppTemplate.Application.Abstractions;
+using AspireWebAppTemplate.Infrastructure.Services.Template.Ai;
 using AspireWebAppTemplate.Application.Features.Template.Ai;
+using AspireWebAppTemplate.Infrastructure.Services.Template.Ai;
 using Microsoft.AspNetCore.Authorization;
+using AspireWebAppTemplate.Infrastructure.Services.Template.Ai;
 using Microsoft.AspNetCore.Mvc;
+using AspireWebAppTemplate.Infrastructure.Services.Template.Ai;
 
 namespace AspireWebAppTemplate.ApiService.Controllers;
 

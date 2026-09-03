@@ -8,7 +8,7 @@ using AspireWebAppTemplate.Application.Features.Template.Notifications;
 using AspireWebAppTemplate.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
-namespace AspireWebAppTemplate.Infrastructure.Services;
+namespace AspireWebAppTemplate.Infrastructure.Services.Template.Notifications;
 
 /// <summary>
 /// Implements the <see cref="INotificationService"/> interface to manage in-app notification

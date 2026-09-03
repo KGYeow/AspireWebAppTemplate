@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using AspireWebAppTemplate.Infrastructure.Identity;
 
-namespace AspireWebAppTemplate.Infrastructure.Services;
+namespace AspireWebAppTemplate.Infrastructure.Services.Template.Authentication;
 
 /// <summary>
 /// Implements <see cref="IRegisterService"/> by creating a new user via

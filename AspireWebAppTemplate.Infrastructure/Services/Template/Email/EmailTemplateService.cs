@@ -7,7 +7,7 @@ using AspireWebAppTemplate.Application.Features.Template.Email;
 using AspireWebAppTemplate.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
-namespace AspireWebAppTemplate.Infrastructure.Services;
+namespace AspireWebAppTemplate.Infrastructure.Services.Template.Email;
 
 /// <summary>
 /// Implements the <see cref="IEmailTemplateService"/> interface to resolve, render, and manage

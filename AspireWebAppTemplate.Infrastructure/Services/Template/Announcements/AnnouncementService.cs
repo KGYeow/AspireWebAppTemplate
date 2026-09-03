@@ -11,7 +11,7 @@ using AspireWebAppTemplate.Domain.Enums;
 using Ganss.Xss;
 using Microsoft.EntityFrameworkCore;
 
-namespace AspireWebAppTemplate.Infrastructure.Services;
+namespace AspireWebAppTemplate.Infrastructure.Services.Template.Announcements;
 
 /// <summary>
 /// Implements the <see cref="IAnnouncementService"/> interface to manage announcement

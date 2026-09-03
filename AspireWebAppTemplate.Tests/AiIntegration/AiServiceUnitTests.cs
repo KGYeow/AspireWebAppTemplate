@@ -2,6 +2,7 @@ using Amazon.BedrockRuntime;
 using Amazon.BedrockRuntime.Model;
 using AspireWebAppTemplate.Infrastructure.Extensions;
 using AspireWebAppTemplate.Infrastructure.Services;
+using AspireWebAppTemplate.Infrastructure.Services.Template.Ai;
 using AspireWebAppTemplate.Application.Features.Template.Ai;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;

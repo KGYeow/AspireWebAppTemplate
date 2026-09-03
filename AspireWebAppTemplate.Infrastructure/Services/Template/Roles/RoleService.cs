@@ -8,7 +8,7 @@ using AspireWebAppTemplate.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace AspireWebAppTemplate.Infrastructure.Services;
+namespace AspireWebAppTemplate.Infrastructure.Services.Template.Roles;
 
 /// <summary>
 /// Implements <see cref="IRoleService"/> providing full role lifecycle management including

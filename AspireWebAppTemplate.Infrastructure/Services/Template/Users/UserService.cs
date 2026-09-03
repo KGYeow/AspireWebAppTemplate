@@ -12,7 +12,7 @@ using AspireWebAppTemplate.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace AspireWebAppTemplate.Infrastructure.Services;
+namespace AspireWebAppTemplate.Infrastructure.Services.Template.Users;
 
 /// <summary>
 /// Implements <see cref="IUserService"/> with full user lifecycle management including

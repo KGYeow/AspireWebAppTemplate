@@ -11,7 +11,7 @@ using AspireWebAppTemplate.Application.Features.Template.AuditLog;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace AspireWebAppTemplate.Infrastructure.Services;
+namespace AspireWebAppTemplate.Infrastructure.Services.Template.AuditLog;
 
 /// <summary>
 /// Implements the <see cref="IAuditLogService"/> interface to record significant user and system

@@ -8,7 +8,7 @@ using AspireWebAppTemplate.Application.Features.Template.Users;
 using AspireWebAppTemplate.Infrastructure.Options;
 using Microsoft.Extensions.Options;
 
-namespace AspireWebAppTemplate.Infrastructure.Services;
+namespace AspireWebAppTemplate.Infrastructure.Services.Template.Authentication;
 
 /// <summary>
 /// Implements <see cref="ILdapAuthService"/> using LDAPS to authenticate users

@@ -6,6 +6,7 @@ using AspireWebAppTemplate.Infrastructure.Data;
 using AspireWebAppTemplate.Infrastructure.Data.Entities;
 using AspireWebAppTemplate.Infrastructure.Identity;
 using AspireWebAppTemplate.Infrastructure.Services;
+using AspireWebAppTemplate.Infrastructure.Services.Template.AuditLog;
 using AspireWebAppTemplate.Domain.Constants;
 using AspireWebAppTemplate.Application.Features.Template.AuditLog;
 using AspireWebAppTemplate.Domain.Enums;

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Caching.Memory;
 using AspireWebAppTemplate.Infrastructure.Identity;
 
-namespace AspireWebAppTemplate.Infrastructure.Services;
+namespace AspireWebAppTemplate.Infrastructure.Services.Template.Authentication;
 
 /// <summary>
 /// Implements <see cref="ILoginService"/> by validating credentials using

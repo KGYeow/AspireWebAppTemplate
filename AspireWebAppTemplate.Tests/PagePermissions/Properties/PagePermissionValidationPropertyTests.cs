@@ -5,6 +5,7 @@ using AspireWebAppTemplate.Infrastructure.Data;
 using AspireWebAppTemplate.Infrastructure.Data.Entities;
 using AspireWebAppTemplate.Infrastructure.Identity;
 using AspireWebAppTemplate.Infrastructure.Services;
+using AspireWebAppTemplate.Infrastructure.Services.Template.PagePermissions;
 using AspireWebAppTemplate.Application.Common;
 using FsCheck;
 using FsCheck.Fluent;

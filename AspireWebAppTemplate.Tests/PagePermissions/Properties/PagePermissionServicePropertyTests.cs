@@ -3,6 +3,7 @@ using AspireWebAppTemplate.Infrastructure.Data;
 using AspireWebAppTemplate.Infrastructure.Data.Entities;
 using AspireWebAppTemplate.Infrastructure.Identity;
 using AspireWebAppTemplate.Infrastructure.Services;
+using AspireWebAppTemplate.Infrastructure.Services.Template.PagePermissions;
 using AspireWebAppTemplate.Application.Abstractions;
 using AspireWebAppTemplate.Application.Features.Template.Navigation;
 using AspireWebAppTemplate.Application.Common;

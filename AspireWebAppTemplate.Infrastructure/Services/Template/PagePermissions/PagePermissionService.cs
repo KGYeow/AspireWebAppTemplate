@@ -10,7 +10,7 @@ using AspireWebAppTemplate.Application.Features.Template.PagePermissions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace AspireWebAppTemplate.Infrastructure.Services;
+namespace AspireWebAppTemplate.Infrastructure.Services.Template.PagePermissions;
 
 /// <summary>
 /// Implements the <see cref="IPagePermissionService"/> interface to manage role-based page access

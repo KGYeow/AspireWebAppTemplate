@@ -1,12 +1,21 @@
 using AspireWebAppTemplate.ApiService.Authentication;
+using AspireWebAppTemplate.Infrastructure.Services.Template.Authentication;
 using AspireWebAppTemplate.Infrastructure.Data;
+using AspireWebAppTemplate.Infrastructure.Services.Template.Authentication;
 using AspireWebAppTemplate.Infrastructure.Identity;
+using AspireWebAppTemplate.Infrastructure.Services.Template.Authentication;
 using AspireWebAppTemplate.Infrastructure.Extensions;
+using AspireWebAppTemplate.Infrastructure.Services.Template.Authentication;
 using AspireWebAppTemplate.Infrastructure.Data.SeedData;
+using AspireWebAppTemplate.Infrastructure.Services.Template.Authentication;
 using AspireWebAppTemplate.Infrastructure.Options;
+using AspireWebAppTemplate.Infrastructure.Services.Template.Authentication;
 using Microsoft.AspNetCore.Authentication;
+using AspireWebAppTemplate.Infrastructure.Services.Template.Authentication;
 using Microsoft.AspNetCore.Identity;
+using AspireWebAppTemplate.Infrastructure.Services.Template.Authentication;
 using Microsoft.EntityFrameworkCore;
+using AspireWebAppTemplate.Infrastructure.Services.Template.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 

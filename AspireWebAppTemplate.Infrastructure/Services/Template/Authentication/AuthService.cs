@@ -12,7 +12,7 @@ using AspireWebAppTemplate.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 
-namespace AspireWebAppTemplate.Infrastructure.Services;
+namespace AspireWebAppTemplate.Infrastructure.Services.Template.Authentication;
 
 /// <summary>
 /// Implements <see cref="IAuthService"/> with full account self-management operations

@@ -1,16 +1,29 @@
 using System.Net;
+using AspireWebAppTemplate.Infrastructure.Services.Template.Navigation;
 using System.Net.Http.Json;
+using AspireWebAppTemplate.Infrastructure.Services.Template.Navigation;
 using System.Reflection;
+using AspireWebAppTemplate.Infrastructure.Services.Template.Navigation;
 using System.Text.Json;
+using AspireWebAppTemplate.Infrastructure.Services.Template.Navigation;
 using AspireWebAppTemplate.Application.Abstractions;
+using AspireWebAppTemplate.Infrastructure.Services.Template.Navigation;
 using AspireWebAppTemplate.Application.Features.Template.Navigation;
+using AspireWebAppTemplate.Infrastructure.Services.Template.Navigation;
 using AspireWebAppTemplate.ApiService.Controllers;
+using AspireWebAppTemplate.Infrastructure.Services.Template.Navigation;
 using AspireWebAppTemplate.Application.Common;
+using AspireWebAppTemplate.Infrastructure.Services.Template.Navigation;
 using AspireWebAppTemplate.Web.Services.ApiClients;
+using AspireWebAppTemplate.Infrastructure.Services.Template.Navigation;
 using Microsoft.AspNetCore.Http;
+using AspireWebAppTemplate.Infrastructure.Services.Template.Navigation;
 using Microsoft.AspNetCore.Mvc;
+using AspireWebAppTemplate.Infrastructure.Services.Template.Navigation;
 using Moq;
+using AspireWebAppTemplate.Infrastructure.Services.Template.Navigation;
 using Moq.Protected;
+using AspireWebAppTemplate.Infrastructure.Services.Template.Navigation;
 
 namespace AspireWebAppTemplate.Tests.Navigation;
 

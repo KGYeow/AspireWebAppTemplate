@@ -7,6 +7,7 @@ using Amazon.BedrockRuntime;
 using Amazon.BedrockRuntime.Model;
 using Amazon.Runtime;
 using AspireWebAppTemplate.Infrastructure.Services;
+using AspireWebAppTemplate.Infrastructure.Services.Template.Ai;
 using AspireWebAppTemplate.Application.Features.Template.Ai;
 using FsCheck;
 using FsCheck.Fluent;

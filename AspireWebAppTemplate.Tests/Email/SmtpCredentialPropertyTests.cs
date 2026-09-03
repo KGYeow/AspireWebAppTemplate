@@ -4,6 +4,7 @@ using AspireWebAppTemplate.Application.Abstractions;
 using AspireWebAppTemplate.Application.Features.Template.Email;
 using AspireWebAppTemplate.Infrastructure.Data;
 using AspireWebAppTemplate.Infrastructure.Services;
+using AspireWebAppTemplate.Infrastructure.Services.Template.Email;
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;

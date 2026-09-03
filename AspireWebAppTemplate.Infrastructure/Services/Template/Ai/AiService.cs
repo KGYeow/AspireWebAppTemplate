@@ -6,7 +6,7 @@ using AspireWebAppTemplate.Application.Features.Template.Ai;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace AspireWebAppTemplate.Infrastructure.Services;
+namespace AspireWebAppTemplate.Infrastructure.Services.Template.Ai;
 
 /// <summary>
 /// Implements <see cref="IAiService"/> by sending user prompts to Amazon Bedrock via the

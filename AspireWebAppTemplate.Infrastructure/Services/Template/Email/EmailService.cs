@@ -11,7 +11,7 @@ using AspireWebAppTemplate.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace AspireWebAppTemplate.Infrastructure.Services;
+namespace AspireWebAppTemplate.Infrastructure.Services.Template.Email;
 
 /// <summary>
 /// Sends emails via SMTP using resolved templates from <see cref="IEmailTemplateService"/>.

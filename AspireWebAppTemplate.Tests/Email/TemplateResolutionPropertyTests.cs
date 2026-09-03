@@ -3,6 +3,7 @@
 using AspireWebAppTemplate.Infrastructure.Data;
 using AspireWebAppTemplate.Domain.Entities;
 using AspireWebAppTemplate.Infrastructure.Services;
+using AspireWebAppTemplate.Infrastructure.Services.Template.Email;
 using AspireWebAppTemplate.Domain.Enums;
 using FsCheck;
 using FsCheck.Fluent;

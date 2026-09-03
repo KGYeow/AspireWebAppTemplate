@@ -4,7 +4,7 @@ using AspireWebAppTemplate.Application.Features.Template.Navigation;
 using AspireWebAppTemplate.Application.Common;
 using AspireWebAppTemplate.Domain.Constants;
 
-namespace AspireWebAppTemplate.Infrastructure.Services;
+namespace AspireWebAppTemplate.Infrastructure.Services.Template.Navigation;
 
 /// <summary>
 /// Provides filtered navigation trees by combining the full navigation structure
