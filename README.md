@@ -289,15 +289,21 @@ Features built on top of the template for specific project needs. Not part of th
 ## Development Workflow
 
 ### Adding New Features
-1. Add DTOs to `AspireWebAppTemplate.Application/Contracts/`
-2. Add service interface to `AspireWebAppTemplate.Application/Abstractions/`
-3. Add service implementation to `AspireWebAppTemplate.Infrastructure/Services/`
-4. Add API endpoints to `AspireWebAppTemplate.ApiService/Controllers/`
-5. Add HTTP client methods to `AspireWebAppTemplate.Web/Services/`
-6. Create UI pages in `AspireWebAppTemplate.Web/Components/Pages/`
+
+Business features go under a business-module folder (NOT under `Template/`, which is
+template-owned). See `docs/architecture/feature-organization.md` for the full convention.
+
+1. Add the service interface AND its DTOs to `AspireWebAppTemplate.Application/Features/{BusinessModule}/{Feature}/` (one shared per-feature namespace)
+2. Add the service implementation to `AspireWebAppTemplate.Infrastructure/Services/{BusinessModule}/{Feature}/`
+3. Add API endpoints to `AspireWebAppTemplate.ApiService/Controllers/{BusinessModule}/` (add a `{Feature}/` level only if a feature has multiple controllers)
+4. Add HTTP client methods to `AspireWebAppTemplate.Web/Services/`
+5. Create UI pages in `AspireWebAppTemplate.Web/Components/Pages/`
+
+> Cross-cutting, non-feature contracts belong in `Application/Abstractions/` (interfaces) or
+> `Application/Common/` (shapes) — not in a feature folder.
 
 ### Database Changes
-1. Modify entities in `Infrastructure/Data/Entities/` or `Infrastructure/Identity/` or `Domain/Entities/`
+1. Modify entities in `Infrastructure/Data/Entities/{BusinessModule}/` (or `Infrastructure/Identity/`, or `Domain/Entities/{BusinessModule}/` for pure domain entities)
 2. Update `ApplicationDbContext.cs`
 3. Add migration: `Add-Migration MigrationName -Project AspireWebAppTemplate.Infrastructure -StartupProject AspireWebAppTemplate.ApiService`
 4. Apply: `Update-Database -Project AspireWebAppTemplate.Infrastructure -StartupProject AspireWebAppTemplate.ApiService`

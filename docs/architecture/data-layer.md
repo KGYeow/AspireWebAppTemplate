@@ -14,17 +14,17 @@ Located at `AspireWebAppTemplate.Infrastructure/Data/ApplicationDbContext.cs`, e
 |--------|-------|----------|---------|
 | `ApplicationUser` | AspNetUsers | `Infrastructure/Identity/` | Extended Identity user with profile, preferences, and LDAP fields |
 | `ApplicationRole` | AspNetRoles | `Infrastructure/Identity/` | Extended Identity role with IsSystem, IsDefault, Position, display metadata |
-| `Announcement` | Announcements | `Infrastructure/Data/Entities/` | Multi-surface announcements with scheduling, severity, and HTML content |
-| `AnnouncementDismissal` | AnnouncementDismissals | `Infrastructure/Data/Entities/` | Per-user announcement dismissal tracking |
-| `AuditLogEntry` | AuditLogEntries | `Infrastructure/Data/Entities/` | Security-sensitive audit trail records with old/new value change tracking |
-| `Notification` | Notifications | `Infrastructure/Data/Entities/` | In-app notifications with category, read state, and deep-link support |
-| `NotificationPreference` | NotificationPreferences | `Infrastructure/Data/Entities/` | Per-user, per-category notification channel preferences |
-| `PagePermission` | PagePermissions | `Infrastructure/Data/Entities/` | Database-driven page access whitelist (role-based) |
-| `EmailTemplate` | EmailTemplates | `Domain/Entities/` | Email templates resolved by EmailType enum, stored in database |
+| `Announcement` | Announcements | `Infrastructure/Data/Entities/Template/` | Multi-surface announcements with scheduling, severity, and HTML content |
+| `AnnouncementDismissal` | AnnouncementDismissals | `Infrastructure/Data/Entities/Template/` | Per-user announcement dismissal tracking |
+| `AuditLogEntry` | AuditLogEntries | `Infrastructure/Data/Entities/Template/` | Security-sensitive audit trail records with old/new value change tracking |
+| `Notification` | Notifications | `Infrastructure/Data/Entities/Template/` | In-app notifications with category, read state, and deep-link support |
+| `NotificationPreference` | NotificationPreferences | `Infrastructure/Data/Entities/Template/` | Per-user, per-category notification channel preferences |
+| `PagePermission` | PagePermissions | `Infrastructure/Data/Entities/Template/` | Database-driven page access whitelist (role-based) |
+| `EmailTemplate` | EmailTemplates | `Domain/Entities/Template/` | Email templates resolved by EmailType enum, stored in database |
 
 ### Entity Type Configurations
 
-Located at `AspireWebAppTemplate.Infrastructure/Data/Configurations/`. Each entity has a dedicated `IEntityTypeConfiguration<T>` class defining indexes, constraints, conversions, and relationships.
+Located at `AspireWebAppTemplate.Infrastructure/Data/Configurations/Template/` (business configs go under `Configurations/{BusinessModule}/`). Each entity has a dedicated `IEntityTypeConfiguration<T>` class defining indexes, constraints, conversions, and relationships.
 
 ### Conventions
 
