@@ -1,6 +1,6 @@
 using AspireWebAppTemplate.Domain.Enums;
 
-namespace AspireWebAppTemplate.Application.Contracts.AuditLog;
+namespace AspireWebAppTemplate.Application.Features.Template.AuditLog.Contracts;
 
 /// <summary>
 /// Encapsulates all parameters for recording a single audit log entry.

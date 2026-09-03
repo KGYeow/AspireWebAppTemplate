@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using AspireWebAppTemplate.Application.Common;
 using AspireWebAppTemplate.Application.Contracts.Auth;
-using AspireWebAppTemplate.Application.Contracts.AuditLog;
+using AspireWebAppTemplate.Application.Features.Template.AuditLog.Contracts;
 using AspireWebAppTemplate.Application.Contracts.Roles;
 using AspireWebAppTemplate.Application.Contracts.Users;
 using AspireWebAppTemplate.Domain.Attributes;

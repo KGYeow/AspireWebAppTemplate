@@ -1,7 +1,8 @@
 using AspireWebAppTemplate.Application.Abstractions;
+using AspireWebAppTemplate.Application.Features.Template.AuditLog;
 using AspireWebAppTemplate.Infrastructure.Identity;
 using AspireWebAppTemplate.Infrastructure.Utilities;
-using AspireWebAppTemplate.Application.Contracts.AuditLog;
+using AspireWebAppTemplate.Application.Features.Template.AuditLog.Contracts;
 using AspireWebAppTemplate.Application.Contracts.PagePermissions;
 using AspireWebAppTemplate.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;

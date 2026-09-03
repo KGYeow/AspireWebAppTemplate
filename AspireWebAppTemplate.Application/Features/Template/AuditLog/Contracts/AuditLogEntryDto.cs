@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using AspireWebAppTemplate.Domain.Enums;
 using AspireWebAppTemplate.Domain.Attributes;
 
-namespace AspireWebAppTemplate.Application.Contracts.AuditLog;
+namespace AspireWebAppTemplate.Application.Features.Template.AuditLog.Contracts;
 
 /// <summary>
 /// Data transfer object representing a single audit log entry.

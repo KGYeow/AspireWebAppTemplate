@@ -1,5 +1,5 @@
 using System.Text.Json;
-using AspireWebAppTemplate.Application.Contracts.AuditLog;
+using AspireWebAppTemplate.Application.Features.Template.AuditLog.Contracts;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using AspireWebAppTemplate.Web.Abstractions;

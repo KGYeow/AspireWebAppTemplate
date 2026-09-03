@@ -1,5 +1,5 @@
 // Feature: audit-log-old-new-values, Property 6: AuditLogRequest Default Property Values
-using AspireWebAppTemplate.Application.Contracts.AuditLog;
+using AspireWebAppTemplate.Application.Features.Template.AuditLog.Contracts;
 
 namespace AspireWebAppTemplate.Tests.AuditLog;
 

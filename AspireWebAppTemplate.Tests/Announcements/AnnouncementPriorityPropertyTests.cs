@@ -1,5 +1,6 @@
 // Feature: announcement-banner-system, Property 8: Priority ordering selects by Severity descending then CreatedAtUtc descending
 using AspireWebAppTemplate.Application.Abstractions;
+using AspireWebAppTemplate.Application.Features.Template.AuditLog;
 using AspireWebAppTemplate.Infrastructure.Data;
 using AspireWebAppTemplate.Infrastructure.Data.Entities;
 using AspireWebAppTemplate.Infrastructure.Identity;

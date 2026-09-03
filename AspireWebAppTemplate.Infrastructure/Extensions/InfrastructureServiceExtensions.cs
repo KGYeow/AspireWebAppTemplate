@@ -3,6 +3,7 @@ using Amazon.BedrockRuntime;
 using Amazon.Runtime;
 using Amazon.Runtime.Credentials;
 using AspireWebAppTemplate.Application.Abstractions;
+using AspireWebAppTemplate.Application.Features.Template.AuditLog;
 using AspireWebAppTemplate.Application.Utilities;
 using AspireWebAppTemplate.Infrastructure.Identity;
 using AspireWebAppTemplate.Infrastructure.Services;

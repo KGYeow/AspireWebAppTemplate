@@ -1,4 +1,4 @@
-using AspireWebAppTemplate.Application.Contracts.AuditLog;
+using AspireWebAppTemplate.Application.Features.Template.AuditLog.Contracts;
 using AspireWebAppTemplate.Domain.Enums;
 using AspireWebAppTemplate.Web.Services;
 using AspireWebAppTemplate.Web.Abstractions;
@@ -194,7 +194,7 @@ public partial class Index : ComponentBase, IDisposable
             }
 
             // Build query parameters for the API call
-            var queryParams = new Application.Contracts.AuditLog.AuditLogQueryParams
+            var queryParams = new Application.Features.Template.AuditLog.Contracts.AuditLogQueryParams
             {
                 Page = state.Page,
                 PageSize = pageSize,
@@ -319,7 +319,7 @@ public partial class Index : ComponentBase, IDisposable
 
         try
         {
-            var exportResult = await AuditLogService.ExportExcelAsync(new Application.Contracts.AuditLog.AuditLogQueryParams
+            var exportResult = await AuditLogService.ExportExcelAsync(new Application.Features.Template.AuditLog.Contracts.AuditLogQueryParams
             {
                 SearchTerm = _searchString,
                 ActionType = _actionTypeFilter,

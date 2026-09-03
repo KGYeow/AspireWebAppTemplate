@@ -1,7 +1,7 @@
 using AspireWebAppTemplate.Application.Common;
-using AspireWebAppTemplate.Application.Contracts.AuditLog;
+using AspireWebAppTemplate.Application.Features.Template.AuditLog.Contracts;
 
-namespace AspireWebAppTemplate.Application.Abstractions;
+namespace AspireWebAppTemplate.Application.Features.Template.AuditLog;
 
 /// <summary>
 /// Defines the contract for the audit log service that records significant user and system

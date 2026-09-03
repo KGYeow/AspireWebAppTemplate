@@ -7,7 +7,8 @@ using AspireWebAppTemplate.Infrastructure.Identity;
 using AspireWebAppTemplate.Application.Extensions;
 using AspireWebAppTemplate.Domain.Constants;
 using AspireWebAppTemplate.Application.Common;
-using AspireWebAppTemplate.Application.Contracts.AuditLog;
+using AspireWebAppTemplate.Application.Features.Template.AuditLog.Contracts;
+using AspireWebAppTemplate.Application.Features.Template.AuditLog;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 

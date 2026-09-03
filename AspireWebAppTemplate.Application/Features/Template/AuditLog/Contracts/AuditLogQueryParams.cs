@@ -1,6 +1,6 @@
 using AspireWebAppTemplate.Domain.Enums;
 
-namespace AspireWebAppTemplate.Application.Contracts.AuditLog;
+namespace AspireWebAppTemplate.Application.Features.Template.AuditLog.Contracts;
 
 /// <summary>
 /// Query parameters for filtering and paging the audit log list.
