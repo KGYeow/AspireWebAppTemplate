@@ -23,7 +23,7 @@ using Microsoft.AspNetCore.Mvc;
 using AspireWebAppTemplate.Infrastructure.Services.Template.Users;
 using AspireWebAppTemplate.Infrastructure.Services.Template.Authentication;
 
-namespace AspireWebAppTemplate.ApiService.Controllers;
+namespace AspireWebAppTemplate.ApiService.Controllers.Template.Users;
 
 /// <summary>
 /// Provides user management endpoints including CRUD operations, activation/deactivation,

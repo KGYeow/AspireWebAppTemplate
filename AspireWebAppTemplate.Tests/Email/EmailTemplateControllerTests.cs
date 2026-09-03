@@ -1,6 +1,7 @@
 // Feature: email-smtp-integration, Task 11.2: EmailTemplateController unit tests
 using AspireWebAppTemplate.Application.Abstractions;
 using AspireWebAppTemplate.ApiService.Controllers;
+using AspireWebAppTemplate.ApiService.Controllers.Template.Email;
 using AspireWebAppTemplate.Application.Features.Template.Email;
 using AspireWebAppTemplate.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;

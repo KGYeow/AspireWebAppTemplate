@@ -3,7 +3,7 @@ using AspireWebAppTemplate.Application.Features.Template.Email;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AspireWebAppTemplate.ApiService.Controllers;
+namespace AspireWebAppTemplate.ApiService.Controllers.Template.Email;
 
 /// <summary>
 /// Provides email template query, edit, and preview endpoints.

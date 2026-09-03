@@ -7,7 +7,7 @@ using AspireWebAppTemplate.Infrastructure.Services.Template.Ai;
 using Microsoft.AspNetCore.Mvc;
 using AspireWebAppTemplate.Infrastructure.Services.Template.Ai;
 
-namespace AspireWebAppTemplate.ApiService.Controllers;
+namespace AspireWebAppTemplate.ApiService.Controllers.Template.Ai;
 
 /// <summary>
 /// Provides AI text generation endpoints. This controller is intentionally thin — it handles

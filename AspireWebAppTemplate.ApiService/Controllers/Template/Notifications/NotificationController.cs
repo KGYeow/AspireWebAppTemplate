@@ -11,7 +11,7 @@ using AspireWebAppTemplate.Infrastructure.Services.Template.Notifications;
 using Microsoft.AspNetCore.Mvc;
 using AspireWebAppTemplate.Infrastructure.Services.Template.Notifications;
 
-namespace AspireWebAppTemplate.ApiService.Controllers;
+namespace AspireWebAppTemplate.ApiService.Controllers.Template.Notifications;
 
 /// <summary>
 /// Provides notification query, mutation, and preference management endpoints.

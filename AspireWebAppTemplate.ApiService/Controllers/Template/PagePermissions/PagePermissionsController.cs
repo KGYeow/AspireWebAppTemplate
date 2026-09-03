@@ -29,7 +29,7 @@ using Microsoft.AspNetCore.Mvc;
 using AspireWebAppTemplate.Infrastructure.Services.Template.PagePermissions;
 using AspireWebAppTemplate.Infrastructure.Services.Template.AuditLog;
 
-namespace AspireWebAppTemplate.ApiService.Controllers;
+namespace AspireWebAppTemplate.ApiService.Controllers.Template.PagePermissions;
 
 /// <summary>
 /// Manages role-based page access permissions using a whitelist model.
