@@ -56,11 +56,13 @@ Service contracts, DTOs, shared logic, and pure-logic utilities. Depends only on
 
 | Folder | Purpose |
 |--------|---------|
-| `Abstractions/` | All service interfaces (IAuditLogService, IRoleService, IUserService, IAuthService, INavigationProvider, ITimeZoneHelper, ICurrentUserAccessor, etc.) |
-| `Common/` | Shared models (ApiResult, NavItem, PagedResult) |
-| `Contracts/` | DTOs grouped by feature (Ai, Announcements, AuditLog, Auth, Email, Notifications, PagePermissions, Roles, Users) |
+| `Features/Template/{Feature}/` | Feature-owned service interface(s) **and** their DTOs, co-located per feature under one namespace (`...Application.Features.Template.{Feature}`). Template features: AuditLog, Users, Roles, Notifications, Announcements, Email, Authentication, PagePermissions, Ai, Navigation. Business features go under `Features/{BusinessModule}/`. |
+| `Abstractions/` | ONLY layer-wide cross-cutting contracts (ICurrentUserAccessor, IExcelExportService, ITimeZoneHelper). |
+| `Common/` | Cross-cutting shape types with no behavior (ApiResult, NavItem, PagedResult). |
 | `Extensions/` | Extension methods (NavigationProviderExtensions, QueryableExtensions) |
 | `Utilities/` | Pure-logic implementations with no external dependencies (DefaultNavigationProvider, TimeZoneHelper) |
+
+> **Feature-first:** see [Feature Organization & Template/Business Separation](feature-organization.md).
 
 ### AspireWebAppTemplate.Infrastructure (Infrastructure Layer)
 
@@ -69,10 +71,11 @@ Implements Application interfaces. Contains all data access, Identity, and exter
 | Folder | Purpose |
 |--------|---------|
 | `Data/` | ApplicationDbContext, entity configurations, migrations, seed data |
-| `Data/Entities/` | EF Core entities with Identity FK dependencies (Announcement, AuditLogEntry, Notification, PagePermission, etc.) |
+| `Data/Entities/` | EF Core entities (Announcement, AuditLogEntry, Notification, PagePermission, etc.). Organized responsibility-first by design: entities are queried by kind (migrations, schema review), so they are NOT feature-nested. |
 | `Data/SeedData/` | Partial class seed data files (roles, users, page permissions, email templates, announcements) |
 | `Identity/` | ASP.NET Core Identity entities (ApplicationUser, ApplicationRole) |
-| `Services/` | All business service implementations (NotificationService, AuthService, EmailService, AuditLogService, ExcelExportService, etc.) |
+| `Services/Template/{Feature}/` | Business service implementations, organized **feature-first** under a Template ownership marker (e.g., `Services/Template/AuditLog/AuditLogService.cs`, namespace `...Infrastructure.Services.Template.{Feature}`). Business services go under `Services/{BusinessModule}/`. |
+| `Services/` (root) | Only cross-cutting service implementations that belong to no single feature (CurrentUserAccessor, ExcelExportService). |
 | `Clients/` | Typed HttpClients (WebCallbackClient) |
 | `Handlers/` | Delegating handlers (InternalApiKeyDelegatingHandler) |
 | `Extensions/` | DI registration (InfrastructureServiceExtensions → AddInfrastructureServices()) |

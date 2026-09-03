@@ -46,7 +46,8 @@ Pure domain primitives with zero external dependencies:
 
 ### 4. **AspireWebAppTemplate.Application** (Application Layer)
 Service interfaces, DTOs, and contracts (depends on Domain only):
-- **Abstractions/** — All service interfaces (IAuditLogService, IRoleService, IUserService, IAuthService, INavigationProvider, ITimeZoneHelper, ICurrentUserAccessor, etc.)
+- **Features/{Owner}/{Feature}/** - Feature-first: each feature co-locates its service interface(s) and DTOs under one namespace (Features/Template/ for template-owned: AuditLog, Users, Roles, Notifications, Announcements, Email, Authentication, PagePermissions, Ai, Navigation; Features/{BusinessModule}/ for business code)
+- **Abstractions/** - ONLY layer-wide cross-cutting contracts (ICurrentUserAccessor, IExcelExportService, ITimeZoneHelper)
 - **Common/** — Shared models (ApiResult, NavItem, PagedResult)
 - **Contracts/** — DTOs grouped by feature:
   - `Ai/` — AI-related request/response DTOs

@@ -3,7 +3,7 @@
 ## Key Architectural Patterns
 
 - **Clean Architecture (4-layer)**: Domain → Application → Infrastructure → Host projects. Dependencies flow inward only. Domain has zero dependencies; Application depends on Domain; Infrastructure depends on Application; host projects (ApiService) depend on Application + Infrastructure; Web depends on Application + UI + ServiceDefaults.
-- **Thin Controller / Full Service Layer**: Controllers handle ONLY HTTP concerns (request parsing, status code mapping). All business logic, database access, audit logging, and entity mapping lives in service classes under `Infrastructure/Services/`.
+- **Thin Controller / Full Service Layer**: Controllers handle ONLY HTTP concerns (request parsing, status code mapping). All business logic, database access, audit logging, and entity mapping lives in service classes under `Infrastructure/Services/{Owner}/{Feature}/` (feature-first; e.g., `Services/Template/AuditLog/`).
 - **ICurrentUserAccessor**: A scoped service that provides the authenticated user's `UserId`, `UserName`, and `IpAddress` to service-layer components. Services inject this directly — no need to pass identity through method parameters.
 - **Web ↔ ApiService communication**: HTTP calls via typed HttpClient services with Aspire service discovery (`https+http://apiservice`). Identity propagated via `UserIdentityDelegatingHandler` which forwards user claims and client IP (`X-Client-Ip` header).
 - **Per-circuit caching**: Scoped services in Blazor Server (e.g., `PagePermissionContext`, `NotificationContext`) load data once per SignalR circuit and provide synchronous in-memory lookups.

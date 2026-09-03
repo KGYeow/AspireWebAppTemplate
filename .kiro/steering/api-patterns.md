@@ -84,7 +84,8 @@ catch (ArgumentException ex)         { return BadRequest(ex.Message); }
 ## Service Layer
 
 ### Interface Location
-- Service interfaces: `Application/Abstractions/` (e.g., `IAuditLogService`, `IRoleService`, `IUserService`, `IAuthService`, `INavigationProvider`, `ITimeZoneHelper`, `ICurrentUserAccessor`)
+- Feature service interfaces: `Application/Features/{Owner}/{Feature}/` (e.g., `Features/Template/AuditLog/IAuditLogService.cs`, `Features/Template/Users/IUserService.cs`).
+- Layer-wide cross-cutting interfaces only: `Application/Abstractions/` (`ICurrentUserAccessor`, `IExcelExportService`, `ITimeZoneHelper`).
 
 ### Implementation Location
 - `Infrastructure/Services/` — business logic implementations

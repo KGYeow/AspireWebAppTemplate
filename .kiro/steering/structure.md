@@ -27,25 +27,27 @@ AspireWebAppTemplate.Domain/
 └── ValueObjects/               ← Value objects (reserved for future use)
 ```
 
-## Application Project
+## Application Project (feature-first)
+
+Organized by feature under Features/{Owner}/{Feature}/. Each feature folder holds its service
+interface(s) AND its DTOs under a single per-feature namespace
+(AspireWebAppTemplate.Application.Features.{Owner}.{Feature}).
+
 ```
 AspireWebAppTemplate.Application/
-├── Abstractions/               ← All service interfaces (IAuditLogService, IRoleService, IUserService, IAuthService, INavigationProvider, ITimeZoneHelper, ICurrentUserAccessor, etc.)
-├── Common/                     ← Shared models (ApiResult, NavItem, PagedResult)
-├── Contracts/                  ← DTOs grouped by feature
-│   ├── Ai/                     ← AI-related request/response DTOs
-│   ├── Announcements/          ← AnnouncementDto, CreateAnnouncementRequest, UpdateAnnouncementRequest, AnnouncementQueryParams
-│   ├── AuditLog/               ← AuditLogDto, AuditLogQueryParams, AuditLogRequest
-│   ├── Auth/                   ← LoginRequest, RegisterResponse, etc.
-│   ├── Email/                  ← EmailTemplateDto, UpdateEmailTemplateRequest, EmailTemplateQueryParams
-│   ├── Notifications/          ← NotificationDto, CreateNotificationRequest, NotificationPushRequest, etc.
-│   ├── PagePermissions/        ← PagePermissionDto, UpdatePagePermissionsRequest
-│   ├── Roles/                  ← RoleDto, CreateRoleRequest, UpdateRoleRequest, RoleQueryParams
-│   └── Users/                  ← UserDto, CreateUserRequest, UpdateUserRequest, UserQueryParams
-├── Extensions/                 ← Extension methods (NavigationProviderExtensions, QueryableExtensions)
-└── Utilities/                  ← Pure-logic implementations (DefaultNavigationProvider, TimeZoneHelper)
+├── Common/                     <- Cross-cutting SHAPES only (ApiResult, NavItem, PagedResult)
+├── Abstractions/               <- ONLY layer-wide contracts (ICurrentUserAccessor, IExcelExportService, ITimeZoneHelper)
+├── Extensions/                 <- Extension methods (NavigationProviderExtensions, QueryableExtensions)
+├── Utilities/                  <- Pure-logic implementations (DefaultNavigationProvider, TimeZoneHelper)
+└── Features/
+    ├── Template/               <- template-owned features (interface + DTOs per feature, one namespace)
+    │   ├── AuditLog/           <- IAuditLogService + AuditLog DTOs
+    │   ├── Users/  Roles/  Notifications/  Announcements/
+    │   ├── Email/  Authentication/  PagePermissions/  Ai/  Navigation/
+    └── {BusinessModule}/       <- business-owned features (e.g., Hr/EmployeeManagement)
 ```
 
+See docs/architecture/feature-organization.md for the full convention.
 ## Infrastructure Project
 ```
 AspireWebAppTemplate.Infrastructure/
@@ -53,7 +55,7 @@ AspireWebAppTemplate.Infrastructure/
 ├── Data/
 │   ├── ApplicationDbContext.cs ← EF Core DbContext
 │   ├── Configurations/         ← IEntityTypeConfiguration<T> classes (one per entity)
-│   ├── Entities/               ← EF Core entities with Identity FK dependencies (Announcement, AnnouncementDismissal, AuditLogEntry, Notification, NotificationPreference, PagePermission)
+│   ├── Entities/              <- EF Core entities (responsibility-first: queried by kind, NOT feature-nested)
 │   ├── Migrations/             ← EF Core migration files
 │   └── SeedData/               ← Partial class seed data files
 │       ├── SeedData.cs                    ← Entry point (orchestrates all seed methods)
@@ -66,7 +68,7 @@ AspireWebAppTemplate.Infrastructure/
 ├── Handlers/                   ← Delegating handlers (InternalApiKeyDelegatingHandler)
 ├── Identity/                   ← ASP.NET Core Identity entities (ApplicationUser, ApplicationRole)
 ├── Options/                    ← Configuration option classes (LdapSettings)
-├── Services/                   ← All business service implementations (NotificationService, AuthService, EmailService, etc.)
+├── Services/                <- Feature-first impls: Template/{Feature}/ (e.g. Template/AuditLog/AuditLogService.cs); business under {Module}/; cross-cutting (CurrentUserAccessor, ExcelExportService) at Services/ root
 └── Utilities/                  ← Helper classes (AuditChangeHelper, CurrentUserAccessor, SecureConnectionString)
 ```
 
@@ -129,7 +131,7 @@ AspireWebAppTemplate.Tests/
 ├── Email/                      ← Property + unit tests for email template/service features
 ├── Notifications/              ← Property + unit tests for notification features
 ├── PagePermissions/            ← Property + unit tests for page permissions
-├── Services/                   ← Service-level unit tests
+├── Services/                <- Feature-first impls: Template/{Feature}/ (e.g. Template/AuditLog/AuditLogService.cs); business under {Module}/; cross-cutting (CurrentUserAccessor, ExcelExportService) at Services/ root
 └── Layout/                     ← Layout/component tests
 ```
 
