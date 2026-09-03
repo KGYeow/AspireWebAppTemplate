@@ -1,7 +1,7 @@
 using AspireWebAppTemplate.Infrastructure.Identity;
 using AspireWebAppTemplate.Domain.Enums;
 
-namespace AspireWebAppTemplate.Infrastructure.Data.Entities;
+namespace AspireWebAppTemplate.Infrastructure.Data.Entities.Template;
 
 /// <summary>
 /// Represents a system-wide announcement record that can be displayed to users

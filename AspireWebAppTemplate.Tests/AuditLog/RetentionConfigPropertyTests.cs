@@ -1,6 +1,6 @@
 // Feature: audit-log, Property 10: Retention configuration validation
 using AspireWebAppTemplate.Infrastructure.Data;
-using AspireWebAppTemplate.Infrastructure.Data.Entities;
+using AspireWebAppTemplate.Infrastructure.Data.Entities.Template;
 using AspireWebAppTemplate.Infrastructure.Identity;
 using AspireWebAppTemplate.Infrastructure.Services;
 using AspireWebAppTemplate.Infrastructure.Services.Template.AuditLog;

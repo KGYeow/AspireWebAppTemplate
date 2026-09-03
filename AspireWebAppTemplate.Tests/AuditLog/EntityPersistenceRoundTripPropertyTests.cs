@@ -1,6 +1,6 @@
 // Feature: audit-log, Property 1: Entity persistence round-trip
 using AspireWebAppTemplate.Infrastructure.Data;
-using AspireWebAppTemplate.Infrastructure.Data.Entities;
+using AspireWebAppTemplate.Infrastructure.Data.Entities.Template;
 using AspireWebAppTemplate.Infrastructure.Identity;
 using AspireWebAppTemplate.Domain.Enums;
 using FsCheck;

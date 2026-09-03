@@ -1,5 +1,5 @@
 using AspireWebAppTemplate.Domain.Enums;
-using AspireWebAppTemplate.Infrastructure.Data.Entities;
+using AspireWebAppTemplate.Infrastructure.Data.Entities.Template;
 using AspireWebAppTemplate.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

@@ -23,7 +23,7 @@ that best represents its own responsibility.
 | **Application** | **Feature-first** under `Features/{Owner}/{Feature}/` | Yes (`Features/Template`, `Features/{Module}`) | **Yes** |
 | **Infrastructure** | Responsibility (`Data`, `Services`, `Identity`, ...) | In `Services/` (and `Data` when it grows) | **`Services/` only** |
 | **ApiService** | Responsibility (`Controllers`) | Optional per growth | Only if a feature has multiple controllers |
-| **Web** | Responsibility (`Pages`, `Layout`, `Services`) — already area-clustered | Not yet | Reactively, per busy area |
+| **Web** | Responsibility (`Pages`, `Layout`, `Services`) ï¿½ already area-clustered | Not yet | Reactively, per busy area |
 | **UI (shared)** | Responsibility | No | No |
 
 ### Application layer (feature-first)
@@ -35,23 +35,23 @@ Application/
 +-- Extensions/ , Utilities/    ? pure, dependency-free helpers
 +-- Features/
     +-- Template/               ? template-owned features
-    ¦   +-- AuditLog/           ? IAuditLogService.cs + AuditLog DTOs (ONE namespace)
-    ¦   +-- Users/ , Roles/ , Notifications/ , Announcements/
-    ¦   +-- Email/ , Authentication/ , PagePermissions/ , Ai/ , Navigation/
+    ï¿½   +-- AuditLog/           ? IAuditLogService.cs + AuditLog DTOs (ONE namespace)
+    ï¿½   +-- Users/ , Roles/ , Notifications/ , Announcements/
+    ï¿½   +-- Email/ , Authentication/ , PagePermissions/ , Ai/ , Navigation/
     +-- {BusinessModule}/       ? business-owned features (added by your app)
         +-- {Feature}/          ? I{Feature}Service.cs + its DTOs
 ```
 
 - One feature folder holds the **service interface(s) and the DTOs that feature consumes**.
 - Interface and DTOs share **one namespace**: `...Application.Features.{Owner}.{Feature}`.
-  (We intentionally do NOT use a `.Contracts` sub-namespace — it doubled imports for no benefit.)
+  (We intentionally do NOT use a `.Contracts` sub-namespace ï¿½ it doubled imports for no benefit.)
 
 ### Infrastructure layer (responsibility-first, features inside Services)
 
 ```
 Infrastructure/
 +-- Data/                       ? Entities, Configurations, Migrations, SeedData (responsibility-first)
-¦   +-- Entities/               ? queried by KIND (migrations, schema) ? NOT feature-nested
+ï¿½   +-- Entities/               ? queried by KIND (migrations, schema) ? NOT feature-nested
 +-- Identity/ , Clients/ , Handlers/ , Options/ , Extensions/ , Utilities/   ? unchanged
 +-- Services/
     +-- Template/{Feature}/     ? e.g. Services/Template/AuditLog/AuditLogService.cs
@@ -94,7 +94,7 @@ Clean Architecture''s inward-dependency rule, applied to ownership. Enforce it w
    Infrastructure `Services`; EF entity ? `Data/Entities`; controller ? ApiService `Controllers`;
    page ? Web `Pages`.
 3. **Template or business?** `Features/Template` vs `Features/{Module}` (and same for `Services`).
-4. **Genuinely cross-feature AND cross-layer?** Apply the Common/Utilities rules below —
+4. **Genuinely cross-feature AND cross-layer?** Apply the Common/Utilities rules below ï¿½
    and prefer moving it into a feature.
 
 ## Common / Utilities rules (anti-junk-drawer)
@@ -114,10 +114,10 @@ Clean Architecture''s inward-dependency rule, applied to ownership. Enforce it w
 
 - Infrastructure `Services/`: feature organization applies now (it is the growth sink).
 - `Data/Entities` & `Configurations`: add a `Feature` level under `Business/` only when a module
-  exceeds ~15–20 entities.
-- ApiService: add a `Feature/` level when a single feature has 2–3+ controllers.
-- Web: add a feature folder under `Pages/{Area}/` when a feature exceeds ~6–8 co-changing files.
-- Any single responsibility folder passing ~25–30 files of one kind signals the feature axis has
+  exceeds ~15ï¿½20 entities.
+- ApiService: add a `Feature/` level when a single feature has 2ï¿½3+ controllers.
+- Web: add a feature folder under `Pages/{Area}/` when a feature exceeds ~6ï¿½8 co-changing files.
+- Any single responsibility folder passing ~25ï¿½30 files of one kind signals the feature axis has
   become dominant there.
 
 ## Namespace & naming conventions

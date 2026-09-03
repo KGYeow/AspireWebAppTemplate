@@ -1,9 +1,9 @@
-using AspireWebAppTemplate.Infrastructure.Data.Entities;
+using AspireWebAppTemplate.Infrastructure.Data.Entities.Template;
 using AspireWebAppTemplate.Infrastructure.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace AspireWebAppTemplate.Infrastructure.Data.Configurations;
+namespace AspireWebAppTemplate.Infrastructure.Data.Configurations.Template;
 
 /// <summary>
 /// EF Core configuration for the <see cref="Announcement"/> entity.

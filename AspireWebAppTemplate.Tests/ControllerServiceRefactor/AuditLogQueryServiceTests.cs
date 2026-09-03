@@ -3,7 +3,7 @@
 // Feature: controller-service-refactor, Property 4: Audit log lookup round-trip
 // Feature: controller-service-refactor, Property 5: Audit log export row cap
 using AspireWebAppTemplate.Infrastructure.Data;
-using AspireWebAppTemplate.Infrastructure.Data.Entities;
+using AspireWebAppTemplate.Infrastructure.Data.Entities.Template;
 using AspireWebAppTemplate.Infrastructure.Identity;
 using AspireWebAppTemplate.Infrastructure.Services;
 using AspireWebAppTemplate.Infrastructure.Services.Template.AuditLog;

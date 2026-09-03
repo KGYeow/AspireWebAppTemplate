@@ -1,5 +1,5 @@
 using AspireWebAppTemplate.Infrastructure.Identity;
-namespace AspireWebAppTemplate.Infrastructure.Data.Entities;
+namespace AspireWebAppTemplate.Infrastructure.Data.Entities.Template;
 
 /// <summary>
 /// Represents a per-user dismissal of a specific announcement.

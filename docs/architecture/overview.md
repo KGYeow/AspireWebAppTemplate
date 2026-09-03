@@ -71,7 +71,7 @@ Implements Application interfaces. Contains all data access, Identity, and exter
 | Folder | Purpose |
 |--------|---------|
 | `Data/` | ApplicationDbContext, entity configurations, migrations, seed data |
-| `Data/Entities/` | EF Core entities (Announcement, AuditLogEntry, Notification, PagePermission, etc.). Organized responsibility-first by design: entities are queried by kind (migrations, schema review), so they are NOT feature-nested. |
+| `Data/Entities/Template/` | EF Core entities under a Template ownership marker (Announcement, AuditLogEntry, Notification, PagePermission, etc.). Responsibility-first (queried by kind for migrations/schema review; NOT feature-nested). Business entities go under `Data/Entities/{BusinessModule}/`. |
 | `Data/SeedData/` | Partial class seed data files (roles, users, page permissions, email templates, announcements) |
 | `Identity/` | ASP.NET Core Identity entities (ApplicationUser, ApplicationRole) |
 | `Services/Template/{Feature}/` | Business service implementations, organized **feature-first** under a Template ownership marker (e.g., `Services/Template/AuditLog/AuditLogService.cs`, namespace `...Infrastructure.Services.Template.{Feature}`). Business services go under `Services/{BusinessModule}/`. |

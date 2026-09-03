@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using AspireWebAppTemplate.Application.Abstractions;
 using AspireWebAppTemplate.Infrastructure.Data;
-using AspireWebAppTemplate.Infrastructure.Data.Entities;
+using AspireWebAppTemplate.Infrastructure.Data.Entities.Template;
 using AspireWebAppTemplate.Infrastructure.Utilities;
 using AspireWebAppTemplate.Application.Common;
 using AspireWebAppTemplate.Application.Features.Template.Announcements;

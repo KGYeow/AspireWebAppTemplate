@@ -1,8 +1,11 @@
 using AspireWebAppTemplate.Domain.Entities.Template;
+using AspireWebAppTemplate.Infrastructure.Data.Entities.Template;
 using Microsoft.EntityFrameworkCore;
+using AspireWebAppTemplate.Infrastructure.Data.Entities.Template;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using AspireWebAppTemplate.Infrastructure.Data.Entities.Template;
 
-namespace AspireWebAppTemplate.Infrastructure.Data.Configurations;
+namespace AspireWebAppTemplate.Infrastructure.Data.Configurations.Template;
 
 /// <summary>
 /// EF Core configuration for the <see cref="EmailTemplate"/> entity.

@@ -54,8 +54,8 @@ AspireWebAppTemplate.Infrastructure/
 ├── Clients/                    ← Typed HttpClients (WebCallbackClient)
 ├── Data/
 │   ├── ApplicationDbContext.cs ← EF Core DbContext
-│   ├── Configurations/         ← IEntityTypeConfiguration<T> classes (one per entity)
-│   ├── Entities/              <- EF Core entities (responsibility-first: queried by kind, NOT feature-nested)
+│   ├── Configurations/Template/ <- IEntityTypeConfiguration classes, mirror the Template marker
+│   ├── Entities/Template/     <- EF entities under Template marker (responsibility-first; NOT feature-nested; business under Entities/{Module}/)
 │   ├── Migrations/             ← EF Core migration files
 │   └── SeedData/               ← Partial class seed data files
 │       ├── SeedData.cs                    ← Entry point (orchestrates all seed methods)
