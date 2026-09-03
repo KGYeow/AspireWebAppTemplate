@@ -1,6 +1,6 @@
 using AspireWebAppTemplate.Domain.Enums;
 
-namespace AspireWebAppTemplate.Domain.Entities;
+namespace AspireWebAppTemplate.Domain.Entities.Template;
 
 /// <summary>
 /// Represents an email template stored in the database. All templates (system and business)

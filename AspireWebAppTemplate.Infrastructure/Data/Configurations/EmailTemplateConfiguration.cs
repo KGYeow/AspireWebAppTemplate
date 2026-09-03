@@ -1,4 +1,4 @@
-using AspireWebAppTemplate.Domain.Entities;
+using AspireWebAppTemplate.Domain.Entities.Template;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

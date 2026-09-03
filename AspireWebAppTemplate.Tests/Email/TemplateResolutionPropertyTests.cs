@@ -1,7 +1,7 @@
 // Feature: email-smtp-integration, Property 4: Inactive or missing EmailType template is rejected
 // Feature: email-smtp-integration, Property 5: Template resolution uses unified database query
 using AspireWebAppTemplate.Infrastructure.Data;
-using AspireWebAppTemplate.Domain.Entities;
+using AspireWebAppTemplate.Domain.Entities.Template;
 using AspireWebAppTemplate.Infrastructure.Services;
 using AspireWebAppTemplate.Infrastructure.Services.Template.Email;
 using AspireWebAppTemplate.Domain.Enums;

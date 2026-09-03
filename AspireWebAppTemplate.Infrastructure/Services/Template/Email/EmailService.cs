@@ -6,7 +6,7 @@ using AspireWebAppTemplate.Application.Abstractions;
 using AspireWebAppTemplate.Application.Features.Template.Email;
 using AspireWebAppTemplate.Infrastructure.Data;
 using AspireWebAppTemplate.Infrastructure.Identity;
-using AspireWebAppTemplate.Domain.Entities;
+using AspireWebAppTemplate.Domain.Entities.Template;
 using AspireWebAppTemplate.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

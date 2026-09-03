@@ -1,4 +1,4 @@
-using AspireWebAppTemplate.Domain.Entities;
+using AspireWebAppTemplate.Domain.Entities.Template;
 using AspireWebAppTemplate.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

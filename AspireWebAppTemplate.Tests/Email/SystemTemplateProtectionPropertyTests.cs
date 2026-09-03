@@ -1,6 +1,6 @@
 // Feature: email-smtp-integration, Property 6: System templates cannot be updated
 using AspireWebAppTemplate.Infrastructure.Data;
-using AspireWebAppTemplate.Domain.Entities;
+using AspireWebAppTemplate.Domain.Entities.Template;
 using AspireWebAppTemplate.Infrastructure.Services;
 using AspireWebAppTemplate.Infrastructure.Services.Template.Email;
 using AspireWebAppTemplate.Application.Features.Template.Email;
