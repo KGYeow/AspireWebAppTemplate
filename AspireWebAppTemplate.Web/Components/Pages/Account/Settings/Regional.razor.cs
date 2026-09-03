@@ -1,6 +1,6 @@
 using AspireWebAppTemplate.Application.Abstractions;
 using AspireWebAppTemplate.Domain.Constants;
-using AspireWebAppTemplate.Application.Contracts.Users;
+using AspireWebAppTemplate.Application.Features.Template.Users;
 using AspireWebAppTemplate.Web.Abstractions;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Authorization;

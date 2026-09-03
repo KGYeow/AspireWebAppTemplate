@@ -1,6 +1,6 @@
 // Feature: aws-ai-integration, Property 5: DTO validation enforces prompt constraints
 using System.ComponentModel.DataAnnotations;
-using AspireWebAppTemplate.Application.Contracts.Ai;
+using AspireWebAppTemplate.Application.Features.Template.Ai;
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;

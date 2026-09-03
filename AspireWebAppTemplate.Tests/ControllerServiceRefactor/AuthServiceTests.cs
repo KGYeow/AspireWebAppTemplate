@@ -3,7 +3,8 @@
 using System.Text;
 using System.Text.Json;
 using AspireWebAppTemplate.Application.Abstractions;
-using AspireWebAppTemplate.Application.Contracts.Users;
+using AspireWebAppTemplate.Application.Features.Template.Authentication;
+using AspireWebAppTemplate.Application.Features.Template.Users;
 using AspireWebAppTemplate.Domain.Enums;
 using FsCheck;
 using FsCheck.Fluent;

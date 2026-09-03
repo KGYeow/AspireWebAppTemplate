@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Net.Mail;
 using AspireWebAppTemplate.Application.Abstractions;
-using AspireWebAppTemplate.Application.Contracts.Email;
+using AspireWebAppTemplate.Application.Features.Template.Email;
 using AspireWebAppTemplate.Infrastructure.Data;
 using AspireWebAppTemplate.Infrastructure.Identity;
 using AspireWebAppTemplate.Domain.Entities;

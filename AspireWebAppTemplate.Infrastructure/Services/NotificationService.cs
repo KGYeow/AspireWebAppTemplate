@@ -4,7 +4,7 @@ using AspireWebAppTemplate.Infrastructure.Data;
 using AspireWebAppTemplate.Infrastructure.Data.Entities;
 using AspireWebAppTemplate.Infrastructure.Clients;
 using AspireWebAppTemplate.Application.Common;
-using AspireWebAppTemplate.Application.Contracts.Notifications;
+using AspireWebAppTemplate.Application.Features.Template.Notifications;
 using AspireWebAppTemplate.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
@@ -124,7 +124,7 @@ public class NotificationService : INotificationService
                 var unreadCount = await _dbContext.Notifications
                     .CountAsync(n => n.UserId == request.UserId && !n.IsRead);
 
-                await _webCallbackClient.NotifyAsync(new Application.Contracts.Notifications.NotificationPushRequest
+                await _webCallbackClient.NotifyAsync(new Application.Features.Template.Notifications.NotificationPushRequest
                 {
                     UserId = request.UserId,
                     Title = request.Title,

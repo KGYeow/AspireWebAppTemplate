@@ -2,7 +2,7 @@ using Amazon.BedrockRuntime;
 using Amazon.BedrockRuntime.Model;
 using Amazon.Runtime;
 using AspireWebAppTemplate.Application.Abstractions;
-using AspireWebAppTemplate.Application.Contracts.Ai;
+using AspireWebAppTemplate.Application.Features.Template.Ai;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 

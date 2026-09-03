@@ -1,5 +1,5 @@
 // Feature: notification-push-deep-link, Property 2: Endpoint forwards all parameters to SignalR
-using AspireWebAppTemplate.Application.Contracts.Notifications;
+using AspireWebAppTemplate.Application.Features.Template.Notifications;
 using AspireWebAppTemplate.Domain.Enums;
 using AspireWebAppTemplate.Web.Endpoints;
 using AspireWebAppTemplate.Web.Hubs;

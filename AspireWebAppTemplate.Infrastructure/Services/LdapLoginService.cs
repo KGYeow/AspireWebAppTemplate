@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Logging;
 using AspireWebAppTemplate.Application.Abstractions;
 using AspireWebAppTemplate.Domain.Enums;
-using AspireWebAppTemplate.Application.Contracts.Auth;
-using AspireWebAppTemplate.Application.Contracts.Users;
+using AspireWebAppTemplate.Application.Features.Template.Authentication;
+using AspireWebAppTemplate.Application.Features.Template.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Caching.Memory;
 using AspireWebAppTemplate.Infrastructure.Identity;

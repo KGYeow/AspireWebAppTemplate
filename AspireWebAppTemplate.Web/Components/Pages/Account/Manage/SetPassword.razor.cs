@@ -1,9 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using AspireWebAppTemplate.Application.Common;
-using AspireWebAppTemplate.Application.Contracts.Auth;
-using AspireWebAppTemplate.Application.Features.Template.AuditLog.Contracts;
-using AspireWebAppTemplate.Application.Contracts.Roles;
-using AspireWebAppTemplate.Application.Contracts.Users;
+using AspireWebAppTemplate.Application.Features.Template.Authentication;
+using AspireWebAppTemplate.Application.Features.Template.AuditLog;
+using AspireWebAppTemplate.Application.Features.Template.Roles;
+using AspireWebAppTemplate.Application.Features.Template.Users;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;

@@ -1,6 +1,6 @@
 // Feature: controller-service-refactor, Property 6: Role CRUD round-trip
 using AspireWebAppTemplate.Application.Abstractions;
-using AspireWebAppTemplate.Application.Contracts.Roles;
+using AspireWebAppTemplate.Application.Features.Template.Roles;
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;

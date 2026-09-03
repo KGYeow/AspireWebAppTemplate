@@ -1,6 +1,7 @@
 // Feature: email-smtp-integration, Property 2: SMTP credentials are applied if and only if both username and password are present
 using System.Reflection;
 using AspireWebAppTemplate.Application.Abstractions;
+using AspireWebAppTemplate.Application.Features.Template.Email;
 using AspireWebAppTemplate.Infrastructure.Data;
 using AspireWebAppTemplate.Infrastructure.Services;
 using FsCheck;

@@ -1,6 +1,6 @@
 using AspireWebAppTemplate.Application.Abstractions;
 using AspireWebAppTemplate.Application.Common;
-using AspireWebAppTemplate.Application.Contracts.Notifications;
+using AspireWebAppTemplate.Application.Features.Template.Notifications;
 using AspireWebAppTemplate.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

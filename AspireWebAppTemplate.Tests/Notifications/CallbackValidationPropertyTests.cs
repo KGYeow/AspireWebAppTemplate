@@ -1,6 +1,6 @@
 // Feature: realtime-notifications, Property 1: Valid callback requests are accepted
 // Feature: realtime-notifications, Property 2: Invalid callback requests are rejected
-using AspireWebAppTemplate.Application.Contracts.Notifications;
+using AspireWebAppTemplate.Application.Features.Template.Notifications;
 using AspireWebAppTemplate.Domain.Enums;
 using AspireWebAppTemplate.Web.Endpoints;
 using AspireWebAppTemplate.Web.Hubs;

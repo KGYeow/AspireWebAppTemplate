@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 using AspireWebAppTemplate.Application.Abstractions;
 using AspireWebAppTemplate.Infrastructure.Data;
 using AspireWebAppTemplate.Domain.Entities;
-using AspireWebAppTemplate.Application.Contracts.Email;
+using AspireWebAppTemplate.Application.Features.Template.Email;
 using AspireWebAppTemplate.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 

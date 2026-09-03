@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Reflection;
 using System.Text.Json;
 using AspireWebAppTemplate.Application.Abstractions;
+using AspireWebAppTemplate.Application.Features.Template.Navigation;
 using AspireWebAppTemplate.ApiService.Controllers;
 using AspireWebAppTemplate.Application.Common;
 using AspireWebAppTemplate.Web.Services.ApiClients;

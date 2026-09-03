@@ -1,5 +1,4 @@
 using AspireWebAppTemplate.Application.Common;
-using AspireWebAppTemplate.Application.Features.Template.AuditLog.Contracts;
 
 namespace AspireWebAppTemplate.Application.Features.Template.AuditLog;
 

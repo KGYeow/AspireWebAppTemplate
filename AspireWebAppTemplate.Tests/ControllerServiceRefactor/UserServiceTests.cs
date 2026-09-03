@@ -2,7 +2,7 @@
 // Feature: controller-service-refactor, Property 12: User search filter correctness
 using AspireWebAppTemplate.Application.Abstractions;
 using AspireWebAppTemplate.Application.Common;
-using AspireWebAppTemplate.Application.Contracts.Users;
+using AspireWebAppTemplate.Application.Features.Template.Users;
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;

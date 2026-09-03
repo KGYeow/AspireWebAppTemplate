@@ -2,7 +2,8 @@ using Microsoft.Extensions.Logging;
 using System.Text;
 using System.Text.Encodings.Web;
 using AspireWebAppTemplate.Application.Abstractions;
-using AspireWebAppTemplate.Application.Contracts.Auth;
+using AspireWebAppTemplate.Application.Features.Template.Email;
+using AspireWebAppTemplate.Application.Features.Template.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using AspireWebAppTemplate.Infrastructure.Identity;
@@ -103,7 +104,7 @@ public sealed class RegisterService : IRegisterService
         await _emailSender.SendConfirmationLinkAsync(user, email, HtmlEncoder.Default.Encode(callbackUrl));
 
         // Send welcome email (best-effort, respects EmailEnabled preference)
-        await _emailService.TrySendEmailAsync(new Application.Contracts.Email.TrySendEmailRequest
+        await _emailService.TrySendEmailAsync(new Application.Features.Template.Email.TrySendEmailRequest
         {
             UserId = userId,
             RecipientEmail = email,

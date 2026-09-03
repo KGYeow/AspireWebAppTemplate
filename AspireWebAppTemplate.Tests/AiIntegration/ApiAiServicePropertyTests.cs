@@ -1,7 +1,7 @@
 // Feature: aws-ai-integration, Property 6: HTTP error responses map to failed ApiResult
 // Feature: aws-ai-integration, Property 7: Client-side prompt validation rejects invalid input
 using System.Net;
-using AspireWebAppTemplate.Application.Contracts.Ai;
+using AspireWebAppTemplate.Application.Features.Template.Ai;
 using AspireWebAppTemplate.Web.Services;
 using FsCheck;
 using FsCheck.Fluent;

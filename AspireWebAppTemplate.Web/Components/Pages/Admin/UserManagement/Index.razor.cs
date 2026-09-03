@@ -1,5 +1,5 @@
-using AspireWebAppTemplate.Application.Contracts.Roles;
-using AspireWebAppTemplate.Application.Contracts.Users;
+using AspireWebAppTemplate.Application.Features.Template.Roles;
+using AspireWebAppTemplate.Application.Features.Template.Users;
 using AspireWebAppTemplate.UI.Components.Shared;
 using AspireWebAppTemplate.UI.Utilities;
 using AspireWebAppTemplate.Web.Services;

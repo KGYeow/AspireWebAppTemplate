@@ -1,11 +1,11 @@
 // Feature: announcement-banner-system, Property 4: Update preserves fields and refreshes UpdatedAtUtc
 using AspireWebAppTemplate.Application.Abstractions;
+using AspireWebAppTemplate.Application.Features.Template.Notifications;
 using AspireWebAppTemplate.Infrastructure.Data;
 using AspireWebAppTemplate.Infrastructure.Data.Entities;
 using AspireWebAppTemplate.Infrastructure.Identity;
 using AspireWebAppTemplate.Infrastructure.Services;
-using AspireWebAppTemplate.Application.Contracts.Announcements;
-using AspireWebAppTemplate.Application.Features.Template.AuditLog.Contracts;
+using AspireWebAppTemplate.Application.Features.Template.Announcements;
 using AspireWebAppTemplate.Application.Features.Template.AuditLog;
 using AspireWebAppTemplate.Domain.Enums;
 using FsCheck;
@@ -117,7 +117,7 @@ public class AnnouncementUpdatePropertyTests
                     mockAuditLog.Setup(x => x.LogAsync(It.IsAny<AuditLogRequest>())).Returns(Task.CompletedTask);
 
                     var mockNotification = new Mock<INotificationService>();
-                    mockNotification.Setup(x => x.CreateNotificationAsync(It.IsAny<Application.Contracts.Notifications.CreateNotificationRequest>()))
+                    mockNotification.Setup(x => x.CreateNotificationAsync(It.IsAny<Application.Features.Template.Notifications.CreateNotificationRequest>()))
                         .Returns(Task.CompletedTask);
 
                     var logger = NullLogger<AnnouncementService>.Instance;

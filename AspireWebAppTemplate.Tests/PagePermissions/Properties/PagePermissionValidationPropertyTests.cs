@@ -1,5 +1,6 @@
 // Feature: page-access-permissions, Property 2: Validation Rejects Invalid PagePaths
 using AspireWebAppTemplate.Application.Abstractions;
+using AspireWebAppTemplate.Application.Features.Template.Navigation;
 using AspireWebAppTemplate.Infrastructure.Data;
 using AspireWebAppTemplate.Infrastructure.Data.Entities;
 using AspireWebAppTemplate.Infrastructure.Identity;

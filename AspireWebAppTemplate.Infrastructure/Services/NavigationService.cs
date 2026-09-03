@@ -1,4 +1,6 @@
 using AspireWebAppTemplate.Application.Abstractions;
+using AspireWebAppTemplate.Application.Features.Template.PagePermissions;
+using AspireWebAppTemplate.Application.Features.Template.Navigation;
 using AspireWebAppTemplate.Application.Common;
 using AspireWebAppTemplate.Domain.Constants;
 

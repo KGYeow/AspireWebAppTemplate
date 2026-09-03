@@ -1,9 +1,9 @@
 using System.Net.Http.Json;
 using AspireWebAppTemplate.Application.Common;
-using AspireWebAppTemplate.Application.Contracts.Auth;
-using AspireWebAppTemplate.Application.Features.Template.AuditLog.Contracts;
-using AspireWebAppTemplate.Application.Contracts.Roles;
-using AspireWebAppTemplate.Application.Contracts.Users;
+using AspireWebAppTemplate.Application.Features.Template.Authentication;
+using AspireWebAppTemplate.Application.Features.Template.AuditLog;
+using AspireWebAppTemplate.Application.Features.Template.Roles;
+using AspireWebAppTemplate.Application.Features.Template.Users;
 
 namespace AspireWebAppTemplate.Web.Services;
 

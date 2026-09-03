@@ -1,6 +1,7 @@
 using AspireWebAppTemplate.Application.Abstractions;
-using AspireWebAppTemplate.Application.Contracts.PagePermissions;
-using AspireWebAppTemplate.Application.Contracts.Roles;
+using AspireWebAppTemplate.Application.Features.Template.Navigation;
+using AspireWebAppTemplate.Application.Features.Template.PagePermissions;
+using AspireWebAppTemplate.Application.Features.Template.Roles;
 using AspireWebAppTemplate.Application.Extensions;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;

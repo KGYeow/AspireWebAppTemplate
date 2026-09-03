@@ -3,7 +3,8 @@ using System.DirectoryServices;
 using System.DirectoryServices.Protocols;
 using System.Net;
 using AspireWebAppTemplate.Application.Abstractions;
-using AspireWebAppTemplate.Application.Contracts.Users;
+using AspireWebAppTemplate.Application.Features.Template.Authentication;
+using AspireWebAppTemplate.Application.Features.Template.Users;
 using AspireWebAppTemplate.Infrastructure.Options;
 using Microsoft.Extensions.Options;
 

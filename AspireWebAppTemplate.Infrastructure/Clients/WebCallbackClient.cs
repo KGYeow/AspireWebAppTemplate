@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Json;
-using AspireWebAppTemplate.Application.Contracts.Notifications;
+using AspireWebAppTemplate.Application.Features.Template.Notifications;
 
 namespace AspireWebAppTemplate.Infrastructure.Clients;
 
