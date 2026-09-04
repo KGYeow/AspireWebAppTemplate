@@ -9,7 +9,7 @@ using AspireWebAppTemplate.Infrastructure.Services.Template.Navigation;
 using Microsoft.AspNetCore.Mvc;
 using AspireWebAppTemplate.Infrastructure.Services.Template.Navigation;
 
-namespace AspireWebAppTemplate.ApiService.Controllers.Template.Navigation;
+namespace AspireWebAppTemplate.ApiService.Controllers.Template;
 
 /// <summary>
 /// Provides the filtered navigation tree endpoint for authenticated users.

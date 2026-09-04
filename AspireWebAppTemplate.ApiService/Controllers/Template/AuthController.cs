@@ -44,7 +44,7 @@ using System.Text;
 using AspireWebAppTemplate.Infrastructure.Services.Template.Authentication;
 using AspireWebAppTemplate.Infrastructure.Services.Template.AuditLog;
 
-namespace AspireWebAppTemplate.ApiService.Controllers.Template.Authentication;
+namespace AspireWebAppTemplate.ApiService.Controllers.Template;
 
 /// <summary>
 /// Handles authentication and account self-management operations.

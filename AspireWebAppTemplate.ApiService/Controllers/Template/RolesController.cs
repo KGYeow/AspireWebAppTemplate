@@ -9,7 +9,7 @@ using AspireWebAppTemplate.Infrastructure.Services.Template.Roles;
 using Microsoft.AspNetCore.Mvc;
 using AspireWebAppTemplate.Infrastructure.Services.Template.Roles;
 
-namespace AspireWebAppTemplate.ApiService.Controllers.Template.Roles;
+namespace AspireWebAppTemplate.ApiService.Controllers.Template;
 
 /// <summary>
 /// Manages application roles including CRUD operations, activation/deactivation,

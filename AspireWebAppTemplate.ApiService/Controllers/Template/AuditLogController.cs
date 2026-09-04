@@ -9,7 +9,7 @@ using AspireWebAppTemplate.Infrastructure.Services.Template.AuditLog;
 using Microsoft.AspNetCore.Mvc;
 using AspireWebAppTemplate.Infrastructure.Services.Template.AuditLog;
 
-namespace AspireWebAppTemplate.ApiService.Controllers.Template.AuditLog;
+namespace AspireWebAppTemplate.ApiService.Controllers.Template;
 
 /// <summary>
 /// Provides audit log querying and Excel export capabilities.

@@ -88,7 +88,7 @@ Thin HTTP host layer. Controllers delegate all work to Infrastructure services.
 
 | Folder | Purpose |
 |--------|---------|
-| `Controllers/` | Thin REST API controllers (Auth, Users, Roles, AuditLog, Notifications, Announcements, EmailTemplates, etc.) |
+| `Controllers/Template/` | Thin REST API controllers, template-owned, kept flat (one controller = one API resource; no per-feature folder). E.g. `UsersController.cs`, `AuditLogController.cs`. Business controllers go under `Controllers/Business/`. `BaseController` and `WeatherController` stay at `Controllers/` root. |
 | `Authentication/` | InternalAuthenticationHandler for service-to-service auth |
 | `Program.cs` | Composition root (DI, middleware, Identity, EF Core configuration) |
 

@@ -76,7 +76,11 @@ AspireWebAppTemplate.Infrastructure/
 ```
 AspireWebAppTemplate.ApiService/
 ├── Authentication/             ← InternalAuthenticationHandler (service-to-service auth)
-├── Controllers/                ← Thin REST API controllers (extend BaseController, delegate to services)
+├── Controllers/                <- Thin REST API controllers (extend BaseController, delegate to services)
+│   ├── BaseController.cs        <- cross-cutting base (root)
+│   ├── WeatherController.cs     <- Aspire sample (root)
+│   ├── Template/                <- template-owned controllers, kept FLAT (one controller = one resource; no per-feature folder)
+│   └── Business/                <- business controllers (flat; add {Module}/ only when many, {Feature}/ only when a feature spans multiple controllers)
 └── Program.cs                  ← Composition root (DI, middleware, Identity, EF Core configuration)
 ```
 

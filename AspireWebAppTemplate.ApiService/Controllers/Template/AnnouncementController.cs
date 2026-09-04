@@ -11,7 +11,7 @@ using AspireWebAppTemplate.Infrastructure.Services.Template.Announcements;
 using Microsoft.AspNetCore.Mvc;
 using AspireWebAppTemplate.Infrastructure.Services.Template.Announcements;
 
-namespace AspireWebAppTemplate.ApiService.Controllers.Template.Announcements;
+namespace AspireWebAppTemplate.ApiService.Controllers.Template;
 
 /// <summary>
 /// Provides announcement query, mutation, and dismissal endpoints.

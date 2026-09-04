@@ -11,7 +11,7 @@ using AspireWebAppTemplate.Infrastructure.Services.Template.Navigation;
 using AspireWebAppTemplate.Application.Features.Template.Navigation;
 using AspireWebAppTemplate.Infrastructure.Services.Template.Navigation;
 using AspireWebAppTemplate.ApiService.Controllers;
-using AspireWebAppTemplate.ApiService.Controllers.Template.Navigation;
+using AspireWebAppTemplate.ApiService.Controllers.Template;
 using AspireWebAppTemplate.Infrastructure.Services.Template.Navigation;
 using AspireWebAppTemplate.Application.Common;
 using AspireWebAppTemplate.Infrastructure.Services.Template.Navigation;
