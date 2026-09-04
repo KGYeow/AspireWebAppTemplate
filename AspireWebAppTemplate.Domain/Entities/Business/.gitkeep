@@ -1,0 +1,8 @@
+# Business-owned code goes here.
+#
+# Place your application's business features alongside the Template/ folder,
+# grouped by business module: {BusinessModule}/{Feature}/.
+# Business code may depend on Template code, never the reverse.
+# See docs/architecture/feature-organization.md.
+#
+# This .gitkeep can be deleted once the folder contains real files.
