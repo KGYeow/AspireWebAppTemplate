@@ -2,26 +2,12 @@ using System.Text.Json;
 using AspireWebAppTemplate.Infrastructure.Services.Template.Users;
 using AspireWebAppTemplate.Infrastructure.Services.Template.Authentication;
 using AspireWebAppTemplate.Application.Abstractions;
-using AspireWebAppTemplate.Infrastructure.Services.Template.Users;
-using AspireWebAppTemplate.Infrastructure.Services.Template.Authentication;
 using AspireWebAppTemplate.Application.Features.Template.Authentication;
-using AspireWebAppTemplate.Infrastructure.Services.Template.Users;
-using AspireWebAppTemplate.Infrastructure.Services.Template.Authentication;
 using AspireWebAppTemplate.Application.Common;
-using AspireWebAppTemplate.Infrastructure.Services.Template.Users;
-using AspireWebAppTemplate.Infrastructure.Services.Template.Authentication;
 using AspireWebAppTemplate.Application.Features.Template.Roles;
-using AspireWebAppTemplate.Infrastructure.Services.Template.Users;
-using AspireWebAppTemplate.Infrastructure.Services.Template.Authentication;
 using AspireWebAppTemplate.Application.Features.Template.Users;
-using AspireWebAppTemplate.Infrastructure.Services.Template.Users;
-using AspireWebAppTemplate.Infrastructure.Services.Template.Authentication;
 using Microsoft.AspNetCore.Authorization;
-using AspireWebAppTemplate.Infrastructure.Services.Template.Users;
-using AspireWebAppTemplate.Infrastructure.Services.Template.Authentication;
 using Microsoft.AspNetCore.Mvc;
-using AspireWebAppTemplate.Infrastructure.Services.Template.Users;
-using AspireWebAppTemplate.Infrastructure.Services.Template.Authentication;
 
 namespace AspireWebAppTemplate.ApiService.Controllers.Template;
 
