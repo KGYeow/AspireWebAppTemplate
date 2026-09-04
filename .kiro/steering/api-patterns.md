@@ -84,7 +84,7 @@ catch (ArgumentException ex)         { return BadRequest(ex.Message); }
 ## Service Layer
 
 ### Interface Location
-- Feature service interfaces: `Application/Features/{Owner}/{Feature}/` (e.g., `Features/Template/AuditLog/IAuditLogService.cs`, `Features/Template/Users/IUserService.cs`).
+- Feature service interfaces sit at the feature root: `Application/Features/{Owner}/{Feature}/I{Feature}Service.cs` (e.g., `Features/Template/AuditLog/IAuditLogService.cs`). The feature's DTOs live in a `Contracts/` subfolder beside the interface (see DTO Conventions).
 - Layer-wide cross-cutting interfaces only: `Application/Abstractions/` (`ICurrentUserAccessor`, `IExcelExportService`, `ITimeZoneHelper`).
 
 ### Implementation Location
@@ -164,7 +164,7 @@ private static readonly (string Key, Func<ApplicationUser, object?> Getter)[] Us
 ## DTO Conventions
 
 ### Location
-- `Application/Contracts/{Feature}/` — grouped by feature (e.g., `Contracts/AuditLog/`, `Contracts/Users/`)
+- `Application/Features/{Owner}/{Feature}/Contracts/` — DTOs live in a `Contracts/` subfolder within their feature (e.g., `Features/Template/AuditLog/Contracts/`, `Features/Template/Users/Contracts/`). The `Contracts/` folder keeps the **feature namespace** (`...Features.{Owner}.{Feature}`), not a `.Contracts` namespace — folder is organizational only, so consumers need just one `using` per feature. A feature with no DTOs (e.g., Navigation) has no `Contracts/` folder.
 
 ### Naming
 - Request DTOs: `{Action}Request` (e.g., `UpdateProfileRequest`, `CreateUserRequest`)

@@ -35,16 +35,28 @@ Application/
 +-- Extensions/ , Utilities/    <- pure, dependency-free helpers
 +-- Features/
     +-- Template/               <- template-owned features
-    |   +-- AuditLog/           <- IAuditLogService.cs + AuditLog DTOs (ONE namespace)
+    |   +-- AuditLog/
+    |   |   +-- IAuditLogService.cs      <- behavioral abstraction at the feature root
+    |   |   +-- Contracts/               <- data contracts (DTOs, requests, query params, results)
+    |   |       +-- AuditLogEntryDto.cs
+    |   |       +-- AuditLogQueryParams.cs
+    |   |       +-- AuditLogRequest.cs
     |   +-- Users/ , Roles/ , Notifications/ , Announcements/
-    |   +-- Email/ , Authentication/ , PagePermissions/ , Ai/ , Navigation/
+    |   +-- Email/ , Authentication/ , PagePermissions/ , Ai/
+    |   +-- Navigation/          <- interfaces only (no Contracts/ folder: it has no DTOs)
     +-- {BusinessModule}/       <- business-owned features (added by your app)
-        +-- {Feature}/          <- I{Feature}Service.cs + its DTOs
+        +-- {Feature}/
+            +-- I{Feature}Service.cs
+            +-- Contracts/
 ```
 
-- One feature folder holds the **service interface(s) and the DTOs that feature consumes**.
-- Interface and DTOs share **one namespace**: `...Application.Features.{Owner}.{Feature}`.
-  (We intentionally do NOT use a `.Contracts` sub-namespace - it doubled imports for no benefit.)
+- Each feature separates **behavioral abstractions from data contracts**:
+  interface(s) sit at the feature root; DTOs/requests/results live in a `Contracts/` subfolder.
+- A feature with **no DTOs** (e.g. `Navigation`) has no `Contracts/` folder - do not create empty folders.
+- **Namespace rule (important):** the `Contracts/` folder is organizational only. Its files keep the
+  **feature namespace** (`...Application.Features.{Owner}.{Feature}`), NOT a `.Contracts` namespace.
+  This gives uniform folders while consumers still need only **one** `using` per feature.
+  (Folder path intentionally does not mirror namespace here - a deliberate, documented exception.)
 
 ### Infrastructure layer (responsibility-first, features inside Services)
 

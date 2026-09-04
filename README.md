@@ -46,7 +46,7 @@ Pure domain primitives with zero external dependencies:
 
 ### 4. **AspireWebAppTemplate.Application** (Application Layer)
 Service interfaces, DTOs, and contracts (depends on Domain only):
-- **Features/{Owner}/{Feature}/** - Feature-first: each feature co-locates its service interface(s) and DTOs under one namespace (Features/Template/ for template-owned: AuditLog, Users, Roles, Notifications, Announcements, Email, Authentication, PagePermissions, Ai, Navigation; Features/{BusinessModule}/ for business code)
+- **Features/{Owner}/{Feature}/** - Feature-first: each feature keeps its service interface(s) at the feature root and its DTOs in a `Contracts/` subfolder, both under one shared per-feature namespace (Features/Template/ for template-owned: AuditLog, Users, Roles, Notifications, Announcements, Email, Authentication, PagePermissions, Ai, Navigation; Features/{BusinessModule}/ for business code)
 - **Abstractions/** - ONLY layer-wide cross-cutting contracts (ICurrentUserAccessor, IExcelExportService, ITimeZoneHelper)
 - **Common/** — Shared models (ApiResult, NavItem, PagedResult)
 - **Contracts/** — DTOs grouped by feature:
@@ -293,7 +293,7 @@ Features built on top of the template for specific project needs. Not part of th
 Business features go under a business-module folder (NOT under `Template/`, which is
 template-owned). See `docs/architecture/feature-organization.md` for the full convention.
 
-1. Add the service interface AND its DTOs to `AspireWebAppTemplate.Application/Features/{BusinessModule}/{Feature}/` (one shared per-feature namespace)
+1. Add the service interface at `AspireWebAppTemplate.Application/Features/{BusinessModule}/{Feature}/I{Feature}Service.cs` and its DTOs under that feature's `Contracts/` subfolder (both share one per-feature namespace; the `Contracts/` folder does not add a `.Contracts` namespace)
 2. Add the service implementation to `AspireWebAppTemplate.Infrastructure/Services/{BusinessModule}/{Feature}/`
 3. Add API endpoints to `AspireWebAppTemplate.ApiService/Controllers/{BusinessModule}/` (add a `{Feature}/` level only if a feature has multiple controllers)
 4. Add HTTP client methods to `AspireWebAppTemplate.Web/Services/`

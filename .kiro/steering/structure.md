@@ -29,9 +29,10 @@ AspireWebAppTemplate.Domain/
 
 ## Application Project (feature-first)
 
-Organized by feature under Features/{Owner}/{Feature}/. Each feature folder holds its service
-interface(s) AND its DTOs under a single per-feature namespace
-(AspireWebAppTemplate.Application.Features.{Owner}.{Feature}).
+Organized by feature under Features/{Owner}/{Feature}/. Each feature keeps its service
+interface(s) at the feature root and its DTOs in a Contracts/ subfolder. Both share ONE
+per-feature namespace (AspireWebAppTemplate.Application.Features.{Owner}.{Feature}) - the
+Contracts/ folder is organizational only and does NOT add a .Contracts namespace segment.
 
 ```
 AspireWebAppTemplate.Application/
@@ -40,10 +41,13 @@ AspireWebAppTemplate.Application/
 ├── Extensions/                 <- Extension methods (NavigationProviderExtensions, QueryableExtensions)
 ├── Utilities/                  <- Pure-logic implementations (DefaultNavigationProvider, TimeZoneHelper)
 └── Features/
-    ├── Template/               <- template-owned features (interface + DTOs per feature, one namespace)
-    │   ├── AuditLog/           <- IAuditLogService + AuditLog DTOs
-    │   ├── Users/  Roles/  Notifications/  Announcements/
-    │   ├── Email/  Authentication/  PagePermissions/  Ai/  Navigation/
+    ├── Template/               <- template-owned features
+    │   ├── AuditLog/
+    │   │   ├── IAuditLogService.cs   <- behavioral abstraction at feature root
+    │   │   └── Contracts/            <- DTOs (AuditLogEntryDto, AuditLogQueryParams, AuditLogRequest)
+    │   ├── Users/  Roles/  Notifications/  Announcements/   (each: I{Feature}Service.cs + Contracts/)
+    │   ├── Email/  Authentication/  PagePermissions/  Ai/
+    │   └── Navigation/          <- interfaces only (no Contracts/: it has no DTOs)
     └── {BusinessModule}/       <- business-owned features (e.g., Hr/EmployeeManagement)
 ```
 
