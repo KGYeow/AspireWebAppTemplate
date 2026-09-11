@@ -1,3 +1,11 @@
+---
+inclusion: always
+---
+
+<!-- TEMPLATE-OWNED steering (Coding standards & engineering conventions). Inherited from AspireWebAppTemplate.
+     Business apps should KEEP these conventions; pull updates from the template repo (steering/template/*).
+     See steering/template/template-guardrails.md for the capability-protection rule. -->
+
 # Coding Standards & Instructions
 
 ## Documentation

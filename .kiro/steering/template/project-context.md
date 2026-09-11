@@ -1,3 +1,11 @@
+---
+inclusion: always
+---
+
+<!-- TEMPLATE-OWNED steering (Architectural patterns & key design decisions). Inherited from AspireWebAppTemplate.
+     Business apps should KEEP these conventions; pull updates from the template repo (steering/template/*).
+     See steering/template/template-guardrails.md for the capability-protection rule. -->
+
 # Project Context — Architectural Patterns
 
 ## Key Architectural Patterns

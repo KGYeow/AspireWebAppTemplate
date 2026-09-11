@@ -1,3 +1,11 @@
+---
+inclusion: always
+---
+
+<!-- BUSINESS-OWNED steering. This file describes the PRODUCT (what it is / who it is for / features).
+     A business application built from the template REPLACES this content with its own product description.
+     Do NOT sync this file from the template repo after the business app is created. -->
+
 # Product
 
 ## What Is This?

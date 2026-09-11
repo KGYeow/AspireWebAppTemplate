@@ -1,3 +1,11 @@
+---
+inclusion: always
+---
+
+<!-- TEMPLATE-OWNED steering (API & service-layer patterns). Inherited from AspireWebAppTemplate.
+     Business apps should KEEP these conventions; pull updates from the template repo (steering/template/*).
+     See steering/template/template-guardrails.md for the capability-protection rule. -->
+
 # API & Service Layer Patterns
 
 ## Thin Controller / Full Service Layer
