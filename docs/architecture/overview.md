@@ -56,13 +56,13 @@ Service contracts, DTOs, shared logic, and pure-logic utilities. Depends only on
 
 | Folder | Purpose |
 |--------|---------|
-| `Features/Template/{Feature}/` | Feature-owned service interface(s) **and** their DTOs, co-located per feature under one namespace (`...Application.Features.Template.{Feature}`). Template features: AuditLog, Users, Roles, Notifications, Announcements, Email, Authentication, PagePermissions, Ai, Navigation. Business features go under `Features/{BusinessModule}/`. |
+| `Features/{Feature}/` | Feature-owned service interface(s) **and** their DTOs, co-located per feature under one namespace (`...Application.Features.{Feature}`). Template features: AuditLog, Users, Roles, Notifications, Announcements, Email, Authentication, PagePermissions, Ai, Navigation. Business features are added as sibling feature folders. |
 | `Abstractions/` | ONLY layer-wide cross-cutting contracts (ICurrentUserAccessor, IExcelExportService, ITimeZoneHelper). |
 | `Common/` | Cross-cutting shape types with no behavior (ApiResult, NavItem, PagedResult). |
 | `Extensions/` | Extension methods (NavigationProviderExtensions, QueryableExtensions) |
 | `Utilities/` | Pure-logic implementations with no external dependencies (DefaultNavigationProvider, TimeZoneHelper) |
 
-> **Feature-first:** see [Feature Organization & Template/Business Separation](feature-organization.md).
+> **Feature-first:** see [Feature Organization & Template Update Strategy](feature-organization.md).
 
 ### AspireWebAppTemplate.Infrastructure (Infrastructure Layer)
 
@@ -71,10 +71,10 @@ Implements Application interfaces. Contains all data access, Identity, and exter
 | Folder | Purpose |
 |--------|---------|
 | `Data/` | ApplicationDbContext, entity configurations, migrations, seed data |
-| `Data/Entities/Template/` | EF Core entities under a Template ownership marker (Announcement, AuditLogEntry, Notification, PagePermission, etc.). Responsibility-first (queried by kind for migrations/schema review; NOT feature-nested). Business entities go under `Data/Entities/{BusinessModule}/`. |
+| `Data/Entities/` | EF Core entities (Announcement, AuditLogEntry, Notification, PagePermission, etc.). Responsibility-first (queried by kind for migrations/schema review; NOT feature-nested). |
 | `Data/SeedData/` | Partial class seed data files (roles, users, page permissions, email templates, announcements) |
 | `Identity/` | ASP.NET Core Identity entities (ApplicationUser, ApplicationRole) |
-| `Services/{Owner}/{Feature}/` | Service implementations, organized **feature-first** under an ownership marker (`Template` or a `{BusinessModule}`), e.g., `Services/Template/AuditLog/AuditLogService.cs` (namespace `...Infrastructure.Services.{Owner}.{Feature}`). **Each folder mirrors the matching `Application/Features/{Owner}/{Feature}/` folder** (interface <-> implementation, same path). Kept per-feature even for a single service. |
+| `Services/{Feature}/` | Service implementations, organized **feature-first**, e.g., `Services/AuditLog/AuditLogService.cs` (namespace `...Infrastructure.Services.{Feature}`). **Each folder mirrors the matching `Application/Features/{Feature}/` folder** (interface <-> implementation, same path). Kept per-feature even for a single service. |
 | `Services/` (root) | Only cross-cutting service implementations that belong to no single feature (CurrentUserAccessor, ExcelExportService). |
 | `Clients/` | Typed HttpClients (WebCallbackClient) |
 | `Handlers/` | Delegating handlers (InternalApiKeyDelegatingHandler) |
@@ -88,7 +88,7 @@ Thin HTTP host layer. Controllers delegate all work to Infrastructure services.
 
 | Folder | Purpose |
 |--------|---------|
-| `Controllers/Template/` | Thin REST API controllers, template-owned, kept flat (one controller = one API resource; no per-feature folder). E.g. `UsersController.cs`, `AuditLogController.cs`. Business controllers go under `Controllers/Business/`. `BaseController` and `WeatherController` stay at `Controllers/` root. |
+| `Controllers/` | Thin REST API controllers, kept flat (one controller = one API resource; no per-feature folder). E.g. `UsersController.cs`, `AuditLogController.cs`. `BaseController` and `WeatherController` also live here. |
 | `Authentication/` | InternalAuthenticationHandler for service-to-service auth |
 | `Program.cs` | Composition root (DI, middleware, Identity, EF Core configuration) |
 

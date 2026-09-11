@@ -84,11 +84,11 @@ catch (ArgumentException ex)         { return BadRequest(ex.Message); }
 ## Service Layer
 
 ### Interface Location
-- Feature service interfaces sit at the feature root: `Application/Features/{Owner}/{Feature}/I{Feature}Service.cs` (e.g., `Features/Template/AuditLog/IAuditLogService.cs`). The feature's DTOs live in a `Contracts/` subfolder beside the interface (see DTO Conventions).
+- Feature service interfaces sit at the feature root: `Application/Features/{Feature}/I{Feature}Service.cs` (e.g., `Features/AuditLog/IAuditLogService.cs`). The feature's DTOs live in a `Contracts/` subfolder beside the interface (see DTO Conventions).
 - Layer-wide cross-cutting interfaces only: `Application/Abstractions/` (`ICurrentUserAccessor`, `IExcelExportService`, `ITimeZoneHelper`).
 
 ### Implementation Location
-- `Infrastructure/Services/{Owner}/{Feature}/` — business logic implementations, feature-first under an owner marker (e.g., `Services/Template/AuditLog/AuditLogService.cs`). Cross-cutting implementations (`CurrentUserAccessor`, `ExcelExportService`) stay at `Services/` root.
+- `Infrastructure/Services/{Feature}/` — business logic implementations, feature-first (e.g., `Services/AuditLog/AuditLogService.cs`). Cross-cutting implementations (`CurrentUserAccessor`, `ExcelExportService`) stay at `Services/` root.
 - **Application vs Infrastructure:** the interface lives in Application; the implementation lives in Infrastructure whenever it touches any infrastructure concern (EF Core/`DbContext`, Identity, HTTP, SMTP, LDAP, file/Excel, cloud SDKs, `IHttpContextAccessor`) — which is the default for data-driven services. Only pure-orchestration services with zero infrastructure dependencies may be implemented in Application. See `docs/architecture/feature-organization.md`.
 
 ### DI Registration
@@ -165,7 +165,7 @@ private static readonly (string Key, Func<ApplicationUser, object?> Getter)[] Us
 ## DTO Conventions
 
 ### Location
-- `Application/Features/{Owner}/{Feature}/Contracts/` — DTOs live in a `Contracts/` subfolder within their feature (e.g., `Features/Template/AuditLog/Contracts/`, `Features/Template/Users/Contracts/`). The `Contracts/` folder keeps the **feature namespace** (`...Features.{Owner}.{Feature}`), not a `.Contracts` namespace — folder is organizational only, so consumers need just one `using` per feature. A feature with no DTOs (e.g., Navigation) has no `Contracts/` folder.
+- `Application/Features/{Feature}/Contracts/` — DTOs live in a `Contracts/` subfolder within their feature (e.g., `Features/AuditLog/Contracts/`, `Features/Users/Contracts/`). The `Contracts/` folder keeps the **feature namespace** (`...Features.{Feature}`), not a `.Contracts` namespace — folder is organizational only, so consumers need just one `using` per feature. A feature with no DTOs (e.g., Navigation) has no `Contracts/` folder.
 
 ### Naming
 - Request DTOs: `{Action}Request` (e.g., `UpdateProfileRequest`, `CreateUserRequest`)

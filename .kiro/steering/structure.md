@@ -41,14 +41,13 @@ AspireWebAppTemplate.Application/
 ├── Extensions/                 <- Extension methods (NavigationProviderExtensions, QueryableExtensions)
 ├── Utilities/                  <- Pure-logic implementations (DefaultNavigationProvider, TimeZoneHelper)
 └── Features/
-    ├── Template/               <- template-owned features
-    │   ├── AuditLog/
-    │   │   ├── IAuditLogService.cs   <- behavioral abstraction at feature root
-    │   │   └── Contracts/            <- DTOs (AuditLogEntryDto, AuditLogQueryParams, AuditLogRequest)
-    │   ├── Users/  Roles/  Notifications/  Announcements/   (each: I{Feature}Service.cs + Contracts/)
-    │   ├── Email/  Authentication/  PagePermissions/  Ai/
-    │   └── Navigation/          <- interfaces only (no Contracts/: it has no DTOs)
-    └── {BusinessModule}/       <- business-owned features (e.g., Hr/EmployeeManagement)
+    ├── AuditLog/
+    │   ├── IAuditLogService.cs   <- behavioral abstraction at feature root
+    │   └── Contracts/            <- DTOs (AuditLogEntryDto, AuditLogQueryParams, AuditLogRequest)
+    ├── Users/  Roles/  Notifications/  Announcements/   (each: I{Feature}Service.cs + Contracts/)
+    ├── Email/  Authentication/  PagePermissions/  Ai/
+    ├── Navigation/              <- interfaces only (no Contracts/: it has no DTOs)
+    └── {YourBusinessFeature}/   <- business features you add (same shape)
 ```
 
 See docs/architecture/feature-organization.md for the full convention.
@@ -58,8 +57,8 @@ AspireWebAppTemplate.Infrastructure/
 ├── Clients/                    ← Typed HttpClients (WebCallbackClient)
 ├── Data/
 │   ├── ApplicationDbContext.cs ← EF Core DbContext
-│   ├── Configurations/Template/ <- IEntityTypeConfiguration classes, mirror the Template marker
-│   ├── Entities/Template/     <- EF entities under Template marker (responsibility-first; NOT feature-nested; business under Entities/{Module}/)
+│   ├── Configurations/         <- IEntityTypeConfiguration classes (one per entity)
+│   ├── Entities/               <- EF entities (responsibility-first; queried by kind; NOT feature-nested)
 │   ├── Migrations/             ← EF Core migration files
 │   └── SeedData/               ← Partial class seed data files
 │       ├── SeedData.cs                    ← Entry point (orchestrates all seed methods)
@@ -72,7 +71,7 @@ AspireWebAppTemplate.Infrastructure/
 ├── Handlers/                   ← Delegating handlers (InternalApiKeyDelegatingHandler)
 ├── Identity/                   ← ASP.NET Core Identity entities (ApplicationUser, ApplicationRole)
 ├── Options/                    ← Configuration option classes (LdapSettings)
-├── Services/                <- Feature-first impls: Template/{Feature}/ (e.g. Template/AuditLog/AuditLogService.cs); business under {Module}/; cross-cutting (CurrentUserAccessor, ExcelExportService) at Services/ root
+├── Services/                <- Feature-first impls: {Feature}/ (e.g. AuditLog/AuditLogService.cs); cross-cutting (CurrentUserAccessor, ExcelExportService) at Services/ root
 └── Utilities/                  ← Helper classes (AuditChangeHelper, CurrentUserAccessor, SecureConnectionString)
 ```
 
@@ -83,8 +82,7 @@ AspireWebAppTemplate.ApiService/
 ├── Controllers/                <- Thin REST API controllers (extend BaseController, delegate to services)
 │   ├── BaseController.cs        <- cross-cutting base (root)
 │   ├── WeatherController.cs     <- Aspire sample (root)
-│   ├── Template/                <- template-owned controllers, kept FLAT (one controller = one resource; no per-feature folder)
-│   └── Business/                <- business controllers (flat; add {Module}/ only when many, {Feature}/ only when a feature spans multiple controllers)
+│   └── (feature controllers)    <- kept FLAT (one controller = one resource); e.g. UsersController.cs, AuditLogController.cs; business controllers sit alongside
 └── Program.cs                  ← Composition root (DI, middleware, Identity, EF Core configuration)
 ```
 
@@ -139,7 +137,7 @@ AspireWebAppTemplate.Tests/
 ├── Email/                      ← Property + unit tests for email template/service features
 ├── Notifications/              ← Property + unit tests for notification features
 ├── PagePermissions/            ← Property + unit tests for page permissions
-├── Services/                <- Feature-first impls: Template/{Feature}/ (e.g. Template/AuditLog/AuditLogService.cs); business under {Module}/; cross-cutting (CurrentUserAccessor, ExcelExportService) at Services/ root
+├── Services/                <- Feature-first impls: {Feature}/ (e.g. AuditLog/AuditLogService.cs); cross-cutting (CurrentUserAccessor, ExcelExportService) at Services/ root
 └── Layout/                     ← Layout/component tests
 ```
 
