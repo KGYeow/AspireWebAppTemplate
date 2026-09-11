@@ -79,6 +79,25 @@ Namespace: `...Infrastructure.Services.Template.{Feature}` (or `...Services.{Mod
 usually one file, and developers query them by kind. Add a Template/Business split there only when
 a module grows large enough that per-module schema review becomes common.
 
+### Where does a `*Service` go - Application or Infrastructure?
+
+- The **interface** always goes in `Application/Features/{Owner}/{Feature}/` (behavioral abstraction
+  the inner layer owns).
+- If the implementation touches **any** infrastructure concern - EF Core / `DbContext`, ASP.NET
+  Identity (`UserManager`/`RoleManager`/`SignInManager`), HTTP, SMTP, LDAP, file/Excel, cloud SDKs,
+  or `IHttpContextAccessor` - it goes in `Infrastructure/Services/{Owner}/{Feature}/`. This is the
+  default and covers essentially every data-driven service.
+- Only a **pure-orchestration** service with zero infrastructure dependencies may live beside its
+  interface in Application. This is rare; when in doubt, choose Infrastructure.
+
+**Why implementations stay in Infrastructure (not Application):** this project is a service-layer
+(non-DDD) architecture where EF Core IS the data layer (no repository indirection), so a service's
+logic and its data access are the same code. Moving such an implementation into Application would
+drag `DbContext`/Identity/EF/SMTP/etc. into the inner layer and break the inward-dependency rule
+(and risk a circular Application -> Infrastructure reference). Keeping interfaces in Application and
+infrastructure-coupled implementations in Infrastructure is the conventionally-correct Clean
+Architecture split for this style, and matches Microsoft's eShopOnWeb reference app.
+
 ### ApiService layer (responsibility-first; controllers stay flat)
 
 A controller is already a cohesive API resource boundary (one route prefix, one primary service).

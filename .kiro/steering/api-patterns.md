@@ -88,7 +88,8 @@ catch (ArgumentException ex)         { return BadRequest(ex.Message); }
 - Layer-wide cross-cutting interfaces only: `Application/Abstractions/` (`ICurrentUserAccessor`, `IExcelExportService`, `ITimeZoneHelper`).
 
 ### Implementation Location
-- `Infrastructure/Services/` — business logic implementations
+- `Infrastructure/Services/{Owner}/{Feature}/` — business logic implementations, feature-first under an owner marker (e.g., `Services/Template/AuditLog/AuditLogService.cs`). Cross-cutting implementations (`CurrentUserAccessor`, `ExcelExportService`) stay at `Services/` root.
+- **Application vs Infrastructure:** the interface lives in Application; the implementation lives in Infrastructure whenever it touches any infrastructure concern (EF Core/`DbContext`, Identity, HTTP, SMTP, LDAP, file/Excel, cloud SDKs, `IHttpContextAccessor`) — which is the default for data-driven services. Only pure-orchestration services with zero infrastructure dependencies may be implemented in Application. See `docs/architecture/feature-organization.md`.
 
 ### DI Registration
 - Services registered as **scoped** (aligns with per-request DbContext lifetime).
