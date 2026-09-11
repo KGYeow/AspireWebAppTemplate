@@ -75,6 +75,16 @@ Infrastructure/
 
 Namespace: `...Infrastructure.Services.Template.{Feature}` (or `...Services.{Module}.{Feature}`).
 
+**Parallel with Application (both owners):** each `Infrastructure/Services/{Owner}/{Feature}/` folder
+deliberately mirrors the matching `Application/Features/{Owner}/{Feature}/` folder - same owner
+(`Template` or a `{BusinessModule}`) and same feature name - so the interface and its implementation
+sit at the same path in both projects and you can navigate interface -> implementation directly.
+Examples: `Application/Features/Template/AuditLog/` <-> `Infrastructure/Services/Template/AuditLog/`;
+`Application/Features/Hr/EmployeeManagement/` <-> `Infrastructure/Services/Hr/EmployeeManagement/`.
+Keep this per-feature folder even when it holds a single service - do NOT flatten it (unlike
+Controllers). The parallel with the abstraction layer is the organizing principle, and services are
+the layer most likely to grow additional related implementations later.
+
 `Data/Entities` and `Data/Configurations` are deliberately **responsibility-first**: an entity is
 usually one file, and developers query them by kind. Add a Template/Business split there only when
 a module grows large enough that per-module schema review becomes common.

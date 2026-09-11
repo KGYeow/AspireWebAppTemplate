@@ -74,7 +74,7 @@ Implements Application interfaces. Contains all data access, Identity, and exter
 | `Data/Entities/Template/` | EF Core entities under a Template ownership marker (Announcement, AuditLogEntry, Notification, PagePermission, etc.). Responsibility-first (queried by kind for migrations/schema review; NOT feature-nested). Business entities go under `Data/Entities/{BusinessModule}/`. |
 | `Data/SeedData/` | Partial class seed data files (roles, users, page permissions, email templates, announcements) |
 | `Identity/` | ASP.NET Core Identity entities (ApplicationUser, ApplicationRole) |
-| `Services/Template/{Feature}/` | Business service implementations, organized **feature-first** under a Template ownership marker (e.g., `Services/Template/AuditLog/AuditLogService.cs`, namespace `...Infrastructure.Services.Template.{Feature}`). Business services go under `Services/{BusinessModule}/`. |
+| `Services/{Owner}/{Feature}/` | Service implementations, organized **feature-first** under an ownership marker (`Template` or a `{BusinessModule}`), e.g., `Services/Template/AuditLog/AuditLogService.cs` (namespace `...Infrastructure.Services.{Owner}.{Feature}`). **Each folder mirrors the matching `Application/Features/{Owner}/{Feature}/` folder** (interface <-> implementation, same path). Kept per-feature even for a single service. |
 | `Services/` (root) | Only cross-cutting service implementations that belong to no single feature (CurrentUserAccessor, ExcelExportService). |
 | `Clients/` | Typed HttpClients (WebCallbackClient) |
 | `Handlers/` | Delegating handlers (InternalApiKeyDelegatingHandler) |
