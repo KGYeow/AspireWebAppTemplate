@@ -1,6 +1,6 @@
 using AspireWebAppTemplate.Abstractions;
 using AspireWebAppTemplate.Application.Abstractions;
-using AspireWebAppTemplate.Application.Features.Template.Users;
+using AspireWebAppTemplate.Application.Features.Users;
 using AspireWebAppTemplate.Domain.Enums;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Authorization;

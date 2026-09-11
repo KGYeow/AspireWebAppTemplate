@@ -1,5 +1,5 @@
 using AspireWebAppTemplate.Application.Common;
-using AspireWebAppTemplate.Application.Features.Template.Authentication;
+using AspireWebAppTemplate.Application.Features.Authentication;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;

@@ -1,11 +1,11 @@
 using AspireWebAppTemplate.Application.Abstractions;
-using AspireWebAppTemplate.Infrastructure.Services.Template.Notifications;
-using AspireWebAppTemplate.Application.Features.Template.Notifications;
-using AspireWebAppTemplate.Infrastructure.Services.Template.Notifications;
+using AspireWebAppTemplate.Infrastructure.Services.Notifications;
+using AspireWebAppTemplate.Application.Features.Notifications;
+using AspireWebAppTemplate.Infrastructure.Services.Notifications;
 using Microsoft.AspNetCore.Authorization;
-using AspireWebAppTemplate.Infrastructure.Services.Template.Notifications;
+using AspireWebAppTemplate.Infrastructure.Services.Notifications;
 using Microsoft.AspNetCore.Mvc;
-using AspireWebAppTemplate.Infrastructure.Services.Template.Notifications;
+using AspireWebAppTemplate.Infrastructure.Services.Notifications;
 
 namespace AspireWebAppTemplate.ApiService.Controllers;
 

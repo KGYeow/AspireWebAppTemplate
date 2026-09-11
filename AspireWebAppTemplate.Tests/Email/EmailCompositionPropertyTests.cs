@@ -2,8 +2,8 @@
 using AspireWebAppTemplate.Application.Abstractions;
 using AspireWebAppTemplate.Infrastructure.Data;
 using AspireWebAppTemplate.Infrastructure.Services;
-using AspireWebAppTemplate.Infrastructure.Services.Template.Email;
-using AspireWebAppTemplate.Application.Features.Template.Email;
+using AspireWebAppTemplate.Infrastructure.Services.Email;
+using AspireWebAppTemplate.Application.Features.Email;
 using AspireWebAppTemplate.Domain.Enums;
 using FsCheck;
 using FsCheck.Fluent;

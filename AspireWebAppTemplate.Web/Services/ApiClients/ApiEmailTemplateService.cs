@@ -1,6 +1,6 @@
 using System.Net.Http.Json;
 using AspireWebAppTemplate.Application.Common;
-using AspireWebAppTemplate.Application.Features.Template.Email;
+using AspireWebAppTemplate.Application.Features.Email;
 
 namespace AspireWebAppTemplate.Web.Services;
 

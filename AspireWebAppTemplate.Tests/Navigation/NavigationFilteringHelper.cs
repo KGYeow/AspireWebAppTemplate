@@ -1,8 +1,8 @@
 // Feature: api-nav-filtering, Property 1: Filtering Pipeline Equivalence
 using AspireWebAppTemplate.Application.Common;
-using AspireWebAppTemplate.Infrastructure.Services.Template.Navigation;
+using AspireWebAppTemplate.Infrastructure.Services.Navigation;
 using AspireWebAppTemplate.Domain.Constants;
-using AspireWebAppTemplate.Infrastructure.Services.Template.Navigation;
+using AspireWebAppTemplate.Infrastructure.Services.Navigation;
 
 namespace AspireWebAppTemplate.Tests.Navigation;
 

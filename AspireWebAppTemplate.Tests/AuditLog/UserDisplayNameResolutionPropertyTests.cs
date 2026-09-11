@@ -1,9 +1,9 @@
 using AspireWebAppTemplate.Infrastructure.Data;
-using AspireWebAppTemplate.Infrastructure.Data.Entities.Template;
+using AspireWebAppTemplate.Infrastructure.Data.Entities;
 using AspireWebAppTemplate.Infrastructure.Identity;
 using AspireWebAppTemplate.Infrastructure.Services;
-using AspireWebAppTemplate.Infrastructure.Services.Template.AuditLog;
-using AspireWebAppTemplate.Application.Features.Template.AuditLog;
+using AspireWebAppTemplate.Infrastructure.Services.AuditLog;
+using AspireWebAppTemplate.Application.Features.AuditLog;
 using AspireWebAppTemplate.Domain.Enums;
 using FsCheck;
 using FsCheck.Xunit;

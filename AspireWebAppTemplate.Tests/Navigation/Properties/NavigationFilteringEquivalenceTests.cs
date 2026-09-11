@@ -1,18 +1,18 @@
 // Feature: api-nav-filtering, Property 1: Filtering Pipeline Equivalence
 using AspireWebAppTemplate.Application.Common;
-using AspireWebAppTemplate.Infrastructure.Services.Template.Navigation;
+using AspireWebAppTemplate.Infrastructure.Services.Navigation;
 using AspireWebAppTemplate.Tests.Navigation.Generators;
-using AspireWebAppTemplate.Infrastructure.Services.Template.Navigation;
+using AspireWebAppTemplate.Infrastructure.Services.Navigation;
 using FsCheck;
-using AspireWebAppTemplate.Infrastructure.Services.Template.Navigation;
+using AspireWebAppTemplate.Infrastructure.Services.Navigation;
 using FsCheck.Fluent;
-using AspireWebAppTemplate.Infrastructure.Services.Template.Navigation;
+using AspireWebAppTemplate.Infrastructure.Services.Navigation;
 using FsCheck.Xunit;
-using AspireWebAppTemplate.Infrastructure.Services.Template.Navigation;
+using AspireWebAppTemplate.Infrastructure.Services.Navigation;
 using Gen = FsCheck.Fluent.Gen;
-using AspireWebAppTemplate.Infrastructure.Services.Template.Navigation;
+using AspireWebAppTemplate.Infrastructure.Services.Navigation;
 using Property = FsCheck.Property;
-using AspireWebAppTemplate.Infrastructure.Services.Template.Navigation;
+using AspireWebAppTemplate.Infrastructure.Services.Navigation;
 
 namespace AspireWebAppTemplate.Tests.Navigation.Properties;
 

@@ -1,4 +1,4 @@
-using AspireWebAppTemplate.Application.Features.Template.Notifications;
+using AspireWebAppTemplate.Application.Features.Notifications;
 using AspireWebAppTemplate.Domain.Enums;
 using AspireWebAppTemplate.UI.Components.Shared;
 using AspireWebAppTemplate.UI.Utilities;

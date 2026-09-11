@@ -1,6 +1,6 @@
 using System.Net.Http.Json;
 using AspireWebAppTemplate.Application.Common;
-using AspireWebAppTemplate.Application.Features.Template.AuditLog;
+using AspireWebAppTemplate.Application.Features.AuditLog;
 
 namespace AspireWebAppTemplate.Web.Services;
 

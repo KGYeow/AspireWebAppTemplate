@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using AspireWebAppTemplate.Application.Features.Template.Announcements;
+using AspireWebAppTemplate.Application.Features.Announcements;
 using AspireWebAppTemplate.Domain.Enums;
 using AspireWebAppTemplate.Web.Abstractions;
 using AspireWebAppTemplate.Web.Services;

@@ -1,4 +1,4 @@
-using AspireWebAppTemplate.Application.Features.Template.Announcements;
+using AspireWebAppTemplate.Application.Features.Announcements;
 
 namespace AspireWebAppTemplate.Web.Abstractions;
 

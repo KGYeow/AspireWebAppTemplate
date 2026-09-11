@@ -1,9 +1,9 @@
 // Feature: notification-system, Property 12: Missing preferences default to both channels enabled
 using AspireWebAppTemplate.Infrastructure.Data;
-using AspireWebAppTemplate.Infrastructure.Data.Entities.Template;
+using AspireWebAppTemplate.Infrastructure.Data.Entities;
 using AspireWebAppTemplate.Infrastructure.Identity;
 using AspireWebAppTemplate.Infrastructure.Services;
-using AspireWebAppTemplate.Infrastructure.Services.Template.Notifications;
+using AspireWebAppTemplate.Infrastructure.Services.Notifications;
 using AspireWebAppTemplate.Domain.Enums;
 using FsCheck;
 using FsCheck.Fluent;

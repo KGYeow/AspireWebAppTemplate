@@ -1,9 +1,9 @@
 using System.Security.Claims;
 using AspireWebAppTemplate.Application.Abstractions;
 using AspireWebAppTemplate.ApiService.Controllers;
-using AspireWebAppTemplate.ApiService.Controllers.Template;
+using AspireWebAppTemplate.ApiService.Controllers;
 using AspireWebAppTemplate.Application.Common;
-using AspireWebAppTemplate.Application.Features.Template.Notifications;
+using AspireWebAppTemplate.Application.Features.Notifications;
 using AspireWebAppTemplate.Domain.Enums;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

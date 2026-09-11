@@ -1,13 +1,13 @@
 // Feature: announcement-banner-system, Property 2: Creation preserves all input fields and sets audit metadata
 using AspireWebAppTemplate.Application.Abstractions;
-using AspireWebAppTemplate.Application.Features.Template.Notifications;
+using AspireWebAppTemplate.Application.Features.Notifications;
 using AspireWebAppTemplate.Infrastructure.Data;
-using AspireWebAppTemplate.Infrastructure.Data.Entities.Template;
+using AspireWebAppTemplate.Infrastructure.Data.Entities;
 using AspireWebAppTemplate.Infrastructure.Identity;
 using AspireWebAppTemplate.Infrastructure.Services;
-using AspireWebAppTemplate.Infrastructure.Services.Template.Announcements;
-using AspireWebAppTemplate.Application.Features.Template.Announcements;
-using AspireWebAppTemplate.Application.Features.Template.AuditLog;
+using AspireWebAppTemplate.Infrastructure.Services.Announcements;
+using AspireWebAppTemplate.Application.Features.Announcements;
+using AspireWebAppTemplate.Application.Features.AuditLog;
 using AspireWebAppTemplate.Domain.Enums;
 using FsCheck;
 using FsCheck.Fluent;
@@ -119,7 +119,7 @@ public class AnnouncementCreationPropertyTests
                     mockAuditLog.Setup(x => x.LogAsync(It.IsAny<AuditLogRequest>())).Returns(Task.CompletedTask);
 
                     var mockNotification = new Mock<INotificationService>();
-                    mockNotification.Setup(x => x.CreateNotificationAsync(It.IsAny<Application.Features.Template.Notifications.CreateNotificationRequest>()))
+                    mockNotification.Setup(x => x.CreateNotificationAsync(It.IsAny<Application.Features.Notifications.CreateNotificationRequest>()))
                         .Returns(Task.CompletedTask);
 
                     var logger = NullLogger<AnnouncementService>.Instance;

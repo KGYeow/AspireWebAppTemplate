@@ -1,12 +1,12 @@
 // Feature: announcement-banner-system, Property 1: Status classification is consistent with IsActive, StartsAtUtc, and ExpiresAtUtc
 using AspireWebAppTemplate.Application.Abstractions;
-using AspireWebAppTemplate.Application.Features.Template.Notifications;
-using AspireWebAppTemplate.Application.Features.Template.AuditLog;
+using AspireWebAppTemplate.Application.Features.Notifications;
+using AspireWebAppTemplate.Application.Features.AuditLog;
 using AspireWebAppTemplate.Infrastructure.Data;
-using AspireWebAppTemplate.Infrastructure.Data.Entities.Template;
+using AspireWebAppTemplate.Infrastructure.Data.Entities;
 using AspireWebAppTemplate.Infrastructure.Identity;
 using AspireWebAppTemplate.Infrastructure.Services;
-using AspireWebAppTemplate.Infrastructure.Services.Template.Announcements;
+using AspireWebAppTemplate.Infrastructure.Services.Announcements;
 using AspireWebAppTemplate.Domain.Enums;
 using FsCheck;
 using FsCheck.Fluent;

@@ -1,5 +1,5 @@
 using System.Text.RegularExpressions;
-using AspireWebAppTemplate.Application.Features.Template.Announcements;
+using AspireWebAppTemplate.Application.Features.Announcements;
 using AspireWebAppTemplate.Domain.Enums;
 using AspireWebAppTemplate.Web.Abstractions;
 using Microsoft.AspNetCore.Components;

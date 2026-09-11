@@ -1,13 +1,13 @@
 // Feature: announcement-banner-system, Property 14: Notification delivery respects NotifyUsers flag
 using AspireWebAppTemplate.Application.Abstractions;
 using AspireWebAppTemplate.Infrastructure.Data;
-using AspireWebAppTemplate.Infrastructure.Data.Entities.Template;
+using AspireWebAppTemplate.Infrastructure.Data.Entities;
 using AspireWebAppTemplate.Infrastructure.Identity;
 using AspireWebAppTemplate.Infrastructure.Services;
-using AspireWebAppTemplate.Infrastructure.Services.Template.Announcements;
-using AspireWebAppTemplate.Application.Features.Template.Announcements;
-using AspireWebAppTemplate.Application.Features.Template.AuditLog;
-using AspireWebAppTemplate.Application.Features.Template.Notifications;
+using AspireWebAppTemplate.Infrastructure.Services.Announcements;
+using AspireWebAppTemplate.Application.Features.Announcements;
+using AspireWebAppTemplate.Application.Features.AuditLog;
+using AspireWebAppTemplate.Application.Features.Notifications;
 using AspireWebAppTemplate.Domain.Enums;
 using FsCheck;
 using FsCheck.Fluent;

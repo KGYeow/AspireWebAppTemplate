@@ -1,5 +1,5 @@
-using AspireWebAppTemplate.Application.Features.Template.Notifications;
-using AspireWebAppTemplate.Application.Features.Template.Users;
+using AspireWebAppTemplate.Application.Features.Notifications;
+using AspireWebAppTemplate.Application.Features.Users;
 using AspireWebAppTemplate.Domain.Enums;
 using AspireWebAppTemplate.Web.Abstractions;
 using AspireWebAppTemplate.Web.Services;

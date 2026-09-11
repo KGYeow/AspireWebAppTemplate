@@ -2,11 +2,11 @@
 // Feature: notification-system, Property 4: Pagination returns at most pageSize items
 // Feature: notification-system, Property 5: Unread count matches actual count of unread notifications
 using AspireWebAppTemplate.Infrastructure.Data;
-using AspireWebAppTemplate.Infrastructure.Data.Entities.Template;
+using AspireWebAppTemplate.Infrastructure.Data.Entities;
 using AspireWebAppTemplate.Infrastructure.Identity;
 using AspireWebAppTemplate.Infrastructure.Services;
-using AspireWebAppTemplate.Infrastructure.Services.Template.Notifications;
-using AspireWebAppTemplate.Application.Features.Template.Notifications;
+using AspireWebAppTemplate.Infrastructure.Services.Notifications;
+using AspireWebAppTemplate.Application.Features.Notifications;
 using AspireWebAppTemplate.Domain.Enums;
 using FsCheck;
 using FsCheck.Fluent;

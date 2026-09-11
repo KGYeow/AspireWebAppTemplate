@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using AspireWebAppTemplate.Application.Features.Template.Email;
+using AspireWebAppTemplate.Application.Features.Email;
 using AspireWebAppTemplate.Web.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;

@@ -1,4 +1,4 @@
-using AspireWebAppTemplate.Application.Features.Template.Email;
+using AspireWebAppTemplate.Application.Features.Email;
 using AspireWebAppTemplate.Domain.Enums;
 using AspireWebAppTemplate.UI.Utilities;
 using AspireWebAppTemplate.Web.Abstractions;

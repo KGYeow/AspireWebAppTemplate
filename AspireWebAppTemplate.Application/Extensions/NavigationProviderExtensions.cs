@@ -1,5 +1,5 @@
 using AspireWebAppTemplate.Application.Abstractions;
-using AspireWebAppTemplate.Application.Features.Template.Navigation;
+using AspireWebAppTemplate.Application.Features.Navigation;
 using AspireWebAppTemplate.Application.Common;
 using AspireWebAppTemplate.Domain.Constants;
 
