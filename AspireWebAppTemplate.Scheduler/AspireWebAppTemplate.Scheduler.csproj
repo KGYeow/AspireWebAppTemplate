@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>AspireWebAppTemplate.Scheduler</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Generic host: DI, configuration, logging, lifetime. -->
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.0" />
+    <!-- Rich console output for interactive/manual runs (degrades cleanly under Task Scheduler). -->
+    <PackageReference Include="Spectre.Console" Version="0.55.0" />
+    <!-- Required by ASP.NET Core Identity default token providers outside a web host. -->
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="10.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Inward-only references: Scheduler is a host/composition root, peer to ApiService.
+         References Application (interfaces), Infrastructure (implementations + DbContext),
+         and ServiceDefaults (telemetry). It MUST NOT reference the Web project. -->
+    <ProjectReference Include="..\AspireWebAppTemplate.Application\AspireWebAppTemplate.Application.csproj" />
+    <ProjectReference Include="..\AspireWebAppTemplate.Infrastructure\AspireWebAppTemplate.Infrastructure.csproj" />
+    <ProjectReference Include="..\AspireWebAppTemplate.ServiceDefaults\AspireWebAppTemplate.ServiceDefaults.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Console SDK does not auto-copy appsettings; copy them so the published exe finds config. -->
+    <Content Include="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="appsettings.Development.json" CopyToOutputDirectory="PreserveNewest" Condition="Exists('appsettings.Development.json')" />
+  </ItemGroup>
+
+</Project>

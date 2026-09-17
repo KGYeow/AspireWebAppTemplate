@@ -18,6 +18,7 @@ AspireWebAppTemplate/
 ├── AspireWebAppTemplate.Infrastructure/  ← Infrastructure layer (EF Core, Identity, services, data access)
 ├── AspireWebAppTemplate.ApiService/      ← API host (thin controllers, authentication, Program.cs)
 ├── AspireWebAppTemplate.Web/             ← Blazor Server frontend
+├── AspireWebAppTemplate.Scheduler/       ← OPTIONAL batch/scheduled-job console (Windows Task Scheduler)
 ├── AspireWebAppTemplate.UI/              ← Shared Razor Class Library
 ├── AspireWebAppTemplate.ServiceDefaults/ ← Aspire defaults (telemetry, health)
 ├── AspireWebAppTemplate.Tests/           ← All tests (property, unit, integration)
