@@ -53,16 +53,15 @@ public class AuditLogQueryServiceTests
 
     /// <summary>
     /// Creates an AuditLogService instance with the given context and mocked dependencies.
-    /// The UserManager, Logger, and Configuration are mocked since query methods don't use them.
+    /// The UserManager and Logger are mocked since query methods don't use them.
     /// </summary>
     private static AuditLogService CreateService(ApplicationDbContext context)
     {
         var mockUserManager = new Mock<UserManager<ApplicationUser>>(
             Mock.Of<IUserStore<ApplicationUser>>(), null!, null!, null!, null!, null!, null!, null!, null!);
         var mockLogger = new Mock<ILogger<AuditLogService>>();
-        var mockConfig = new Mock<IConfiguration>();
 
-        return new AuditLogService(context, mockUserManager.Object, mockLogger.Object, mockConfig.Object);
+        return new AuditLogService(context, mockUserManager.Object, mockLogger.Object);
     }
 
     /// <summary>

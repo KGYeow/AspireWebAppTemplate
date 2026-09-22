@@ -1,14 +1,11 @@
-// Feature: audit-log, Property 10: Retention configuration validation
+// Bugfix: scheduler-dependency-cleanup, Property 2: purge/retention preserved
 using AspireWebAppTemplate.Infrastructure.Data;
 using AspireWebAppTemplate.Infrastructure.Data.Entities;
-using AspireWebAppTemplate.Infrastructure.Identity;
-using AspireWebAppTemplate.Infrastructure.Services;
 using AspireWebAppTemplate.Infrastructure.Services.AuditLog;
 using AspireWebAppTemplate.Domain.Enums;
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -69,16 +66,13 @@ public class RetentionConfigPropertyTests
     }
 
     /// <summary>
-    /// Creates an AuditLogService with the given configuration and database context.
+    /// Creates an AuditLogRetentionService with the given configuration and database context.
     /// </summary>
-    private static AuditLogService CreateService(ApplicationDbContext dbContext, IConfiguration configuration)
+    private static AuditLogRetentionService CreateService(ApplicationDbContext dbContext, IConfiguration configuration)
     {
-        var userStoreMock = new Mock<IUserStore<ApplicationUser>>();
-        var userManagerMock = new Mock<UserManager<ApplicationUser>>(
-            userStoreMock.Object, null!, null!, null!, null!, null!, null!, null!, null!);
-        var loggerMock = new Mock<ILogger<AuditLogService>>();
+        var loggerMock = new Mock<ILogger<AuditLogRetentionService>>();
 
-        return new AuditLogService(dbContext, userManagerMock.Object, loggerMock.Object, configuration);
+        return new AuditLogRetentionService(dbContext, configuration, loggerMock.Object);
     }
 
     /// <summary>
@@ -106,7 +100,7 @@ public class RetentionConfigPropertyTests
     /// For any valid integer in range 1–3650 configured as AuditLog:RetentionDays,
     /// the system uses that value as the retention period (verified via purge behavior).
     /// </summary>
-    [Property(MaxTest = 1)]
+    [Property(MaxTest = 2)]
     public Property ValidRetentionDays_UsedAsIs()
     {
         var validDaysGen = Gen.Choose(MinRetentionDays, MaxRetentionDays);
@@ -148,7 +142,7 @@ public class RetentionConfigPropertyTests
     /// **Validates: Requirements 10.1, 10.2**
     /// For missing configuration (null/empty/whitespace), the system falls back to 365 days.
     /// </summary>
-    [Property(MaxTest = 1)]
+    [Property(MaxTest = 2)]
     public Property MissingConfig_FallsBackTo365()
     {
         var missingValueGen = Gen.OneOf(
@@ -192,7 +186,7 @@ public class RetentionConfigPropertyTests
     /// **Validates: Requirements 10.1, 10.2**
     /// For non-numeric configuration values, the system falls back to 365 days.
     /// </summary>
-    [Property(MaxTest = 1)]
+    [Property(MaxTest = 2)]
     public Property NonNumericConfig_FallsBackTo365()
     {
         var nonNumericGen = Gen.OneOf(
@@ -239,7 +233,7 @@ public class RetentionConfigPropertyTests
     /// **Validates: Requirements 10.1, 10.2**
     /// For out-of-range configuration values (below 1 or above 3650), the system falls back to 365 days.
     /// </summary>
-    [Property(MaxTest = 1)]
+    [Property(MaxTest = 2)]
     public Property OutOfRangeConfig_FallsBackTo365()
     {
         var outOfRangeGen = Gen.OneOf(

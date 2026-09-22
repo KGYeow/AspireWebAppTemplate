@@ -6,7 +6,7 @@ namespace AspireWebAppTemplate.Scheduler.Jobs;
 
 /// <summary>
 /// Deletes audit-log entries older than the configured retention period by delegating to
-/// <see cref="IAuditLogService.PurgeOldEntriesAsync"/>. This is a template-owned maintenance
+/// <see cref="IAuditLogRetentionService.PurgeOldEntriesAsync"/>. This is a template-owned maintenance
 /// job (no business-domain logic) that demonstrates the job pattern end to end.
 /// </summary>
 /// <remarks>
@@ -18,8 +18,8 @@ public sealed class AuditLogRetentionJob : IScheduledJob
 {
     #region Constructor
 
-    /// <summary>The audit log service that performs the retention purge.</summary>
-    private readonly IAuditLogService _auditLogService;
+    /// <summary>The audit-log retention service that performs the retention purge.</summary>
+    private readonly IAuditLogRetentionService _auditLogRetentionService;
 
     /// <summary>The logger used for structured, Task-Scheduler-diagnosable output.</summary>
     private readonly ILogger<AuditLogRetentionJob> _logger;
@@ -27,11 +27,11 @@ public sealed class AuditLogRetentionJob : IScheduledJob
     /// <summary>
     /// Initializes a new instance of the <see cref="AuditLogRetentionJob"/> class.
     /// </summary>
-    /// <param name="auditLogService">The audit log service used to purge old entries.</param>
+    /// <param name="auditLogRetentionService">The audit-log retention service used to purge old entries.</param>
     /// <param name="logger">The logger instance.</param>
-    public AuditLogRetentionJob(IAuditLogService auditLogService, ILogger<AuditLogRetentionJob> logger)
+    public AuditLogRetentionJob(IAuditLogRetentionService auditLogRetentionService, ILogger<AuditLogRetentionJob> logger)
     {
-        _auditLogService = auditLogService;
+        _auditLogRetentionService = auditLogRetentionService;
         _logger = logger;
     }
 
@@ -50,7 +50,7 @@ public sealed class AuditLogRetentionJob : IScheduledJob
     {
         try
         {
-            var purged = await _auditLogService.PurgeOldEntriesAsync();
+            var purged = await _auditLogRetentionService.PurgeOldEntriesAsync();
 
             _logger.LogInformation("Audit-log retention purge completed. Entries purged: {PurgedCount}", purged);
             AnsiConsole.MarkupLineInterpolated($"[green]Purged[/] {purged} audit-log entrie(s).");

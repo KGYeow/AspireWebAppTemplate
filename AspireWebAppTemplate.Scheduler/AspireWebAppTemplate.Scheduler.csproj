@@ -13,8 +13,6 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.0" />
     <!-- Rich console output for interactive/manual runs (degrades cleanly under Task Scheduler). -->
     <PackageReference Include="Spectre.Console" Version="0.55.0" />
-    <!-- Required by ASP.NET Core Identity default token providers outside a web host. -->
-    <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="10.0.0" />
   </ItemGroup>
 
   <ItemGroup>

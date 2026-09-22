@@ -4,8 +4,8 @@ namespace AspireWebAppTemplate.Application.Features.AuditLog;
 
 /// <summary>
 /// Defines the contract for the audit log service that records significant user and system
-/// actions into a persistent audit trail, manages data retention through periodic purging,
-/// and provides query/filter/export capabilities for audit log entries.
+/// actions into a persistent audit trail and provides query/filter/export capabilities for
+/// audit log entries.
 /// </summary>
 /// <remarks>
 /// Implementations should be registered as scoped services to align with the per-request
@@ -32,20 +32,6 @@ public interface IAuditLogService
     /// persistence are caught, logged at Error level via <c>ILogger</c>, and swallowed.
     /// </exception>
     Task LogAsync(AuditLogRequest request);
-
-    /// <summary>
-    /// Purges audit log entries older than the configured retention period
-    /// (<c>AuditLog:RetentionDays</c> in appsettings.json, defaulting to 365 days).
-    /// </summary>
-    /// <returns>
-    /// The number of audit log entries that were deleted from the database.
-    /// </returns>
-    /// <exception cref="System.InvalidOperationException">
-    /// Thrown when the database operation fails due to connectivity or concurrency issues.
-    /// Unlike <see cref="LogAsync"/>, purge failures are propagated to the caller so that
-    /// the invoking process (e.g., a background job) can handle retry logic.
-    /// </exception>
-    Task<int> PurgeOldEntriesAsync();
 
     #endregion
 

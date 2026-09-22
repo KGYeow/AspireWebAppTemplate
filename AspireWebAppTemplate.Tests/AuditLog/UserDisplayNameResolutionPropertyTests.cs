@@ -189,19 +189,13 @@ public class UserDisplayNameResolutionPropertyTests : IDisposable
     }
 
     /// <summary>
-    /// Creates an <see cref="AuditLogService"/> instance with the shared DbContext,
-    /// the provided UserManager mock, and default configuration.
+    /// Creates an <see cref="AuditLogService"/> instance with the shared DbContext
+    /// and the provided UserManager mock.
     /// </summary>
     private AuditLogService CreateService(UserManager<ApplicationUser> userManager)
     {
         var logger = NullLogger<AuditLogService>.Instance;
-        var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["AuditLog:RetentionDays"] = "365"
-            })
-            .Build();
 
-        return new AuditLogService(_dbContext, userManager, logger, configuration);
+        return new AuditLogService(_dbContext, userManager, logger);
     }
 }

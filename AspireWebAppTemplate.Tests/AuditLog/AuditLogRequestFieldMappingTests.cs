@@ -120,10 +120,9 @@ public class AuditLogRequestFieldMappingTests
                     }
 
                     var logger = new Mock<ILogger<AuditLogService>>();
-                    var configuration = new Mock<IConfiguration>();
 
                     var service = new AuditLogService(
-                        dbContext, userManager.Object, logger.Object, configuration.Object);
+                        dbContext, userManager.Object, logger.Object);
 
                     // Act
                     service.LogAsync(request).GetAwaiter().GetResult();

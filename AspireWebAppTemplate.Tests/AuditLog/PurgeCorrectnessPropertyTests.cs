@@ -1,20 +1,15 @@
-// Feature: audit-log, Property 11: Purge correctness
+// Bugfix: scheduler-dependency-cleanup, Property 2: purge/retention preserved
 using AspireWebAppTemplate.Infrastructure.Data;
 using AspireWebAppTemplate.Infrastructure.Data.Entities;
-using AspireWebAppTemplate.Infrastructure.Identity;
-using AspireWebAppTemplate.Infrastructure.Services;
 using AspireWebAppTemplate.Infrastructure.Services.AuditLog;
 using AspireWebAppTemplate.Domain.Enums;
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Moq;
 using Gen = FsCheck.Fluent.Gen;
 using Property = FsCheck.Property;
 
@@ -57,14 +52,10 @@ public class PurgeCorrectnessPropertyTests
     }
 
     /// <summary>
-    /// Creates an AuditLogService with the given configuration and database context.
+    /// Creates an AuditLogRetentionService with the given retention configuration and database context.
     /// </summary>
-    private static AuditLogService CreateService(ApplicationDbContext dbContext, int retentionDays)
+    private static AuditLogRetentionService CreateService(ApplicationDbContext dbContext, int retentionDays)
     {
-        var userStoreMock = new Mock<IUserStore<ApplicationUser>>();
-        var userManagerMock = new Mock<UserManager<ApplicationUser>>(
-            userStoreMock.Object, null!, null!, null!, null!, null!, null!, null!, null!);
-
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
@@ -72,11 +63,10 @@ public class PurgeCorrectnessPropertyTests
             })
             .Build();
 
-        return new AuditLogService(
+        return new AuditLogRetentionService(
             dbContext,
-            userManagerMock.Object,
-            NullLogger<AuditLogService>.Instance,
-            configuration);
+            configuration,
+            NullLogger<AuditLogRetentionService>.Instance);
     }
 
     /// <summary>
@@ -107,7 +97,7 @@ public class PurgeCorrectnessPropertyTests
     /// SHALL remain, and all entries within the retention window SHALL be preserved.
     /// **Validates: Requirements 10.4**
     /// </summary>
-    [Property(MaxTest = 1)]
+    [Property(MaxTest = 2)]
     public Property AfterPurge_NoExpiredEntriesRemain_And_AllValidEntriesPreserved()
     {
         // Generator for a valid retention period within the allowed range (1–3650 days)

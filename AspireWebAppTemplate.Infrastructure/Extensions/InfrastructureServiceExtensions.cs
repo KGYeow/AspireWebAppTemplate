@@ -52,6 +52,7 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<ICurrentUserAccessor, CurrentUserAccessor>();
         services.AddSingleton<INavigationProvider, DefaultNavigationProvider>();
         services.AddScoped<IAuditLogService, AuditLogService>();
+        services.AddScoped<IAuditLogRetentionService, AuditLogRetentionService>();
         services.AddScoped<IExcelExportService, ExcelExportService>();
         services.AddScoped<ILoginService, LoginService>();
         services.AddScoped<IRegisterService, RegisterService>();
