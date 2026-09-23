@@ -1,8 +1,6 @@
 using AspireWebAppTemplate.Application.Features.AuditLog;
 using AspireWebAppTemplate.Scheduler.Constants;
 using AspireWebAppTemplate.Scheduler.Jobs;
-using Microsoft.Extensions.Logging;
-using Spectre.Console;
 
 namespace AspireWebAppTemplate.Scheduler.Jobs.Implementations;
 
@@ -13,8 +11,10 @@ namespace AspireWebAppTemplate.Scheduler.Jobs.Implementations;
 /// </summary>
 /// <remarks>
 /// Retention is read from <c>AuditLog:RetentionDays</c> by the service layer. This job is a thin
-/// trigger: it calls the Application service, reports the result, and maps success/failure to an
-/// exit code. Run via <c>Scheduler.exe purge-audit-logs</c>.
+/// trigger: it reports its progress through <see cref="IJobProgress"/> and returns
+/// <see cref="ExitCodes.Success"/> on completion. It does NOT catch exceptions or format the run
+/// envelope — the runner owns status/timing/exit-code mapping and logs the full stack trace on
+/// failure, so any exception here surfaces as a FAILED result. Run via <c>Scheduler.exe purge-audit-logs</c>.
 /// </remarks>
 public sealed class AuditLogRetentionJob : IScheduledJob
 {
@@ -23,18 +23,18 @@ public sealed class AuditLogRetentionJob : IScheduledJob
     /// <summary>The audit-log retention service that performs the retention purge.</summary>
     private readonly IAuditLogRetentionService _auditLogRetentionService;
 
-    /// <summary>The logger used for structured, Task-Scheduler-diagnosable output.</summary>
-    private readonly ILogger<AuditLogRetentionJob> _logger;
+    /// <summary>The per-run progress reporter (writes to both the logger and the console).</summary>
+    private readonly IJobProgress _progress;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AuditLogRetentionJob"/> class.
     /// </summary>
     /// <param name="auditLogRetentionService">The audit-log retention service used to purge old entries.</param>
-    /// <param name="logger">The logger instance.</param>
-    public AuditLogRetentionJob(IAuditLogRetentionService auditLogRetentionService, ILogger<AuditLogRetentionJob> logger)
+    /// <param name="progress">The per-run progress reporter.</param>
+    public AuditLogRetentionJob(IAuditLogRetentionService auditLogRetentionService, IJobProgress progress)
     {
         _auditLogRetentionService = auditLogRetentionService;
-        _logger = logger;
+        _progress = progress;
     }
 
     #endregion
@@ -50,20 +50,16 @@ public sealed class AuditLogRetentionJob : IScheduledJob
     /// <inheritdoc />
     public async Task<int> RunAsync(CancellationToken cancellationToken)
     {
-        try
-        {
-            var purged = await _auditLogRetentionService.PurgeOldEntriesAsync();
+        int purged;
 
-            _logger.LogInformation("Audit-log retention purge completed. Entries purged: {PurgedCount}", purged);
-            AnsiConsole.MarkupLineInterpolated($"[green]Purged[/] {purged} audit-log entrie(s).");
-
-            return ExitCodes.Success;
-        }
-        catch (Exception ex)
+        // Phase usage is optional; shown here to demonstrate the pattern for future job authors.
+        using (_progress.Phase("Purge old audit-log entries"))
         {
-            _logger.LogError(ex, "Audit-log retention purge failed.");
-            return ExitCodes.JobFailed;
+            purged = await _auditLogRetentionService.PurgeOldEntriesAsync();
         }
+
+        _progress.Info($"Purged {purged:N0} audit-log entrie(s).");
+        return ExitCodes.Success;
     }
 
     #endregion

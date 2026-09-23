@@ -56,6 +56,10 @@ public static class SchedulerHostBuilder
         // Web callback client, sanitizer, or full feature graph.
         builder.Services.AddSchedulerInfrastructure(builder.Configuration);
 
+        // Per-run progress reporter (writes to both the logger and the console). Scoped so it shares
+        // the per-run DI scope with the job.
+        builder.Services.AddScoped<IJobProgress, JobProgress>();
+
         // Register all scheduled jobs. Business apps add their jobs here (or delete the template job).
         builder.Services.AddScoped<IScheduledJob, AuditLogRetentionJob>();
 

@@ -223,6 +223,7 @@ public class SchedulerIntegrationTests
 
         builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(connection));
         builder.Services.AddScoped<IAuditLogRetentionService, AuditLogRetentionService>();
+        builder.Services.AddScoped<IJobProgress, JobProgress>();
         builder.Services.AddScoped<IScheduledJob, AuditLogRetentionJob>();
 
         return builder.Build();

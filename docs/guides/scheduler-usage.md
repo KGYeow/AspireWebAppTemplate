@@ -62,6 +62,37 @@ The Scheduler runs a single job identified by its **job name** (a kebab-case str
 > discover-and-run everything. To run several jobs, launch it several times (or configure several
 > Task Scheduler tasks — see [section 7](#7-different-trigger-times-for-different-jobs)).
 
+### What a successful run looks like
+
+A run produces a structured console envelope: a header (app name, UTC start time, environment, job,
+and a correlation **run id**), timestamped status/phase lines, and a result footer with the overall
+status, exit code, and total duration. For example:
+
+```
+============================================================
+ AspireWebAppTemplate.Scheduler
+============================================================
+ Start       : 2026-09-23 02:00:01 UTC
+ Environment : Production
+ Job         : purge-audit-logs
+ Run Id      : a58c939c-6cdb-42f4-bec8-c5ee33346b06
+============================================================
+[02:00:01] STARTING  purge-audit-logs
+[02:00:01]   PHASE    Purge old audit-log entries...
+[02:00:06]   PHASE    Purge old audit-log entries — done (00:00:05.241)
+[02:00:06]   INFO     Purged 1,245 audit-log entrie(s).
+[02:00:06] SUCCESS   purge-audit-logs  (00:00:06.241)
+------------------------------------------------------------
+ Result : SUCCESS   Exit code: 0   Duration: 00:00:06.241
+============================================================
+```
+
+On failure the status line shows `FAILED`, followed by the error message, the exception type, and the
+run id; the **full stack trace is written to the structured logs** (not the console). The result
+footer then shows `FAILED`, exit code `1`, and the duration. Structured `ILogger` output is emitted
+alongside these lines and is the durable record when the Scheduler runs headless under Task Scheduler
+(where the console is not captured). The run id ties a console snippet back to the logs.
+
 ### Running from Visual Studio
 
 The project ships launch profiles (see [section 2](#2-launchsettingsjson)). Pressing **F5** uses the
@@ -316,7 +347,7 @@ Configure the trigger for the job's cadence (e.g., Daily at 02:00). Task Schedul
 ### How to verify execution
 
 - Check the application logs (your configured logging sink / console output) for the job's
-  informational line, e.g. `Audit-log retention purge completed. Entries purged: N`.
+  informational line, e.g. `Purged N audit-log entrie(s).`, and the `SUCCESS` / `Result` footer.
 - Verify the domain effect (e.g., that old audit-log rows were removed).
 - Check **Task Scheduler -> History** for the run and its result.
 

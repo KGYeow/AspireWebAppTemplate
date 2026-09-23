@@ -121,17 +121,38 @@ that need is concrete — not preemptively.
 | 2 | Invalid usage (missing/unknown job name) |
 | 3 | Cancelled (Ctrl+C / SIGTERM) |
 
-## Console output
+## Console output & observability
 
-Uses **Spectre.Console** for human-friendly output (tables, colored status) on interactive/manual
-runs, alongside structured `ILogger` output that is the source of truth for diagnosing Task
-Scheduler runs. Spectre degrades gracefully when output is redirected (non-interactive).
+The run produces a **structured console envelope** — a header, timestamped status/phase lines, and a
+result footer — layered on top of the structured `ILogger` output. The console is a human-readable
+**projection** of the run; the logger remains the durable diagnostic record (the console is largely
+absent when the Scheduler runs headless under Task Scheduler).
+
+Ownership:
+
+- **`JobRunner`** owns the envelope: it generates a correlation **run id**, opens a logging scope,
+  writes the header (app name, UTC start, environment, job, run id), the `STARTING`/terminal status
+  lines, times the run, maps the outcome to an exit code, and writes the result footer. On failure it
+  writes a human-readable error line (message + exception type + run id) to the console and logs the
+  **full stack trace** via `ILogger`.
+- **`SchedulerConsole`** (in `Hosting/`) is the single source of truth for console formatting —
+  timestamp/duration formats, status labels, separators, and the available-jobs table.
+- **`IJobProgress`** (contract in `Jobs/`, `JobProgress` impl in `Hosting/`) is injected into each job
+  so it can report facts (`Info`, `Warn`) and optional timed phases (`Phase(name)`). Each call writes
+  to **both** the logger and the console from one call, so the two channels never diverge. Jobs never
+  format the header/footer/status or map exit codes themselves.
+
+Status vocabulary: `STARTING`, `SUCCESS`, `FAILED`, `CANCELLED` (mapped 1:1 to the exit codes below).
+Timestamps are UTC (`yyyy-MM-dd HH:mm:ss UTC` in the header/footer, `HH:mm:ss` per line); durations
+use `hh:mm:ss.fff`. Uses **Spectre.Console**, which degrades gracefully when output is redirected.
 
 ## Adding a new job
 
 1. Create a class in `Jobs/Implementations/` implementing `IScheduledJob` (unique kebab-case `Name`). The `IScheduledJob` contract stays at the `Jobs/` root; all concrete jobs live under `Jobs/Implementations/`.
-2. In `RunAsync`, call the relevant **Application service interface**; return `ExitCodes.Success`
-   or a non-zero code on failure.
+2. In `RunAsync`, call the relevant **Application service interface**; report progress through the
+   injected `IJobProgress` (`Info`, optional `Phase(...)`) and return `ExitCodes.Success`. Let
+   exceptions propagate — the runner owns the `FAILED` envelope and logs the full stack trace; the job
+   does not catch-and-swallow or format status/timing itself.
 3. Register it in `SchedulerHostBuilder`: `builder.Services.AddScoped<IScheduledJob, YourJob>();`.
    If the job needs a service the focused seam does not yet register, add that registration to
    `AddSchedulerInfrastructure` (feature service) or `SchedulerHostBuilder` (job wiring) — keeping the
