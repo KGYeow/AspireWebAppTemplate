@@ -1,7 +1,7 @@
-using AspireWebAppTemplate.Scheduler.Jobs;
+﻿using AspireWebAppTemplate.Scheduler.Jobs;
 using Spectre.Console;
 
-namespace AspireWebAppTemplate.Scheduler;
+namespace AspireWebAppTemplate.Scheduler.Hosting;
 
 /// <summary>
 /// Console-output helpers for the Scheduler's interactive/diagnostic messages.

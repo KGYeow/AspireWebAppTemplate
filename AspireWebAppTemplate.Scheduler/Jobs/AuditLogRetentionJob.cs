@@ -1,4 +1,5 @@
-using AspireWebAppTemplate.Application.Features.AuditLog;
+﻿using AspireWebAppTemplate.Application.Features.AuditLog;
+using AspireWebAppTemplate.Scheduler.Constants;
 using Microsoft.Extensions.Logging;
 using Spectre.Console;
 

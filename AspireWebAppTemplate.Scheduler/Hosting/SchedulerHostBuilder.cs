@@ -1,10 +1,10 @@
-using AspireWebAppTemplate.Infrastructure.Extensions;
+﻿using AspireWebAppTemplate.Infrastructure.Extensions;
 using AspireWebAppTemplate.Scheduler.Jobs;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace AspireWebAppTemplate.Scheduler;
+namespace AspireWebAppTemplate.Scheduler.Hosting;
 
 /// <summary>
 /// Builds and configures the Scheduler's generic host: Aspire service defaults, executable-anchored
@@ -13,7 +13,7 @@ namespace AspireWebAppTemplate.Scheduler;
 /// <remarks>
 /// The Scheduler is a short-lived console process, not a Worker Service, so this builder maps only
 /// what its jobs consume via <see cref="SchedulerInfrastructureServiceExtensions.AddSchedulerInfrastructure"/>
-/// — it does NOT import the full API/Web feature graph, Identity, or Data Protection. Job
+/// â€” it does NOT import the full API/Web feature graph, Identity, or Data Protection. Job
 /// registrations live here (not in Infrastructure) so business apps add or remove jobs in one place.
 /// </remarks>
 public static class SchedulerHostBuilder

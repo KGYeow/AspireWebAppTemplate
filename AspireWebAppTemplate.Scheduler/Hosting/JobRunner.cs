@@ -1,10 +1,11 @@
+﻿using AspireWebAppTemplate.Scheduler.Constants;
 using AspireWebAppTemplate.Scheduler.Jobs;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Spectre.Console;
 
-namespace AspireWebAppTemplate.Scheduler;
+namespace AspireWebAppTemplate.Scheduler.Hosting;
 
 /// <summary>
 /// Selects and runs a single batch job against a built host, then maps the outcome to a process

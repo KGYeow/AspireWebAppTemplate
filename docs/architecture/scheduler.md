@@ -41,15 +41,17 @@ Because it does not reference Web, the template can also be used purely for sche
 
 ```
 AspireWebAppTemplate.Scheduler/
-├── Program.cs                  <- explicit Main: build host -> resolve job -> execute -> exit code
-├── SchedulerHostBuilder.cs     <- host + config + DI composition (focused Scheduler graph)
-├── JobRunner.cs                <- cancellation wiring, scope, job dispatch, exit-code mapping
-├── JobConsole.cs               <- Spectre.Console helpers (available-jobs table)
-├── ExitCodes.cs                <- exit-code contract (0 success, non-zero failure)
+├── Program.cs                      <- explicit Main: build host -> resolve job -> execute -> exit code
+├── Constants/
+│   └── ExitCodes.cs                <- exit-code contract (0 success, non-zero failure)
+├── Hosting/
+│   ├── SchedulerHostBuilder.cs     <- host + config + DI composition (focused Scheduler graph)
+│   ├── JobRunner.cs                <- cancellation wiring, scope, job dispatch, exit-code mapping
+│   └── JobConsole.cs               <- Spectre.Console helpers (available-jobs table)
 ├── Jobs/
-│   ├── IScheduledJob.cs        <- job contract: Name, Description, Task<int> RunAsync(CancellationToken)
-│   └── AuditLogRetentionJob.cs <- the one shipped job (audit-log retention purge)
-├── appsettings.json            <- connection string, retention, logging
+│   ├── IScheduledJob.cs            <- job contract: Name, Description, Task<int> RunAsync(CancellationToken)
+│   └── AuditLogRetentionJob.cs     <- the one shipped job (audit-log retention purge)
+├── appsettings.json                <- connection string, retention, logging
 └── appsettings.Development.json
 ```
 

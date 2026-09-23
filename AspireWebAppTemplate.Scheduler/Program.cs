@@ -1,17 +1,17 @@
-using AspireWebAppTemplate.Scheduler;
+﻿using AspireWebAppTemplate.Scheduler.Hosting;
 
 // -----------------------------------------------------------------------------------------------
 // AspireWebAppTemplate.Scheduler
 //
 // A short-lived, Windows-Task-Scheduler-triggered batch runner. It builds a focused DI graph
-// (only what its jobs consume — ApplicationDbContext + the audit-log retention service), selects
+// (only what its jobs consume â€” ApplicationDbContext + the audit-log retention service), selects
 // ONE job by command-line name, runs it once, and exits with a process code that Task Scheduler
 // records.
 //
 //   Windows Task Scheduler -> Scheduler.exe <job-name> -> run one job -> log -> exit code
 //
 // This is intentionally NOT a Worker Service: there is no continuous loop and no in-process
-// scheduling — Task Scheduler owns timing, retries, and run history.
+// scheduling â€” Task Scheduler owns timing, retries, and run history.
 // -----------------------------------------------------------------------------------------------
 
 /// <summary>

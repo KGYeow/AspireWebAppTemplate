@@ -1,11 +1,12 @@
-// Bugfix: scheduler-dependency-cleanup, Integration: purge / usage / cancellation end-to-end through JobRunner
+﻿// Bugfix: scheduler-dependency-cleanup, Integration: purge / usage / cancellation end-to-end through JobRunner
 using System.Reflection;
 using AspireWebAppTemplate.Application.Features.AuditLog;
 using AspireWebAppTemplate.Domain.Enums;
 using AspireWebAppTemplate.Infrastructure.Data;
 using AspireWebAppTemplate.Infrastructure.Data.Entities;
 using AspireWebAppTemplate.Infrastructure.Services.AuditLog;
-using AspireWebAppTemplate.Scheduler;
+using AspireWebAppTemplate.Scheduler.Constants;
+using AspireWebAppTemplate.Scheduler.Hosting;
 using AspireWebAppTemplate.Scheduler.Jobs;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -31,8 +32,8 @@ namespace AspireWebAppTemplate.Tests.Scheduler;
 ///   <item>a cancelled run returns <see cref="ExitCodes.Cancelled"/>.</item>
 /// </list>
 /// The host is composed with the real <see cref="AuditLogRetentionJob"/> and its sole feature dependency
-/// (<see cref="IAuditLogRetentionService"/> → <see cref="AuditLogRetentionService"/>) over a SQLite
-/// in-memory context, so the purge path is driven exactly as production wiring does — without importing
+/// (<see cref="IAuditLogRetentionService"/> â†’ <see cref="AuditLogRetentionService"/>) over a SQLite
+/// in-memory context, so the purge path is driven exactly as production wiring does â€” without importing
 /// the full API/Web graph.
 /// </remarks>
 public class SchedulerIntegrationTests
@@ -49,7 +50,7 @@ public class SchedulerIntegrationTests
     /// This drives the real cancellation path through the public <see cref="JobRunner.RunAsync"/> surface:
     /// no production code is modified. The job raises <c>Console.CancelKeyPress</c> synchronously, which
     /// runs <see cref="JobRunner"/>'s handler (setting <c>e.Cancel = true</c> and cancelling the internal
-    /// source), so by the time the token is observed <c>cts.IsCancellationRequested</c> is <c>true</c> —
+    /// source), so by the time the token is observed <c>cts.IsCancellationRequested</c> is <c>true</c> â€”
     /// satisfying the <c>when (cts.IsCancellationRequested)</c> guard that maps to
     /// <see cref="ExitCodes.Cancelled"/>.
     /// </remarks>
@@ -67,7 +68,7 @@ public class SchedulerIntegrationTests
             // Trigger the same event JobRunner subscribes to; its handler cancels the internal source.
             RaiseConsoleCancelKeyPress();
 
-            // The handler ran synchronously above, so the token is now cancelled — this throws
+            // The handler ran synchronously above, so the token is now cancelled â€” this throws
             // OperationCanceledException, which JobRunner maps to Cancelled because IsCancellationRequested.
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -101,8 +102,8 @@ public class SchedulerIntegrationTests
                 dbContext.Database.EnsureCreated();
 
                 var now = DateTime.UtcNow;
-                expiredId = SeedEntry(dbContext, now - TimeSpan.FromDays(400)); // older than 365 → purged
-                recentId = SeedEntry(dbContext, now - TimeSpan.FromDays(10));   // within retention → kept
+                expiredId = SeedEntry(dbContext, now - TimeSpan.FromDays(400)); // older than 365 â†’ purged
+                recentId = SeedEntry(dbContext, now - TimeSpan.FromDays(10));   // within retention â†’ kept
             }
 
             var exitCode = await JobRunner.RunAsync(host, ["purge-audit-logs"]);
@@ -183,8 +184,8 @@ public class SchedulerIntegrationTests
     /// fires, <see cref="JobRunner.RunAsync"/> returns <see cref="ExitCodes.Cancelled"/>.
     /// </summary>
     /// <remarks>
-    /// This exercises the same cancellation wiring the production process uses (Ctrl+C / SIGTERM →
-    /// <c>Console.CancelKeyPress</c> → internal <c>cts.Cancel()</c>) through the public
+    /// This exercises the same cancellation wiring the production process uses (Ctrl+C / SIGTERM â†’
+    /// <c>Console.CancelKeyPress</c> â†’ internal <c>cts.Cancel()</c>) through the public
     /// <see cref="JobRunner.RunAsync"/> surface, with no production seam added.
     /// </remarks>
     [Fact]
@@ -203,7 +204,7 @@ public class SchedulerIntegrationTests
 
     /// <summary>
     /// Builds a generic host that registers the real <see cref="AuditLogRetentionJob"/> and its feature
-    /// dependency (<see cref="IAuditLogRetentionService"/> → <see cref="AuditLogRetentionService"/>) over a
+    /// dependency (<see cref="IAuditLogRetentionService"/> â†’ <see cref="AuditLogRetentionService"/>) over a
     /// SQLite in-memory <see cref="ApplicationDbContext"/>. Mirrors the Scheduler's focused composition
     /// (job + retention service + DbContext) without importing the full API/Web graph.
     /// </summary>
@@ -227,7 +228,7 @@ public class SchedulerIntegrationTests
     }
 
     /// <summary>
-    /// Builds a minimal host that registers only the supplied jobs plus logging — used for paths that do
+    /// Builds a minimal host that registers only the supplied jobs plus logging â€” used for paths that do
     /// not touch the database (e.g., the cancellation path).
     /// </summary>
     /// <param name="jobs">The jobs to register.</param>
@@ -289,7 +290,7 @@ public class SchedulerIntegrationTests
     /// Raises the process-wide <see cref="Console.CancelKeyPress"/> event via reflection, simulating a
     /// Ctrl+C press. <see cref="ConsoleCancelEventArgs"/> has no public constructor and the event has no
     /// public raise method, so both are accessed through non-public members. This touches only framework
-    /// types — no production Scheduler code is modified or given a test seam.
+    /// types â€” no production Scheduler code is modified or given a test seam.
     /// </summary>
     private static void RaiseConsoleCancelKeyPress()
     {
@@ -317,7 +318,7 @@ public class SchedulerIntegrationTests
         // Console.CancelKeyPress is a process-global event and JobRunner subscribes a fresh handler on each
         // RunAsync call without unsubscribing, so prior test runs leave stale handlers whose captured
         // CancellationTokenSource has since been disposed. Invoke each handler in the multicast list
-        // individually and swallow ObjectDisposedException from those stale handlers — only the live
+        // individually and swallow ObjectDisposedException from those stale handlers â€” only the live
         // handler (whose source is the current run's cts) needs to observe the event.
         foreach (var singleHandler in handler.GetInvocationList().Cast<ConsoleCancelEventHandler>())
         {

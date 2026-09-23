@@ -1,5 +1,6 @@
-// Bugfix: scheduler-dependency-cleanup, Unit tests: JobRunner exit-code mapping
-using AspireWebAppTemplate.Scheduler;
+﻿// Bugfix: scheduler-dependency-cleanup, Unit tests: JobRunner exit-code mapping
+using AspireWebAppTemplate.Scheduler.Constants;
+using AspireWebAppTemplate.Scheduler.Hosting;
 using AspireWebAppTemplate.Scheduler.Jobs;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -13,8 +14,8 @@ namespace AspireWebAppTemplate.Tests.Scheduler;
 /// <remarks>
 /// Bugfix: scheduler-dependency-cleanup. Covers the exit-code contract that Windows Task Scheduler keys on:
 /// <list type="bullet">
-///   <item>no job name / unknown job name → <see cref="ExitCodes.InvalidUsage"/>;</item>
-///   <item>an unhandled exception thrown by the job → <see cref="ExitCodes.JobFailed"/>;</item>
+///   <item>no job name / unknown job name â†’ <see cref="ExitCodes.InvalidUsage"/>;</item>
+///   <item>an unhandled exception thrown by the job â†’ <see cref="ExitCodes.JobFailed"/>;</item>
 ///   <item>a success (or any code returned by the job) is passed through verbatim.</item>
 /// </list>
 /// The <see cref="ExitCodes.Cancelled"/> path is not exercised here: <see cref="JobRunner"/> only maps to
@@ -171,7 +172,7 @@ public class JobRunnerExitCodeTests
 
     /// <summary>
     /// When the selected job returns a non-zero code of its own, <see cref="JobRunner.RunAsync"/> passes it
-    /// through verbatim rather than remapping it — proving success passthrough is the job's value, not a
+    /// through verbatim rather than remapping it â€” proving success passthrough is the job's value, not a
     /// hard-coded constant.
     /// </summary>
     [Fact]
