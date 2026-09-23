@@ -11,6 +11,9 @@ Windows Task Scheduler -> Scheduler.exe <job-name> -> run one job -> log -> exit
 It is intentionally a **console app**, NOT a Worker Service: Task Scheduler owns timing, retries,
 and run history, so there is no continuous loop or in-process scheduler.
 
+> **Usage & deployment:** for how to run the Scheduler (dev, published exe, PowerShell) and how to
+> configure Windows Task Scheduler, see the [Scheduler Usage & Deployment Guide](../guides/scheduler-usage.md).
+
 ## Why a separate project
 
 - A short-lived batch process has a different lifecycle from the web API/frontend.
