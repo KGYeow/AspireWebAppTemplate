@@ -1,4 +1,4 @@
-﻿// Bugfix: scheduler-dependency-cleanup, Integration: purge / usage / cancellation end-to-end through JobRunner
+// Bugfix: scheduler-dependency-cleanup, Integration: purge / usage / cancellation end-to-end through JobRunner
 using System.Reflection;
 using AspireWebAppTemplate.Application.Features.AuditLog;
 using AspireWebAppTemplate.Domain.Enums;
@@ -8,6 +8,7 @@ using AspireWebAppTemplate.Infrastructure.Services.AuditLog;
 using AspireWebAppTemplate.Scheduler.Constants;
 using AspireWebAppTemplate.Scheduler.Hosting;
 using AspireWebAppTemplate.Scheduler.Jobs;
+using AspireWebAppTemplate.Scheduler.Jobs.Implementations;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;

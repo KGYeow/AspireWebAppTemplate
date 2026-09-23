@@ -1,9 +1,10 @@
-﻿using AspireWebAppTemplate.Application.Features.AuditLog;
+using AspireWebAppTemplate.Application.Features.AuditLog;
 using AspireWebAppTemplate.Scheduler.Constants;
+using AspireWebAppTemplate.Scheduler.Jobs;
 using Microsoft.Extensions.Logging;
 using Spectre.Console;
 
-namespace AspireWebAppTemplate.Scheduler.Jobs;
+namespace AspireWebAppTemplate.Scheduler.Jobs.Implementations;
 
 /// <summary>
 /// Deletes audit-log entries older than the configured retention period by delegating to

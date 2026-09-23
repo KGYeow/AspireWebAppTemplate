@@ -49,8 +49,9 @@ AspireWebAppTemplate.Scheduler/
 │   ├── JobRunner.cs                <- cancellation wiring, scope, job dispatch, exit-code mapping
 │   └── JobConsole.cs               <- Spectre.Console helpers (available-jobs table)
 ├── Jobs/
-│   ├── IScheduledJob.cs            <- job contract: Name, Description, Task<int> RunAsync(CancellationToken)
-│   └── AuditLogRetentionJob.cs     <- the one shipped job (audit-log retention purge)
+│   ├── IScheduledJob.cs            <- job contract (plugin interface): Name, Description, Task<int> RunAsync(CancellationToken)
+│   └── Implementations/
+│       └── AuditLogRetentionJob.cs <- the one shipped job (audit-log retention purge)
 ├── appsettings.json                <- connection string, retention, logging
 └── appsettings.Development.json
 ```
@@ -125,7 +126,7 @@ Scheduler runs. Spectre degrades gracefully when output is redirected (non-inter
 
 ## Adding a new job
 
-1. Create a class in `Jobs/` implementing `IScheduledJob` (unique kebab-case `Name`).
+1. Create a class in `Jobs/Implementations/` implementing `IScheduledJob` (unique kebab-case `Name`). The `IScheduledJob` contract stays at the `Jobs/` root; all concrete jobs live under `Jobs/Implementations/`.
 2. In `RunAsync`, call the relevant **Application service interface**; return `ExitCodes.Success`
    or a non-zero code on failure.
 3. Register it in `SchedulerHostBuilder`: `builder.Services.AddScoped<IScheduledJob, YourJob>();`.

@@ -1,5 +1,6 @@
-﻿using AspireWebAppTemplate.Infrastructure.Extensions;
+using AspireWebAppTemplate.Infrastructure.Extensions;
 using AspireWebAppTemplate.Scheduler.Jobs;
+using AspireWebAppTemplate.Scheduler.Jobs.Implementations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

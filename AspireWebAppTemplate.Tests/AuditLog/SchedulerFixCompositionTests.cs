@@ -7,6 +7,7 @@ using AspireWebAppTemplate.Infrastructure.Data;
 using AspireWebAppTemplate.Infrastructure.Extensions;
 using AspireWebAppTemplate.Infrastructure.Identity;
 using AspireWebAppTemplate.Scheduler.Jobs;
+using AspireWebAppTemplate.Scheduler.Jobs.Implementations;
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;
