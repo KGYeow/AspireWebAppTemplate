@@ -4,6 +4,8 @@ using AspireWebAppTemplate.Scheduler.Jobs.Implementations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 
 namespace AspireWebAppTemplate.Scheduler.Hosting;
 
@@ -41,6 +43,14 @@ public static class SchedulerHostBuilder
         // Aspire service defaults (telemetry, logging enrichment). Health-check endpoints are not mapped
         // because this is a short-lived console process, not a long-running service.
         builder.AddServiceDefaults();
+
+        // Console output is owned by the SchedulerConsole envelope (a human-readable projection of the
+        // run). Raise the CONSOLE logging provider's minimum level to Warning so ILogger's Information
+        // lines do not duplicate onto the terminal and clutter the envelope — while still surfacing
+        // genuine warnings/errors on the console as a safety net (e.g., a failure during host build,
+        // before the envelope exists). All log levels continue to flow to the OpenTelemetry/other
+        // providers wired by AddServiceDefaults(), so the durable diagnostic record is unaffected.
+        builder.Logging.AddFilter<ConsoleLoggerProvider>(category: null, level: LogLevel.Warning);
 
         // Explicitly load appsettings from the executable directory. Task Scheduler may launch the exe
         // with an unrelated working directory, so we anchor config to AppContext.BaseDirectory rather than

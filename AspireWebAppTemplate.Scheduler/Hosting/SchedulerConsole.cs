@@ -76,8 +76,9 @@ public static class SchedulerConsole
     {
         AnsiConsole.WriteLine(LightSeparator);
         var color = StatusColor(status);
-        AnsiConsole.MarkupLineInterpolated(
-            $" Result : [{color}]{status.ToString().ToUpperInvariant()}[/]   Exit code: {exitCode}   Duration: {duration.ToString(DurationFormat)}");
+        AnsiConsole.MarkupLineInterpolated($" Result    : [{color}]{status.ToString().ToUpperInvariant()}[/]");
+        AnsiConsole.MarkupLineInterpolated($" Exit code : {exitCode}");
+        AnsiConsole.MarkupLineInterpolated($" Duration  : {duration.ToString(DurationFormat)}");
         AnsiConsole.WriteLine(HeavySeparator);
     }
 
@@ -93,6 +94,7 @@ public static class SchedulerConsole
     /// <param name="duration">Optional duration to append (shown for terminal statuses).</param>
     public static void WriteStatus(JobStatus status, string jobName, TimeSpan? duration = null)
     {
+        AnsiConsole.WriteLine();
         var label = status.ToString().ToUpperInvariant().PadRight(StatusLabelWidth);
         var color = StatusColor(status);
         var durationText = duration is null ? string.Empty : $"  ({duration.Value.ToString(DurationFormat)})";
@@ -102,17 +104,26 @@ public static class SchedulerConsole
     /// <summary>Writes a timestamped informational line reported by a job.</summary>
     /// <param name="message">The message to display.</param>
     public static void WriteInfo(string message)
-        => AnsiConsole.MarkupLineInterpolated($"{LinePrefix()}  INFO     {message}");
+    {
+        AnsiConsole.WriteLine();
+        AnsiConsole.MarkupLineInterpolated($"{LinePrefix()}  INFO     {message}");
+    }
 
     /// <summary>Writes a timestamped warning line reported by a job.</summary>
     /// <param name="message">The warning message to display.</param>
     public static void WriteWarning(string message)
-        => AnsiConsole.MarkupLineInterpolated($"{LinePrefix()}  [yellow]WARN[/]     {message}");
+    {
+        AnsiConsole.WriteLine();
+        AnsiConsole.MarkupLineInterpolated($"{LinePrefix()}  [yellow]WARN[/]     {message}");
+    }
 
     /// <summary>Writes a timestamped line marking the start of a named job phase.</summary>
     /// <param name="phase">The phase name.</param>
     public static void WritePhaseStart(string phase)
-        => AnsiConsole.MarkupLineInterpolated($"{LinePrefix()}  PHASE    {phase}...");
+    {
+        AnsiConsole.WriteLine();
+        AnsiConsole.MarkupLineInterpolated($"{LinePrefix()}  PHASE    {phase}...");
+    }
 
     /// <summary>Writes a timestamped line marking the end of a named job phase with its duration.</summary>
     /// <param name="phase">The phase name.</param>

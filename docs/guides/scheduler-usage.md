@@ -77,13 +77,19 @@ status, exit code, and total duration. For example:
  Job         : purge-audit-logs
  Run Id      : a58c939c-6cdb-42f4-bec8-c5ee33346b06
 ============================================================
+
 [02:00:01] STARTING  purge-audit-logs
+
 [02:00:01]   PHASE    Purge old audit-log entries...
 [02:00:06]   PHASE    Purge old audit-log entries — done (00:00:05.241)
+
 [02:00:06]   INFO     Purged 1,245 audit-log entrie(s).
+
 [02:00:06] SUCCESS   purge-audit-logs  (00:00:06.241)
 ------------------------------------------------------------
- Result : SUCCESS   Exit code: 0   Duration: 00:00:06.241
+ Result    : SUCCESS
+ Exit code : 0
+ Duration  : 00:00:06.241
 ============================================================
 ```
 
@@ -346,8 +352,11 @@ Configure the trigger for the job's cadence (e.g., Daily at 02:00). Task Schedul
 
 ### How to verify execution
 
-- Check the application logs (your configured logging sink / console output) for the job's
-  informational line, e.g. `Purged N audit-log entrie(s).`, and the `SUCCESS` / `Result` footer.
+- On the **console**, confirm the run envelope: the job's `INFO` line(s) (e.g. `Purged N audit-log
+  entrie(s).`) and the `SUCCESS` status + `Result` footer.
+- In the **structured logs** (the OpenTelemetry sink wired by `AddServiceDefaults`), confirm the same
+  events with full detail. `Information`-level logs go to the sink, **not** the console — the console
+  shows only the envelope plus any `Warning`/`Error`. Correlate by the **Run Id** from the header.
 - Verify the domain effect (e.g., that old audit-log rows were removed).
 - Check **Task Scheduler -> History** for the run and its result.
 

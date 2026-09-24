@@ -146,6 +146,12 @@ Status vocabulary: `STARTING`, `SUCCESS`, `FAILED`, `CANCELLED` (mapped 1:1 to t
 Timestamps are UTC (`yyyy-MM-dd HH:mm:ss UTC` in the header/footer, `HH:mm:ss` per line); durations
 use `hh:mm:ss.fff`. Uses **Spectre.Console**, which degrades gracefully when output is redirected.
 
+The **console logging provider** is quieted to `Warning` (via `AddFilter<ConsoleLoggerProvider>`), so
+`Information`-level `ILogger` output does not duplicate onto the terminal and clutter the envelope. All
+levels still flow to the OpenTelemetry/other providers wired by `AddServiceDefaults()` — the durable
+diagnostic record is unaffected — and genuine `Warning`/`Error` logs still reach the console as a
+safety net (including failures during host build, before the envelope exists).
+
 ## Adding a new job
 
 1. Create a class in `Jobs/Implementations/` implementing `IScheduledJob` (unique kebab-case `Name`). The `IScheduledJob` contract stays at the `Jobs/` root; all concrete jobs live under `Jobs/Implementations/`.
