@@ -80,10 +80,10 @@ status, exit code, and total duration. For example:
 
 [02:00:01] STARTING  purge-audit-logs
 
-[02:00:01]   PHASE    Purge old audit-log entries...
-[02:00:06]   PHASE    Purge old audit-log entries — done (00:00:05.241)
+[02:00:01] PHASE     Purge old audit-log entries...
+[02:00:06] PHASE     Purge old audit-log entries — done (00:00:05.241)
 
-[02:00:06]   INFO     Purged 1,245 audit-log entrie(s).
+[02:00:06] INFO      Purged 1,245 audit-log entrie(s).
 
 [02:00:06] SUCCESS   purge-audit-logs  (00:00:06.241)
 ------------------------------------------------------------

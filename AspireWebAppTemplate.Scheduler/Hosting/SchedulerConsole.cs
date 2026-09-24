@@ -95,10 +95,8 @@ public static class SchedulerConsole
     public static void WriteStatus(JobStatus status, string jobName, TimeSpan? duration = null)
     {
         AnsiConsole.WriteLine();
-        var label = status.ToString().ToUpperInvariant().PadRight(StatusLabelWidth);
-        var color = StatusColor(status);
         var durationText = duration is null ? string.Empty : $"  ({duration.Value.ToString(DurationFormat)})";
-        AnsiConsole.MarkupLineInterpolated($"{LinePrefix()}[{color}]{label}[/] {jobName}{durationText}");
+        WriteLabelledLine(status.ToString().ToUpperInvariant(), StatusColor(status), $"{jobName}{durationText}");
     }
 
     /// <summary>Writes a timestamped informational line reported by a job.</summary>
@@ -106,7 +104,7 @@ public static class SchedulerConsole
     public static void WriteInfo(string message)
     {
         AnsiConsole.WriteLine();
-        AnsiConsole.MarkupLineInterpolated($"{LinePrefix()}  INFO     {message}");
+        WriteLabelledLine("INFO", color: null, message);
     }
 
     /// <summary>Writes a timestamped warning line reported by a job.</summary>
@@ -114,7 +112,7 @@ public static class SchedulerConsole
     public static void WriteWarning(string message)
     {
         AnsiConsole.WriteLine();
-        AnsiConsole.MarkupLineInterpolated($"{LinePrefix()}  [yellow]WARN[/]     {message}");
+        WriteLabelledLine("WARN", color: "yellow", message);
     }
 
     /// <summary>Writes a timestamped line marking the start of a named job phase.</summary>
@@ -122,14 +120,14 @@ public static class SchedulerConsole
     public static void WritePhaseStart(string phase)
     {
         AnsiConsole.WriteLine();
-        AnsiConsole.MarkupLineInterpolated($"{LinePrefix()}  PHASE    {phase}...");
+        WriteLabelledLine("PHASE", color: null, $"{phase}...");
     }
 
     /// <summary>Writes a timestamped line marking the end of a named job phase with its duration.</summary>
     /// <param name="phase">The phase name.</param>
     /// <param name="duration">The measured phase duration.</param>
     public static void WritePhaseEnd(string phase, TimeSpan duration)
-        => AnsiConsole.MarkupLineInterpolated($"{LinePrefix()}  PHASE    {phase} — done ({duration.ToString(DurationFormat)})");
+        => WriteLabelledLine("PHASE", color: null, $"{phase} — done ({duration.ToString(DurationFormat)})");
 
     /// <summary>
     /// Writes the human-readable error detail for a failed run: the message and exception type, plus a
@@ -182,6 +180,22 @@ public static class SchedulerConsole
     /// <summary>Builds the per-line timestamp prefix (e.g., "[02:00:01] ") in UTC.</summary>
     private static string LinePrefix()
         => $"[{DateTime.UtcNow.ToString(LineTimestampFormat)}] ";
+
+    /// <summary>
+    /// Writes one aligned body line: the UTC timestamp prefix, a fixed-width label (optionally colored),
+    /// a single space, then the content. All body lines (STARTING/SUCCESS/FAILED/CANCELLED, PHASE, INFO,
+    /// WARN) share this single rule so their labels and following text line up in consistent columns.
+    /// </summary>
+    /// <param name="label">The status/kind label (e.g., "STARTING", "PHASE", "INFO").</param>
+    /// <param name="color">Optional Spectre color for the label; null renders the label uncolored.</param>
+    /// <param name="content">The line content following the label (job name, message, phase text).</param>
+    private static void WriteLabelledLine(string label, string? color, string content)
+    {
+        var paddedLabel = label.PadRight(StatusLabelWidth);
+        var markupLabel = color is null ? Markup.Escape(paddedLabel) : $"[{color}]{Markup.Escape(paddedLabel)}[/]";
+        // Single line: "[HH:mm:ss] " + fixed-width (optionally colored) label + " " + escaped content.
+        AnsiConsole.MarkupLine($"{Markup.Escape(LinePrefix())}{markupLabel} {Markup.Escape(content)}");
+    }
 
     /// <summary>Maps a status to its Spectre color markup.</summary>
     private static string StatusColor(JobStatus status) => status switch
