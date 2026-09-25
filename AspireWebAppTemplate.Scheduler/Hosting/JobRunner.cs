@@ -1,4 +1,4 @@
-using AspireWebAppTemplate.Scheduler.Constants;
+using AspireWebAppTemplate.Scheduler.Contracts;
 using AspireWebAppTemplate.Scheduler.Jobs;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -48,6 +48,14 @@ public static class JobRunner
 
         var logger = host.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Scheduler");
 
+        // Correlation id ties the console output to the structured logs for this invocation.
+        var runId = Guid.NewGuid();
+        var environment = host.Services.GetRequiredService<IHostEnvironment>().EnvironmentName;
+        var startUtc = DateTime.UtcNow;
+
+        // Open a logging scope so every log line for this invocation carries the run id.
+        using var logScope = logger.BeginScope(new Dictionary<string, object> { ["RunId"] = runId });
+
         // Resolve the requested job name (first non-empty argument).
         var jobName = args.FirstOrDefault(a => !string.IsNullOrWhiteSpace(a));
 
@@ -58,29 +66,28 @@ public static class JobRunner
 
         if (string.IsNullOrWhiteSpace(jobName))
         {
-            AnsiConsole.MarkupLine("[yellow]No job specified.[/] Usage: [grey]Scheduler.exe <job-name>[/]");
+            SchedulerConsole.WriteHeader(AppName, environment, runId, startUtc);
+            SchedulerConsole.WriteUsage("No job specified. Run: Scheduler.exe <job-name>");
+            AnsiConsole.WriteLine();
             SchedulerConsole.PrintJobTable(registeredJobs);
-            logger.LogWarning("Scheduler invoked with no job name.");
+            SchedulerConsole.WriteUsageFooter("INVALID USAGE", ExitCodes.InvalidUsage);
+            logger.LogInformation("Scheduler invoked with no job name (RunId {RunId}).", runId);
             return ExitCodes.InvalidUsage;
         }
 
         var job = registeredJobs.FirstOrDefault(j => string.Equals(j.Name, jobName, StringComparison.OrdinalIgnoreCase));
         if (job is null)
         {
-            AnsiConsole.MarkupLineInterpolated($"[red]Unknown job:[/] '{jobName}'.");
+            SchedulerConsole.WriteHeader(AppName, environment, runId, startUtc);
+            SchedulerConsole.WriteUsage($"Unknown job: '{jobName}'. Run one of the jobs below.");
+            AnsiConsole.WriteLine();
             SchedulerConsole.PrintJobTable(registeredJobs);
-            logger.LogError("Unknown job requested: {JobName}", jobName);
+            SchedulerConsole.WriteUsageFooter("INVALID USAGE", ExitCodes.InvalidUsage);
+            logger.LogInformation("Unknown job requested: {JobName} (RunId {RunId}).", jobName, runId);
             return ExitCodes.InvalidUsage;
         }
 
-        // Correlation id ties the console output to the structured logs for this run.
-        var runId = Guid.NewGuid();
-        var environment = host.Services.GetRequiredService<IHostEnvironment>().EnvironmentName;
-        var startUtc = DateTime.UtcNow;
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-
-        // Open a logging scope so every log line for this run carries the run id.
-        using var logScope = logger.BeginScope(new Dictionary<string, object> { ["RunId"] = runId });
 
         SchedulerConsole.WriteHeader(AppName, environment, job.Name, runId, startUtc);
         SchedulerConsole.WriteStatus(JobStatus.Starting, job.Name);

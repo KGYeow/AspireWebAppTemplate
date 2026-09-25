@@ -45,16 +45,21 @@ Because it does not reference Web, the template can also be used purely for sche
 ```
 AspireWebAppTemplate.Scheduler/
 ├── Program.cs                      <- explicit Main: build host -> resolve job -> execute -> exit code
-├── Constants/
-│   └── ExitCodes.cs                <- exit-code contract (0 success, non-zero failure)
+├── Contracts/
+│   ├── ExitCodes.cs                <- process exit-code contract (0 success, non-zero failure)
+│   └── JobStatus.cs                <- run-status vocabulary (Starting/Success/Failed/Cancelled)
 ├── Hosting/
 │   ├── SchedulerHostBuilder.cs     <- host + config + DI composition (focused Scheduler graph)
-│   ├── JobRunner.cs                <- cancellation wiring, scope, job dispatch, exit-code mapping
-│   └── JobConsole.cs               <- Spectre.Console helpers (available-jobs table)
+│   ├── JobRunner.cs                <- job dispatch, run envelope, timing, exit-code mapping
+│   ├── SchedulerConsole.cs         <- console formatting (header/status/footer, available-jobs table)
+│   └── JobProgress.cs              <- host-owned IJobProgress implementation (logger + console)
 ├── Jobs/
 │   ├── IScheduledJob.cs            <- job contract (plugin interface): Name, Description, Task<int> RunAsync(CancellationToken)
+│   ├── IJobProgress.cs             <- job-facing progress-reporting contract (Info/Warn/Phase)
 │   └── Implementations/
 │       └── AuditLogRetentionJob.cs <- the one shipped job (audit-log retention purge)
+├── Properties/
+│   └── launchSettings.json         <- dev launch profiles (job name via commandLineArgs)
 ├── appsettings.json                <- connection string, retention, logging
 └── appsettings.Development.json
 ```

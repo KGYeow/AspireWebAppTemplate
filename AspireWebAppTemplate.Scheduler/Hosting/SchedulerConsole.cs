@@ -1,4 +1,4 @@
-using AspireWebAppTemplate.Scheduler.Constants;
+using AspireWebAppTemplate.Scheduler.Contracts;
 using AspireWebAppTemplate.Scheduler.Jobs;
 using Spectre.Console;
 
@@ -67,6 +67,26 @@ public static class SchedulerConsole
     }
 
     /// <summary>
+    /// Writes the header for the usage path (no job selected): application name, start time (UTC),
+    /// environment, and the correlation run id. The <c>Job</c> line is omitted because no job was
+    /// resolved for this invocation.
+    /// </summary>
+    /// <param name="appName">The Scheduler application name.</param>
+    /// <param name="environment">The hosting environment name (e.g., Production).</param>
+    /// <param name="runId">The correlation id for this invocation.</param>
+    /// <param name="startUtc">The UTC start time of the invocation.</param>
+    public static void WriteHeader(string appName, string environment, Guid runId, DateTime startUtc)
+    {
+        AnsiConsole.WriteLine(HeavySeparator);
+        AnsiConsole.MarkupLineInterpolated($" [bold]{appName}[/]");
+        AnsiConsole.WriteLine(HeavySeparator);
+        AnsiConsole.MarkupLineInterpolated($" Start       : {startUtc.ToString(AbsoluteTimestampFormat)} UTC");
+        AnsiConsole.MarkupLineInterpolated($" Environment : {environment}");
+        AnsiConsole.MarkupLineInterpolated($" Run Id      : {runId}");
+        AnsiConsole.WriteLine(HeavySeparator);
+    }
+
+    /// <summary>
     /// Writes the result footer: the overall status, process exit code, and total duration.
     /// </summary>
     /// <param name="status">The terminal status of the run.</param>
@@ -79,6 +99,22 @@ public static class SchedulerConsole
         AnsiConsole.MarkupLineInterpolated($" Result    : [{color}]{status.ToString().ToUpperInvariant()}[/]");
         AnsiConsole.MarkupLineInterpolated($" Exit code : {exitCode}");
         AnsiConsole.MarkupLineInterpolated($" Duration  : {duration.ToString(DurationFormat)}");
+        AnsiConsole.WriteLine(HeavySeparator);
+    }
+
+    /// <summary>
+    /// Writes the result footer for the usage path: a free-form status label and the process exit code
+    /// (no duration). Kept separate from <see cref="WriteResultFooter(JobStatus, int, TimeSpan)"/> so the
+    /// usage path can show a label like "INVALID USAGE" without adding non-run states to
+    /// <see cref="JobStatus"/>.
+    /// </summary>
+    /// <param name="statusLabel">The free-form status label (e.g., "INVALID USAGE").</param>
+    /// <param name="exitCode">The process exit code returned to the caller / Task Scheduler.</param>
+    public static void WriteUsageFooter(string statusLabel, int exitCode)
+    {
+        AnsiConsole.WriteLine(LightSeparator);
+        AnsiConsole.MarkupLineInterpolated($" Result    : [yellow]{statusLabel}[/]");
+        AnsiConsole.MarkupLineInterpolated($" Exit code : {exitCode}");
         AnsiConsole.WriteLine(HeavySeparator);
     }
 
@@ -113,6 +149,14 @@ public static class SchedulerConsole
     {
         AnsiConsole.WriteLine();
         WriteLabelledLine("WARN", color: "yellow", message);
+    }
+
+    /// <summary>Writes a timestamped usage/guidance line (used by the no-job / unknown-job path).</summary>
+    /// <param name="message">The usage message to display.</param>
+    public static void WriteUsage(string message)
+    {
+        AnsiConsole.WriteLine();
+        WriteLabelledLine("USAGE", color: "yellow", message);
     }
 
     /// <summary>Writes a timestamped line marking the start of a named job phase.</summary>

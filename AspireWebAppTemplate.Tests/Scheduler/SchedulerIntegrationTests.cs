@@ -5,7 +5,7 @@ using AspireWebAppTemplate.Domain.Enums;
 using AspireWebAppTemplate.Infrastructure.Data;
 using AspireWebAppTemplate.Infrastructure.Data.Entities;
 using AspireWebAppTemplate.Infrastructure.Services.AuditLog;
-using AspireWebAppTemplate.Scheduler.Constants;
+using AspireWebAppTemplate.Scheduler.Contracts;
 using AspireWebAppTemplate.Scheduler.Hosting;
 using AspireWebAppTemplate.Scheduler.Jobs;
 using AspireWebAppTemplate.Scheduler.Jobs.Implementations;

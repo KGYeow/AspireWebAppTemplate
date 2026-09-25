@@ -1,4 +1,4 @@
-﻿namespace AspireWebAppTemplate.Scheduler.Constants;
+namespace AspireWebAppTemplate.Scheduler.Contracts;
 
 /// <summary>
 /// Process exit codes returned to Windows Task Scheduler (recorded as "Last Run Result").

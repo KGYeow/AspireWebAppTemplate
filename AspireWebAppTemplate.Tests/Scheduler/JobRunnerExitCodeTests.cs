@@ -1,5 +1,5 @@
-﻿// Bugfix: scheduler-dependency-cleanup, Unit tests: JobRunner exit-code mapping
-using AspireWebAppTemplate.Scheduler.Constants;
+// Bugfix: scheduler-dependency-cleanup, Unit tests: JobRunner exit-code mapping
+using AspireWebAppTemplate.Scheduler.Contracts;
 using AspireWebAppTemplate.Scheduler.Hosting;
 using AspireWebAppTemplate.Scheduler.Jobs;
 using Microsoft.Extensions.DependencyInjection;

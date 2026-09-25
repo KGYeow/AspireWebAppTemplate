@@ -1,4 +1,4 @@
-namespace AspireWebAppTemplate.Scheduler.Constants;
+namespace AspireWebAppTemplate.Scheduler.Contracts;
 
 /// <summary>
 /// The lifecycle status of a scheduled job run, used for structured console output and log messages.

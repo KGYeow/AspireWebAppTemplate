@@ -15,6 +15,14 @@
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       }
+    },
+    "unknown job (usage)": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "commandLineArgs": "made-up-job",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
     }
   }
 }

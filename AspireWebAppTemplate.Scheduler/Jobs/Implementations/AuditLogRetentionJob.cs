@@ -1,5 +1,5 @@
 using AspireWebAppTemplate.Application.Features.AuditLog;
-using AspireWebAppTemplate.Scheduler.Constants;
+using AspireWebAppTemplate.Scheduler.Contracts;
 using AspireWebAppTemplate.Scheduler.Jobs;
 
 namespace AspireWebAppTemplate.Scheduler.Jobs.Implementations;
