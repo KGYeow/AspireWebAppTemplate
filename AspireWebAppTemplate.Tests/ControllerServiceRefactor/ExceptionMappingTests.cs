@@ -1,7 +1,6 @@
 // Feature: controller-service-refactor, Property 17: Exception-to-HTTP-status mapping
 using AspireWebAppTemplate.Application.Abstractions;
 using AspireWebAppTemplate.ApiService.Controllers;
-using AspireWebAppTemplate.ApiService.Controllers;
 using AspireWebAppTemplate.Application.Features.Roles;
 using AspireWebAppTemplate.Application.Features.Users;
 using FsCheck;

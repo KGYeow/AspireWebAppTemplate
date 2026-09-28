@@ -2,17 +2,11 @@
 using AspireWebAppTemplate.Application.Abstractions;
 using AspireWebAppTemplate.Infrastructure.Services.AuditLog;
 using AspireWebAppTemplate.Application.Features.AuditLog;
-using AspireWebAppTemplate.Infrastructure.Services.AuditLog;
 using AspireWebAppTemplate.Domain.Enums;
-using AspireWebAppTemplate.Infrastructure.Services.AuditLog;
 using FsCheck;
-using AspireWebAppTemplate.Infrastructure.Services.AuditLog;
 using FsCheck.Fluent;
-using AspireWebAppTemplate.Infrastructure.Services.AuditLog;
 using FsCheck.Xunit;
-using AspireWebAppTemplate.Infrastructure.Services.AuditLog;
 using Moq;
-using AspireWebAppTemplate.Infrastructure.Services.AuditLog;
 
 namespace AspireWebAppTemplate.Tests.ControllerServiceRefactor;
 

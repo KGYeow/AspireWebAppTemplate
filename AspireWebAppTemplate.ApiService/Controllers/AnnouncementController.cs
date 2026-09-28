@@ -1,15 +1,10 @@
 using AspireWebAppTemplate.Application.Abstractions;
 using AspireWebAppTemplate.Infrastructure.Services.Announcements;
 using AspireWebAppTemplate.Application.Common;
-using AspireWebAppTemplate.Infrastructure.Services.Announcements;
 using AspireWebAppTemplate.Application.Features.Announcements;
-using AspireWebAppTemplate.Infrastructure.Services.Announcements;
 using AspireWebAppTemplate.Domain.Enums;
-using AspireWebAppTemplate.Infrastructure.Services.Announcements;
 using Microsoft.AspNetCore.Authorization;
-using AspireWebAppTemplate.Infrastructure.Services.Announcements;
 using Microsoft.AspNetCore.Mvc;
-using AspireWebAppTemplate.Infrastructure.Services.Announcements;
 
 namespace AspireWebAppTemplate.ApiService.Controllers;
 

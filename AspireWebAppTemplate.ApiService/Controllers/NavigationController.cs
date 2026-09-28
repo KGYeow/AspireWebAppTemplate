@@ -1,13 +1,9 @@
 using AspireWebAppTemplate.Application.Abstractions;
 using AspireWebAppTemplate.Infrastructure.Services.Navigation;
 using AspireWebAppTemplate.Application.Features.Navigation;
-using AspireWebAppTemplate.Infrastructure.Services.Navigation;
 using AspireWebAppTemplate.Application.Common;
-using AspireWebAppTemplate.Infrastructure.Services.Navigation;
 using Microsoft.AspNetCore.Authorization;
-using AspireWebAppTemplate.Infrastructure.Services.Navigation;
 using Microsoft.AspNetCore.Mvc;
-using AspireWebAppTemplate.Infrastructure.Services.Navigation;
 
 namespace AspireWebAppTemplate.ApiService.Controllers;
 

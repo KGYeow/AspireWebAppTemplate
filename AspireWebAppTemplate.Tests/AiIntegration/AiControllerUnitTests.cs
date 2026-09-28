@@ -1,7 +1,6 @@
 using System.Reflection;
 using AspireWebAppTemplate.Application.Abstractions;
 using AspireWebAppTemplate.ApiService.Controllers;
-using AspireWebAppTemplate.ApiService.Controllers;
 using AspireWebAppTemplate.Application.Features.Ai;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

@@ -1,9 +1,7 @@
 using AspireWebAppTemplate.Domain.Entities;
 using AspireWebAppTemplate.Infrastructure.Data.Entities;
 using Microsoft.EntityFrameworkCore;
-using AspireWebAppTemplate.Infrastructure.Data.Entities;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using AspireWebAppTemplate.Infrastructure.Data.Entities;
 
 namespace AspireWebAppTemplate.Infrastructure.Data.Configurations;
 

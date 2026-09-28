@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using AspireWebAppTemplate.Application.Abstractions;
 using AspireWebAppTemplate.ApiService.Controllers;
-using AspireWebAppTemplate.ApiService.Controllers;
 using AspireWebAppTemplate.Application.Common;
 using AspireWebAppTemplate.Application.Features.Notifications;
 using AspireWebAppTemplate.Domain.Enums;

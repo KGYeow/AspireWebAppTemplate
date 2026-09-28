@@ -2,7 +2,6 @@
 using AspireWebAppTemplate.Application.Common;
 using AspireWebAppTemplate.Infrastructure.Services.Navigation;
 using AspireWebAppTemplate.Domain.Constants;
-using AspireWebAppTemplate.Infrastructure.Services.Navigation;
 
 namespace AspireWebAppTemplate.Tests.Navigation;
 

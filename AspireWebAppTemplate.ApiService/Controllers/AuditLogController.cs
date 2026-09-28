@@ -1,13 +1,9 @@
 using AspireWebAppTemplate.Application.Abstractions;
 using AspireWebAppTemplate.Infrastructure.Services.AuditLog;
 using AspireWebAppTemplate.Application.Common;
-using AspireWebAppTemplate.Infrastructure.Services.AuditLog;
 using AspireWebAppTemplate.Application.Features.AuditLog;
-using AspireWebAppTemplate.Infrastructure.Services.AuditLog;
 using Microsoft.AspNetCore.Authorization;
-using AspireWebAppTemplate.Infrastructure.Services.AuditLog;
 using Microsoft.AspNetCore.Mvc;
-using AspireWebAppTemplate.Infrastructure.Services.AuditLog;
 
 namespace AspireWebAppTemplate.ApiService.Controllers;
 
