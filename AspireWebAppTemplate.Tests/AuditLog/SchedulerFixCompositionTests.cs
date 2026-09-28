@@ -72,7 +72,14 @@ public class SchedulerFixCompositionTests
         services.AddSingleton(configuration);
         services.AddLogging();
 
-        services.AddSchedulerInfrastructure(configuration);
+        // Mirror the Scheduler host composition root: the host registers the SQL Server DbContext, then
+        // the parameterless focused seam registers the feature services. SwapDbContextToSqlite replaces
+        // the SQL Server context with SQLite so the graph can actually be built in tests.
+        var connectionString = configuration.GetConnectionString("DefaultConnection")
+            ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+        services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseSqlServer(connectionString, b => b.MigrationsAssembly("AspireWebAppTemplate.Infrastructure")));
+        services.AddSchedulerInfrastructure();
         services.AddScoped<IScheduledJob, AuditLogRetentionJob>();
 
         return services;

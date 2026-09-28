@@ -77,8 +77,11 @@ Program.Main(args) -> SchedulerHostBuilder.Build(args) -> JobRunner (dispatch + 
 - **`SchedulerHostBuilder.Build(args)`** — owns host + config + DI composition:
   - `AddServiceDefaults()` — Aspire telemetry/logging.
   - Config anchored to `AppContext.BaseDirectory` (Task Scheduler may launch with any working dir).
-  - `AddSchedulerInfrastructure(builder.Configuration)` — the **focused** Infrastructure seam
-    (see below).
+  - Registers the `ApplicationDbContext` (`UseSqlServer` on the same `DefaultConnection` as the API;
+    throws if the connection string is missing) — in the composition root, consistent with the API's
+    `Program.cs`. The Scheduler **does not run migrations** (the API/deploy step owns schema).
+  - `AddSchedulerInfrastructure()` — the **focused** Infrastructure seam registering the feature
+    services the jobs consume (see below).
   - One `AddScoped<IScheduledJob, ...>()` registration per job. Job registrations live here in the
     Scheduler, not in Infrastructure.
 - **`JobRunner`** — cancellation wiring (`Console.CancelKeyPress` + `CancellationTokenSource`), creates
@@ -93,14 +96,14 @@ Jobs are resolved from a **DI scope** (never the root provider) so scoped servic
 ### Focused Infrastructure seam (`AddSchedulerInfrastructure`)
 
 The Scheduler composes only what its registered job(s) transitively consume, through an
-Infrastructure-owned `AddSchedulerInfrastructure(this IServiceCollection, IConfiguration)` extension
-(a sibling of `AddInfrastructureServices`, in its own file). It registers **only**:
+Infrastructure-owned `AddSchedulerInfrastructure(this IServiceCollection)` extension (a sibling of
+`AddInfrastructureServices`, in its own file). Like `AddInfrastructureServices`, it is a **pure
+service-registration** extension — the composition root (`SchedulerHostBuilder`) owns reading the
+connection string and registering the `ApplicationDbContext`, mirroring how the API's `Program.cs`
+wires the database. The seam registers **only**:
 
-- `ApplicationDbContext` (`UseSqlServer` on the same `DefaultConnection` as the API; throws if the
-  connection string is missing). The Scheduler **does not run migrations** — the API/deploy step
-  owns schema.
-- `IAuditLogRetentionService -> AuditLogRetentionService` (scoped) — the single service the purge job
-  consumes; its own dependencies are just `ApplicationDbContext` + `IConfiguration`.
+- `IAuditLogRetentionService -> AuditLogRetentionService` (scoped) — the single feature service the
+  purge job consumes; its own dependencies are just `ApplicationDbContext` + `IConfiguration`.
 
 It deliberately does **not** register `IAuditLogService`, ASP.NET Core Identity, Data Protection,
 the AI/Bedrock client, `WebCallbackClient`, `HtmlSanitizer`, `ICurrentUserAccessor`, or any other

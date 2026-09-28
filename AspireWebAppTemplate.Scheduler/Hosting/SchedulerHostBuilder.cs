@@ -1,6 +1,8 @@
+using AspireWebAppTemplate.Infrastructure.Data;
 using AspireWebAppTemplate.Infrastructure.Extensions;
 using AspireWebAppTemplate.Scheduler.Jobs;
 using AspireWebAppTemplate.Scheduler.Jobs.Implementations;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -15,7 +17,8 @@ namespace AspireWebAppTemplate.Scheduler.Hosting;
 /// </summary>
 /// <remarks>
 /// The Scheduler is a short-lived console process, not a Worker Service, so this builder maps only
-/// what its jobs consume via <see cref="SchedulerInfrastructureServiceExtensions.AddSchedulerInfrastructure"/>
+/// what its jobs consume: the host registers the <see cref="ApplicationDbContext"/> (composition root,
+/// like the API's Program.cs) and the focused feature services via <see cref="SchedulerInfrastructureServiceExtensions.AddSchedulerInfrastructure"/>
 /// â€” it does NOT import the full API/Web feature graph, Identity, or Data Protection. Job
 /// registrations live here (not in Infrastructure) so business apps add or remove jobs in one place.
 /// </remarks>
@@ -64,7 +67,18 @@ public static class SchedulerHostBuilder
         // Focused infrastructure seam: registers ONLY what the Scheduler's jobs consume
         // (ApplicationDbContext + IAuditLogRetentionService). No Identity, Data Protection, AI/Bedrock,
         // Web callback client, sanitizer, or full feature graph.
-        builder.Services.AddSchedulerInfrastructure(builder.Configuration);
+        // Database — same connection string the API uses, registered here in the composition root
+        // (consistent with the API's Program.cs). The Scheduler never runs migrations; it assumes the
+        // schema already exists (the API/deploy step owns migrations).
+        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+            ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+        builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseSqlServer(connectionString, b => b.MigrationsAssembly("AspireWebAppTemplate.Infrastructure")));
+
+        // Focused infrastructure seam: registers ONLY the feature services the Scheduler's jobs consume
+        // (IAuditLogRetentionService). No Identity, Data Protection, AI/Bedrock, Web callback client,
+        // sanitizer, or full feature graph.
+        builder.Services.AddSchedulerInfrastructure();
 
         // Per-run progress reporter (writes to both the logger and the console). Scoped so it shares
         // the per-run DI scope with the job.
