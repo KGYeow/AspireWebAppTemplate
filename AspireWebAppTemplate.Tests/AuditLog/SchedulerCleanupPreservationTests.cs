@@ -1,7 +1,5 @@
 // Bugfix: scheduler-dependency-cleanup, Property 2: Preservation - API/Web audit-write and infrastructure graph unchanged
-using Amazon.BedrockRuntime;
 using AspireWebAppTemplate.Application.Abstractions;
-using AspireWebAppTemplate.Application.Features.Ai;
 using AspireWebAppTemplate.Application.Features.Announcements;
 using AspireWebAppTemplate.Application.Features.AuditLog;
 using AspireWebAppTemplate.Application.Features.Authentication;
@@ -53,7 +51,7 @@ namespace AspireWebAppTemplate.Tests.AuditLog;
 /// deletes entries older than the <c>AuditLog:RetentionDays</c> cutoff and returns the purged count.
 ///
 /// Preservation Test Case 3 (regression 3.2): <c>AddInfrastructureServices()</c> registers the full
-/// feature graph (users, roles, email, notifications, AI/Bedrock, LDAP, announcements, page permissions,
+/// feature graph (users, roles, email, notifications, LDAP, announcements, page permissions,
 /// navigation, sanitizer, Web callback client, and the HTTP-backed <see cref="ICurrentUserAccessor"/>).
 /// </remarks>
 public class SchedulerCleanupPreservationTests
@@ -328,9 +326,7 @@ public class SchedulerCleanupPreservationTests
         // Audit log service (the currently Identity-coupled service on the full graph).
         Assert.True(IsRegistered<IAuditLogService>(services), "IAuditLogService must remain registered on the full graph.");
 
-        // AI/Bedrock, sanitizer, Web callback client, and the HTTP-backed current-user accessor.
-        Assert.True(IsRegistered<IAiService>(services), "IAiService must remain registered.");
-        Assert.True(IsRegistered<AmazonBedrockRuntimeClient>(services), "AmazonBedrockRuntimeClient must remain registered.");
+        // Sanitizer, Web callback client, and the HTTP-backed current-user accessor.
         Assert.True(IsRegistered<HtmlSanitizer>(services), "HtmlSanitizer must remain registered.");
         Assert.True(IsRegistered<WebCallbackClient>(services), "WebCallbackClient must remain registered.");
         Assert.True(IsRegistered<ICurrentUserAccessor>(services), "ICurrentUserAccessor (HTTP-backed) must remain registered.");

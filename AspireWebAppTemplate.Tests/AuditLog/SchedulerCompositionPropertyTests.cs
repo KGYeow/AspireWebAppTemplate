@@ -1,6 +1,5 @@
 // Bugfix: scheduler-dependency-cleanup, Property 1: Scheduler registers exactly what its jobs consume
 using System.Reflection;
-using Amazon.BedrockRuntime;
 using AspireWebAppTemplate.Application.Abstractions;
 using AspireWebAppTemplate.Application.Features.AuditLog;
 using AspireWebAppTemplate.Infrastructure.Clients;
@@ -31,7 +30,7 @@ namespace AspireWebAppTemplate.Tests.AuditLog;
 /// These tests validate the fixed behavior: the Scheduler's registered service set equals exactly what
 /// its job(s) consume — <see cref="ApplicationDbContext"/>, <see cref="IConfiguration"/>, and the focused
 /// <see cref="IAuditLogRetentionService"/> — and does NOT pull in ASP.NET Core Identity / Data Protection,
-/// an <see cref="AmazonBedrockRuntimeClient"/> (AWS Bedrock), a <see cref="WebCallbackClient"/> (Web host),
+/// a <see cref="WebCallbackClient"/> (Web host),
 /// an <see cref="HtmlSanitizer"/>, an <see cref="ICurrentUserAccessor"/>, or the Identity-coupled
 /// <see cref="IAuditLogService"/>.
 ///
@@ -180,21 +179,6 @@ public class SchedulerCompositionPropertyTests
     #endregion
 
     #region Expected Behavior 2-4 — focused graph excludes over-inherited types
-
-    /// <summary>
-    /// Expected Behavior 2: the focused Scheduler graph does NOT register an
-    /// <see cref="AmazonBedrockRuntimeClient"/> (AWS Bedrock) — no job consumes it.
-    /// </summary>
-    [Fact]
-    public void SchedulerGraph_ShouldNotRegisterBedrockClient()
-    {
-        var services = BuildSchedulerServices(BuildConfiguration());
-
-        Assert.False(
-            IsRegistered<AmazonBedrockRuntimeClient>(services),
-            "The Scheduler graph must not register AmazonBedrockRuntimeClient (AWS Bedrock) — " +
-            "purge-audit-logs never invokes AI.");
-    }
 
     /// <summary>
     /// Expected Behavior 3: the focused Scheduler graph does NOT register a <see cref="WebCallbackClient"/>

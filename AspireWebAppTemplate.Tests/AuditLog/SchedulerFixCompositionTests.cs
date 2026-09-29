@@ -1,5 +1,4 @@
 // Bugfix: scheduler-dependency-cleanup, Property 1: Scheduler registers exactly what its jobs consume
-using Amazon.BedrockRuntime;
 using AspireWebAppTemplate.Application.Abstractions;
 using AspireWebAppTemplate.Application.Features.AuditLog;
 using AspireWebAppTemplate.Infrastructure.Clients;
@@ -32,7 +31,7 @@ namespace AspireWebAppTemplate.Tests.AuditLog;
 /// <list type="bullet">
 ///   <item><see cref="IAuditLogRetentionService"/> resolves and <c>PurgeOldEntriesAsync()</c> runs to success.</item>
 ///   <item>The graph does NOT register <see cref="IAuditLogService"/>, ASP.NET Core Identity
-///     (<see cref="UserManager{ApplicationUser}"/>), Data Protection, an <see cref="AmazonBedrockRuntimeClient"/>,
+///     (<see cref="UserManager{ApplicationUser}"/>), Data Protection,
 ///     a <see cref="WebCallbackClient"/>, an <see cref="HtmlSanitizer"/>, or an <see cref="ICurrentUserAccessor"/>.</item>
 /// </list>
 ///
@@ -201,7 +200,7 @@ public class SchedulerFixCompositionTests
     /// <summary>
     /// The focused Scheduler graph does NOT register any of the excluded types: the Identity-coupled
     /// <see cref="IAuditLogService"/>, ASP.NET Core Identity (<see cref="UserManager{ApplicationUser}"/>),
-    /// Data Protection, an <see cref="AmazonBedrockRuntimeClient"/>, a <see cref="WebCallbackClient"/>,
+    /// Data Protection, a <see cref="WebCallbackClient"/>,
     /// an <see cref="HtmlSanitizer"/>, or an <see cref="ICurrentUserAccessor"/>.
     /// </summary>
     [Fact]
@@ -216,8 +215,6 @@ public class SchedulerFixCompositionTests
             "The Scheduler graph must not register ASP.NET Core Identity (UserManager<ApplicationUser>).");
         Assert.False(IsRegisteredByNameFragment(services, "DataProtection"),
             "The Scheduler graph must not register Data Protection.");
-        Assert.False(IsRegistered<AmazonBedrockRuntimeClient>(services),
-            "The Scheduler graph must not register an AmazonBedrockRuntimeClient (AWS Bedrock).");
         Assert.False(IsRegistered<WebCallbackClient>(services),
             "The Scheduler graph must not register a WebCallbackClient (Web host coupling).");
         Assert.False(IsRegistered<HtmlSanitizer>(services),
@@ -255,7 +252,6 @@ public class SchedulerFixCompositionTests
                 !IsRegistered<IAuditLogService>(services) &&
                 !IsRegistered<UserManager<ApplicationUser>>(services) &&
                 !IsRegisteredByNameFragment(services, "DataProtection") &&
-                !IsRegistered<AmazonBedrockRuntimeClient>(services) &&
                 !IsRegistered<WebCallbackClient>(services) &&
                 !IsRegistered<HtmlSanitizer>(services) &&
                 !IsRegistered<ICurrentUserAccessor>(services);

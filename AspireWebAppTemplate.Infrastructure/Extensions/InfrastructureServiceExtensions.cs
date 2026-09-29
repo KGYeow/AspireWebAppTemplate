@@ -1,11 +1,6 @@
-using Amazon;
-using Amazon.BedrockRuntime;
-using Amazon.Runtime;
-using Amazon.Runtime.Credentials;
 using AspireWebAppTemplate.Application.Abstractions;
 using AspireWebAppTemplate.Application.Features.Email;
 using AspireWebAppTemplate.Application.Features.Roles;
-using AspireWebAppTemplate.Application.Features.Ai;
 using AspireWebAppTemplate.Application.Features.Announcements;
 using AspireWebAppTemplate.Application.Features.Authentication;
 using AspireWebAppTemplate.Application.Features.Notifications;
@@ -24,7 +19,6 @@ using AspireWebAppTemplate.Infrastructure.Services.Announcements;
 using AspireWebAppTemplate.Infrastructure.Services.Email;
 using AspireWebAppTemplate.Infrastructure.Services.Authentication;
 using AspireWebAppTemplate.Infrastructure.Services.PagePermissions;
-using AspireWebAppTemplate.Infrastructure.Services.Ai;
 using AspireWebAppTemplate.Infrastructure.Services.Navigation;
 using AspireWebAppTemplate.Infrastructure.Clients;
 using AspireWebAppTemplate.Infrastructure.Handlers;
@@ -136,41 +130,6 @@ public static class InfrastructureServiceExtensions
         // Example:
         // services.AddScoped<IOrderService, OrderService>();
         // services.AddScoped<IInvoiceService, InvoiceService>();
-
-        // AI Service
-        services.AddSingleton<AmazonBedrockRuntimeClient>(sp =>
-        {
-            var config = sp.GetRequiredService<IConfiguration>();
-            var region = config["Ai:Region"]
-                ?? throw new InvalidOperationException("Ai:Region configuration is required.");
-
-            var accessKeyId = config["Ai:AccessKeyId"];
-            var secretAccessKey = config["Ai:SecretAccessKey"];
-            var sessionToken = config["Ai:SessionToken"];
-
-            var clientConfig = new AmazonBedrockRuntimeConfig
-            {
-                RegionEndpoint = RegionEndpoint.GetBySystemName(region)
-            };
-
-            AWSCredentials credentials;
-            if (!string.IsNullOrEmpty(accessKeyId) && !string.IsNullOrEmpty(secretAccessKey) && !string.IsNullOrEmpty(sessionToken))
-            {
-                credentials = new SessionAWSCredentials(accessKeyId, secretAccessKey, sessionToken);
-            }
-            else if (!string.IsNullOrEmpty(accessKeyId) && !string.IsNullOrEmpty(secretAccessKey))
-            {
-                credentials = new BasicAWSCredentials(accessKeyId, secretAccessKey);
-            }
-            else
-            {
-                credentials = FallbackCredentialsFactory.GetCredentials(clientConfig, false);
-                //credentials = DefaultAWSCredentialsIdentityResolver.GetCredentialsAsync(clientConfig);
-            }
-
-            return new AmazonBedrockRuntimeClient(credentials, clientConfig);
-        });
-        services.AddScoped<IAiService, AiService>();
 
         #endregion
 

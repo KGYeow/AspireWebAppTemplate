@@ -156,7 +156,6 @@ docs/
 ├── features/                   ← Completed feature specs (requirements, design, tasks)
 │   ├── announcement-banner-system/
 │   ├── audit-log/
-│   ├── aws-ai-integration/
 │   ├── clean-architecture-migration/
 │   ├── email-smtp-integration/
 │   ├── navigation-filtering/

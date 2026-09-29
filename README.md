@@ -128,7 +128,6 @@ Reusable Blazor components and themes:
 - **Email**: SMTP with database-stored templates (MailKit)
 - **LDAP**: Active Directory integration via System.DirectoryServices.Protocols
 - **Excel Export**: EPPlus
-- **AI Integration**: AWSSDK.BedrockRuntime (Amazon Bedrock Converse API)
 - **HTML Sanitization**: Ganss.Xss.HtmlSanitizer
 - **Telemetry**: OpenTelemetry
 - **Testing**: xUnit, FsCheck.Xunit, Moq
@@ -192,13 +191,6 @@ Reusable Blazor components and themes:
 
 Features built on top of the template for specific project needs. Not part of the core template, but demonstrate how to extend it:
 
-### AI Integration (Amazon Bedrock)
-- Provider-agnostic AI text generation via Amazon Bedrock (Amazon Nova 2 Lite)
-- Converse API with cross-region inference profile (`us.amazon.nova-2-lite-v1:0`)
-- Three-tier credential resolution: session credentials → basic credentials → IAM role fallback
-- Credentials managed via Aspire secret parameters (never committed to source control)
-- 60-second timeout with structured error handling and logging
-- See `docs/guides/aws-ai-credentials.md` for setup
 
 ## Getting Started
 
@@ -222,16 +214,7 @@ Features built on top of the template for specific project needs. Not part of th
    ```
    This sets the shared API key used for internal service-to-service communication (API→Web notification callbacks). The value can be any random string — it just needs to exist. Each developer can use a different value since it's only used locally between the two services running on the same machine.
 
-3. **Configure AWS credentials for AI integration** (optional)
-   If you want to use the AI feature (Amazon Bedrock), set your AWS credentials:
-   ```bash
-   dotnet user-secrets set "Parameters:ai-access-key-id" "your-access-key-id" --project AspireWebAppTemplate.AppHost
-   dotnet user-secrets set "Parameters:ai-secret-access-key" "your-secret-access-key" --project AspireWebAppTemplate.AppHost
-   dotnet user-secrets set "Parameters:ai-session-token" "your-session-token" --project AspireWebAppTemplate.AppHost
-   ```
-   Get these values from the AWS console (Option 3: "Use individual values in your AWS service client"). Session tokens expire — see `docs/guides/aws-ai-credentials.md` for details.
-
-4. **Configure the database connection**
+3. **Configure the database connection**
    Update `AspireWebAppTemplate.ApiService/appsettings.json`:
    ```json
    {
@@ -241,23 +224,23 @@ Features built on top of the template for specific project needs. Not part of th
    }
    ```
 
-5. **Run with Aspire (recommended)**
+4. **Run with Aspire (recommended)**
    ```bash
    dotnet run --project AspireWebAppTemplate.AppHost
    ```
    Aspire dashboard opens at `https://localhost:17024` with links to both services.
 
-6. **Or run ApiService standalone** (for EF migrations)
+5. **Or run ApiService standalone** (for EF migrations)
    ```bash
    dotnet run --project AspireWebAppTemplate.ApiService
    ```
 
-7. **Database migrations**
+6. **Database migrations**
    - Auto-migrates on startup in Development mode
    - Manual: `Update-Database -Project AspireWebAppTemplate.Infrastructure -StartupProject AspireWebAppTemplate.ApiService`
    - CLI: `dotnet ef database update --project AspireWebAppTemplate.Infrastructure --startup-project AspireWebAppTemplate.ApiService`
 
-8. **Default accounts** (seeded automatically)
+7. **Default accounts** (seeded automatically)
    - Admin: `admin@example.com` / `Admin123#`
    - User: `user@example.com` / `User123#`
 
