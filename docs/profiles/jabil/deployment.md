@@ -31,6 +31,13 @@ Create `appsettings.Production.json` (or use environment variables):
     "BindDn": "CN=svc-blazorapp,OU=Service Accounts,DC=jabil,DC=com",
     "BindPassword": "***"
   },
+  "Smtp": {
+    "Host": "127.0.0.1",
+    "Port": 25,
+    "EnableSsl": false,
+    "FromAddress": "AspireWebApp_Notification@jabil.com",
+    "FromName": "AspireWebApp"
+  },
   "AuditLog": {
     "RetentionDays": 365
   }
@@ -42,6 +49,8 @@ Create `appsettings.Production.json` (or use environment variables):
 Store in environment variables or Windows Credential Manager — never commit to source control:
 - `LdapSettings__BindPassword`
 - `ConnectionStrings__DefaultConnection` (if using SQL auth)
+
+SMTP uses the internal relay anonymously (no credentials), so there are no SMTP secrets to store. Confirm the correct `Smtp:Host`/`Port` for the environment with internal IT — see [infrastructure.md](./infrastructure.md#email--smtp). If `Smtp:Host` is empty, email runs in no-op mode (logged, not sent).
 
 ## Database Migration
 
