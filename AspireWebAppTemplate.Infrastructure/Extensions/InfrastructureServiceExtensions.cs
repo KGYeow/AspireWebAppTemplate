@@ -24,7 +24,6 @@ using AspireWebAppTemplate.Infrastructure.Clients;
 using AspireWebAppTemplate.Infrastructure.Handlers;
 using Ganss.Xss;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AspireWebAppTemplate.Infrastructure.Extensions;
