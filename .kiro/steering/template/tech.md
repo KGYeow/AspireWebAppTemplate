@@ -29,6 +29,7 @@ inclusion: always
 - **SQL Server** — production database
 - **SQLite in-memory** — test database (via Microsoft.EntityFrameworkCore.Sqlite)
 - **EF Core Migrations** — schema management
+- **Provider portability** — the app uses only standard EF Core (no raw SQL/stored procedures), so it can be converted to PostgreSQL with a small, scoped change set. See `docs/guides/switching-database-provider.md`.
 
 ## Testing
 - **xUnit** — test runner
