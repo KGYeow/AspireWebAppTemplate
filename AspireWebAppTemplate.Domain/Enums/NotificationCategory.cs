@@ -25,8 +25,7 @@ public enum NotificationCategory
 
     #endregion
 
-    #region Custom
-
+    #region Business
     // Add your application-specific notification categories below this line.
     // Example:
     // Workflow,

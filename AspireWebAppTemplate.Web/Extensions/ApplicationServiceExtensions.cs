@@ -32,8 +32,7 @@ public static class ApplicationServiceExtensions
 
         #endregion
 
-        #region Custom
-
+        #region Business
         // Register your application-specific frontend services below this line.
         // Example:
         // services.AddScoped<IWorkflowContext, WorkflowContext>();

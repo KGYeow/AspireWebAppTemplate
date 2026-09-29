@@ -64,8 +64,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
 
     #endregion
 
-    #region Custom
-
+    #region Business
     // Add your application-specific DbSet properties below this line.
     // Example:
     // public DbSet<Order> Orders { get; set; } = null!;

@@ -65,8 +65,7 @@ public static class ApiClientServiceExtensions
 
         #endregion
 
-        #region Custom
-
+        #region Business
         // Register your application-specific API client services below this line.
         // Example:
         // services.AddHttpClient<ApiOrderService>(client =>

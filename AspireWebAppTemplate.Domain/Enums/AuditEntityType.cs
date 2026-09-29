@@ -36,8 +36,7 @@ public enum AuditEntityType
 
     #endregion
 
-    #region Custom
-
+    #region Business
     // Add your application-specific audit entity types below this line.
     // Example:
     // Order,

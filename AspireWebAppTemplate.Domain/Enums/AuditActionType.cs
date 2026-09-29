@@ -105,8 +105,7 @@ public enum AuditActionType
 
     #endregion
 
-    #region Custom
-
+    #region Business
     // Add your application-specific audit action types below this line.
     // Example:
     // OrderCreated,

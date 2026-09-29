@@ -124,8 +124,7 @@ public static class InfrastructureServiceExtensions
 
         #endregion
 
-        #region Custom
-
+        #region Business
         // Register your application-specific services below this line.
         // Example:
         // services.AddScoped<IOrderService, OrderService>();
