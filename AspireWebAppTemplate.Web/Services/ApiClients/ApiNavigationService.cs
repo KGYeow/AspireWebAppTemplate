@@ -1,5 +1,5 @@
-using System.Net.Http.Json;
 using AspireWebAppTemplate.Application.Common;
+using AspireWebAppTemplate.Web.Extensions;
 
 namespace AspireWebAppTemplate.Web.Services.ApiClients;
 
@@ -44,9 +44,7 @@ public class ApiNavigationService
         try
         {
             var response = await _http.GetAsync("/api/navigation");
-            if (response.IsSuccessStatusCode)
-                return ApiResult<List<NavItem>>.Success(await response.Content.ReadFromJsonAsync<List<NavItem>>() ?? []);
-            return ApiResult<List<NavItem>>.Failure(await response.Content.ReadAsStringAsync());
+            return await response.ToApiResultAsync<List<NavItem>>(defaultValue: []);
         }
         catch (Exception ex)
         {

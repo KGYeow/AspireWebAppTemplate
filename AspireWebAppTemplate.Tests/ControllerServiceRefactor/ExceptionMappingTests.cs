@@ -67,22 +67,17 @@ public class ExceptionMappingTests
 
             var controller = new RolesController(mockService.Object);
 
-            // Act: call multiple actions and verify all return 404
-            var getResult = controller.GetRole(input.RoleId).GetAwaiter().GetResult().Result;
-            var updateResult = controller.UpdateRole(input.RoleId, new CreateRoleRequest { Name = "Test" })
-                .GetAwaiter().GetResult();
-            var deleteResult = controller.DeleteRole(input.RoleId).GetAwaiter().GetResult();
-            var activateResult = controller.ActivateRole(input.RoleId).GetAwaiter().GetResult();
+            // Act & Assert: the controller no longer catches the exception; each action lets the
+            // KeyNotFoundException propagate to the central ExceptionMappingHandler, which maps it
+            // to 404 at the HTTP layer. The direct-invocation test therefore observes the raw throw.
+            var getThrows = ThrowsKeyNotFound(() => controller.GetRole(input.RoleId).GetAwaiter().GetResult());
+            var updateThrows = ThrowsKeyNotFound(() => controller.UpdateRole(input.RoleId, new CreateRoleRequest { Name = "Test" }).GetAwaiter().GetResult());
+            var deleteThrows = ThrowsKeyNotFound(() => controller.DeleteRole(input.RoleId).GetAwaiter().GetResult());
+            var activateThrows = ThrowsKeyNotFound(() => controller.ActivateRole(input.RoleId).GetAwaiter().GetResult());
 
-            // Assert: all should be NotFoundObjectResult (404)
-            var getIs404 = getResult is NotFoundObjectResult;
-            var updateIs404 = updateResult is NotFoundObjectResult;
-            var deleteIs404 = deleteResult is NotFoundObjectResult;
-            var activateIs404 = activateResult is NotFoundObjectResult;
-
-            return (getIs404 && updateIs404 && deleteIs404 && activateIs404)
-                .Label($"GetRole 404={getIs404}, UpdateRole 404={updateIs404}, " +
-                       $"DeleteRole 404={deleteIs404}, ActivateRole 404={activateIs404}");
+            return (getThrows && updateThrows && deleteThrows && activateThrows)
+                .Label($"GetRole throws={getThrows}, UpdateRole throws={updateThrows}, " +
+                       $"DeleteRole throws={deleteThrows}, ActivateRole throws={activateThrows}");
         });
     }
 
@@ -128,23 +123,17 @@ public class ExceptionMappingTests
 
             var controller = new RolesController(mockService.Object);
 
-            // Act
-            var createResult = controller.CreateRole(new CreateRoleRequest { Name = "Test" })
-                .GetAwaiter().GetResult().Result;
-            var updateResult = controller.UpdateRole(input.RoleId, new CreateRoleRequest { Name = "Test" })
-                .GetAwaiter().GetResult();
-            var deleteResult = controller.DeleteRole(input.RoleId).GetAwaiter().GetResult();
-            var deactivateResult = controller.DeactivateRole(input.RoleId).GetAwaiter().GetResult();
+            // Act & Assert: the controller no longer catches the exception; each action lets the
+            // InvalidOperationException propagate to the central ExceptionMappingHandler, which maps
+            // it to 400 at the HTTP layer. The direct-invocation test observes the raw throw.
+            var createThrows = ThrowsInvalidOperation(() => controller.CreateRole(new CreateRoleRequest { Name = "Test" }).GetAwaiter().GetResult());
+            var updateThrows = ThrowsInvalidOperation(() => controller.UpdateRole(input.RoleId, new CreateRoleRequest { Name = "Test" }).GetAwaiter().GetResult());
+            var deleteThrows = ThrowsInvalidOperation(() => controller.DeleteRole(input.RoleId).GetAwaiter().GetResult());
+            var deactivateThrows = ThrowsInvalidOperation(() => controller.DeactivateRole(input.RoleId).GetAwaiter().GetResult());
 
-            // Assert: all should be BadRequestObjectResult (400)
-            var createIs400 = createResult is BadRequestObjectResult;
-            var updateIs400 = updateResult is BadRequestObjectResult;
-            var deleteIs400 = deleteResult is BadRequestObjectResult;
-            var deactivateIs400 = deactivateResult is BadRequestObjectResult;
-
-            return (createIs400 && updateIs400 && deleteIs400 && deactivateIs400)
-                .Label($"CreateRole 400={createIs400}, UpdateRole 400={updateIs400}, " +
-                       $"DeleteRole 400={deleteIs400}, DeactivateRole 400={deactivateIs400}");
+            return (createThrows && updateThrows && deleteThrows && deactivateThrows)
+                .Label($"CreateRole throws={createThrows}, UpdateRole throws={updateThrows}, " +
+                       $"DeleteRole throws={deleteThrows}, DeactivateRole throws={deactivateThrows}");
         });
     }
 
@@ -190,23 +179,17 @@ public class ExceptionMappingTests
 
             var controller = new RolesController(mockService.Object);
 
-            // Act
-            var createResult = controller.CreateRole(new CreateRoleRequest { Name = "Test" })
-                .GetAwaiter().GetResult().Result;
-            var updateResult = controller.UpdateRole(input.RoleId, new CreateRoleRequest { Name = "Test" })
-                .GetAwaiter().GetResult();
-            var deleteResult = controller.DeleteRole(input.RoleId).GetAwaiter().GetResult();
-            var activateResult = controller.ActivateRole(input.RoleId).GetAwaiter().GetResult();
+            // Act & Assert: the controller no longer catches the exception; each action lets the
+            // ArgumentException propagate to the central ExceptionMappingHandler, which maps it to
+            // 400 at the HTTP layer. The direct-invocation test observes the raw throw.
+            var createThrows = ThrowsArgument(() => controller.CreateRole(new CreateRoleRequest { Name = "Test" }).GetAwaiter().GetResult());
+            var updateThrows = ThrowsArgument(() => controller.UpdateRole(input.RoleId, new CreateRoleRequest { Name = "Test" }).GetAwaiter().GetResult());
+            var deleteThrows = ThrowsArgument(() => controller.DeleteRole(input.RoleId).GetAwaiter().GetResult());
+            var activateThrows = ThrowsArgument(() => controller.ActivateRole(input.RoleId).GetAwaiter().GetResult());
 
-            // Assert: all should be BadRequestObjectResult (400)
-            var createIs400 = createResult is BadRequestObjectResult;
-            var updateIs400 = updateResult is BadRequestObjectResult;
-            var deleteIs400 = deleteResult is BadRequestObjectResult;
-            var activateIs400 = activateResult is BadRequestObjectResult;
-
-            return (createIs400 && updateIs400 && deleteIs400 && activateIs400)
-                .Label($"CreateRole 400={createIs400}, UpdateRole 400={updateIs400}, " +
-                       $"DeleteRole 400={deleteIs400}, ActivateRole 400={activateIs400}");
+            return (createThrows && updateThrows && deleteThrows && activateThrows)
+                .Label($"CreateRole throws={createThrows}, UpdateRole throws={updateThrows}, " +
+                       $"DeleteRole throws={deleteThrows}, ActivateRole throws={activateThrows}");
         });
     }
 
@@ -316,5 +299,49 @@ public class ExceptionMappingTests
                        $"Update 200={updateIs200}, Delete 200={deleteIs200}, Activate 200={activateIs200}, " +
                        $"GetUsers 200={getUsersIs200}, Assign 200={assignIs200}");
         });
+    }
+
+    /// <summary>
+    /// Runs <paramref name="action"/> and returns <c>true</c> when it throws
+    /// <see cref="KeyNotFoundException"/>; otherwise <c>false</c>.
+    /// </summary>
+    /// <param name="action">The controller invocation expected to propagate the exception.</param>
+    private static bool ThrowsKeyNotFound(Action action) => Throws<KeyNotFoundException>(action);
+
+    /// <summary>
+    /// Runs <paramref name="action"/> and returns <c>true</c> when it throws
+    /// <see cref="InvalidOperationException"/>; otherwise <c>false</c>.
+    /// </summary>
+    /// <param name="action">The controller invocation expected to propagate the exception.</param>
+    private static bool ThrowsInvalidOperation(Action action) => Throws<InvalidOperationException>(action);
+
+    /// <summary>
+    /// Runs <paramref name="action"/> and returns <c>true</c> when it throws
+    /// <see cref="ArgumentException"/>; otherwise <c>false</c>.
+    /// </summary>
+    /// <param name="action">The controller invocation expected to propagate the exception.</param>
+    private static bool ThrowsArgument(Action action) => Throws<ArgumentException>(action);
+
+    /// <summary>
+    /// Runs <paramref name="action"/> and returns <c>true</c> when it throws an exception assignable
+    /// to <typeparamref name="TException"/>; otherwise <c>false</c>.
+    /// </summary>
+    /// <typeparam name="TException">The expected exception type.</typeparam>
+    /// <param name="action">The invocation to observe.</param>
+    private static bool Throws<TException>(Action action) where TException : Exception
+    {
+        try
+        {
+            action();
+            return false;
+        }
+        catch (TException)
+        {
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 }

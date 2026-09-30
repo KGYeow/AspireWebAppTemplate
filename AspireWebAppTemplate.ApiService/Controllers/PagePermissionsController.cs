@@ -107,52 +107,34 @@ public class PagePermissionsController : BaseController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateRolePermissions(string roleId, [FromBody] UpdateRolePermissionsRequest request)
     {
-        try
-        {
-            // Look up the role to get display name for the audit entry
-            var role = await _roleManager.FindByIdAsync(roleId);
-            if (role is null)
-                return NotFound($"Role with ID '{roleId}' was not found.");
+        // Look up the role to get display name for the audit entry
+        var role = await _roleManager.FindByIdAsync(roleId);
+        if (role is null)
+            return NotFound($"Role with ID '{roleId}' was not found.");
 
-            // Capture previous page paths for the role before the update
-            var allPermissions = await _pagePermissionService.GetAllPermissionsAsync();
-            var rolePermissions = allPermissions.FirstOrDefault(rp => rp.RoleId == roleId);
-            var previousPaths = rolePermissions?.Pages.Select(p => p.PagePath).ToList() ?? new List<string>();
+        // Capture previous page paths for the role before the update
+        var allPermissions = await _pagePermissionService.GetAllPermissionsAsync();
+        var rolePermissions = allPermissions.FirstOrDefault(rp => rp.RoleId == roleId);
+        var previousPaths = rolePermissions?.Pages.Select(p => p.PagePath).ToList() ?? new List<string>();
 
-            // Perform the update
-            await _pagePermissionService.UpdateRolePermissionsAsync(roleId, request.PagePaths);
+        // Perform the update
+        await _pagePermissionService.UpdateRolePermissionsAsync(roleId, request.PagePaths);
 
-            // Log the audit entry with old/new values
-            await _auditLogService.LogAsync(new AuditLogRequest
-            {
-                UserId = CurrentUserId,
-                ActionType = AuditActionType.SettingsChanged,
-                EntityType = AuditEntityType.Role,
-                EntityId = roleId,
-                EntityName = role.DisplayName ?? role.Name ?? "",
-                Description = $"Page permissions for role '{role.DisplayName ?? role.Name}' were updated.",
-                OldValues = AuditChangeHelper.Serialize(new { PagePaths = previousPaths }),
-                NewValues = AuditChangeHelper.Serialize(new { PagePaths = request.PagePaths }),
-                IpAddress = ClientIpAddress
-            });
+        // Log the audit entry with old/new values
+        await _auditLogService.LogAsync(new AuditLogRequest
+        {
+            UserId = CurrentUserId,
+            ActionType = AuditActionType.SettingsChanged,
+            EntityType = AuditEntityType.Role,
+            EntityId = roleId,
+            EntityName = role.DisplayName ?? role.Name ?? "",
+            Description = $"Page permissions for role '{role.DisplayName ?? role.Name}' were updated.",
+            OldValues = AuditChangeHelper.Serialize(new { PagePaths = previousPaths }),
+            NewValues = AuditChangeHelper.Serialize(new { PagePaths = request.PagePaths }),
+            IpAddress = ClientIpAddress
+        });
 
-            return Ok();
-        }
-        catch (KeyNotFoundException ex)
-        {
-            // Role not found in AspNetRoles — return 404.
-            return NotFound(ex.Message);
-        }
-        catch (InvalidOperationException ex)
-        {
-            // Admin role or system role modification attempted — return 400.
-            return BadRequest(ex.Message);
-        }
-        catch (ArgumentException ex)
-        {
-            // Invalid page paths provided — return 400 with details.
-            return BadRequest(ex.Message);
-        }
+        return Ok();
     }
 
     /// <summary>

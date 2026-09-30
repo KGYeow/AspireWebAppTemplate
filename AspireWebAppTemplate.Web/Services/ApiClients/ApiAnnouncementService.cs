@@ -2,6 +2,8 @@ using System.Net.Http.Json;
 using AspireWebAppTemplate.Application.Common;
 using AspireWebAppTemplate.Application.Features.Announcements;
 using AspireWebAppTemplate.Domain.Enums;
+using AspireWebAppTemplate.Web.Extensions;
+using AspireWebAppTemplate.Web.Utilities;
 
 namespace AspireWebAppTemplate.Web.Services;
 
@@ -44,9 +46,7 @@ public class ApiAnnouncementService
     public async Task<ApiResult<List<AnnouncementDto>>> GetActiveForUserAsync()
     {
         var response = await _http.GetAsync("/api/announcements/active");
-        if (response.IsSuccessStatusCode)
-            return ApiResult<List<AnnouncementDto>>.Success(await response.Content.ReadFromJsonAsync<List<AnnouncementDto>>() ?? []);
-        return ApiResult<List<AnnouncementDto>>.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync<List<AnnouncementDto>>(defaultValue: []);
     }
 
     /// <summary>
@@ -60,14 +60,16 @@ public class ApiAnnouncementService
     /// </returns>
     public async Task<ApiResult<PagedResult<AnnouncementDto>>> GetForListPageAsync(AnnouncementQueryParams queryParams)
     {
-        var url = $"/api/announcements/list?page={queryParams.Page}&pageSize={queryParams.PageSize}";
-        if (queryParams.Severity.HasValue)
-            url += $"&severity={queryParams.Severity.Value}";
+        // page and pageSize are always emitted; severity only when the nullable has a value.
+        var url = QueryStringBuilder.Build("/api/announcements/list", qs =>
+        {
+            qs.Add("page", queryParams.Page);
+            qs.Add("pageSize", queryParams.PageSize);
+            qs.AddIfHasValue("severity", queryParams.Severity);
+        });
 
         var response = await _http.GetAsync(url);
-        if (response.IsSuccessStatusCode)
-            return ApiResult<PagedResult<AnnouncementDto>>.Success(await response.Content.ReadFromJsonAsync<PagedResult<AnnouncementDto>>() ?? new());
-        return ApiResult<PagedResult<AnnouncementDto>>.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync<PagedResult<AnnouncementDto>>(defaultValue: new());
     }
 
     #endregion
@@ -85,9 +87,7 @@ public class ApiAnnouncementService
     public async Task<ApiResult<List<AnnouncementDto>>> GetAllAsync()
     {
         var response = await _http.GetAsync("/api/announcements");
-        if (response.IsSuccessStatusCode)
-            return ApiResult<List<AnnouncementDto>>.Success(await response.Content.ReadFromJsonAsync<List<AnnouncementDto>>() ?? []);
-        return ApiResult<List<AnnouncementDto>>.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync<List<AnnouncementDto>>(defaultValue: []);
     }
 
     #endregion
@@ -106,9 +106,7 @@ public class ApiAnnouncementService
     public async Task<ApiResult<AnnouncementDto>> CreateAsync(CreateAnnouncementRequest request)
     {
         var response = await _http.PostAsJsonAsync("/api/announcements", request);
-        if (response.IsSuccessStatusCode)
-            return ApiResult<AnnouncementDto>.Success(await response.Content.ReadFromJsonAsync<AnnouncementDto>()!);
-        return ApiResult<AnnouncementDto>.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync<AnnouncementDto>();
     }
 
     /// <summary>
@@ -124,9 +122,7 @@ public class ApiAnnouncementService
     public async Task<ApiResult<AnnouncementDto>> UpdateAsync(Guid id, UpdateAnnouncementRequest request)
     {
         var response = await _http.PutAsJsonAsync($"/api/announcements/{id}", request);
-        if (response.IsSuccessStatusCode)
-            return ApiResult<AnnouncementDto>.Success(await response.Content.ReadFromJsonAsync<AnnouncementDto>()!);
-        return ApiResult<AnnouncementDto>.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync<AnnouncementDto>();
     }
 
     /// <summary>
@@ -140,8 +136,7 @@ public class ApiAnnouncementService
     public async Task<ApiResult> DeleteAsync(Guid id)
     {
         var response = await _http.DeleteAsync($"/api/announcements/{id}");
-        if (response.IsSuccessStatusCode) return ApiResult.Success();
-        return ApiResult.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync();
     }
 
     #endregion
@@ -159,8 +154,7 @@ public class ApiAnnouncementService
     public async Task<ApiResult> DismissAsync(Guid id)
     {
         var response = await _http.PostAsync($"/api/announcements/{id}/dismiss", null);
-        if (response.IsSuccessStatusCode) return ApiResult.Success();
-        return ApiResult.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync();
     }
 
     #endregion

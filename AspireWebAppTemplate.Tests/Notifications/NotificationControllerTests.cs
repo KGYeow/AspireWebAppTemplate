@@ -333,8 +333,8 @@ public class NotificationControllerTests
     }
 
     /// <summary>
-    /// Verifies that UpdatePreference returns 400 Bad Request when the service
-    /// throws an ArgumentException.
+    /// Verifies that UpdatePreference lets an ArgumentException from the service propagate,
+    /// which the central ExceptionMappingHandler maps to 400 Bad Request at the HTTP layer.
     /// </summary>
     [Fact]
     public async Task UpdatePreference_Returns400_OnArgumentException()
@@ -351,17 +351,15 @@ public class NotificationControllerTests
             .Setup(s => s.UpdatePreferenceAsync(TestUserId, request))
             .ThrowsAsync(new ArgumentException("Invalid category value."));
 
-        // Act
-        var result = await _controller.UpdatePreference(request);
-
-        // Assert
-        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-        Assert.Equal("Invalid category value.", badRequestResult.Value);
+        // Act & Assert: the controller no longer catches the exception; it propagates to the
+        // central ExceptionMappingHandler, which maps ArgumentException to 400 at the HTTP layer.
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() => _controller.UpdatePreference(request));
+        Assert.Equal("Invalid category value.", exception.Message);
     }
 
     /// <summary>
-    /// Verifies that UpdatePreference returns 404 Not Found when the service
-    /// throws a KeyNotFoundException.
+    /// Verifies that UpdatePreference lets a KeyNotFoundException from the service propagate,
+    /// which the central ExceptionMappingHandler maps to 404 Not Found at the HTTP layer.
     /// </summary>
     [Fact]
     public async Task UpdatePreference_Returns404_OnKeyNotFoundException()
@@ -378,12 +376,10 @@ public class NotificationControllerTests
             .Setup(s => s.UpdatePreferenceAsync(TestUserId, request))
             .ThrowsAsync(new KeyNotFoundException("Preference not found."));
 
-        // Act
-        var result = await _controller.UpdatePreference(request);
-
-        // Assert
-        var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-        Assert.Equal("Preference not found.", notFoundResult.Value);
+        // Act & Assert: the controller no longer catches the exception; it propagates to the
+        // central ExceptionMappingHandler, which maps KeyNotFoundException to 404 at the HTTP layer.
+        var exception = await Assert.ThrowsAsync<KeyNotFoundException>(() => _controller.UpdatePreference(request));
+        Assert.Equal("Preference not found.", exception.Message);
     }
 
     #endregion

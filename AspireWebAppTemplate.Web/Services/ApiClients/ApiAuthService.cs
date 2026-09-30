@@ -4,6 +4,7 @@ using AspireWebAppTemplate.Application.Features.Authentication;
 using AspireWebAppTemplate.Application.Features.AuditLog;
 using AspireWebAppTemplate.Application.Features.Roles;
 using AspireWebAppTemplate.Application.Features.Users;
+using AspireWebAppTemplate.Web.Extensions;
 
 namespace AspireWebAppTemplate.Web.Services;
 
@@ -40,9 +41,7 @@ public class ApiAuthService
     public async Task<ApiResult<LoginTokenValidationResult>> ValidateLoginTokenAsync(string token)
     {
         var response = await _http.PostAsJsonAsync("/api/auth/validate-token", new ValidateTokenRequest { Token = token });
-        if (response.IsSuccessStatusCode)
-            return ApiResult<LoginTokenValidationResult>.Success(await response.Content.ReadFromJsonAsync<LoginTokenValidationResult>()!);
-        return ApiResult<LoginTokenValidationResult>.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync<LoginTokenValidationResult>();
     }
 
     /// <summary>
@@ -51,9 +50,7 @@ public class ApiAuthService
     public async Task<ApiResult<LoginResult>> LoginAsync(LoginRequest request)
     {
         var response = await _http.PostAsJsonAsync("/api/auth/login", request);
-        if (response.IsSuccessStatusCode)
-            return ApiResult<LoginResult>.Success(await response.Content.ReadFromJsonAsync<LoginResult>()!);
-        return ApiResult<LoginResult>.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync<LoginResult>();
     }
 
     /// <summary>
@@ -62,9 +59,7 @@ public class ApiAuthService
     public async Task<ApiResult<RegisterResult>> RegisterAsync(LoginRequest request)
     {
         var response = await _http.PostAsJsonAsync("/api/auth/register", request);
-        if (response.IsSuccessStatusCode)
-            return ApiResult<RegisterResult>.Success(await response.Content.ReadFromJsonAsync<RegisterResult>()!);
-        return ApiResult<RegisterResult>.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync<RegisterResult>();
     }
 
     /// <summary>
@@ -83,9 +78,7 @@ public class ApiAuthService
     public async Task<ApiResult<UserDto>> GetCurrentUserAsync()
     {
         var response = await _http.GetAsync("/api/auth/me");
-        if (response.IsSuccessStatusCode)
-            return ApiResult<UserDto>.Success(await response.Content.ReadFromJsonAsync<UserDto>()!);
-        return ApiResult<UserDto>.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync<UserDto>();
     }
 
     /// <summary>
@@ -94,8 +87,7 @@ public class ApiAuthService
     public async Task<ApiResult> UpdateProfileAsync(UpdateProfileRequest request)
     {
         var response = await _http.PutAsJsonAsync("/api/auth/profile", request);
-        if (response.IsSuccessStatusCode) return ApiResult.Success();
-        return ApiResult.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync();
     }
 
     /// <summary>
@@ -104,8 +96,7 @@ public class ApiAuthService
     public async Task<ApiResult> UpdatePreferencesAsync(UpdatePreferencesRequest request)
     {
         var response = await _http.PutAsJsonAsync("/api/auth/preferences", request);
-        if (response.IsSuccessStatusCode) return ApiResult.Success();
-        return ApiResult.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync();
     }
 
     /// <summary>
@@ -114,8 +105,7 @@ public class ApiAuthService
     public async Task<ApiResult> ChangePasswordAsync(ChangePasswordRequest request)
     {
         var response = await _http.PostAsJsonAsync("/api/auth/change-password", request);
-        if (response.IsSuccessStatusCode) return ApiResult.Success();
-        return ApiResult.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync();
     }
 
     /// <summary>
@@ -124,8 +114,7 @@ public class ApiAuthService
     public async Task<ApiResult> SetPasswordAsync(SetPasswordRequest request)
     {
         var response = await _http.PostAsJsonAsync("/api/auth/set-password", request);
-        if (response.IsSuccessStatusCode) return ApiResult.Success();
-        return ApiResult.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync();
     }
 
     /// <summary>
@@ -134,8 +123,7 @@ public class ApiAuthService
     public async Task<ApiResult> ForgotPasswordAsync(string email)
     {
         var response = await _http.PostAsJsonAsync("/api/auth/forgot-password", new { Email = email });
-        if (response.IsSuccessStatusCode) return ApiResult.Success();
-        return ApiResult.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync();
     }
 
     /// <summary>
@@ -144,8 +132,7 @@ public class ApiAuthService
     public async Task<ApiResult> ResetPasswordAsync(ResetPasswordRequest request)
     {
         var response = await _http.PostAsJsonAsync("/api/auth/reset-password", request);
-        if (response.IsSuccessStatusCode) return ApiResult.Success();
-        return ApiResult.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync();
     }
 
     /// <summary>
@@ -154,8 +141,7 @@ public class ApiAuthService
     public async Task<ApiResult> ConfirmEmailAsync(ConfirmEmailRequest request)
     {
         var response = await _http.PostAsJsonAsync("/api/auth/confirm-email", request);
-        if (response.IsSuccessStatusCode) return ApiResult.Success();
-        return ApiResult.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync();
     }
 
     #endregion
@@ -168,9 +154,7 @@ public class ApiAuthService
     public async Task<ApiResult<EmailInfoDto>> GetEmailInfoAsync()
     {
         var response = await _http.GetAsync("/api/auth/email");
-        if (response.IsSuccessStatusCode)
-            return ApiResult<EmailInfoDto>.Success(await response.Content.ReadFromJsonAsync<EmailInfoDto>()!);
-        return ApiResult<EmailInfoDto>.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync<EmailInfoDto>();
     }
 
     /// <summary>
@@ -179,8 +163,7 @@ public class ApiAuthService
     public async Task<ApiResult> ChangeEmailAsync(string newEmail)
     {
         var response = await _http.PostAsJsonAsync("/api/auth/change-email", new ChangeEmailRequest { NewEmail = newEmail });
-        if (response.IsSuccessStatusCode) return ApiResult.Success();
-        return ApiResult.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync();
     }
 
     /// <summary>
@@ -189,8 +172,7 @@ public class ApiAuthService
     public async Task<ApiResult> SendVerificationEmailAsync()
     {
         var response = await _http.PostAsync("/api/auth/send-verification-email", null);
-        if (response.IsSuccessStatusCode) return ApiResult.Success();
-        return ApiResult.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync();
     }
 
     /// <summary>
@@ -210,8 +192,7 @@ public class ApiAuthService
     public async Task<ApiResult> DeleteAccountAsync(string password)
     {
         var response = await _http.PostAsJsonAsync("/api/auth/delete-account", new DeleteAccountRequest { Password = password });
-        if (response.IsSuccessStatusCode) return ApiResult.Success();
-        return ApiResult.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync();
     }
 
     #endregion
@@ -224,9 +205,7 @@ public class ApiAuthService
     public async Task<ApiResult<TwoFactorStatusDto>> Get2faStatusAsync()
     {
         var response = await _http.GetAsync("/api/auth/2fa-status");
-        if (response.IsSuccessStatusCode)
-            return ApiResult<TwoFactorStatusDto>.Success(await response.Content.ReadFromJsonAsync<TwoFactorStatusDto>()!);
-        return ApiResult<TwoFactorStatusDto>.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync<TwoFactorStatusDto>();
     }
 
     /// <summary>
@@ -235,9 +214,7 @@ public class ApiAuthService
     public async Task<ApiResult<AuthenticatorSetupDto>> GetAuthenticatorSetupAsync()
     {
         var response = await _http.GetAsync("/api/auth/authenticator-setup");
-        if (response.IsSuccessStatusCode)
-            return ApiResult<AuthenticatorSetupDto>.Success(await response.Content.ReadFromJsonAsync<AuthenticatorSetupDto>()!);
-        return ApiResult<AuthenticatorSetupDto>.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync<AuthenticatorSetupDto>();
     }
 
     /// <summary>
@@ -246,9 +223,7 @@ public class ApiAuthService
     public async Task<ApiResult<VerifyAuthenticatorResult>> VerifyAuthenticatorAsync(string code)
     {
         var response = await _http.PostAsJsonAsync("/api/auth/verify-authenticator", new VerifyAuthenticatorRequest { Code = code });
-        if (response.IsSuccessStatusCode)
-            return ApiResult<VerifyAuthenticatorResult>.Success(await response.Content.ReadFromJsonAsync<VerifyAuthenticatorResult>()!);
-        return ApiResult<VerifyAuthenticatorResult>.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync<VerifyAuthenticatorResult>();
     }
 
     /// <summary>
@@ -257,8 +232,7 @@ public class ApiAuthService
     public async Task<ApiResult> Disable2faAsync()
     {
         var response = await _http.PostAsync("/api/auth/disable-2fa", null);
-        if (response.IsSuccessStatusCode) return ApiResult.Success();
-        return ApiResult.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync();
     }
 
     /// <summary>
@@ -267,9 +241,7 @@ public class ApiAuthService
     public async Task<ApiResult<string[]>> GenerateRecoveryCodesAsync()
     {
         var response = await _http.PostAsync("/api/auth/generate-recovery-codes", null);
-        if (response.IsSuccessStatusCode)
-            return ApiResult<string[]>.Success(await response.Content.ReadFromJsonAsync<string[]>()!);
-        return ApiResult<string[]>.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync<string[]>();
     }
 
     /// <summary>
@@ -278,8 +250,7 @@ public class ApiAuthService
     public async Task<ApiResult> ResetAuthenticatorAsync()
     {
         var response = await _http.PostAsync("/api/auth/reset-authenticator", null);
-        if (response.IsSuccessStatusCode) return ApiResult.Success();
-        return ApiResult.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync();
     }
 
     /// <summary>
@@ -288,9 +259,7 @@ public class ApiAuthService
     public async Task<ApiResult<LoginResult>> LoginWith2faAsync(LoginWith2faRequest request)
     {
         var response = await _http.PostAsJsonAsync("/api/auth/login-2fa", request);
-        if (response.IsSuccessStatusCode)
-            return ApiResult<LoginResult>.Success(await response.Content.ReadFromJsonAsync<LoginResult>()!);
-        return ApiResult<LoginResult>.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync<LoginResult>();
     }
 
     /// <summary>
@@ -299,9 +268,7 @@ public class ApiAuthService
     public async Task<ApiResult<LoginResult>> LoginWithRecoveryCodeAsync(string recoveryCode)
     {
         var response = await _http.PostAsJsonAsync("/api/auth/login-recovery-code", new LoginWithRecoveryCodeRequest { RecoveryCode = recoveryCode });
-        if (response.IsSuccessStatusCode)
-            return ApiResult<LoginResult>.Success(await response.Content.ReadFromJsonAsync<LoginResult>()!);
-        return ApiResult<LoginResult>.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync<LoginResult>();
     }
 
     #endregion
@@ -314,9 +281,7 @@ public class ApiAuthService
     public async Task<ApiResult<List<PasskeyInfoDto>>> GetPasskeysAsync()
     {
         var response = await _http.GetAsync("/api/auth/passkeys");
-        if (response.IsSuccessStatusCode)
-            return ApiResult<List<PasskeyInfoDto>>.Success(await response.Content.ReadFromJsonAsync<List<PasskeyInfoDto>>()!);
-        return ApiResult<List<PasskeyInfoDto>>.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync<List<PasskeyInfoDto>>();
     }
 
     /// <summary>
@@ -325,8 +290,7 @@ public class ApiAuthService
     public async Task<ApiResult> DeletePasskeyAsync(string credentialId)
     {
         var response = await _http.DeleteAsync($"/api/auth/passkeys/{credentialId}");
-        if (response.IsSuccessStatusCode) return ApiResult.Success();
-        return ApiResult.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync();
     }
 
     /// <summary>
@@ -335,8 +299,7 @@ public class ApiAuthService
     public async Task<ApiResult> RenamePasskeyAsync(string credentialId, string name)
     {
         var response = await _http.PutAsJsonAsync($"/api/auth/passkeys/{credentialId}/rename", new RenamePasskeyRequest { Name = name });
-        if (response.IsSuccessStatusCode) return ApiResult.Success();
-        return ApiResult.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync();
     }
 
     /// <summary>
@@ -345,9 +308,7 @@ public class ApiAuthService
     public async Task<ApiResult<ExternalLoginsDto>> GetExternalLoginsAsync()
     {
         var response = await _http.GetAsync("/api/auth/external-logins");
-        if (response.IsSuccessStatusCode)
-            return ApiResult<ExternalLoginsDto>.Success(await response.Content.ReadFromJsonAsync<ExternalLoginsDto>()!);
-        return ApiResult<ExternalLoginsDto>.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync<ExternalLoginsDto>();
     }
 
     /// <summary>
@@ -357,8 +318,7 @@ public class ApiAuthService
     {
         var response = await _http.PostAsJsonAsync("/api/auth/remove-external-login",
             new RemoveExternalLoginRequest { LoginProvider = loginProvider, ProviderKey = providerKey });
-        if (response.IsSuccessStatusCode) return ApiResult.Success();
-        return ApiResult.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync();
     }
 
     #endregion

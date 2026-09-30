@@ -78,12 +78,8 @@ public class UsersController : BaseController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<UserDto>> GetUser(string id)
     {
-        try
-        {
-            var user = await _userService.GetByIdAsync(id);
-            return Ok(user);
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+        var user = await _userService.GetByIdAsync(id);
+        return Ok(user);
     }
 
     /// <summary>
@@ -98,13 +94,8 @@ public class UsersController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<UserDto>> CreateUser([FromBody] CreateUserRequest request)
     {
-        try
-        {
-            var user = await _userService.CreateAsync(request);
-            return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
-        }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
-        catch (ArgumentException ex) { return BadRequest(ex.Message); }
+        var user = await _userService.CreateAsync(request);
+        return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
     }
 
     /// <summary>
@@ -123,14 +114,8 @@ public class UsersController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUserRequest request)
     {
-        try
-        {
-            await _userService.UpdateAsync(id, request);
-            return Ok();
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
-        catch (ArgumentException ex) { return BadRequest(ex.Message); }
+        await _userService.UpdateAsync(id, request);
+        return Ok();
     }
 
     /// <summary>
@@ -148,14 +133,8 @@ public class UsersController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteUser(string id)
     {
-        try
-        {
-            await _userService.DeleteAsync(id);
-            return Ok();
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
-        catch (ArgumentException ex) { return BadRequest(ex.Message); }
+        await _userService.DeleteAsync(id);
+        return Ok();
     }
 
     #endregion
@@ -174,12 +153,8 @@ public class UsersController : BaseController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ActivateUser(string id)
     {
-        try
-        {
-            await _userService.ActivateAsync(id);
-            return Ok();
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+        await _userService.ActivateAsync(id);
+        return Ok();
     }
 
     /// <summary>
@@ -197,13 +172,8 @@ public class UsersController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeactivateUser(string id)
     {
-        try
-        {
-            await _userService.DeactivateAsync(id);
-            return Ok();
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+        await _userService.DeactivateAsync(id);
+        return Ok();
     }
 
     /// <summary>
@@ -222,13 +192,8 @@ public class UsersController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ResetPassword(string id, [FromBody] AdminResetPasswordRequest request)
     {
-        try
-        {
-            await _userService.ResetPasswordAsync(id, request.NewPassword);
-            return Ok();
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+        await _userService.ResetPasswordAsync(id, request.NewPassword);
+        return Ok();
     }
 
     #endregion
@@ -250,14 +215,8 @@ public class UsersController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> SetRoles(string id, [FromBody] string[] roleNames)
     {
-        try
-        {
-            await _userService.SetRolesAsync(id, roleNames);
-            return Ok();
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
-        catch (ArgumentException ex) { return BadRequest(ex.Message); }
+        await _userService.SetRolesAsync(id, roleNames);
+        return Ok();
     }
 
     /// <summary>
@@ -314,13 +273,8 @@ public class UsersController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<UserDto>> CreateLdapUser([FromBody] LdapUserAttributes attributes)
     {
-        try
-        {
-            var user = await _userService.CreateLdapUserAsync(attributes);
-            return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
-        }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
-        catch (ArgumentException ex) { return BadRequest(ex.Message); }
+        var user = await _userService.CreateLdapUserAsync(attributes);
+        return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
     }
 
     /// <summary>

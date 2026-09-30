@@ -1,6 +1,7 @@
 using System.Net.Http.Json;
 using AspireWebAppTemplate.Application.Common;
 using AspireWebAppTemplate.Application.Features.Email;
+using AspireWebAppTemplate.Web.Extensions;
 
 namespace AspireWebAppTemplate.Web.Services;
 
@@ -42,9 +43,7 @@ public class ApiEmailTemplateService
     public async Task<ApiResult<List<EmailTemplateDto>>> GetAllAsync()
     {
         var response = await _http.GetAsync("/api/email-templates");
-        if (response.IsSuccessStatusCode)
-            return ApiResult<List<EmailTemplateDto>>.Success(await response.Content.ReadFromJsonAsync<List<EmailTemplateDto>>() ?? []);
-        return ApiResult<List<EmailTemplateDto>>.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync<List<EmailTemplateDto>>();
     }
 
     /// <summary>
@@ -59,9 +58,7 @@ public class ApiEmailTemplateService
     public async Task<ApiResult<EmailTemplateDto>> GetByIdAsync(Guid id)
     {
         var response = await _http.GetAsync($"/api/email-templates/{id}");
-        if (response.IsSuccessStatusCode)
-            return ApiResult<EmailTemplateDto>.Success(await response.Content.ReadFromJsonAsync<EmailTemplateDto>()!);
-        return ApiResult<EmailTemplateDto>.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync<EmailTemplateDto>();
     }
 
     #endregion
@@ -81,9 +78,7 @@ public class ApiEmailTemplateService
     public async Task<ApiResult<EmailTemplateDto>> UpdateAsync(Guid id, UpdateEmailTemplateRequest request)
     {
         var response = await _http.PutAsJsonAsync($"/api/email-templates/{id}", request);
-        if (response.IsSuccessStatusCode)
-            return ApiResult<EmailTemplateDto>.Success(await response.Content.ReadFromJsonAsync<EmailTemplateDto>()!);
-        return ApiResult<EmailTemplateDto>.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync<EmailTemplateDto>();
     }
 
     /// <summary>
@@ -99,9 +94,7 @@ public class ApiEmailTemplateService
     public async Task<ApiResult<RenderedEmailResult>> PreviewAsync(Guid id, PreviewTemplateRequest request)
     {
         var response = await _http.PostAsJsonAsync($"/api/email-templates/{id}/preview", request);
-        if (response.IsSuccessStatusCode)
-            return ApiResult<RenderedEmailResult>.Success(await response.Content.ReadFromJsonAsync<RenderedEmailResult>()!);
-        return ApiResult<RenderedEmailResult>.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync<RenderedEmailResult>();
     }
 
     #endregion

@@ -69,12 +69,8 @@ public class RolesController : BaseController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<RoleDto>> GetRole(string id)
     {
-        try
-        {
-            var role = await _roleService.GetByIdAsync(id);
-            return Ok(role);
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+        var role = await _roleService.GetByIdAsync(id);
+        return Ok(role);
     }
 
     /// <summary>
@@ -89,13 +85,8 @@ public class RolesController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<RoleDto>> CreateRole([FromBody] CreateRoleRequest request)
     {
-        try
-        {
-            var role = await _roleService.CreateAsync(request);
-            return CreatedAtAction(nameof(GetRole), new { id = role.Id }, role);
-        }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
-        catch (ArgumentException ex) { return BadRequest(ex.Message); }
+        var role = await _roleService.CreateAsync(request);
+        return CreatedAtAction(nameof(GetRole), new { id = role.Id }, role);
     }
 
     /// <summary>
@@ -113,14 +104,8 @@ public class RolesController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateRole(string id, [FromBody] CreateRoleRequest request)
     {
-        try
-        {
-            await _roleService.UpdateAsync(id, request);
-            return Ok();
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
-        catch (ArgumentException ex) { return BadRequest(ex.Message); }
+        await _roleService.UpdateAsync(id, request);
+        return Ok();
     }
 
     /// <summary>
@@ -137,14 +122,8 @@ public class RolesController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteRole(string id)
     {
-        try
-        {
-            await _roleService.DeleteAsync(id);
-            return Ok();
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
-        catch (ArgumentException ex) { return BadRequest(ex.Message); }
+        await _roleService.DeleteAsync(id);
+        return Ok();
     }
 
     #endregion
@@ -165,14 +144,8 @@ public class RolesController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ActivateRole(string id)
     {
-        try
-        {
-            await _roleService.ActivateAsync(id);
-            return Ok();
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
-        catch (ArgumentException ex) { return BadRequest(ex.Message); }
+        await _roleService.ActivateAsync(id);
+        return Ok();
     }
 
     /// <summary>
@@ -189,14 +162,8 @@ public class RolesController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeactivateRole(string id)
     {
-        try
-        {
-            await _roleService.DeactivateAsync(id);
-            return Ok();
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
-        catch (ArgumentException ex) { return BadRequest(ex.Message); }
+        await _roleService.DeactivateAsync(id);
+        return Ok();
     }
 
     #endregion
@@ -218,14 +185,8 @@ public class RolesController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> AssignUsersToRole(string id, [FromBody] string[] userIds)
     {
-        try
-        {
-            var result = await _roleService.AssignUsersAsync(id, userIds);
-            return Ok(result);
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
-        catch (ArgumentException ex) { return BadRequest(ex.Message); }
+        var result = await _roleService.AssignUsersAsync(id, userIds);
+        return Ok(result);
     }
 
     /// <summary>
@@ -243,14 +204,8 @@ public class RolesController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RemoveUserFromRole(string id, string userId)
     {
-        try
-        {
-            await _roleService.RemoveUserAsync(id, userId);
-            return Ok();
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
-        catch (ArgumentException ex) { return BadRequest(ex.Message); }
+        await _roleService.RemoveUserAsync(id, userId);
+        return Ok();
     }
 
     /// <summary>
@@ -265,12 +220,8 @@ public class RolesController : BaseController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<List<UserDto>>> GetUsersInRole(string id)
     {
-        try
-        {
-            var users = await _roleService.GetUsersInRoleAsync(id);
-            return Ok(users);
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+        var users = await _roleService.GetUsersInRoleAsync(id);
+        return Ok(users);
     }
 
     #endregion

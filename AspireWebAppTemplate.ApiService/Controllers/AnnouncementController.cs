@@ -128,14 +128,8 @@ public class AnnouncementController : BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<AnnouncementDto>> Create([FromBody] CreateAnnouncementRequest request)
     {
-        try
-        {
-            var result = await _announcementService.CreateAsync(request);
-            return Ok(result);
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
-        catch (ArgumentException ex) { return BadRequest(ex.Message); }
+        var result = await _announcementService.CreateAsync(request);
+        return Ok(result);
     }
 
     /// <summary>
@@ -156,14 +150,8 @@ public class AnnouncementController : BaseController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<AnnouncementDto>> Update(Guid id, [FromBody] UpdateAnnouncementRequest request)
     {
-        try
-        {
-            var result = await _announcementService.UpdateAsync(id, request);
-            return Ok(result);
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
-        catch (ArgumentException ex) { return BadRequest(ex.Message); }
+        var result = await _announcementService.UpdateAsync(id, request);
+        return Ok(result);
     }
 
     /// <summary>
@@ -180,14 +168,8 @@ public class AnnouncementController : BaseController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(Guid id)
     {
-        try
-        {
-            await _announcementService.DeleteAsync(id);
-            return Ok();
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
-        catch (ArgumentException ex) { return BadRequest(ex.Message); }
+        await _announcementService.DeleteAsync(id);
+        return Ok();
     }
 
     #endregion

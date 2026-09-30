@@ -59,15 +59,8 @@ public class AuditLogController : BaseController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<AuditLogEntryDto>> GetAuditLogEntry(Guid id)
     {
-        try
-        {
-            var entry = await _auditLogService.GetByIdAsync(id);
-            return Ok(entry);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
+        var entry = await _auditLogService.GetByIdAsync(id);
+        return Ok(entry);
     }
 
     #endregion

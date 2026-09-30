@@ -224,13 +224,8 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<UserDto>> Me()
     {
-        try
-        {
-            var profile = await _authService.GetProfileAsync();
-            return Ok(profile);
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+        var profile = await _authService.GetProfileAsync();
+        return Ok(profile);
     }
 
     /// <summary>
@@ -242,13 +237,8 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
     {
-        try
-        {
-            await _authService.UpdateProfileAsync(request);
-            return Ok();
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+        await _authService.UpdateProfileAsync(request);
+        return Ok();
     }
 
     /// <summary>
@@ -260,13 +250,8 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdatePreferences([FromBody] UpdatePreferencesRequest request)
     {
-        try
-        {
-            await _authService.UpdatePreferencesAsync(request);
-            return Ok();
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+        await _authService.UpdatePreferencesAsync(request);
+        return Ok();
     }
 
     #endregion
@@ -282,13 +267,8 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
     {
-        try
-        {
-            await _authService.ChangePasswordAsync(request);
-            return Ok();
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+        await _authService.ChangePasswordAsync(request);
+        return Ok();
     }
 
     /// <summary>
@@ -300,13 +280,8 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> SetPassword([FromBody] SetPasswordRequest request)
     {
-        try
-        {
-            await _authService.SetPasswordAsync(request);
-            return Ok();
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+        await _authService.SetPasswordAsync(request);
+        return Ok();
     }
 
     /// <summary>
@@ -388,13 +363,8 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(EmailInfoDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<EmailInfoDto>> GetEmail()
     {
-        try
-        {
-            var emailInfo = await _authService.GetEmailAsync();
-            return Ok(emailInfo);
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+        var emailInfo = await _authService.GetEmailAsync();
+        return Ok(emailInfo);
     }
 
     /// <summary>
@@ -406,13 +376,8 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ChangeEmail([FromBody] ChangeEmailRequest request)
     {
-        try
-        {
-            await _authService.ChangeEmailAsync(request);
-            return Ok();
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+        await _authService.ChangeEmailAsync(request);
+        return Ok();
     }
 
     /// <summary>
@@ -423,13 +388,8 @@ public class AuthController : BaseController
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> SendVerificationEmail()
     {
-        try
-        {
-            await _authService.SendVerificationEmailAsync();
-            return Ok();
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+        await _authService.SendVerificationEmailAsync();
+        return Ok();
     }
 
     #endregion
@@ -444,13 +404,8 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
     public async Task<IActionResult> DownloadPersonalData()
     {
-        try
-        {
-            var jsonBytes = await _authService.DownloadPersonalDataAsync();
-            return File(jsonBytes, "application/json", "PersonalData.json");
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+        var jsonBytes = await _authService.DownloadPersonalDataAsync();
+        return File(jsonBytes, "application/json", "PersonalData.json");
     }
 
     /// <summary>
@@ -462,13 +417,8 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteAccount([FromBody] DeleteAccountRequest request)
     {
-        try
-        {
-            await _authService.DeleteAccountAsync(request);
-            return Ok();
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+        await _authService.DeleteAccountAsync(request);
+        return Ok();
     }
 
     #endregion
@@ -483,13 +433,8 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(TwoFactorStatusDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<TwoFactorStatusDto>> Get2faStatus()
     {
-        try
-        {
-            var status = await _authService.Get2faStatusAsync();
-            return Ok(status);
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+        var status = await _authService.Get2faStatusAsync();
+        return Ok(status);
     }
 
     /// <summary>
@@ -500,13 +445,8 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(AuthenticatorSetupDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<AuthenticatorSetupDto>> GetAuthenticatorSetup()
     {
-        try
-        {
-            var setup = await _authService.GetAuthenticatorSetupAsync();
-            return Ok(setup);
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+        var setup = await _authService.GetAuthenticatorSetupAsync();
+        return Ok(setup);
     }
 
     /// <summary>
@@ -518,13 +458,8 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<VerifyAuthenticatorResult>> VerifyAuthenticator([FromBody] VerifyAuthenticatorRequest request)
     {
-        try
-        {
-            var result = await _authService.VerifyAuthenticatorAsync(request);
-            return Ok(result);
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+        var result = await _authService.VerifyAuthenticatorAsync(request);
+        return Ok(result);
     }
 
     /// <summary>
@@ -536,13 +471,8 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Disable2fa()
     {
-        try
-        {
-            await _authService.Disable2faAsync();
-            return Ok();
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+        await _authService.Disable2faAsync();
+        return Ok();
     }
 
     /// <summary>
@@ -554,13 +484,8 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GenerateRecoveryCodes()
     {
-        try
-        {
-            var codes = await _authService.GenerateRecoveryCodesAsync();
-            return Ok(codes);
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+        var codes = await _authService.GenerateRecoveryCodesAsync();
+        return Ok(codes);
     }
 
     /// <summary>
@@ -571,13 +496,8 @@ public class AuthController : BaseController
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> ResetAuthenticator()
     {
-        try
-        {
-            await _authService.ResetAuthenticatorAsync();
-            return Ok();
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+        await _authService.ResetAuthenticatorAsync();
+        return Ok();
     }
 
     /// <summary>
@@ -653,13 +573,8 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(List<PasskeyInfoDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<List<PasskeyInfoDto>>> GetPasskeys()
     {
-        try
-        {
-            var passkeys = await _authService.GetPasskeysAsync();
-            return Ok(passkeys);
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+        var passkeys = await _authService.GetPasskeysAsync();
+        return Ok(passkeys);
     }
 
     /// <summary>
@@ -671,13 +586,8 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeletePasskey(string credentialId)
     {
-        try
-        {
-            await _authService.DeletePasskeyAsync(credentialId);
-            return Ok();
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+        await _authService.DeletePasskeyAsync(credentialId);
+        return Ok();
     }
 
     /// <summary>
@@ -689,13 +599,8 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RenamePasskey(string credentialId, [FromBody] RenamePasskeyRequest request)
     {
-        try
-        {
-            await _authService.RenamePasskeyAsync(credentialId, request);
-            return Ok();
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+        await _authService.RenamePasskeyAsync(credentialId, request);
+        return Ok();
     }
 
     /// <summary>
@@ -706,13 +611,8 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(ExternalLoginsDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<ExternalLoginsDto>> GetExternalLogins()
     {
-        try
-        {
-            var externalLogins = await _authService.GetExternalLoginsAsync();
-            return Ok(externalLogins);
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+        var externalLogins = await _authService.GetExternalLoginsAsync();
+        return Ok(externalLogins);
     }
 
     /// <summary>
@@ -724,13 +624,8 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RemoveExternalLogin([FromBody] RemoveExternalLoginRequest request)
     {
-        try
-        {
-            await _authService.RemoveExternalLoginAsync(request);
-            return Ok();
-        }
-        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-        catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+        await _authService.RemoveExternalLoginAsync(request);
+        return Ok();
     }
 
     #endregion

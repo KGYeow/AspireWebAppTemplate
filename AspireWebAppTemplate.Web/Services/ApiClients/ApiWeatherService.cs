@@ -1,6 +1,7 @@
 using System.Net.Http.Json;
 using AspireWebAppTemplate.Application.Common;
 using AspireWebAppTemplate.Application.Features.Notifications;
+using AspireWebAppTemplate.Web.Extensions;
 
 namespace AspireWebAppTemplate.Web.Services;
 
@@ -66,8 +67,7 @@ public class ApiWeatherService
     public async Task<ApiResult> SendNotificationAsync(CreateNotificationRequest request)
     {
         var response = await _http.PostAsJsonAsync("/WeatherForecast/send-notification", request);
-        if (response.IsSuccessStatusCode) return ApiResult.Success();
-        return ApiResult.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync();
     }
 
     #endregion

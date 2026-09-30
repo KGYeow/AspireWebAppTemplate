@@ -23,58 +23,43 @@ public static class ApiClientServiceExtensions
     {
         #region Template
 
-        services.AddHttpClient<ApiWeatherService>(client =>
-            client.BaseAddress = new(ApiServiceBaseAddress))
-            .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
-
-        services.AddHttpClient<ApiAuthService>(client =>
-            client.BaseAddress = new(ApiServiceBaseAddress))
-            .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
-
-        services.AddHttpClient<ApiUserService>(client =>
-            client.BaseAddress = new(ApiServiceBaseAddress))
-            .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
-
-        services.AddHttpClient<ApiRoleService>(client =>
-            client.BaseAddress = new(ApiServiceBaseAddress))
-            .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
-
-        services.AddHttpClient<ApiAuditLogService>(client =>
-            client.BaseAddress = new(ApiServiceBaseAddress))
-            .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
-
-        services.AddHttpClient<ApiPagePermissionService>(client =>
-            client.BaseAddress = new(ApiServiceBaseAddress))
-            .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
-
-        services.AddHttpClient<ApiNotificationService>(client =>
-            client.BaseAddress = new(ApiServiceBaseAddress))
-            .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
-
-        services.AddHttpClient<ApiNavigationService>(client =>
-            client.BaseAddress = new(ApiServiceBaseAddress))
-            .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
-
-        services.AddHttpClient<ApiAnnouncementService>(client =>
-            client.BaseAddress = new(ApiServiceBaseAddress))
-            .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
-
-        services.AddHttpClient<ApiEmailTemplateService>(client =>
-            client.BaseAddress = new(ApiServiceBaseAddress))
-            .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
+        services.AddApiClient<ApiWeatherService>();
+        services.AddApiClient<ApiAuthService>();
+        services.AddApiClient<ApiUserService>();
+        services.AddApiClient<ApiRoleService>();
+        services.AddApiClient<ApiAuditLogService>();
+        services.AddApiClient<ApiPagePermissionService>();
+        services.AddApiClient<ApiNotificationService>();
+        services.AddApiClient<ApiNavigationService>();
+        services.AddApiClient<ApiAnnouncementService>();
+        services.AddApiClient<ApiEmailTemplateService>();
 
         #endregion
 
         #region Business
         // Register your application-specific API client services below this line.
         // Example:
-        // services.AddHttpClient<ApiOrderService>(client =>
-        //     client.BaseAddress = new(ApiServiceBaseAddress))
-        //     .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
+        // services.AddApiClient<ApiOrderService>();
 
 
         #endregion
 
+        return services;
+    }
+
+    /// <summary>
+    /// Registers <typeparamref name="TClient"/> as a typed <see cref="HttpClient"/> whose base address
+    /// is the ApiService service-discovery address and whose pipeline includes
+    /// <see cref="UserIdentityDelegatingHandler"/> for identity propagation.
+    /// </summary>
+    /// <typeparam name="TClient">The typed API client to register.</typeparam>
+    /// <param name="services">The service collection to add the client to.</param>
+    /// <returns>The same service collection for chaining.</returns>
+    private static IServiceCollection AddApiClient<TClient>(this IServiceCollection services)
+        where TClient : class
+    {
+        services.AddHttpClient<TClient>(client => client.BaseAddress = new(ApiServiceBaseAddress))
+            .AddHttpMessageHandler<UserIdentityDelegatingHandler>();
         return services;
     }
 }

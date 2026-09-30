@@ -1,4 +1,5 @@
 using AspireWebAppTemplate.ApiService.Authentication;
+using AspireWebAppTemplate.ApiService.Exceptions;
 using AspireWebAppTemplate.Infrastructure.Services.Authentication;
 using AspireWebAppTemplate.Infrastructure.Data;
 using AspireWebAppTemplate.Infrastructure.Identity;
@@ -16,6 +17,7 @@ builder.AddServiceDefaults();
 
 // Add services to the container.
 builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<ExceptionMappingHandler>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();

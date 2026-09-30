@@ -4,6 +4,8 @@ using AspireWebAppTemplate.Application.Features.Authentication;
 using AspireWebAppTemplate.Application.Features.AuditLog;
 using AspireWebAppTemplate.Application.Features.Roles;
 using AspireWebAppTemplate.Application.Features.Users;
+using AspireWebAppTemplate.Web.Extensions;
+using AspireWebAppTemplate.Web.Utilities;
 
 namespace AspireWebAppTemplate.Web.Services;
 
@@ -39,18 +41,15 @@ public class ApiUserService
     /// <param name="queryParams">Query parameters containing page index, page size, and optional search term.</param>
     public async Task<ApiResult<PagedResult<UserDto>>> GetUsersAsync(UserQueryParams queryParams)
     {
-        var queryStringParts = new List<string>();
-        if (queryParams.Page.HasValue)
-            queryStringParts.Add($"page={queryParams.Page.Value}");
-        if (queryParams.PageSize.HasValue)
-            queryStringParts.Add($"pageSize={queryParams.PageSize.Value}");
-        if (!string.IsNullOrWhiteSpace(queryParams.SearchTerm))
-            queryStringParts.Add($"searchTerm={Uri.EscapeDataString(queryParams.SearchTerm)}");
-        var url = queryStringParts.Count > 0 ? $"/api/users?{string.Join("&", queryStringParts)}" : "/api/users";
+        var url = QueryStringBuilder.Build("/api/users", qs =>
+        {
+            qs.AddIfHasValue("page", queryParams.Page);
+            qs.AddIfHasValue("pageSize", queryParams.PageSize);
+            qs.AddIfNotWhiteSpace("searchTerm", queryParams.SearchTerm);
+        });
+
         var response = await _http.GetAsync(url);
-        if (response.IsSuccessStatusCode)
-            return ApiResult<PagedResult<UserDto>>.Success(await response.Content.ReadFromJsonAsync<PagedResult<UserDto>>()!);
-        return ApiResult<PagedResult<UserDto>>.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync<PagedResult<UserDto>>();
     }
 
     /// <summary>
@@ -58,16 +57,14 @@ public class ApiUserService
     /// </summary>
     public async Task<List<UserDto>> GetAllUsersAsync(string? searchTerm = null)
     {
-        var url = "/api/users";
-        if (!string.IsNullOrWhiteSpace(searchTerm))
-            url += $"?searchTerm={Uri.EscapeDataString(searchTerm)}";
-        var response = await _http.GetAsync(url);
-        if (response.IsSuccessStatusCode)
+        var url = QueryStringBuilder.Build("/api/users", qs =>
         {
-            var result = await response.Content.ReadFromJsonAsync<PagedResult<UserDto>>();
-            return result?.Items ?? [];
-        }
-        return [];
+            qs.AddIfNotWhiteSpace("searchTerm", searchTerm);
+        });
+
+        var response = await _http.GetAsync(url);
+        var result = await response.ToApiResultAsync<PagedResult<UserDto>>(defaultValue: new());
+        return result.Data?.Items ?? [];
     }
 
     /// <summary>
@@ -76,9 +73,7 @@ public class ApiUserService
     public async Task<ApiResult<UserDto>> GetUserAsync(string id)
     {
         var response = await _http.GetAsync($"/api/users/{id}");
-        if (response.IsSuccessStatusCode)
-            return ApiResult<UserDto>.Success(await response.Content.ReadFromJsonAsync<UserDto>()!);
-        return ApiResult<UserDto>.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync<UserDto>();
     }
 
     /// <summary>
@@ -87,8 +82,7 @@ public class ApiUserService
     public async Task<ApiResult> CreateUserAsync(CreateUserRequest request)
     {
         var response = await _http.PostAsJsonAsync("/api/users", request);
-        if (response.IsSuccessStatusCode) return ApiResult.Success();
-        return ApiResult.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync();
     }
 
     /// <summary>
@@ -97,8 +91,7 @@ public class ApiUserService
     public async Task<ApiResult> UpdateUserAsync(string id, UpdateUserRequest request)
     {
         var response = await _http.PutAsJsonAsync($"/api/users/{id}", request);
-        if (response.IsSuccessStatusCode) return ApiResult.Success();
-        return ApiResult.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync();
     }
 
     /// <summary>
@@ -107,8 +100,7 @@ public class ApiUserService
     public async Task<ApiResult> DeleteUserAsync(string id)
     {
         var response = await _http.DeleteAsync($"/api/users/{id}");
-        if (response.IsSuccessStatusCode) return ApiResult.Success();
-        return ApiResult.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync();
     }
 
     #endregion
@@ -121,8 +113,7 @@ public class ApiUserService
     public async Task<ApiResult> ActivateUserAsync(string id)
     {
         var response = await _http.PostAsync($"/api/users/{id}/activate", null);
-        if (response.IsSuccessStatusCode) return ApiResult.Success();
-        return ApiResult.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync();
     }
 
     /// <summary>
@@ -131,8 +122,7 @@ public class ApiUserService
     public async Task<ApiResult> DeactivateUserAsync(string id)
     {
         var response = await _http.PostAsync($"/api/users/{id}/deactivate", null);
-        if (response.IsSuccessStatusCode) return ApiResult.Success();
-        return ApiResult.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync();
     }
 
     /// <summary>
@@ -141,8 +131,7 @@ public class ApiUserService
     public async Task<ApiResult> SetRolesAsync(string id, string[] roleNames)
     {
         var response = await _http.PostAsJsonAsync($"/api/users/{id}/roles", roleNames);
-        if (response.IsSuccessStatusCode) return ApiResult.Success();
-        return ApiResult.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync();
     }
 
     /// <summary>
@@ -151,9 +140,7 @@ public class ApiUserService
     public async Task<ApiResult<List<RoleDto>>> GetRolesMetadataAsync()
     {
         var response = await _http.GetAsync("/api/users/roles-metadata");
-        if (response.IsSuccessStatusCode)
-            return ApiResult<List<RoleDto>>.Success(await response.Content.ReadFromJsonAsync<List<RoleDto>>()!);
-        return ApiResult<List<RoleDto>>.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync<List<RoleDto>>();
     }
 
     #endregion
@@ -166,9 +153,7 @@ public class ApiUserService
     public async Task<ApiResult<LdapUserAttributes>> LdapLookupAsync(string identifier)
     {
         var response = await _http.GetAsync($"/api/users/ldap-lookup?identifier={Uri.EscapeDataString(identifier)}");
-        if (response.IsSuccessStatusCode)
-            return ApiResult<LdapUserAttributes>.Success(await response.Content.ReadFromJsonAsync<LdapUserAttributes>()!);
-        return ApiResult<LdapUserAttributes>.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync<LdapUserAttributes>();
     }
 
     /// <summary>
@@ -177,8 +162,7 @@ public class ApiUserService
     public async Task<ApiResult> CreateLdapUserAsync(LdapUserAttributes attributes)
     {
         var response = await _http.PostAsJsonAsync("/api/users/ldap-create", attributes);
-        if (response.IsSuccessStatusCode) return ApiResult.Success();
-        return ApiResult.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync();
     }
 
     /// <summary>

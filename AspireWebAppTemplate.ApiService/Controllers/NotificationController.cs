@@ -226,23 +226,8 @@ public class NotificationController : BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> UpdatePreference([FromBody] UpdateNotificationPreferenceRequest request)
     {
-        try
-        {
-            await _notificationService.UpdatePreferenceAsync(CurrentUserId!, request);
-            return Ok();
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        await _notificationService.UpdatePreferenceAsync(CurrentUserId!, request);
+        return Ok();
     }
 
     #endregion

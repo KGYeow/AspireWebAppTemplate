@@ -1,0 +1,498 @@
+{
+  "pbtResults": {
+    "1.3 Write property test for mapped-exception status + message (Property 1)": {
+      "status": "passed",
+      "lastRunTimestamp": 1790737261388
+    }
+  },
+  "executionHistory": {
+    "1.1 Create `ExceptionMappingHandler` implementing `IExceptionHandler`": [
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790736883499
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790736899687
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790737044256
+      }
+    ],
+    "1.2 Register the handler in `Program.cs`": [
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790736883750
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790737055586
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790737348599
+      }
+    ],
+    "1.3 Write property test for mapped-exception status + message (Property 1)": [
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790736884005
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790737055700
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790737348141
+      }
+    ],
+    "1.4 Write property test for unmapped-exception passthrough (Property 2)": [
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790736884154
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790737055791
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790737348506
+      }
+    ],
+    "1.5 Write integration test for the wired handler over real HTTP": [
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790736884307
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790737623489
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790738246478
+      }
+    ],
+    "2. Checkpoint - handler added, nothing removed yet": [
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790736884443
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790744880220
+      }
+    ],
+    "3.1 Create `HttpResponseMessageExtensions` (`ToApiResultAsync<T>` / `ToApiResultAsync`)": [
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790736884538
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790736899847
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790737044383
+      }
+    ],
+    "3.2 Write property test for response mapping (Property 3)": [
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790736884633
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790737055890
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790737348276
+      }
+    ],
+    "3.3 Write unit test for single body-read structure": [
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790736884785
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790737055975
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790737348403
+      }
+    ],
+    "3.4 Create `QueryStringBuilder`": [
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790736884883
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790736899944
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790737044476
+      }
+    ],
+    "3.5 Write property test for query-string equivalence (Property 4)": [
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790736884968
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790737355393
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790737519736
+      }
+    ],
+    "4.1 Add `AddApiClient<TClient>` and convert the Template block to one-liners": [
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790736885063
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790737355553
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790737519568
+      }
+    ],
+    "4.2 Write unit test resolving each registered client": [
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790736885150
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790737623361
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790738246376
+      }
+    ],
+    "5. Checkpoint - all seams added, no behavior touched": [
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790736885235
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790744879921
+      }
+    ],
+    "6.1 Remove bare triad catches from `RolesController` and `UsersController`": [
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790736885336
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790737623615
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790738245989
+      }
+    ],
+    "6.2 Remove bare triad catches from `AuthController` and `EmailTemplateController`": [
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790736885439
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790737623705
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790738246229
+      }
+    ],
+    "7.1 Remove bare triad catches from `NotificationController` and `AnnouncementController`": [
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790736885599
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790738255846
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790738456288
+      }
+    ],
+    "7.2 Remove bare triad catches from `AuditLogController`": [
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790736885682
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790738255948
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790738456122
+      }
+    ],
+    "7.3 Remove bare triad catches from `PagePermissionsController` (opt-out preserved)": [
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790736885774
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790738255580
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790738456502
+      }
+    ],
+    "8. Checkpoint - controller cleanup complete": [
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790736885866
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790744880305
+      }
+    ],
+    "9.1 Migrate `ApiUserService` (excluding the streaming method)": [
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790736885968
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790738531593
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790738870707
+      }
+    ],
+    "9.2 Migrate `ApiRoleService` and `ApiAuthService`": [
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790736886058
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790738532026
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790738871029
+      }
+    ],
+    "9.3 Migrate `ApiNotificationService` (incl. query string + value-type payload)": [
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790736886154
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790738531923
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790738870927
+      }
+    ],
+    "10.1 Migrate `ApiAnnouncementService` (incl. optional query string)": [
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790736886252
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790738880291
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790739184509
+      }
+    ],
+    "10.2 Migrate `ApiPagePermissionService` and `ApiEmailTemplateService`": [
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790736886348
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790738879989
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790739184888
+      }
+    ],
+    "10.3 Migrate `ApiAuditLogService`, `ApiNavigationService`, and `ApiWeatherService`": [
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790736886466
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790738880198
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790739184786
+      }
+    ],
+    "11. Final checkpoint - full build + full suite green": [
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790736886582
+      },
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790744880113
+      }
+    ],
+    "3. Add the Web helpers (additive; no client changed yet)": [
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790737519836
+      }
+    ],
+    "4. Introduce the Client_Registration_Helper and convert Template registrations": [
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790738246561
+      }
+    ],
+    "1. Add the Central_Exception_Handler (additive, coexists with existing try/catch)": [
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790738246742
+      }
+    ],
+    "6. Remove redundant controller try/catch (group A)": [
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790744905854
+      }
+    ],
+    "7. Remove redundant controller try/catch (group B)": [
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790744906078
+      }
+    ],
+    "9. Migrate typed clients to the helpers (group A)": [
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790744906182
+      }
+    ],
+    "10. Migrate typed clients to the helpers (group B)": [
+      {
+        "executionId": "336c5852-39c8-4279-a5f7-e1f4a27d66d2",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790744906277
+      }
+    ]
+  }
+}

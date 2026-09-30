@@ -118,13 +118,10 @@ public class EmailTemplateControllerTests
             .Setup(s => s.GetByIdAsync(templateId))
             .ThrowsAsync(new KeyNotFoundException("Template not found."));
 
-        // Act
-        var result = await _controller.GetById(templateId);
-
-        // Assert
-        var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-        Assert.Equal(404, notFoundResult.StatusCode);
-        Assert.Equal("Template not found.", notFoundResult.Value);
+        // Act & Assert: the controller no longer catches the exception; it propagates to the
+        // central ExceptionMappingHandler, which maps KeyNotFoundException to 404 at the HTTP layer.
+        var exception = await Assert.ThrowsAsync<KeyNotFoundException>(() => _controller.GetById(templateId));
+        Assert.Equal("Template not found.", exception.Message);
     }
 
     #endregion
@@ -190,13 +187,10 @@ public class EmailTemplateControllerTests
             .Setup(s => s.UpdateAsync(templateId, request))
             .ThrowsAsync(new KeyNotFoundException("Template not found."));
 
-        // Act
-        var result = await _controller.Update(templateId, request);
-
-        // Assert
-        var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-        Assert.Equal(404, notFoundResult.StatusCode);
-        Assert.Equal("Template not found.", notFoundResult.Value);
+        // Act & Assert: the controller no longer catches the exception; it propagates to the
+        // central ExceptionMappingHandler, which maps KeyNotFoundException to 404 at the HTTP layer.
+        var exception = await Assert.ThrowsAsync<KeyNotFoundException>(() => _controller.Update(templateId, request));
+        Assert.Equal("Template not found.", exception.Message);
     }
 
     /// <summary>
@@ -219,13 +213,10 @@ public class EmailTemplateControllerTests
             .Setup(s => s.UpdateAsync(templateId, request))
             .ThrowsAsync(new InvalidOperationException("System templates cannot be modified via the API."));
 
-        // Act
-        var result = await _controller.Update(templateId, request);
-
-        // Assert
-        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-        Assert.Equal(400, badRequestResult.StatusCode);
-        Assert.Equal("System templates cannot be modified via the API.", badRequestResult.Value);
+        // Act & Assert: the controller no longer catches the exception; it propagates to the
+        // central ExceptionMappingHandler, which maps InvalidOperationException to 400 at the HTTP layer.
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _controller.Update(templateId, request));
+        Assert.Equal("System templates cannot be modified via the API.", exception.Message);
     }
 
     #endregion
@@ -283,13 +274,10 @@ public class EmailTemplateControllerTests
             .Setup(s => s.RenderPreviewAsync(templateId, request.SampleData))
             .ThrowsAsync(new KeyNotFoundException("Template not found."));
 
-        // Act
-        var result = await _controller.Preview(templateId, request);
-
-        // Assert
-        var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-        Assert.Equal(404, notFoundResult.StatusCode);
-        Assert.Equal("Template not found.", notFoundResult.Value);
+        // Act & Assert: the controller no longer catches the exception; it propagates to the
+        // central ExceptionMappingHandler, which maps KeyNotFoundException to 404 at the HTTP layer.
+        var exception = await Assert.ThrowsAsync<KeyNotFoundException>(() => _controller.Preview(templateId, request));
+        Assert.Equal("Template not found.", exception.Message);
     }
 
     #endregion

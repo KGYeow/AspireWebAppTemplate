@@ -1,6 +1,7 @@
 using System.Net.Http.Json;
 using AspireWebAppTemplate.Application.Common;
 using AspireWebAppTemplate.Application.Features.PagePermissions;
+using AspireWebAppTemplate.Web.Extensions;
 
 namespace AspireWebAppTemplate.Web.Services;
 
@@ -42,9 +43,7 @@ public class ApiPagePermissionService
     public async Task<ApiResult<List<string>>> GetMyPagesAsync()
     {
         var response = await _http.GetAsync("/api/page-permissions/my-pages");
-        if (response.IsSuccessStatusCode)
-            return ApiResult<List<string>>.Success(await response.Content.ReadFromJsonAsync<List<string>>() ?? []);
-        return ApiResult<List<string>>.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync<List<string>>();
     }
 
     /// <summary>
@@ -58,9 +57,7 @@ public class ApiPagePermissionService
     public async Task<ApiResult<List<RolePermissionsDto>>> GetAllPermissionsAsync()
     {
         var response = await _http.GetAsync("/api/page-permissions");
-        if (response.IsSuccessStatusCode)
-            return ApiResult<List<RolePermissionsDto>>.Success(await response.Content.ReadFromJsonAsync<List<RolePermissionsDto>>() ?? []);
-        return ApiResult<List<RolePermissionsDto>>.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync<List<RolePermissionsDto>>();
     }
 
     /// <summary>
@@ -76,7 +73,6 @@ public class ApiPagePermissionService
     public async Task<ApiResult> UpdateRolePermissionsAsync(string roleId, UpdateRolePermissionsRequest request)
     {
         var response = await _http.PutAsJsonAsync($"/api/page-permissions/{roleId}", request);
-        if (response.IsSuccessStatusCode) return ApiResult.Success();
-        return ApiResult.Failure(await response.Content.ReadAsStringAsync());
+        return await response.ToApiResultAsync();
     }
 }
