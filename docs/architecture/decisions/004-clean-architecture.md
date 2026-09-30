@@ -58,7 +58,7 @@ The compiler enforces this via `ProjectReference` — if a reference doesn't exi
 ### Application (depends on Domain only)
 - **Abstractions/** — All service interfaces (IAuditLogService, IRoleService, INavigationProvider, ICurrentUserAccessor, etc.)
 - **Common/** — Shared models (ApiResult, NavItem, PagedResult)
-- **Contracts/** — DTOs grouped by feature (Auth/, Users/, Roles/, AuditLog/, Notifications/, Announcements/, Email/, PagePermissions/, Ai/)
+- **Contracts/** — DTOs grouped by feature (Auth/, Users/, Roles/, AuditLog/, Notifications/, Announcements/, Email/, PagePermissions/)
 - **Extensions/** — Extension methods (NavigationProviderExtensions, QueryableExtensions)
 - **Utilities/** — Pure-logic implementations with no external dependencies (DefaultNavigationProvider, TimeZoneHelper)
 

@@ -54,7 +54,7 @@ AspireWebAppTemplate.Application/
     │   ├── IAuditLogService.cs   <- behavioral abstraction at feature root
     │   └── Contracts/            <- DTOs (AuditLogEntryDto, AuditLogQueryParams, AuditLogRequest)
     ├── Users/  Roles/  Notifications/  Announcements/   (each: I{Feature}Service.cs + Contracts/)
-    ├── Email/  Authentication/  PagePermissions/  Ai/
+    ├── Email/  Authentication/  PagePermissions/
     ├── Navigation/              <- interfaces only (no Contracts/: it has no DTOs)
     └── {YourBusinessFeature}/   <- business features you add (same shape)
 ```

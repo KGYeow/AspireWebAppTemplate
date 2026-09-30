@@ -84,21 +84,17 @@ Specs that ship with the template. Each keeps a technical `design.md`; cross-cut
 |---------|------|-------------|
 | [Audit Log](./features/template/audit-log/) | requirements + design | Recording service, DataGrid page, Excel export, retention |
 | [Page Access Permissions](./features/template/page-access-permissions/) | requirements + design | Role × page whitelist matrix, per-circuit cache, nav filtering |
-| [Notification System](./features/template/notification-system/) | requirements + design | In-app notifications, preferences, unread tracking |
-| [Email & SMTP Integration](./features/template/email-smtp-integration/) | requirements + design | Database-stored templates, SMTP sending, EmailType resolution |
+| [Notification System](./features/template/notification-system/) | requirements + design | In-app notifications, preferences, unread tracking, real-time SignalR push, deep-link toast |
+| [Email & SMTP Integration](./features/template/email-smtp-integration/) | design | Database-stored templates, SMTP sending, EmailType resolution |
 | [Announcement Banner System](./features/template/announcement-banner-system/) | requirements + design | Multi-surface announcements, severity, scheduling, dismissal |
-| [Clean Architecture Migration](./features/template/clean-architecture-migration/) | requirements + design | 4-layer Domain/Application/Infrastructure/host structure |
-| [Controller/Service Refactor](./features/template/controller-service-refactor/) | requirements + design | Thin controllers + full service layer |
-| [Realtime Notifications](./features/template/realtime-notifications/) | design | SignalR push of unread counts |
-| [Notification Push / Deep Link](./features/template/notification-push-deep-link/) | design | API→Web callback, snackbar deep-linking |
-| [Notification Snackbar Popup](./features/template/notification-snackbar-popup/) | design | Transient toast content and behavior |
+| [Reusable API Infrastructure](./features/template/reusable-api-infrastructure/) | requirements + design | Central exception handler, API-client result mapping, query-string builder, typed-client registration |
+| [Server DataGrid Helper](./features/template/server-datagrid-helper/) | design | Database-level MudDataGrid ServerData helpers (page-size guard, sort extraction, PagedResult→GridData mapping) |
 | [Navigation Filtering](./features/template/navigation-filtering/) | design | Permission-based nav menu filtering |
 | [User Management](./features/template/user-management/) | design | Admin CRUD, LDAP import/sync, bulk actions |
 | [Role Management](./features/template/role-management/) | design | Role CRUD, user assignment, system role protection |
 | [User Profile](./features/template/user-profile/) | design | View/edit profile, LDAP restrictions |
 | [Settings Page](./features/template/settings-page/) | design | Time zone, date/time format, theme, instant-save |
 | [Status Alert](./features/template/status-alert/) | design | Self-hiding success/error alert component |
-| [Scheduler Dependency Cleanup](./features/template/scheduler-dependency-cleanup/) | design | Focused Scheduler infrastructure seam |
 
 Your application's feature specs live under [`docs/features/business/`](./features/business/).
 

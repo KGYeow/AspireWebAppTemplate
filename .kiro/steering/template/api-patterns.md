@@ -17,8 +17,9 @@ The project follows a strict **thin controller + full service layer** architectu
 2. Read `CurrentUserId` / `CurrentUserName` / `ClientIpAddress` from `BaseController`
 3. Perform input-format validation (e.g., max ID count checks)
 4. Call the appropriate service method
-5. Map the service result (or exception) to an HTTP status code
+5. Map the service **result** to an HTTP status code (success/not-found/validation shapes)
 6. Return the response
+7. Let service exceptions propagate — the central exception handler maps them (see Exception Handling below); do NOT wrap calls in a triad try/catch
 
 ### Controller MUST NOT
 - Inject or use `ApplicationDbContext` directly
@@ -76,18 +77,33 @@ All controllers extend `BaseController` which provides:
 - Not found: `NotFound()` or `NotFound(message)`.
 - Server error: let middleware handle (500).
 
-### Exception-to-Status Mapping
-Every controller action that delegates to a service uses this pattern:
+### Exception-to-Status Mapping (centralized)
+Controllers do NOT catch service exceptions. A central `IExceptionHandler` — `ExceptionMappingHandler`
+(`ApiService/Exceptions/ExceptionMappingHandler.cs`), registered in `Program.cs` via
+`AddExceptionHandler<ExceptionMappingHandler>()` + `AddProblemDetails()` + `UseExceptionHandler()` —
+maps unhandled service exceptions to RFC 7807 `ProblemDetails` responses:
+
+| Exception | Status |
+|---|---|
+| `KeyNotFoundException` | 404 |
+| `InvalidOperationException` | 400 |
+| `ArgumentException` (incl. subtypes) | 400 |
+| `UnauthorizedAccessException` | 403 |
+| `NotImplementedException` | 501 |
+| `TimeoutException` | 504 |
+| (anything else) | 500 (no detail leaked) |
+
+So a controller action is just the happy path:
 ```csharp
-try
-{
-    var result = await _service.DoSomethingAsync(request);
-    return Ok(result);
-}
-catch (KeyNotFoundException ex)      { return NotFound(ex.Message); }
-catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
-catch (ArgumentException ex)         { return BadRequest(ex.Message); }
+var result = await _service.DoSomethingAsync(request);
+return Ok(result);
 ```
+The exception's `Message` is carried into the response body for mapped types. To add a new mapping,
+extend the single `switch` in `ExceptionMappingHandler` — do not reintroduce per-action try/catch.
+
+**Opt-out:** an action that genuinely needs different behavior (a custom message, a guard clause like
+`if (x is null) return NotFound(...)`, or a non-exception result branch) keeps that logic inline; it is
+not governed by the central handler.
 
 ## Service Layer
 
@@ -189,7 +205,7 @@ private static readonly (string Key, Func<ApplicationUser, object?> Getter)[] Us
 - Audit logging failures: swallow + log at Error level (never disrupt primary operation)
 
 ### Controller Level
-- Map service exceptions to HTTP status codes (see Exception-to-Status Mapping above)
+- Let service exceptions propagate to the central `ExceptionMappingHandler` (see Exception-to-Status Mapping above) — no triad try/catch in actions
 - Input-format validation (e.g., >100 IDs → 400) happens BEFORE calling the service
 
 ## Web → API Communication

@@ -1,18 +1,42 @@
 # Component Patterns
 
-## MudDataGrid with Server-Side Data
+## MudDataGrid with the ServerData callback
 
-All admin pages use `MudDataGrid<T>` with the `ServerData` callback pattern via `DataGridHelper<T>`.
+All admin grids use `MudDataGrid<T>` with the `ServerData` callback (never the `Items` binding). Two
+mechanisms back that callback; choose based on dataset size and where the data lives (see the "Data Grids"
+section in `steering/template/ui-patterns.md` for the decision rule):
 
-### DataGridHelper<T>
+### In-memory: `DataGridHelper<T>`
 
-Located at `AspireWebAppTemplate.UI/Utilities/DataGridHelper.cs`.
+Located at `AspireWebAppTemplate.UI/Utilities/DataGridHelper.cs`. The page loads the **full** set from
+its service and `DataGridHelper<T>` applies filtering, search, sorting, and pagination **in application
+memory** over `IEnumerable<T>`. Correct for small, bounded lists (roles, users, announcements, email
+templates) or when filtering/sorting depends on computed view-model fields that cannot translate to SQL.
 
 Provides:
-- Server-side filtering (global search + per-column)
-- Sorting (single column, ascending/descending)
+- In-memory filtering (global search + per-column) over the materialized list
+- Multi-column sorting
 - Pagination with page-aware line numbering
-- Type: `Task<GridData<T>> ServerReloadAsync(GridState<T> state, ...)`
+- Entry point: `Task<GridData<T>> ServerReloadAsync(GridState<T> state, ...)`
+
+### Database-level: `ServerDataGridHelper` + service + `ToPagedResultAsync`
+
+For large/unbounded datasets (the audit log; future reporting/log grids), the page maps `GridState`
+into a query-param DTO and calls a feature service that composes the query on `IQueryable` and returns
+a `PagedResult<T>` — so filtering/sorting/paging execute in the database and only one page is
+materialized. The pieces:
+
+- `ServerDataGridHelper` (`AspireWebAppTemplate.Web/Utilities/`) — composable `ServerData` helpers the
+  page calls: `ResolvePageSize`, `ExtractSort`, `ToGridData` (PagedResult → GridData with page-aware
+  line numbering), and `Empty` for the readiness guard. The page keeps its filters, service call,
+  readiness guard, and loading state inline.
+- `QueryablePagingExtensions.ToPagedResultAsync` (`AspireWebAppTemplate.Infrastructure/Extensions/`) —
+  EF Core count + sort + page + project → `PagedResult<T>`.
+- `QueryableExtensions.ApplySort` (`AspireWebAppTemplate.Application/Extensions/`) — provider-agnostic
+  dynamic sort composition.
+
+Filtering on the database path is written per feature as explicit `Where` clauses in the service (there
+is deliberately no generic filter engine).
 
 ### Page Structure
 

@@ -56,7 +56,7 @@ Service contracts, DTOs, shared logic, and pure-logic utilities. Depends only on
 
 | Folder | Purpose |
 |--------|---------|
-| `Features/{Feature}/` | Feature-owned service interface(s) **and** their DTOs, co-located per feature under one namespace (`...Application.Features.{Feature}`). Template features: AuditLog, Users, Roles, Notifications, Announcements, Email, Authentication, PagePermissions, Ai, Navigation. Business features are added as sibling feature folders. |
+| `Features/{Feature}/` | Feature-owned service interface(s) **and** their DTOs, co-located per feature under one namespace (`...Application.Features.{Feature}`). Template features: AuditLog, Users, Roles, Notifications, Announcements, Email, Authentication, PagePermissions, Navigation. Business features are added as sibling feature folders. |
 | `Abstractions/` | ONLY layer-wide cross-cutting contracts (ICurrentUserAccessor, IExcelExportService, ITimeZoneHelper). |
 | `Common/` | Cross-cutting shape types with no behavior (ApiResult, NavItem, PagedResult). |
 | `Extensions/` | Extension methods (NavigationProviderExtensions, QueryableExtensions) |
@@ -101,7 +101,7 @@ Blazor Server frontend (Global InteractiveServer mode) — no database, Identity
 | `Components/Pages/` | Feature pages organized by domain (Profile, Settings, UserManagement, RoleManagement, AuditLog, Notifications, Announcements, EmailTemplates) |
 | `Components/Layout/` | Region-based layout (MainLayout, Topbar, Sidebar, Footer) |
 | `Common/Defaults/` | Centralized constants (AssetDefaults — logo/background paths) |
-| `Extensions/` | DI registration extensions (ApiClientServiceExtensions, ApplicationServiceExtensions) |
+| `Extensions/` | DI registration extensions (ApiClientServiceExtensions, ApplicationServiceExtensions) + HTTP-result mapping (HttpResponseMessageExtensions) and HttpClientCertificateExtensions |
 | `Utilities/` | Web helpers (QueryStringBuilder, ServerDataGridHelper) |
 | `Services/ApiClients/` | Typed HttpClient services (ApiUserService, ApiNotificationService, ApiAnnouncementService, etc.) |
 | `Services/Contexts/` | Per-circuit scoped state (NotificationContext, AnnouncementContext, CircuitUserContext) |

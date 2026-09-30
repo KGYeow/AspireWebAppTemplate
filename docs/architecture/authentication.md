@@ -37,10 +37,10 @@ sequenceDiagram
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| `ILoginService` | `Application/Features/Template/Authentication/` | Login orchestration interface |
-| `LoginService` | `Infrastructure/Services/Template/Authentication/` | Coordinates local vs LDAP auth |
-| `ILdapAuthService` | `Application/Features/Template/Authentication/` | LDAP authentication interface |
-| `LdapAuthService` | `Infrastructure/Services/Template/Authentication/` | Active Directory binding and attribute fetching |
+| `ILoginService` | `Application/Features/Authentication/` | Login orchestration interface |
+| `LoginService` | `Infrastructure/Services/Authentication/` | Coordinates local vs LDAP auth |
+| `ILdapAuthService` | `Application/Features/Authentication/` | LDAP authentication interface |
+| `LdapAuthService` | `Infrastructure/Services/Authentication/` | Active Directory binding and attribute fetching |
 | `IdentityRevalidatingAuthenticationStateProvider` | `Web/Components/Account/` | Revalidates auth state in SignalR circuits |
 
 ## ApplicationUser Entity

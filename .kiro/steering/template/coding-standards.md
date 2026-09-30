@@ -146,7 +146,7 @@ Rules:
 ### Error Handling
 - API service methods (Web project): swallow exceptions and return result objects (success/error pattern).
 - Service layer (ApiService): throw typed exceptions for business rule violations; swallow only in audit logging.
-- Controllers: map service exceptions to HTTP status codes via try/catch (see api-patterns.md).
+- Controllers: let service exceptions propagate to the central `ExceptionMappingHandler` (ApiService/Exceptions) — no triad try/catch in actions (see api-patterns.md).
 - UI save operations: show error via Snackbar or inline alert, revert state on failure.
 
 ### Server-Side SignalR Hub Connections

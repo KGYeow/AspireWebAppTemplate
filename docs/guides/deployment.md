@@ -20,7 +20,7 @@ Create `appsettings.Production.json` with:
 Override settings via environment variables:
 ```
 ConnectionStrings__DefaultConnection=Server=prod-sql;...
-LdapSettings__Host=prod-ldap.company.com
+LDAP__Server=ldaps.prod.company.com
 ```
 
 ## Database Migrations

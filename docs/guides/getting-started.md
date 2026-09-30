@@ -56,15 +56,47 @@ Update `appsettings.json` with your LDAP settings:
 
 ```json
 {
-  "LdapSettings": {
-    "Host": "ldap.company.com",
-    "Port": 389,
+  "LDAP": {
+    "Enabled": true,
+    "Server": "ldaps.company.com",
+    "Port": "636",
     "BaseDn": "DC=company,DC=com",
-    "BindDn": "CN=svc-app,OU=Service Accounts,DC=company,DC=com",
-    "BindPassword": "..."
+    "Domain": "COMPANY",
+    "Path": "LDAP://ldaps.company.com:636"
   }
 }
 ```
+
+## Email / SMTP Configuration (Optional)
+
+Email sending is handled by `EmailService` (`Infrastructure/Services/Email/`), which also satisfies
+ASP.NET Core Identity's `IEmailSender<ApplicationUser>`. All email templates (both system-security and
+business) are stored in the database and resolved by the `EmailType` enum; `EmailTemplateCategory`
+controls editability (System = read-only, Business = admin-editable at `/admin/email-templates`).
+
+Configure the SMTP relay via the `Smtp` section in `appsettings.json`:
+
+```json
+{
+  "Smtp": {
+    "Host": "smtp.company.com",
+    "Port": 587,
+    "EnableSsl": true,
+    "FromAddress": "noreply@company.com",
+    "FromName": "MyApp"
+  }
+}
+```
+
+- **Host** — the SMTP server hostname. When empty, `EmailService` runs in **no-op mode**: it logs the
+  intended send but does not connect (so the app runs fine with email unconfigured).
+- **Port / EnableSsl** — `587` with STARTTLS is typical. `System.Net.Mail.SmtpClient` supports 25/587
+  with STARTTLS; it does **not** support implicit TLS (465).
+- **FromAddress / FromName** — the sender. Some relays only deliver mail from an approved/provisioned
+  mailbox even when they accept anonymous relay — set an address your relay actually delivers for.
+- **Credentials** — never commit these. Provide `Smtp__Username` / `Smtp__Password` as environment
+  variables (wired through Aspire parameters in `AppHost.cs`). Credentials are applied only when both
+  are non-empty; a relay that allows anonymous/IP-based relay needs neither.
 
 ## Project Structure
 

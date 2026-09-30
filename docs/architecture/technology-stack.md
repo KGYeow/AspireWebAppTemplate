@@ -14,7 +14,7 @@
 
 | Package | Version | Purpose |
 |---------|---------|---------|
-| MudBlazor | 9.5.0 | Material Design component library |
+| MudBlazor | 9.x | Material Design component library |
 | Radzen.Blazor | — | HtmlEditor component (WYSIWYG rich text editing) |
 | DefaultTheme / JabilTheme | — | Custom themes with PaletteLight/PaletteDark |
 
@@ -49,7 +49,6 @@
 | Package | Project | Purpose |
 |---------|---------|---------|
 | EPPlus | Infrastructure | Excel export (audit log, reports) |
-| AWSSDK.BedrockRuntime | Infrastructure | Amazon Bedrock AI model invocation (Converse API) |
 | Ganss.Xss.HtmlSanitizer | Infrastructure | Server-side HTML content sanitization |
 | System.DirectoryServices | Infrastructure | LDAP/Active Directory integration |
 
@@ -66,7 +65,6 @@
 Microsoft.AspNetCore.Identity.EntityFrameworkCore
 Microsoft.EntityFrameworkCore.SqlServer
 Microsoft.EntityFrameworkCore.Tools
-AWSSDK.BedrockRuntime
 EPPlus
 Ganss.Xss.HtmlSanitizer
 System.DirectoryServices

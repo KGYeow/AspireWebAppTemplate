@@ -55,7 +55,7 @@ Application/
     |       +-- AuditLogQueryParams.cs
     |       +-- AuditLogRequest.cs
     +-- Users/ , Roles/ , Notifications/ , Announcements/
-    +-- Email/ , Authentication/ , PagePermissions/ , Ai/
+    +-- Email/ , Authentication/ , PagePermissions/
     +-- Navigation/              <- interfaces only (no Contracts/ folder: it has no DTOs)
     +-- {YourBusinessFeature}/   <- business features sit alongside, same shape
 ```
@@ -128,7 +128,7 @@ ApiService/
     +-- WeatherController.cs            <- Aspire sample
     +-- AuditLogController.cs
     +-- UsersController.cs
-    +-- ... (Roles, Notifications, Announcements, Email, Auth, PagePermissions, Ai, Navigation)
+    +-- ... (Roles, Notifications, Announcements, Email, Auth, PagePermissions, Navigation)
     +-- {YourBusinessController}.cs     <- business controllers sit alongside
 ```
 
