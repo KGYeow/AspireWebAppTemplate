@@ -212,8 +212,8 @@ public class AuthService : IAuthService
         var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
         code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
 
-        // TODO: Send the verification email with the code
-        // For now, this method generates the token but does not send an actual email
+        // Generates the email-confirmation token. Wire IEmailService (EmailType.EmailConfirmation)
+        // here to send it; the template leaves delivery unwired so it runs without an SMTP relay.
     }
 
     #endregion
@@ -473,8 +473,8 @@ public class AuthService : IAuthService
         // Ensure user exists
         await GetCurrentUserAsync();
 
-        // Passkey support requires WebAuthn credential storage.
-        // Return empty list as stub — full WebAuthn integration to be wired later.
+        // Passkey management requires WebAuthn credential storage, which this template does not include.
+        // Returns an empty list.
         return new List<PasskeyInfoDto>();
     }
 
@@ -484,8 +484,7 @@ public class AuthService : IAuthService
         // Ensure user exists
         await GetCurrentUserAsync();
 
-        // Stub: Passkey deletion requires WebAuthn credential storage.
-        // Full implementation to be added when WebAuthn storage is available.
+        // Passkey management requires WebAuthn credential storage, which this template does not include; no-op.
     }
 
     /// <inheritdoc />
@@ -494,8 +493,7 @@ public class AuthService : IAuthService
         // Ensure user exists
         await GetCurrentUserAsync();
 
-        // Stub: Passkey rename requires WebAuthn credential storage.
-        // Full implementation to be added when WebAuthn storage is available.
+        // Passkey management requires WebAuthn credential storage, which this template does not include; no-op.
     }
 
     #endregion

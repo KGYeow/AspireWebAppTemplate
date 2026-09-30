@@ -302,8 +302,8 @@ public class AuthController : BaseController
         var code = await _userManager.GeneratePasswordResetTokenAsync(user);
         code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
 
-        // TODO: Send password reset email with the code
-        // For now, just return success (email sending to be implemented)
+        // The reset code is generated but not emailed from this endpoint in the template.
+        // Send it via IEmailService (EmailType.PasswordReset) here to enable password-reset email delivery.
 
         return Ok();
     }
