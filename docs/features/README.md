@@ -19,6 +19,14 @@ docs/features/
 - **`business/`** is where your application's completed feature specs are recorded. It starts empty
   (a `.gitkeep` placeholder) and is never synced from the template.
 
+## Status: historical reference, not the source of truth
+
+These are **point-in-time specifications** captured during each feature's development. The codebase is
+the source of truth. A spec can describe an early design that later changed during implementation, so
+**always verify a spec's claims against the current code and the `.kiro/steering/template/*` conventions
+before relying on it.** Any spec known to have diverged carries a "HISTORICAL — SUPERSEDED" banner at
+the top. For *current* architecture and conventions, prefer `docs/architecture/*` and the steering files.
+
 ## What each feature folder contains
 
 Retained specs keep **`design.md`** (how the capability works — architecture, interfaces, data models,
