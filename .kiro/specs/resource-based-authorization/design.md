@@ -1,5 +1,7 @@
 # Design Document: Resource-Based Authorization
 
+> **Status: Proposed — not implemented.** This spec describes a future design that has NOT been built. The shipped system is the page-permission whitelist (the `page-access-permissions` feature). If adopted, this design supersedes that whitelist and restructures a shipped template capability, so it requires explicit architecture approval before execution.
+
 ## Overview
 
 This feature evolves the authorization system from its current transitional state (`[Authorize]` on admin controllers with page-permission-based access control) to a resource-based permission model. Previously, controllers used hardcoded `[Authorize(Roles = "Admin")]`, which conflicted with the page permission whitelist. That was removed as a transitional step — all admin controllers now use `[Authorize]` (authentication-only). This design completes the evolution by adding granular **permission-based** API authorization.

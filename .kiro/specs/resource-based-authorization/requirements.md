@@ -1,5 +1,7 @@
 # Requirements Document
 
+> **Status: Proposed — not implemented.** This spec describes a future design that has NOT been built. The shipped system is the page-permission whitelist (the `page-access-permissions` feature). If adopted, this design supersedes that whitelist and restructures a shipped template capability, so it requires explicit architecture approval before execution.
+
 ## Introduction
 
 Evolve the AspireWebAppTemplate authorization system from its current transitional state to a resource-based permission model. The system previously used hardcoded `[Authorize(Roles = "Admin")]` on admin controllers, which conflicted with the page permission system. As a transitional step, all admin controllers now use `[Authorize]` (authentication-only), and the page permission system (database-driven whitelist) controls page-level access in the Blazor frontend. This feature completes the evolution by introducing granular resource-level permissions. Roles become groupings of permissions assigned to users. API endpoints use policy-based authorization that checks for specific permission keys (e.g., "Users.Read", "Roles.Manage"). Page visibility is derived from permissions — if a role has any permission within a module, the related admin page becomes accessible. The Admin role retains super-admin behavior with implicit access to all permissions.
