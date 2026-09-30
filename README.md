@@ -105,7 +105,7 @@ Reusable Blazor components and themes:
 - **Components/Shared/** — ConfirmationDialog, PageHeader, ModalDialog, PillToggle, StatusAlert, PageContent, LoadingOverlay
 - **Components/DataGrid/** — BoolFilterSelect, EnumFilterSelect, StringFilterSelect
 - **Theme/** — DefaultTheme (neutral blue) + JabilTheme (corporate brand)
-- **Utilities/** — DataGridHelper<T>, QueryableDataGridHelper<T>
+- **Utilities/** — DataGridHelper<T> (in-memory grid filtering/sorting/pagination)
 
 ### 9. **AspireWebAppTemplate.Tests** (Test Project)
 - **Announcements/** — Property-based tests (FsCheck) for announcement service

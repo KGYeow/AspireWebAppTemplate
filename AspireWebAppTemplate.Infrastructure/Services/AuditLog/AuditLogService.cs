@@ -1,9 +1,11 @@
+using System.Linq.Expressions;
 using Microsoft.Extensions.Logging;
 using AspireWebAppTemplate.Application.Abstractions;
 using AspireWebAppTemplate.Infrastructure.Data;
 using AspireWebAppTemplate.Infrastructure.Data.Entities;
 using AspireWebAppTemplate.Infrastructure.Identity;
 using AspireWebAppTemplate.Application.Extensions;
+using AspireWebAppTemplate.Infrastructure.Extensions;
 using AspireWebAppTemplate.Domain.Constants;
 using AspireWebAppTemplate.Application.Common;
 using AspireWebAppTemplate.Application.Features.AuditLog;
@@ -101,36 +103,14 @@ public class AuditLogService : IAuditLogService
 
         query = ApplyFilters(query, queryParams);
 
-        var totalCount = await query.CountAsync();
-
-        var entries = await query
-            .ApplySort(queryParams.SortBy, queryParams.SortDescending, q => q.OrderByDescending(e => e.Timestamp))
-            .Skip(queryParams.Page * queryParams.PageSize)
-            .Take(queryParams.PageSize)
-            .Select(e => new AuditLogEntryDto
-            {
-                Id = e.Id,
-                UserId = e.UserId,
-                UserDisplayName = e.UserDisplayName,
-                ActionType = e.ActionType,
-                EntityType = e.EntityType,
-                EntityId = e.EntityId,
-                EntityName = e.EntityName,
-                Description = e.Description,
-                OldValues = e.OldValues,
-                NewValues = e.NewValues,
-                IpAddress = e.IpAddress,
-                Timestamp = e.Timestamp
-            })
-            .ToListAsync();
-
-        return new PagedResult<AuditLogEntryDto>
-        {
-            Items = entries,
-            TotalCount = totalCount,
-            Page = queryParams.Page,
-            PageSize = queryParams.PageSize
-        };
+        // Sort, count, page, and project at the database level via the shared paging helper.
+        return await query.ToPagedResultAsync(
+            queryParams.Page,
+            queryParams.PageSize,
+            queryParams.SortBy,
+            queryParams.SortDescending,
+            q => q.OrderByDescending(e => e.Timestamp),
+            EntryProjection);
     }
 
     /// <inheritdoc />
@@ -139,21 +119,7 @@ public class AuditLogService : IAuditLogService
         var entry = await _dbContext.AuditLogEntries
             .AsNoTracking()
             .Where(e => e.Id == id)
-            .Select(e => new AuditLogEntryDto
-            {
-                Id = e.Id,
-                UserId = e.UserId,
-                UserDisplayName = e.UserDisplayName,
-                ActionType = e.ActionType,
-                EntityType = e.EntityType,
-                EntityId = e.EntityId,
-                EntityName = e.EntityName,
-                Description = e.Description,
-                OldValues = e.OldValues,
-                NewValues = e.NewValues,
-                IpAddress = e.IpAddress,
-                Timestamp = e.Timestamp
-            })
+            .Select(EntryProjection)
             .FirstOrDefaultAsync();
 
         if (entry is null)
@@ -172,27 +138,34 @@ public class AuditLogService : IAuditLogService
         return await query
             .OrderByDescending(e => e.Timestamp)
             .Take(ExportDefaults.MaxExportRows)
-            .Select(e => new AuditLogEntryDto
-            {
-                Id = e.Id,
-                UserId = e.UserId,
-                UserDisplayName = e.UserDisplayName,
-                ActionType = e.ActionType,
-                EntityType = e.EntityType,
-                EntityId = e.EntityId,
-                EntityName = e.EntityName,
-                Description = e.Description,
-                OldValues = e.OldValues,
-                NewValues = e.NewValues,
-                IpAddress = e.IpAddress,
-                Timestamp = e.Timestamp
-            })
+            .Select(EntryProjection)
             .ToListAsync();
     }
 
     #endregion
 
     #region Private Helpers
+
+    /// <summary>
+    /// Projects an <see cref="AuditLogEntry"/> to an <see cref="AuditLogEntryDto"/>. Defined once as an
+    /// expression so every query method (search, export, single lookup) shares the same mapping and EF
+    /// Core translates the projection into the SQL SELECT list.
+    /// </summary>
+    private static readonly Expression<Func<AuditLogEntry, AuditLogEntryDto>> EntryProjection = e => new AuditLogEntryDto
+    {
+        Id = e.Id,
+        UserId = e.UserId,
+        UserDisplayName = e.UserDisplayName,
+        ActionType = e.ActionType,
+        EntityType = e.EntityType,
+        EntityId = e.EntityId,
+        EntityName = e.EntityName,
+        Description = e.Description,
+        OldValues = e.OldValues,
+        NewValues = e.NewValues,
+        IpAddress = e.IpAddress,
+        Timestamp = e.Timestamp
+    };
 
     /// <summary>
     /// Resolves the display name for the given user ID.

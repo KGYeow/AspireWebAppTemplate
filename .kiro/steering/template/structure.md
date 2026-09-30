@@ -124,6 +124,7 @@ AspireWebAppTemplate.Web/
 │   ├── Contexts/               ← Per-circuit scoped state (NotificationContext, AnnouncementContext, CircuitUserContext)
 │   ├── Handlers/               ← Delegating handlers (UserIdentityDelegatingHandler)
 │   └── ExponentialBackoffRetryPolicy.cs
+├── Utilities/                  ← Web helpers (QueryStringBuilder, ServerDataGridHelper)
 ├── Authorization/              ← PagePermissionHandler, requirements
 └── wwwroot/                    ← Static assets (css, js, images)
 ```
@@ -133,7 +134,7 @@ AspireWebAppTemplate.Web/
 AspireWebAppTemplate.UI/
 ├── Components/Shared/          ← Reusable components (PageContent, LoadingOverlay, PageHeader, StatusAlert, PillToggle, ModalDialog, etc.)
 ├── Components/DataGrid/        ← DataGrid filter components (BoolFilterSelect, EnumFilterSelect, StringFilterSelect)
-├── Utilities/                  ← DataGridHelper, QueryableDataGridHelper
+├── Utilities/                  ← DataGridHelper (in-memory grid helper)
 └── Theme/                      ← DefaultTheme (neutral blue) + JabilTheme (corporate brand)
 ```
 

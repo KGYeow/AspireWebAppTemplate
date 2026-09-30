@@ -71,11 +71,17 @@ Use flat style (Elevation 0) for content sections:
 ```
 
 ### Data Grids
-- ALL admin DataGrid pages use `MudDataGrid<T>` with `ServerData` callback and `DataGridHelper<T>` for consistent filtering, sorting, and pagination — regardless of dataset size.
-- Use `QueryableDataGridHelper<T>` for database-level filtering/sorting/pagination (audit log with thousands of rows).
-- Use `DataGridHelper<T>` for in-memory filtering/sorting/pagination (all other admin pages — roles, users, announcements, email templates).
+- ALL admin DataGrid pages use `MudDataGrid<T>` with a `ServerData` callback (never the `Items` binding).
 - Always include `<NoRecordsContent>` and `<LoadingContent>`.
-- `Items` binding is reserved for truly static lists (e.g., settings dropdowns, enum selectors) — NOT for admin management grids.
+- `Items` binding is reserved for truly static lists (e.g., settings dropdowns, enum selectors) - NOT for admin management grids.
+
+#### Choosing in-memory vs database-level processing
+Two mechanisms back the `ServerData` callback. Choose based on dataset size and where the data lives; this choice has real scalability impact, so make it deliberately:
+
+- **In-memory (default for small, bounded lists):** use `DataGridHelper<T>` (`UI/Utilities/DataGridHelper.cs`). The page loads the full set from its service (e.g. `GetAllAsync`) and `DataGridHelper<T>` applies column filters, global search, multi-sort, and pagination in application memory over `IEnumerable<T>` via fluent `Map*` selectors. Used by roles, users, announcements, and email templates. Correct when the dataset is small and fully materialized, or when filtering/sorting depends on computed view-model fields that cannot translate to SQL.
+- **Database-level (required for large/unbounded datasets):** the page maps the grid `GridState` (page, page size, `SortDefinitions`, toolbar filters) into a query-param DTO (e.g. `AuditLogQueryParams` with `SortBy`/`SortDescending`) and calls a feature service that composes the query on `IQueryable` and returns a `PagedResult<T>`. The service applies filters as `Where` clauses, sorts via `QueryableExtensions.ApplySort` (`Application/Extensions/`), then `CountAsync` + `Skip`/`Take`/`Select`/`ToListAsync` (via `QueryablePagingExtensions.ToPagedResultAsync` in `Infrastructure/Extensions/`) so the database does the work and only one page is materialized. Used by the audit log. On the page side, the `ServerData` callback uses `ServerDataGridHelper` (`Web/Utilities/ServerDataGridHelper.cs`) for the mechanical ceremony — `ResolvePageSize`, `ExtractSort`, and `ToGridData` (PagedResult -> GridData with page-aware line numbering), plus `Empty` for the readiness guard — while the page keeps its filters, service call, readiness guard, and loading state inline. See "Server-Side Sorting & Pagination (Large Datasets)" in `coding-standards.md` for the data-access details.
+- **Avoid:** loading a large table with `GetAllAsync` and handing it to `DataGridHelper<T>` - that pulls the whole table into memory and defeats database paging.
+- The database-level pieces are: `ServerDataGridHelper` (Web, `ServerData` ceremony), `QueryablePagingExtensions.ToPagedResultAsync` (Infrastructure, count/sort/page/project), and `QueryableExtensions.ApplySort` (Application, provider-agnostic sort). **Filtering is still per-feature** — each database-level service writes its own `Where` clauses (there is deliberately no generic filter engine). If several database-backed grids end up sharing filter shapes, consider extracting a shared queryable filter helper then (not before).
 
 ### Dialogs
 Use `ConfirmationDialog` from UI shared library for destructive actions:

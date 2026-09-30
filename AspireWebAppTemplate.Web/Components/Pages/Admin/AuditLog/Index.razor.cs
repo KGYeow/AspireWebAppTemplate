@@ -1,6 +1,7 @@
 using AspireWebAppTemplate.Application.Features.AuditLog;
 using AspireWebAppTemplate.Domain.Enums;
 using AspireWebAppTemplate.Web.Services;
+using AspireWebAppTemplate.Web.Utilities;
 using AspireWebAppTemplate.Web.Abstractions;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
@@ -172,29 +173,19 @@ public partial class Index : ComponentBase, IDisposable
     /// </summary>
     private async Task<GridData<AuditLogViewModel>> ServerReload(GridState<AuditLogViewModel> state, CancellationToken cancellationToken)
     {
-        // Skip during prerender and before timezone context is initialized
+        // Skip during prerender and before timezone context is initialized (page-owned readiness guard).
         if (!_isReady)
-            return new GridData<AuditLogViewModel> { Items = [], TotalItems = 0 };
+            return ServerDataGridHelper.Empty<AuditLogViewModel>();
 
         IsLoading = true;
 
         try
         {
-            // Use default page size if not yet initialized by the grid
-            var pageSize = state.PageSize > 0 ? state.PageSize : 10;
+            var pageSize = ServerDataGridHelper.ResolvePageSize(state);
+            var (sortBy, sortDescending) = ServerDataGridHelper.ExtractSort(state);
 
-            // Extract sort state from the grid (single-column sort)
-            string? sortBy = null;
-            var sortDescending = true;
-            var firstSort = state.SortDefinitions.FirstOrDefault();
-            if (firstSort is not null && !string.IsNullOrWhiteSpace(firstSort.SortBy))
-            {
-                sortBy = firstSort.SortBy;
-                sortDescending = firstSort.Descending;
-            }
-
-            // Build query parameters for the API call
-            var queryParams = new Application.Features.AuditLog.AuditLogQueryParams
+            // Build query parameters for the API call (filters remain feature-specific).
+            var queryParams = new AuditLogQueryParams
             {
                 Page = state.Page,
                 PageSize = pageSize,
@@ -209,26 +200,14 @@ public partial class Index : ComponentBase, IDisposable
 
             var apiResult = await AuditLogService.GetPagedAsync(queryParams);
 
-            if (!apiResult.Succeeded || apiResult.Data is null)
-            {
-                _totalItems = 0;
-                return new GridData<AuditLogViewModel> { Items = [], TotalItems = 0 };
-            }
+            var grid = ServerDataGridHelper.ToGridData(
+                apiResult, state.Page, pageSize,
+                (entry, lineNumber) => new AuditLogViewModel { LineNumber = lineNumber, Entry = entry });
 
-            var result = apiResult.Data;
-            _totalItems = result.TotalCount;
+            // Track the total for the Export button's enabled/disabled state.
+            _totalItems = grid.TotalItems;
 
-            var viewModels = result.Items.Select((entry, index) => new AuditLogViewModel
-            {
-                LineNumber = state.Page * state.PageSize + index + 1,
-                Entry = entry
-            }).ToList();
-
-            return new GridData<AuditLogViewModel>
-            {
-                Items = viewModels,
-                TotalItems = result.TotalCount
-            };
+            return grid;
         }
         finally
         {

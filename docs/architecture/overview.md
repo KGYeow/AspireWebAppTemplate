@@ -102,6 +102,7 @@ Blazor Server frontend (Global InteractiveServer mode) — no database, Identity
 | `Components/Layout/` | Region-based layout (MainLayout, Topbar, Sidebar, Footer) |
 | `Common/Defaults/` | Centralized constants (AssetDefaults — logo/background paths) |
 | `Extensions/` | DI registration extensions (ApiClientServiceExtensions, ApplicationServiceExtensions) |
+| `Utilities/` | Web helpers (QueryStringBuilder, ServerDataGridHelper) |
 | `Services/ApiClients/` | Typed HttpClient services (ApiUserService, ApiNotificationService, ApiAnnouncementService, etc.) |
 | `Services/Contexts/` | Per-circuit scoped state (NotificationContext, AnnouncementContext, CircuitUserContext) |
 | `Services/Handlers/` | Delegating handlers (UserIdentityDelegatingHandler) |
@@ -120,7 +121,7 @@ Reusable Blazor components and theming shared across the application.
 | `Components/DataGrid/` | BoolFilterSelect, EnumFilterSelect, StringFilterSelect |
 | `Components/Shared/` | PageContent, LoadingOverlay, PageHeader, StatusAlert, PillToggle, ModalDialog, etc. |
 | `Theme/` | DefaultTheme (neutral blue), JabilTheme (corporate brand) — dual palette themes |
-| `Utilities/` | DataGridHelper<T>, QueryableDataGridHelper<T> |
+| `Utilities/` | DataGridHelper<T> (in-memory grid helper) |
 
 ### AspireWebAppTemplate.Tests (Test Project)
 
@@ -157,7 +158,7 @@ graph LR
 - **ApiResult<T>**: Typed result wrapper for all API operations
 - **BaseController**: Shared controller base with `CurrentUserId`, `ClientIpAddress`
 - **In-memory data grids**: `DataGridHelper<T>` for MudDataGrid client-side filtering, sorting, pagination
-- **Queryable data grids**: `QueryableDataGridHelper<T>` for true server-side filtering/sorting/pagination (audit log)
+- **Database-level data grids**: feature services compose `IQueryable` with `QueryableExtensions.ApplySort` and return `PagedResult<T>` for true server-side filtering/sorting/pagination (audit log)
 - **Scoped state services**: ThemeStateService (theme), UserTimeZoneContext (timezone/format) — one per SignalR circuit
 - **Instant-save**: Settings page saves on value change (no Save button)
 - **View/Edit mode**: Profile page uses unified layout toggle
