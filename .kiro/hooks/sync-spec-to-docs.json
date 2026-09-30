@@ -3,11 +3,11 @@
   "hooks": [
     {
       "name": "Sync Spec to Docs",
-      "description": "Automatically syncs completed spec documents (requirements.md, design.md, tasks.md) from .kiro/specs/ to docs/features/ when all tasks in a spec are marked complete.",
+      "description": "When all tasks in a spec are complete, syncs its design.md (and requirements.md/bugfix.md only for cross-cutting capability features) from .kiro/specs/ to docs/features/business/. Never copies tasks.md.",
       "trigger": "PostTaskExec",
       "action": {
         "type": "agent",
-        "prompt": "Check if ALL tasks in the current spec's tasks.md are now marked complete. If yes, copy requirements.md, design.md, and tasks.md from .kiro/specs/{feature-name}/ to docs/features/{feature-name}/, creating the folder if needed. If not all tasks are complete, do nothing."
+        "prompt": "Check whether ALL tasks in the current spec's tasks.md are now marked complete. If not all are complete, do nothing.\n\nIf all tasks are complete, sync the spec's documentation into docs/features/business/{feature-name}/ (create the folder if needed), following the repository's docs/features convention:\n- ALWAYS copy design.md.\n- Copy requirements.md (or bugfix.md for a bugfix spec) ONLY when the feature is a cross-cutting/reusable capability whose behavioral contract carries lasting reference value (for example: audit, permissions, notifications, email, announcements, or cross-cutting refactors). For a small or narrowly-scoped feature, copy design.md only.\n- NEVER copy tasks.md (implementation checklists are not retained in docs/features).\n\nBusiness application specs sync under docs/features/business/. Do NOT write to docs/features/template/ - that directory is template-owned and is updated only by pulling from the template repository. See docs/features/README.md for the ownership split."
       },
       "enabled": true
     }

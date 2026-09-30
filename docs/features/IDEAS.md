@@ -4,43 +4,9 @@ A curated list of pages and features that would complement the existing template
 
 ---
 
-## What Already Exists
-
-| Page / Feature | Path | Notes |
-|---|---|---|
-| Home (landing) | `/` | |
-| User Profile (view + edit) | `/account/profile` | |
-| Settings (theme, timezone, date format, notifications) | `/account/settings/*` | Tabbed layout with profile, appearance, regional, notifications |
-| Notifications (inbox + preferences) | `/account/notifications` | Bell dropdown, click-to-expand detail, mark as read, bulk dismiss, category/status filters |
-| User Management (CRUD, LDAP, bulk ops) | `/admin/user-management` | Server-side grid, multi-select, bulk activate/deactivate/delete/role-assign |
-| Role Management (CRUD, user assignment) | `/admin/role-management` | Position hierarchy, user assignment dialog |
-| Audit Log (searchable, filterable, export) | `/admin/audit-log` | Old/new value tracking, Excel export |
-| Page Permissions (role × page matrix) | `/admin/page-permissions` | Bordered matrix grid, per-circuit cache, nav filtering |
-| Auth (login, register, 2FA, passkeys, password reset) | `/Account/*` | Full ASP.NET Core Identity flow + LDAP |
-| Theme Switching (light/dark/system) | Built into layout + settings | Real-time toggle, per-user DB persistence |
-| StatusAlert (reusable component) | UI library | Self-hiding, @bind-Message, dismissible, dense mode |
-| Example pages (counter, weather + notification test) | `/counter`, `/weather`, `/auth` | Weather page includes notification testing |
-
-### Recently Completed (This Session)
-
-- **AWS AI Integration** — Provider-agnostic AI text generation service via Amazon Bedrock (Nova 2 Lite), with three-tier credential resolution, Aspire parameter-based secrets, and structured error handling
-- **Email Templates & SMTP** — All-in-database template architecture with unified EmailType enum, SMTP sending, admin-editable business templates, read-only system templates, Identity integration
-- StatusAlert component created and deployed across all pages
-- Service registration extensions (`AddApiClients()`, `AddApplicationServices()`)
-- SystemPageDefaults expanded (all self-service pages bypass permissions)
-- RedirectToLogin → AccessDenied for authenticated users without permission
-- Notification bell redesign (MudMenu, unread background, click-to-expand-and-read)
-- AssetDefaults centralized (logos, backgrounds)
-- Theme separation (DefaultTheme + JabilTheme from brand guidelines)
-- Notification settings table layout (MudSimpleTable)
-- Removed Bordered from data grids (except page permissions matrix)
-- Settings nav icon color fix (IconColor.Inherit)
-
----
-
 ## High Priority — Common in Every Internal/Enterprise App
 
-### 1. Email Templates & SMTP Configuration ✅ COMPLETE
+### 1. Email Templates & SMTP Configuration
 - SMTP email sending with database-stored templates (all-in-database architecture)
 - Unified `EmailType` enum for template resolution — no file-based templates
 - `IEmailService.SendEmailAsync(EmailType, ...)` as primary sending interface
@@ -79,7 +45,7 @@ The following templates are not in the initial implementation but should be adde
 - Runtime-configurable settings without redeployment
 - Route: `/admin/app-settings`
 
-### 3. ~~Wire Up Notification Triggers~~ ✅ COMPLETED
+### 3. ~~Wire Up Notification Triggers~~
 - ~~Connect `CreateNotificationAsync` calls to actual user events~~
 - Implemented in UserService (account deactivation, password reset by admin) and AnnouncementService (announcement published notifications to all users)
 - Excluded by design: role assignment/removal, account activation (per industry standard — no user value, creates noise)
@@ -107,7 +73,7 @@ The following templates are not in the initial implementation but should be adde
 - Admin view of all active sessions
 - Route: `/account/sessions`
 
-### 7. ~~Announcement / Banner System~~ ✅ COMPLETED
+### 7. ~~Announcement / Banner System~~
 - ~~Admin posts site-wide banners (info, warning, maintenance)~~
 - ~~Dismissible by users (remember dismissal)~~
 - ~~Scheduled start/end dates~~
@@ -193,7 +159,7 @@ The following templates are not in the initial implementation but should be adde
 
 | Enhancement | Description | Priority |
 |---|---|---|
-| ~~SignalR Real-Time Notifications~~ ✅ | Push notification count updates to connected users without polling — implemented via NotificationHub + NotificationContext | ~~High~~ Done |
+| ~~SignalR Real-Time Notifications~~ | Push notification count updates to connected users without polling — implemented via NotificationHub + NotificationContext | ~~High~~ Done |
 | Background Job Dashboard | Hangfire/Quartz for scheduled tasks (email sending, cleanup) | Medium |
 | Rate Limiting Middleware | Protect login and API endpoints from brute force | Medium |
 | CI/CD Pipeline (GitHub Actions) | Build, test, deploy workflow | Medium |
