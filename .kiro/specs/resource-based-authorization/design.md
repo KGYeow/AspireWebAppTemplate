@@ -1,6 +1,6 @@
 # Design Document: Resource-Based Authorization
 
-> **Status: Proposed — not implemented.** This spec describes a future design that has NOT been built. The shipped system is the page-permission whitelist (the `page-access-permissions` feature). If adopted, this design supersedes that whitelist and restructures a shipped template capability, so it requires explicit architecture approval before execution.
+> **Status: In progress.** Implementation is underway (approved; the team accepted that this replaces the shipped page-permission whitelist via a coexistence migration). The `page-access-permissions` whitelist remains in place read-only during the transition; cleanup is deferred (Requirement 10.6).
 
 ## Overview
 
@@ -37,6 +37,7 @@ graph TD
         UC[UsersController] -->|policy attr| PAH
         RC[RolesController] -->|policy attr| PAH
         ALC[AuditLogController] -->|policy attr| PAH
+        ETC[EmailTemplateController] -->|policy attr| PAH
     end
 
     subgraph "Database"
@@ -71,7 +72,7 @@ graph TD
 | `Permission` (entity) | `Infrastructure/Data/Entities/Permission.cs` | EF Core entity for permission definitions |
 | `RolePermission` (entity) | `Infrastructure/Data/Entities/RolePermission.cs` | EF Core join entity linking roles to permissions |
 | `ApplicationDbContext` (update) | `Infrastructure/Data/ApplicationDbContext.cs` | Add `DbSet<Permission>`, `DbSet<RolePermission>`, configure entity |
-| `SeedData` (update) | `Infrastructure/Data/SeedData/SeedData.cs` | Seed 15 permissions + Admin role assignments + migrate PagePermission records |
+| `SeedData` (update) | `Infrastructure/Data/SeedData/SeedData.cs` | Seed 16 permissions + Admin role assignments + migrate PagePermission records |
 
 ### Service Layer (Infrastructure)
 
@@ -96,6 +97,7 @@ graph TD
 | `UsersController` (update) | `Controllers/UsersController.cs` | Replace `[Authorize]` with permission policies |
 | `RolesController` (update) | `Controllers/RolesController.cs` | Replace `[Authorize]` with permission policies |
 | `AuditLogController` (update) | `Controllers/AuditLogController.cs` | Replace `[Authorize]` with permission policies |
+| `EmailTemplateController` (update) | `Controllers/EmailTemplateController.cs` | Replace `[Authorize]` with permission policies: GetAll/GetById/Preview → `EmailTemplates.Read`, Update → `EmailTemplates.Update` (no create/delete endpoints exist) |
 
 ### Web Project Services
 
@@ -121,10 +123,13 @@ graph TD
 
 | Component | Location | Responsibility |
 |-----------|----------|----------------|
-| `PermissionDto` | `Application/Contracts/Permissions/PermissionDto.cs` | Permission definition DTO |
-| `PermissionGroupDto` | `Application/Contracts/Permissions/PermissionGroupDto.cs` | Permissions grouped by module |
-| `UpdateRolePermissionsRequest` | `Application/Contracts/Permissions/UpdateRolePermissionsRequest.cs` | PUT request body with permission keys |
-| `PageModuleMappingDto` | `Application/Contracts/Permissions/PageModuleMappingDto.cs` | Page path → module mapping entry |
+| `PermissionDto` | `Application/Features/Permissions/Contracts/PermissionDto.cs` | Permission definition DTO |
+| `PermissionGroupDto` | `Application/Features/Permissions/Contracts/PermissionGroupDto.cs` | Permissions grouped by module |
+| `UpdateRolePermissionsRequest` | `Application/Features/Permissions/Contracts/UpdateRolePermissionsRequest.cs` | PUT request body with permission keys |
+| `RolePermissionsDto` | `Application/Features/Permissions/Contracts/RolePermissionsDto.cs` | A role's granted permission keys |
+| `PageModuleMappingDto` | `Application/Features/Permissions/Contracts/PageModuleMappingDto.cs` | Page path → module mapping entry |
+
+> **DTO name-collision resolution (coexistence phase).** The new permission contracts collide by name with the existing `page-access-permissions` contracts, which remain in place while both authorization systems run side by side. The legacy feature already defines `UpdateRolePermissionsRequest` (with a `PagePaths` property) and `RolePermissionsDto` in `Application/Features/PagePermissions/Contracts`. To let both compile without ambiguity, **the new permission contracts live in a separate feature namespace**: `AspireWebAppTemplate.Application.Features.Permissions` (folder `Application/Features/Permissions/Contracts/`). The names are deliberately reused within that distinct namespace — the new `UpdateRolePermissionsRequest` carries `PermissionKeys` (not `PagePaths`) — and consumers disambiguate via `using` alias or fully-qualified name where both are referenced in the same file. The legacy `PagePermissions` contracts are untouched until the cleanup phase (Requirement 10.6) removes the PagePermission system.
 
 ### Key Interfaces
 
@@ -193,7 +198,7 @@ public class RolePermission
 - `RoleId`: max 450, FK to `ApplicationRoles` with cascade delete
 - `PermissionId`: FK to `Permissions` with cascade delete
 
-### Seed Data (15 Permissions)
+### Seed Data (16 Permissions)
 
 | Key | DisplayName | Module |
 |-----|-------------|--------|
@@ -211,7 +216,8 @@ public class RolePermission
 | Announcements.Create | Create Announcements | Announcements |
 | Announcements.Update | Update Announcements | Announcements |
 | Announcements.Delete | Delete Announcements | Announcements |
-| Announcements.Publish | Publish Announcements | Announcements |
+| EmailTemplates.Read | View Email Templates | EmailTemplates |
+| EmailTemplates.Update | Edit Email Templates | EmailTemplates |
 
 ### Page-to-Module Mapping (Static Configuration)
 
@@ -222,6 +228,7 @@ public class RolePermission
 | /admin/audit-log | AuditLog |
 | /admin/permission-management | Permissions |
 | /admin/announcements | Announcements |
+| /admin/email-templates | EmailTemplates |
 
 ### DTO Structures
 
@@ -260,9 +267,21 @@ The migration adds:
 3. Retains the existing `PagePermissions` table unchanged (coexistence)
 
 The seed process:
-1. Inserts the 15 permission definitions (idempotent by key)
+1. Inserts the 16 permission definitions (idempotent by key)
 2. Assigns all permissions to the Admin role
 3. Maps existing `PagePermission` records to equivalent permission grants for non-Admin roles
+
+**PagePermission → permission correspondence:**
+
+| Legacy PagePermission path | Granted permission |
+|----------------------------|--------------------|
+| /admin/user-management | Users.Read |
+| /admin/role-management | Roles.Read |
+| /admin/audit-log | AuditLog.Read |
+| /admin/email-templates | EmailTemplates.Read |
+| /admin/page-permissions | Permissions.Manage |
+
+> **Legacy-path timing note.** This mapping reads the **legacy** `PagePermission` records, which still use the original page paths — including `/admin/page-permissions` and `/admin/email-templates`. The seed/migration reads these legacy records **before and independently of** the nav item/route rename from `admin/page-permissions` to `admin/permission-management` (Requirement 10.5). The rename applies only to the navigation entry and route of the new Permission Management page; it does not rewrite the stored legacy `PagePermission` paths, so the correspondence lookup above remains valid regardless of rename ordering.
 
 
 
@@ -302,7 +321,7 @@ The seed process:
 
 ### Property 6: Seed process is idempotent and non-destructive
 
-*For any* initial database state containing existing non-Admin role-permission assignments, running the seed process N times (N ≥ 1) SHALL result in: exactly 15 Permission_Entity records (no duplicates), the Admin role assigned to all 15 permissions, and all pre-existing non-Admin role-permission assignments unchanged.
+*For any* initial database state containing existing non-Admin role-permission assignments, running the seed process N times (N ≥ 1) SHALL result in: exactly 16 Permission_Entity records (no duplicates), the Admin role assigned to all 16 permissions, and all pre-existing non-Admin role-permission assignments unchanged.
 
 **Validates: Requirements 2.2, 2.4, 2.5**
 
@@ -320,7 +339,7 @@ The seed process:
 
 ### Property 9: PagePermission migration mapping correctness
 
-*For any* existing PagePermission record with a page path that has a defined correspondence in the migration mapping, the seed process SHALL create a Role_Permission_Entity granting the mapped permission to that role. The mapping is: "/admin/user-management" → "Users.Read", "/admin/role-management" → "Roles.Read", "/admin/audit-log" → "AuditLog.Read", "/admin/page-permissions" → "Permissions.Manage".
+*For any* existing PagePermission record with a page path that has a defined correspondence in the migration mapping, the seed process SHALL create a Role_Permission_Entity granting the mapped permission to that role. The mapping reads the legacy PagePermission paths and is: "/admin/user-management" → "Users.Read", "/admin/role-management" → "Roles.Read", "/admin/audit-log" → "AuditLog.Read", "/admin/email-templates" → "EmailTemplates.Read", "/admin/page-permissions" → "Permissions.Manage".
 
 **Validates: Requirements 10.2**
 
@@ -410,7 +429,7 @@ Property-based testing IS applicable to this feature. The core authorization log
 - **PermissionService**: Duplicate assignment rejection, Admin role immutability, invalid key rejection
 - **PermissionContext**: IsLoaded lifecycle, API failure graceful degradation, unauthenticated skip
 - **PermissionController**: Endpoint response codes (200, 400, 403, 404) for various scenarios
-- **Seed logic**: All 15 permissions created, Admin assigned, missing Admin role handling
+- **Seed logic**: All 16 permissions created, Admin assigned, missing Admin role handling
 
 ### Integration Tests (SQLite in-memory)
 

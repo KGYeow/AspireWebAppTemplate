@@ -1,4 +1,5 @@
 using AspireWebAppTemplate.ApiService.Authentication;
+using AspireWebAppTemplate.ApiService.Authorization;
 using AspireWebAppTemplate.ApiService.Exceptions;
 using AspireWebAppTemplate.Infrastructure.Services.Authentication;
 using AspireWebAppTemplate.Infrastructure.Data;
@@ -7,6 +8,7 @@ using AspireWebAppTemplate.Infrastructure.Extensions;
 using AspireWebAppTemplate.Infrastructure.Data.SeedData;
 using AspireWebAppTemplate.Infrastructure.Options;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -46,6 +48,14 @@ builder.Services.AddAuthentication(InternalAuthenticationHandler.SchemeName)
     .AddScheme<AuthenticationSchemeOptions, InternalAuthenticationHandler>(
         InternalAuthenticationHandler.SchemeName, options => { });
 builder.Services.AddAuthorization();
+
+// Resource-based authorization: dynamic policy provider resolves "Module.Action" permission
+// policies on demand, and the handler evaluates them. The handler uses IHttpContextAccessor
+// for per-request permission caching (via HttpContext.Items). It depends on the scoped
+// IPermissionService (and ApplicationDbContext), so it is registered as scoped; the policy
+// provider stays singleton (it only depends on IOptions).
+builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
+builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
 
 // Memory cache (used by LoginService for single-use login tokens)
 builder.Services.AddMemoryCache();

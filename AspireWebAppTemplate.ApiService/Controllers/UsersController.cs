@@ -28,7 +28,6 @@ namespace AspireWebAppTemplate.ApiService.Controllers;
 /// </para>
 /// </remarks>
 [Route("api/[controller]")]
-[Authorize]
 public class UsersController : BaseController
 {
     #region Constructor
@@ -59,6 +58,7 @@ public class UsersController : BaseController
     /// <returns>A paged result containing matching users and total count metadata.</returns>
     /// <response code="200">Returns the paged user list.</response>
     [HttpGet]
+    [Authorize(Policy = "Users.Read")]
     [ProducesResponseType(typeof(PagedResult<UserDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<PagedResult<UserDto>>> GetUsers([FromQuery] UserQueryParams queryParams)
     {
@@ -74,6 +74,7 @@ public class UsersController : BaseController
     /// <response code="200">Returns the user profile.</response>
     /// <response code="404">No user exists with the specified ID.</response>
     [HttpGet("{id}")]
+    [Authorize(Policy = "Users.Read")]
     [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<UserDto>> GetUser(string id)
@@ -90,6 +91,7 @@ public class UsersController : BaseController
     /// <response code="201">The user was created successfully.</response>
     /// <response code="400">Validation failed (duplicate email, password policy violation, etc.).</response>
     [HttpPost]
+    [Authorize(Policy = "Users.Create")]
     [ProducesResponseType(typeof(UserDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<UserDto>> CreateUser([FromBody] CreateUserRequest request)
@@ -109,6 +111,7 @@ public class UsersController : BaseController
     /// <response code="400">Validation failed (duplicate email, etc.).</response>
     /// <response code="404">No user exists with the specified ID.</response>
     [HttpPut("{id}")]
+    [Authorize(Policy = "Users.Update")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -128,6 +131,7 @@ public class UsersController : BaseController
     /// <response code="400">Deletion blocked (self-deletion, last admin, etc.).</response>
     /// <response code="404">No user exists with the specified ID.</response>
     [HttpDelete("{id}")]
+    [Authorize(Policy = "Users.Delete")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -149,6 +153,7 @@ public class UsersController : BaseController
     /// <response code="200">The user was activated successfully.</response>
     /// <response code="404">No user exists with the specified ID.</response>
     [HttpPost("{id}/activate")]
+    [Authorize(Policy = "Users.Activate")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ActivateUser(string id)
@@ -167,6 +172,7 @@ public class UsersController : BaseController
     /// <response code="400">Deactivation blocked (self-deactivation).</response>
     /// <response code="404">No user exists with the specified ID.</response>
     [HttpPost("{id}/deactivate")]
+    [Authorize(Policy = "Users.Activate")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -187,6 +193,7 @@ public class UsersController : BaseController
     /// <response code="400">Password reset failed (policy violation).</response>
     /// <response code="404">No user exists with the specified ID.</response>
     [HttpPost("{id}/reset-password")]
+    [Authorize(Policy = "Users.Activate")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -210,6 +217,7 @@ public class UsersController : BaseController
     /// <response code="400">Role assignment failed (invalid role name, etc.).</response>
     /// <response code="404">No user exists with the specified ID.</response>
     [HttpPost("{id}/roles")]
+    [Authorize(Policy = "Users.Activate")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -226,6 +234,7 @@ public class UsersController : BaseController
     /// <returns>A list of role metadata DTOs.</returns>
     /// <response code="200">Returns the roles metadata list.</response>
     [HttpGet("roles-metadata")]
+    [Authorize(Policy = "Users.Read")]
     [ProducesResponseType(typeof(List<RoleDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<List<RoleDto>>> GetRolesMetadata()
     {
@@ -246,6 +255,7 @@ public class UsersController : BaseController
     /// <response code="400">Identifier is missing or empty.</response>
     /// <response code="404">User not found in corporate directory.</response>
     [HttpGet("ldap-lookup")]
+    [Authorize(Policy = "Users.Read")]
     [ProducesResponseType(typeof(LdapUserAttributes), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<LdapUserAttributes>> LdapLookup([FromQuery] string identifier)
@@ -269,6 +279,7 @@ public class UsersController : BaseController
     /// <response code="201">The LDAP user was created successfully.</response>
     /// <response code="400">Creation failed (duplicate username or email, identity error).</response>
     [HttpPost("ldap-create")]
+    [Authorize(Policy = "Users.Create")]
     [ProducesResponseType(typeof(UserDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<UserDto>> CreateLdapUser([FromBody] LdapUserAttributes attributes)
@@ -284,6 +295,7 @@ public class UsersController : BaseController
     /// </summary>
     /// <response code="200">Streams NDJSON progress items until sync completes.</response>
     [HttpPost("ldap-sync")]
+    [Authorize(Policy = "Users.Create")]
     public async Task SyncLdapUsers()
     {
         Response.ContentType = "application/x-ndjson";

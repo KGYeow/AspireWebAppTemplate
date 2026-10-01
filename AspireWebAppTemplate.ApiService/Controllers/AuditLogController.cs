@@ -13,7 +13,6 @@ namespace AspireWebAppTemplate.ApiService.Controllers;
 /// export formatting to <see cref="IExcelExportService"/>.
 /// </summary>
 [Route("api/audit-log")]
-[Authorize]
 public class AuditLogController : BaseController
 {
     #region Constructor
@@ -42,6 +41,7 @@ public class AuditLogController : BaseController
     /// <param name="queryParams">Pagination and filter criteria.</param>
     /// <returns>A paged result containing matching audit log entries.</returns>
     [HttpGet]
+    [Authorize(Policy = "AuditLog.Read")]
     [ProducesResponseType(typeof(PagedResult<AuditLogEntryDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<PagedResult<AuditLogEntryDto>>> GetAuditLog([FromQuery] AuditLogQueryParams queryParams)
     {
@@ -55,6 +55,7 @@ public class AuditLogController : BaseController
     /// <param name="id">The unique identifier of the audit log entry.</param>
     /// <returns>The audit log entry matching the specified ID.</returns>
     [HttpGet("{id:guid}")]
+    [Authorize(Policy = "AuditLog.Read")]
     [ProducesResponseType(typeof(AuditLogEntryDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<AuditLogEntryDto>> GetAuditLogEntry(Guid id)
@@ -74,6 +75,7 @@ public class AuditLogController : BaseController
     /// <param name="queryParams">Filter criteria for the export.</param>
     /// <returns>An Excel file containing the matching audit log entries.</returns>
     [HttpGet("export")]
+    [Authorize(Policy = "AuditLog.Export")]
     [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
     public async Task<IActionResult> ExportAuditLog([FromQuery] AuditLogQueryParams queryParams)
     {

@@ -1,5 +1,3 @@
-using AspireWebAppTemplate.Application.Abstractions;
-using AspireWebAppTemplate.Application.Features.Navigation;
 using AspireWebAppTemplate.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,8 +16,8 @@ namespace AspireWebAppTemplate.Infrastructure.Data.SeedData;
 public static partial class SeedData
 {
     /// <summary>
-    /// Entry point called from <c>Program.cs</c> to seed roles, users, and page permissions.
-    /// Skips creation of any role or user that already exists.
+    /// Entry point called from <c>Program.cs</c> to seed roles, permissions, users,
+    /// announcements, and email templates. Skips creation of any record that already exists.
     /// </summary>
     /// <param name="services">
     /// A scoped <see cref="IServiceProvider"/> from which Identity services are resolved.
@@ -29,12 +27,11 @@ public static partial class SeedData
         var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
         var dbContext = services.GetRequiredService<ApplicationDbContext>();
-        var navigationProvider = services.GetRequiredService<INavigationProvider>();
         var logger = services.GetRequiredService<ILogger<SeedMarker>>();
 
         await SeedRolesAsync(roleManager, logger);
+        await SeedPermissionsAsync(dbContext, roleManager, logger);
         await SeedUsersAsync(userManager, logger);
-        await SeedPagePermissionsAsync(dbContext, roleManager, navigationProvider, logger);
         await SeedAnnouncementsAsync(dbContext, userManager, logger);
         await SeedEmailTemplatesAsync(dbContext, logger);
     }

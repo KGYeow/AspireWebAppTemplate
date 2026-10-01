@@ -1,20 +1,27 @@
 using AspireWebAppTemplate.Application.Abstractions;
-using AspireWebAppTemplate.Application.Features.PagePermissions;
+using AspireWebAppTemplate.Application.Features.Permissions;
 using AspireWebAppTemplate.Application.Features.Navigation;
 using AspireWebAppTemplate.Application.Common;
 using AspireWebAppTemplate.Domain.Constants;
+using Microsoft.AspNetCore.Http;
 
 namespace AspireWebAppTemplate.Infrastructure.Services.Navigation;
 
 /// <summary>
-/// Provides filtered navigation trees by combining the full navigation structure
-/// with the current user's authentication state and page permissions.
-/// Implements the full filtering pipeline: auth filter → permission filter →
+/// Provides filtered navigation trees by combining the full navigation structure with the current
+/// user's authentication state and resource-based (<c>Module.Action</c>) permissions.
+/// Implements the full filtering pipeline: auth filter → module-permission filter →
 /// group visibility resolution → orphan decoration removal.
 /// </summary>
 /// <remarks>
 /// <para>
 /// This service is the single source of truth for navigation visibility.
+/// </para>
+/// <para>
+/// Admin-page links are gated by the module that owns the page (see
+/// <see cref="IPermissionService.GetPageModuleMappingsAsync"/>): a mapped link is visible only when
+/// the user is an Admin or holds at least one permission within that module. Links whose paths are
+/// not in the page-to-module map need only authentication, and System pages always pass.
 /// </para>
 /// <para>
 /// Registered as a scoped service to align with the per-request <c>DbContext</c> lifetime.
@@ -25,14 +32,21 @@ public class NavigationService : INavigationService
     #region Constructor
 
     /// <summary>
+    /// The role name that grants implicit full access to every module. Compared case-insensitively
+    /// against the current user's role membership, mirroring the API authorization handler.
+    /// </summary>
+    private const string AdminRoleName = "Admin";
+
+    /// <summary>
     /// Provides the full navigation tree (all items before filtering).
     /// </summary>
     private readonly INavigationProvider _navigationProvider;
 
     /// <summary>
-    /// Provides page permission lookups for the current user.
+    /// Resolves the current user's effective permission keys and the page-to-module mapping used to
+    /// gate admin-page links.
     /// </summary>
-    private readonly IPagePermissionService _pagePermissionService;
+    private readonly IPermissionService _permissionService;
 
     /// <summary>
     /// Provides the current authenticated user's identity.
@@ -40,19 +54,28 @@ public class NavigationService : INavigationService
     private readonly ICurrentUserAccessor _currentUserAccessor;
 
     /// <summary>
+    /// Provides access to the current HTTP request so the user's role claims can be inspected to
+    /// detect Admin membership (role names are forwarded as claims by the internal auth handler).
+    /// </summary>
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="NavigationService"/> class.
     /// </summary>
     /// <param name="navigationProvider">The provider of the full navigation tree.</param>
-    /// <param name="pagePermissionService">The service for retrieving user page permissions.</param>
+    /// <param name="permissionService">The service for resolving effective permissions and page-module mappings.</param>
     /// <param name="currentUserAccessor">The accessor for the current user's identity.</param>
+    /// <param name="httpContextAccessor">The accessor for the current HTTP request used to detect Admin role membership.</param>
     public NavigationService(
         INavigationProvider navigationProvider,
-        IPagePermissionService pagePermissionService,
-        ICurrentUserAccessor currentUserAccessor)
+        IPermissionService permissionService,
+        ICurrentUserAccessor currentUserAccessor,
+        IHttpContextAccessor httpContextAccessor)
     {
         _navigationProvider = navigationProvider;
-        _pagePermissionService = pagePermissionService;
+        _permissionService = permissionService;
         _currentUserAccessor = currentUserAccessor;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     #endregion
@@ -65,11 +88,23 @@ public class NavigationService : INavigationService
         var allItems = _navigationProvider.GetMainMenuItems();
         var userId = _currentUserAccessor.UserId;
         var isAuthenticated = userId is not null;
-        var permittedPaths = isAuthenticated
-            ? new HashSet<string>(await _pagePermissionService.GetMyPagesAsync(userId!), StringComparer.OrdinalIgnoreCase)
+
+        // Admin users are treated as holding every module. The Admin role has no RolePermission
+        // rows (its access is implicit), so Admin membership must be detected from the forwarded
+        // role claims — consistent with the API PermissionAuthorizationHandler — rather than from
+        // the effective-permission set.
+        var isAdmin = _httpContextAccessor.HttpContext?.User?.IsInRole(AdminRoleName) == true;
+
+        // Compute the current user's effective permission keys once (empty when unauthenticated),
+        // plus the page-to-module map that gates each admin page.
+        var permissionKeys = isAuthenticated
+            ? new HashSet<string>(await _permissionService.GetMyPermissionsAsync(userId!), StringComparer.OrdinalIgnoreCase)
             : new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        var accessible = FilterByAccessibility(allItems, isAuthenticated, permittedPaths);
+        var pageModuleMap = (await _permissionService.GetPageModuleMappingsAsync())
+            .ToDictionary(m => NormalizePath(m.PagePath), m => m.Module, StringComparer.OrdinalIgnoreCase);
+
+        var accessible = FilterByAccessibility(allItems, isAuthenticated, isAdmin, permissionKeys, pageModuleMap);
         return RemoveOrphanedDecorations(accessible);
     }
 
@@ -78,15 +113,22 @@ public class NavigationService : INavigationService
     #region Private Helpers
 
     /// <summary>
-    /// Recursively filters navigation items by authentication state and page permissions.
+    /// Recursively filters navigation items by authentication state and module permissions.
     /// Links are checked individually; Groups are included only if they have visible content children.
     /// Headers and Dividers pass through auth check only (handled in the decoration pass).
     /// </summary>
     /// <param name="items">The items to filter at the current tree level.</param>
     /// <param name="isAuthenticated">Whether the current user is authenticated.</param>
-    /// <param name="permittedPaths">The set of page paths the user has permission to access.</param>
+    /// <param name="isAdmin">Whether the current user holds the Admin role (implicit full access).</param>
+    /// <param name="permissionKeys">The current user's effective permission keys.</param>
+    /// <param name="pageModuleMap">Map of normalized page paths to the module that gates each page.</param>
     /// <returns>A filtered list of NavItems at this level.</returns>
-    private static List<NavItem> FilterByAccessibility(IReadOnlyList<NavItem> items, bool isAuthenticated, HashSet<string> permittedPaths)
+    private static List<NavItem> FilterByAccessibility(
+        IReadOnlyList<NavItem> items,
+        bool isAuthenticated,
+        bool isAdmin,
+        HashSet<string> permissionKeys,
+        IReadOnlyDictionary<string, string> pageModuleMap)
     {
         var result = new List<NavItem>();
 
@@ -101,7 +143,7 @@ public class NavigationService : INavigationService
                     break;
 
                 case NavItemType.Link:
-                    if (IsAuthVisible(item, isAuthenticated) && IsPageAccessible(item, permittedPaths))
+                    if (IsAuthVisible(item, isAuthenticated) && IsPageAccessible(item, isAdmin, permissionKeys, pageModuleMap))
                         result.Add(item);
                     break;
 
@@ -109,7 +151,7 @@ public class NavigationService : INavigationService
                     if (!IsAuthVisible(item, isAuthenticated))
                         break;
 
-                    var visibleChildren = FilterByAccessibility(item.Children ?? [], isAuthenticated, permittedPaths);
+                    var visibleChildren = FilterByAccessibility(item.Children ?? [], isAuthenticated, isAdmin, permissionKeys, pageModuleMap);
                     var hasContent = visibleChildren.Exists(c => c.Type is NavItemType.Link or NavItemType.Group);
                     if (hasContent)
                     {
@@ -267,14 +309,22 @@ public class NavigationService : INavigationService
     }
 
     /// <summary>
-    /// Determines whether a Link-type NavItem is accessible based on page permissions.
-    /// Null Href is always accessible. System pages bypass permission checks.
-    /// Otherwise, the normalized path must exist in the user's permitted paths set.
+    /// Determines whether a Link-type NavItem is accessible under the module-permission model.
+    /// Null Href is always accessible. System pages bypass permission checks. A path that is not in
+    /// the page-to-module map needs only authentication (unmapped links are not module-gated).
+    /// A mapped path is accessible only when the user is an Admin or holds at least one permission
+    /// within the gating module (any key beginning with "{module}.", case-insensitive).
     /// </summary>
     /// <param name="item">The Link NavItem to evaluate.</param>
-    /// <param name="permittedPaths">The set of permitted page paths for the user.</param>
+    /// <param name="isAdmin">Whether the current user holds the Admin role.</param>
+    /// <param name="permissionKeys">The current user's effective permission keys.</param>
+    /// <param name="pageModuleMap">Map of normalized page paths to the module that gates each page.</param>
     /// <returns>True if the item is accessible.</returns>
-    private static bool IsPageAccessible(NavItem item, HashSet<string> permittedPaths)
+    private static bool IsPageAccessible(
+        NavItem item,
+        bool isAdmin,
+        HashSet<string> permissionKeys,
+        IReadOnlyDictionary<string, string> pageModuleMap)
     {
         if (item.Href is null)
             return true;
@@ -284,14 +334,31 @@ public class NavigationService : INavigationService
         if (SystemPageDefaults.Paths.Contains(normalizedPath))
             return true;
 
-        return permittedPaths.Contains(normalizedPath);
+        // Unmapped paths are not module-gated; any authenticated user who passed the auth filter
+        // may see them.
+        if (!pageModuleMap.TryGetValue(normalizedPath, out var module))
+            return true;
+
+        // Admin holds every module implicitly; otherwise the user must hold at least one permission
+        // within the gating module.
+        if (isAdmin)
+            return true;
+
+        var modulePrefix = module + ".";
+        foreach (var key in permissionKeys)
+        {
+            if (key.StartsWith(modulePrefix, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
+        return false;
     }
 
     /// <summary>
-    /// Normalizes an Href value to a consistent path format for permission comparison.
+    /// Normalizes an Href or page-path value to a consistent path format for module-map comparison.
     /// Prepends "/" if missing, strips trailing "/", and treats empty string as "/".
     /// </summary>
-    /// <param name="href">The raw Href value from a NavItem.</param>
+    /// <param name="href">The raw Href or page-path value.</param>
     /// <returns>The normalized path string.</returns>
     private static string NormalizePath(string href)
     {

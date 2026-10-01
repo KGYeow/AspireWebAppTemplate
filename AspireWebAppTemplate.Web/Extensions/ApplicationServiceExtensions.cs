@@ -25,7 +25,7 @@ public static class ApplicationServiceExtensions
         services.AddSingleton<ITimeZoneHelper, TimeZoneHelper>();
         services.AddScoped<IUserTimeZoneContext, UserTimeZoneContext>();
         services.AddScoped<IThemeContext, ThemeContext>();
-        services.AddScoped<IPagePermissionContext, PagePermissionContext>();
+        services.AddScoped<IPermissionContext, PermissionContext>();
         services.AddScoped<INotificationContext, NotificationContext>();
         services.AddScoped<IAnnouncementContext, AnnouncementContext>();
         services.AddScoped<CircuitUserContext>();

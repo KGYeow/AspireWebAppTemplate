@@ -6,7 +6,7 @@ using AspireWebAppTemplate.Application.Features.Authentication;
 using AspireWebAppTemplate.Application.Features.Email;
 using AspireWebAppTemplate.Application.Features.Navigation;
 using AspireWebAppTemplate.Application.Features.Notifications;
-using AspireWebAppTemplate.Application.Features.PagePermissions;
+using AspireWebAppTemplate.Application.Features.Permissions;
 using AspireWebAppTemplate.Application.Features.Roles;
 using AspireWebAppTemplate.Application.Features.Users;
 using AspireWebAppTemplate.Infrastructure.Clients;
@@ -51,7 +51,7 @@ namespace AspireWebAppTemplate.Tests.AuditLog;
 /// deletes entries older than the <c>AuditLog:RetentionDays</c> cutoff and returns the purged count.
 ///
 /// Preservation Test Case 3 (regression 3.2): <c>AddInfrastructureServices()</c> registers the full
-/// feature graph (users, roles, email, notifications, LDAP, announcements, page permissions,
+/// feature graph (users, roles, email, notifications, LDAP, announcements, permissions,
 /// navigation, sanitizer, Web callback client, and the HTTP-backed <see cref="ICurrentUserAccessor"/>).
 /// </remarks>
 public class SchedulerCleanupPreservationTests
@@ -306,7 +306,7 @@ public class SchedulerCleanupPreservationTests
 
         services.AddInfrastructureServices();
 
-        // Feature services (users, roles, email, notifications, LDAP, announcements, page permissions, navigation).
+        // Feature services (users, roles, email, notifications, LDAP, announcements, permissions, navigation).
         Assert.True(IsRegistered<IUserService>(services), "IUserService must remain registered.");
         Assert.True(IsRegistered<IRoleService>(services), "IRoleService must remain registered.");
         Assert.True(IsRegistered<IEmailService>(services), "IEmailService must remain registered.");
@@ -319,7 +319,7 @@ public class SchedulerCleanupPreservationTests
         Assert.True(IsRegistered<ILdapAuthService>(services), "ILdapAuthService must remain registered.");
         Assert.True(IsRegistered<ILdapLoginService>(services), "ILdapLoginService must remain registered.");
         Assert.True(IsRegistered<IAnnouncementService>(services), "IAnnouncementService must remain registered.");
-        Assert.True(IsRegistered<IPagePermissionService>(services), "IPagePermissionService must remain registered.");
+        Assert.True(IsRegistered<IPermissionService>(services), "IPermissionService must remain registered.");
         Assert.True(IsRegistered<INavigationService>(services), "INavigationService must remain registered.");
         Assert.True(IsRegistered<INavigationProvider>(services), "INavigationProvider must remain registered.");
 

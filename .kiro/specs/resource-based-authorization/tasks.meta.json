@@ -1,0 +1,729 @@
+{
+  "pbtResults": {
+    "3.2 Write property test for union resolution": {
+      "status": "passed",
+      "lastRunTimestamp": 1790814670665
+    },
+    "4.3 Write property test for Admin bypass (handler)": {
+      "status": "passed",
+      "lastRunTimestamp": 1790817056715
+    },
+    "3.6 Write property test for audit accuracy": {
+      "status": "passed",
+      "lastRunTimestamp": 1790817063492
+    },
+    "6.3 Write property test for HasPermission correctness": {
+      "status": "passed",
+      "lastRunTimestamp": 1790817358364
+    }
+  },
+  "executionHistory": {
+    "1.1 Create `Permission` and `RolePermission` EF entities": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813551677
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813571249
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813837540
+      }
+    ],
+    "1.2 Add EF Core entity configurations for both entities": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813552023
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813858094
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790814021115
+      }
+    ],
+    "1.3 Register DbSets and apply configurations in `ApplicationDbContext`": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813552184
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790814053868
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790814223784
+      }
+    ],
+    "2.1 Create permission DTOs in the `Permissions` feature namespace": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813552364
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813571150
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813837673
+      }
+    ],
+    "2.2 Add the `IPermissionService` interface": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813552496
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813858211
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790814021261
+      }
+    ],
+    "2.3 Implement the permission-key format validator": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813552751
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813571374
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813837857
+      }
+    ],
+    "3.1 Implement `PermissionService` query methods": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813552886
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790814234864
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790814421485
+      }
+    ],
+    "3.3 Implement `UpdateRolePermissionsAsync` (full replacement + validation)": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813552997
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790814436338
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790814697042
+      }
+    ],
+    "3.5 Add audit logging to `UpdateRolePermissionsAsync`": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813553110
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790814724137
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790815028295
+      }
+    ],
+    "4.1 Implement `PermissionRequirement` and `PermissionPolicyProvider`": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813553235
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813571474
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813837952
+      }
+    ],
+    "4.2 Implement `PermissionAuthorizationHandler`": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813553350
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790814436488
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790814696846
+      }
+    ],
+    "5.1 Evolve `PagePermissionsController` into `PermissionController`": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813553516
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790814724304
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790815028424
+      }
+    ],
+    "5.2 Convert `UsersController` to permission policies": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813553704
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790815047613
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790815203899
+      }
+    ],
+    "5.3 Convert `RolesController` to permission policies": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813553813
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790815047842
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790815204208
+      }
+    ],
+    "5.4 Convert `AuditLogController` to permission policies": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813553937
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790815047727
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790815203650
+      }
+    ],
+    "5.5 Convert `EmailTemplateController` to permission policies": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813554062
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790815048009
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790815204022
+      }
+    ],
+    "6.1 Add `IPermissionContext` and `ApiPermissionService`": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813554179
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790814436587
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790814697193
+      }
+    ],
+    "6.2 Implement `PermissionContext` (per-circuit cache)": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813554296
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790814724408
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790815028518
+      }
+    ],
+    "7.1 Update `PagePermissionHandler` to module-based checks": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813554493
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790815477131
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790816536816
+      }
+    ],
+    "7.3 Rename the \"Page Permissions\" nav item and href": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813554600
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790815219579
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790815467822
+      }
+    ],
+    "7.4 Point navigation filtering at `PermissionContext`": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813554712
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790816544129
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790816818123
+      }
+    ],
+    "7.5 Build the `PermissionManagement.razor` matrix page": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813554831
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790815219410
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790815467437
+      }
+    ],
+    "8.1 Add `SeedData.Permissions.cs` (16 permissions, idempotent, Admin grants)": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813554963
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790814724479
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790815028610
+      }
+    ],
+    "8.3 Add legacy PagePermission → permission mapping to the seed": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813555079
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790815219762
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790815467699
+      }
+    ],
+    "8.5 Register services in DI": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813555194
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790815219852
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790815467932
+      }
+    ],
+    "8.6 Create the EF Core migration (retain PagePermissions)": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813555311
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790815476949
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790816537068
+      }
+    ],
+    "9. Final checkpoint — Ensure all tests pass": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790813555430
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790817653265
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790817933192
+      }
+    ],
+    "2. Application contracts and permission-key validation": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790814021416
+      }
+    ],
+    "2.4 Write property test for permission key validation": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790814053724
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790814223892
+      }
+    ],
+    "1. Data layer — entities, EF configuration, DbContext": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790814223994
+      }
+    ],
+    "1.4 Write integration tests for EF entity configuration": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790814234756
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790814421604
+      }
+    ],
+    "3.2 Write property test for union resolution": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790814436669
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790814696942
+      }
+    ],
+    "4. API authorization infrastructure": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790814697298
+      }
+    ],
+    "3. Permission service implementation": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790815028713
+      }
+    ],
+    "6. Web project — permission context and API client": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790815028812
+      }
+    ],
+    "8. Seed, migration, and DI wiring": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790816537175
+      }
+    ],
+    "7. Web project — page authorization and navigation UI": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790816818317
+      }
+    ],
+    "3.4 Write property test for full replacement strategy": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790816837705
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790817093700
+      }
+    ],
+    "3.7 Write unit tests for `PermissionService`": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790816837846
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790817093311
+      }
+    ],
+    "3.6 Write property test for audit accuracy": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790816837952
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790817093408
+      }
+    ],
+    "4.3 Write property test for Admin bypass (handler)": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790816838154
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790817093508
+      }
+    ],
+    "4.4 Write unit tests for `PermissionAuthorizationHandler`": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790816838238
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790817093806
+      }
+    ],
+    "5.6 Write unit tests for `PermissionController`": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790817106222
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790817402623
+      }
+    ],
+    "6.4 Write property test for module membership": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790817106361
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790817402452
+      }
+    ],
+    "6.3 Write property test for HasPermission correctness": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790817106462
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790817402716
+      }
+    ],
+    "6.5 Write unit tests for `PermissionContext`": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790817106560
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790817402277
+      }
+    ],
+    "7.2 Write property test for unmapped-page bypass": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790817106711
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790817402365
+      }
+    ],
+    "5. Controllers — permission policies and Permission_Controller": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790817402828
+      }
+    ],
+    "8.2 Write property test for seed idempotence": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790817412499
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790817644928
+      }
+    ],
+    "8.4 Write property test for migration mapping correctness": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790817412589
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790817645060
+      }
+    ],
+    "8.7 Write integration test for end-to-end seed + migration": [
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790817412752
+      },
+      {
+        "executionId": "bb57a231-dbd2-42ce-894f-ded084c01e4b",
+        "chatSessionId": "sess_86417d3c-9016-425d-a156-d3bca21dfc79",
+        "timestamp": 1790817645137
+      }
+    ]
+  }
+}

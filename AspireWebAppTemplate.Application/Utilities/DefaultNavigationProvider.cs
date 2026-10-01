@@ -43,6 +43,6 @@ public sealed class DefaultNavigationProvider : INavigationProvider
         new() { Type = NavItemType.Link, Text = "Announcements",    Href = "admin/announcements",    Icon = "material-symbols-rounded/campaign",        AuthorizedOnly = true },
         new() { Type = NavItemType.Link, Text = "Email Templates",  Href = "admin/email-templates",  Icon = "material-symbols-rounded/mail",            AuthorizedOnly = true },
         new() { Type = NavItemType.Link, Text = "Audit Log",        Href = "admin/audit-log",        Icon = "material-symbols-rounded/history",         AuthorizedOnly = true },
-        new() { Type = NavItemType.Link, Text = "Page Permissions", Href = "admin/page-permissions", Icon = "material-symbols-rounded/lock",            AuthorizedOnly = true },
+        new() { Type = NavItemType.Link, Text = "Permission Management", Href = "admin/permission-management", Icon = "material-symbols-rounded/lock",            AuthorizedOnly = true },
     ];
 }

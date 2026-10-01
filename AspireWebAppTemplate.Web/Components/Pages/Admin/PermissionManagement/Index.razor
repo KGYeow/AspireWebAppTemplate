@@ -1,0 +1,88 @@
+@page "/admin/permission-management"
+
+@using AspireWebAppTemplate.Application.Features.Permissions
+@using AspireWebAppTemplate.Application.Features.Roles
+
+<PageTitle>Permission Management</PageTitle>
+
+<PageHeader Title="Permission Management" Subtitle="Configure which permissions each role is granted." />
+
+<!-- Permanent notice: changes take effect on next refresh -->
+<MudAlert Severity="Severity.Info"
+          Class="mb-4 border-1"
+          Icon="@Icons.Material.Rounded.Info">
+    Permission changes take effect on the next page refresh or new session for affected users.
+</MudAlert>
+
+<PageContent IsLoading="IsLoading">
+    @if (HasLoadError)
+    {
+        <!-- Initial-load failure: show the error and do NOT render the matrix (Req 9.10) -->
+        <StatusAlert @bind-Message="ErrorMessage" Severity="Severity.Error" Class="mb-4" />
+    }
+    else
+    {
+        <MudPaper Elevation="0" Class="pa-4">
+            <MudSimpleTable Hover Dense Bordered Striped="false" Style="overflow-x: auto;">
+                <thead>
+                    <tr>
+                        <th style="min-width: 240px;">Permission</th>
+                        @foreach (var role in _roles)
+                        {
+                            <th class="text-center">@RoleColumnLabel(role)</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var group in _groups)
+                    {
+                        <!-- Module section header row (Req 9.5) -->
+                        <tr>
+                            <th colspan="@(_roles.Count + 1)" class="pt-4">
+                                <MudText Typo="Typo.subtitle2" Color="Color.Primary">@group.Module</MudText>
+                            </th>
+                        </tr>
+
+                        @foreach (var permission in group.Permissions)
+                        {
+                            var currentPermission = permission;
+                            <tr>
+                                <td>
+                                    <MudText Typo="Typo.body2">@currentPermission.DisplayName</MudText>
+                                    <MudText Typo="Typo.caption" Class="mud-text-secondary">@currentPermission.Key</MudText>
+                                </td>
+                                @foreach (var role in _roles)
+                                {
+                                    var currentRole = role;
+                                    <td class="text-center">
+                                        @if (IsAdminRole(currentRole))
+                                        {
+                                            <MudTooltip Text="Admin always has full access">
+                                                <MudCheckBox T="bool"
+                                                             Value="true"
+                                                             Disabled
+                                                             Dense
+                                                             Size="Size.Small"
+                                                             Color="Color.Primary" />
+                                            </MudTooltip>
+                                        }
+                                        else
+                                        {
+                                            <MudCheckBox T="bool"
+                                                         Value="@IsPermissionGranted(currentRole.Id, currentPermission.Key)"
+                                                         ValueChanged="@((bool val) => OnTogglePermission(currentRole.Id, currentPermission.Key, val))"
+                                                         Disabled="@IsRoleSaving(currentRole.Id)"
+                                                         Dense
+                                                         Size="Size.Small"
+                                                         Color="Color.Primary" />
+                                        }
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </MudSimpleTable>
+        </MudPaper>
+    }
+</PageContent>

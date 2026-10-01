@@ -47,11 +47,11 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
     [Inject] private IThemeContext ThemeState { get; set; } = default!;
 
     /// <summary>
-    /// Per-circuit page permission context. Initialized once during circuit startup so that
-    /// the <see cref="PagePermissionHandler"/> and NavMenu have cached permissions available
-    /// for zero-latency authorization checks.
+    /// Per-circuit resource-based (<c>Module.Action</c>) permission context. Initialized once during
+    /// circuit startup so that the <see cref="PageAccessAuthorizationHandler"/> and NavMenu have cached
+    /// effective permissions available for synchronous, zero-latency authorization checks.
     /// </summary>
-    [Inject] private IPagePermissionContext PagePermissionContext { get; set; } = default!;
+    [Inject] private IPermissionContext PermissionContext { get; set; } = default!;
 
     /// <summary>
     /// Circuit-scoped user identity cache. Captures the authenticated user's claims early
@@ -143,10 +143,11 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
             var clientIp = HttpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString();
             CircuitUserContext.Initialize(authState.User, clientIp);
 
-            // Initialize the per-circuit page permission cache early so that the
-            // PagePermissionHandler and NavMenu have cached permissions available.
-            // This runs independently of the user profile fetch below.
-            await PagePermissionContext.InitializeAsync();
+            // Initialize the per-circuit resource-based permission cache early so the
+            // PageAccessAuthorizationHandler (module-based page authorization) and NavMenu have
+            // effective permissions available synchronously. This runs independently of the
+            // user profile fetch below.
+            await PermissionContext.InitializeAsync();
 
             // Initialize the per-circuit announcement cache early so that the TopBanner
             // and DashboardCard components have cached announcement data available for

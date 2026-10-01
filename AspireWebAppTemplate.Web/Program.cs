@@ -41,16 +41,16 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     .AddScheme<AuthenticationSchemeOptions, InternalApiKeyAuthenticationHandler>(
         InternalApiKeyAuthenticationHandler.SchemeName, _ => { });
 
-// Authorization: register the page permission handler and add PagePermissionRequirement
+// Authorization: register the page access handler and add PageAccessRequirement
 // to the default policy (triggered by [Authorize] in _Imports.razor).
 // We do NOT set FallbackPolicy because that would block Blazor's /_blazor/negotiate and
 // static asset endpoints for unauthenticated users, breaking the login page circuit.
-builder.Services.AddScoped<IAuthorizationHandler, PagePermissionHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, PageAccessAuthorizationHandler>();
 builder.Services.AddAuthorization(options =>
 {
     options.DefaultPolicy = new AuthorizationPolicyBuilder()
         .RequireAuthenticatedUser()
-        .AddRequirements(new PagePermissionRequirement())
+        .AddRequirements(new PageAccessRequirement())
         .Build();
 
     // Internal API policy: used by the notification callback endpoint for service-to-service auth.

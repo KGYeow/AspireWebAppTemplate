@@ -28,7 +28,7 @@ public static class ApiClientServiceExtensions
         services.AddApiClient<ApiUserService>();
         services.AddApiClient<ApiRoleService>();
         services.AddApiClient<ApiAuditLogService>();
-        services.AddApiClient<ApiPagePermissionService>();
+        services.AddApiClient<ApiPermissionService>();
         services.AddApiClient<ApiNotificationService>();
         services.AddApiClient<ApiNavigationService>();
         services.AddApiClient<ApiAnnouncementService>();

@@ -24,7 +24,6 @@ namespace AspireWebAppTemplate.ApiService.Controllers;
 /// </para>
 /// </remarks>
 [Route("api/[controller]")]
-[Authorize]
 public class RolesController : BaseController
 {
     #region Constructor
@@ -50,6 +49,7 @@ public class RolesController : BaseController
     /// <returns>A list of all roles in the system with user counts.</returns>
     /// <response code="200">Returns the list of roles.</response>
     [HttpGet]
+    [Authorize(Policy = "Roles.Read")]
     [ProducesResponseType(typeof(List<RoleDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<List<RoleDto>>> GetRoles()
     {
@@ -65,6 +65,7 @@ public class RolesController : BaseController
     /// <response code="200">Returns the role.</response>
     /// <response code="404">No role exists with the specified ID.</response>
     [HttpGet("{id}")]
+    [Authorize(Policy = "Roles.Read")]
     [ProducesResponseType(typeof(RoleDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<RoleDto>> GetRole(string id)
@@ -81,6 +82,7 @@ public class RolesController : BaseController
     /// <response code="201">The role was created successfully.</response>
     /// <response code="400">Validation failed (e.g., duplicate role name).</response>
     [HttpPost]
+    [Authorize(Policy = "Roles.Manage")]
     [ProducesResponseType(typeof(RoleDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<RoleDto>> CreateRole([FromBody] CreateRoleRequest request)
@@ -99,6 +101,7 @@ public class RolesController : BaseController
     /// <response code="404">No role exists with the specified ID.</response>
     /// <response code="400">Business rule violation (system role, validation failure).</response>
     [HttpPut("{id}")]
+    [Authorize(Policy = "Roles.Manage")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -117,6 +120,7 @@ public class RolesController : BaseController
     /// <response code="404">No role exists with the specified ID.</response>
     /// <response code="400">Business rule violation (system role, users still assigned).</response>
     [HttpDelete("{id}")]
+    [Authorize(Policy = "Roles.Manage")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -139,6 +143,7 @@ public class RolesController : BaseController
     /// <response code="404">No role exists with the specified ID.</response>
     /// <response code="400">Business rule violation (system role cannot be modified).</response>
     [HttpPost("{id}/activate")]
+    [Authorize(Policy = "Roles.Manage")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -157,6 +162,7 @@ public class RolesController : BaseController
     /// <response code="404">No role exists with the specified ID.</response>
     /// <response code="400">Business rule violation (system role cannot be modified).</response>
     [HttpPost("{id}/deactivate")]
+    [Authorize(Policy = "Roles.Manage")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -180,6 +186,7 @@ public class RolesController : BaseController
     /// <response code="200">Returns the assignment result with success/failed counts.</response>
     /// <response code="404">No role exists with the specified ID.</response>
     [HttpPost("{id}/users")]
+    [Authorize(Policy = "Roles.Manage")]
     [ProducesResponseType(typeof(RoleAssignmentResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -199,6 +206,7 @@ public class RolesController : BaseController
     /// <response code="404">No role or user exists with the specified ID.</response>
     /// <response code="400">Business rule violation (last user in required-minimum role).</response>
     [HttpDelete("{id}/users/{userId}")]
+    [Authorize(Policy = "Roles.Manage")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -216,6 +224,7 @@ public class RolesController : BaseController
     /// <response code="200">Returns the list of users in the role.</response>
     /// <response code="404">No role exists with the specified ID.</response>
     [HttpGet("{id}/users")]
+    [Authorize(Policy = "Roles.Read")]
     [ProducesResponseType(typeof(List<UserDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<List<UserDto>>> GetUsersInRole(string id)

@@ -37,7 +37,7 @@ public class ApiClientRegistrationTests
         typeof(ApiUserService),
         typeof(ApiRoleService),
         typeof(ApiAuditLogService),
-        typeof(ApiPagePermissionService),
+        typeof(ApiPermissionService),
         typeof(ApiNotificationService),
         typeof(ApiNavigationService),
         typeof(ApiAnnouncementService),

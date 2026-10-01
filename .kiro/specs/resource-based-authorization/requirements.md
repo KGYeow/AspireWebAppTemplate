@@ -1,6 +1,6 @@
 # Requirements Document
 
-> **Status: Proposed — not implemented.** This spec describes a future design that has NOT been built. The shipped system is the page-permission whitelist (the `page-access-permissions` feature). If adopted, this design supersedes that whitelist and restructures a shipped template capability, so it requires explicit architecture approval before execution.
+> **Status: In progress.** Implementation is underway (approved; the team accepted that this replaces the shipped page-permission whitelist via a coexistence migration). The `page-access-permissions` whitelist remains in place read-only during the transition; cleanup is deferred (Requirement 10.6).
 
 ## Introduction
 
@@ -17,7 +17,7 @@ Evolve the AspireWebAppTemplate authorization system from its current transition
 - **Permission_Context**: A per-circuit scoped service in the Web project that loads and caches the current user's effective permissions on circuit initialization. Provides synchronous access for navigation filtering and UI permission checks.
 - **Api_Permission_Service**: The typed HttpClient service in the Web project that communicates with the Permission_Controller via Aspire service discovery.
 - **Permission_Key**: A dot-notation string identifier for a specific permission (format: "Module.Action", e.g., "Users.Read", "Roles.Manage", "AuditLog.Export").
-- **Module**: A logical grouping of related permissions (e.g., Users, Roles, AuditLog, Permissions, Announcements). Maps to a set of admin pages.
+- **Module**: A logical grouping of related permissions (e.g., Users, Roles, AuditLog, Permissions, Announcements, EmailTemplates). Maps to a set of admin pages.
 - **Permission_Management_Page**: The Blazor Server admin page that replaces the current Page Permissions page, providing a matrix UI for assigning permissions to roles.
 
 ## Requirements
@@ -42,9 +42,9 @@ Evolve the AspireWebAppTemplate authorization system from its current transition
 
 #### Acceptance Criteria
 
-1. WHEN the application starts, THE seed process SHALL ensure the following 15 Permission_Entity records exist in the database, identified by their unique key: Users.Read, Users.Create, Users.Update, Users.Delete, Users.Activate, Roles.Read, Roles.Manage, AuditLog.Read, AuditLog.Export, Permissions.Manage, Announcements.Read, Announcements.Create, Announcements.Update, Announcements.Delete, Announcements.Publish.
+1. WHEN the application starts, THE seed process SHALL ensure the following 16 Permission_Entity records exist in the database, identified by their unique key: Users.Read, Users.Create, Users.Update, Users.Delete, Users.Activate, Roles.Read, Roles.Manage, AuditLog.Read, AuditLog.Export, Permissions.Manage, Announcements.Read, Announcements.Create, Announcements.Update, Announcements.Delete, EmailTemplates.Read, EmailTemplates.Update.
 2. THE seed process SHALL be idempotent — running it multiple times SHALL NOT create duplicate Permission_Entity records. Existing records with matching keys SHALL be left unchanged.
-3. WHEN the seed process completes, THE Admin role SHALL have assignments to all 15 seeded permissions.
+3. WHEN the seed process completes, THE Admin role SHALL have assignments to all 16 seeded permissions.
 4. THE seed process SHALL NOT modify or remove existing role-permission assignments for non-Admin roles.
 5. WHEN new permissions are added to the seed data in future deployments, THE seed process SHALL insert only the new Permission_Entity records and assign them to the Admin role without removing or modifying existing permission assignments for any role.
 6. IF the Admin role does not exist in the database at the time of permission seeding, THEN THE seed process SHALL skip permission-to-role assignment and log a warning indicating that Admin role assignment was not performed.
@@ -70,13 +70,14 @@ Evolve the AspireWebAppTemplate authorization system from its current transition
 
 1. THE Permission_Authorization_Handler SHALL evaluate permission requirements by loading the set of Permission_Keys granted to the current user (computed as the union of all permissions assigned to all of the user's active roles) and checking if the set contains the required Permission_Key.
 2. IF the current user holds the Admin role, THEN THE Permission_Authorization_Handler SHALL satisfy any permission requirement immediately without querying role-permission assignments.
-3. THE UsersController SHALL replace `[Authorize]` with permission-based policies: GET endpoints (GetUsers, GetUser, GetRolesMetadata, LdapLookup) require "Users.Read", POST endpoints (CreateUser, CreateLdapUser, SyncLdapUsers) require "Users.Create", PUT endpoints (UpdateUser) require "Users.Update", DELETE endpoints (DeleteUser) require "Users.Delete", activation and account-management endpoints (ActivateUser, DeactivateUser, ResetPassword, SetRoles) require "Users.Activate".
+3. THE UsersController SHALL replace `[Authorize]` with permission-based policies: GET endpoints (GetUsers, GetUser, GetRolesMetadata at route `roles-metadata`, LdapLookup) require "Users.Read", POST endpoints (CreateUser, CreateLdapUser at route `ldap-create`, SyncLdapUsers at route `ldap-sync`) require "Users.Create", PUT endpoints (UpdateUser) require "Users.Update", DELETE endpoints (DeleteUser) require "Users.Delete", activation and account-management endpoints (ActivateUser, DeactivateUser, ResetPassword, SetRoles) require "Users.Activate".
 4. THE RolesController SHALL replace `[Authorize]` with permission-based policies: GET endpoints (GetRoles, GetRole, GetUsersInRole) require "Roles.Read", all mutation endpoints (CreateRole, UpdateRole, DeleteRole, ActivateRole, DeactivateRole, AssignUsersToRole, RemoveUserFromRole) require "Roles.Manage".
 5. THE AuditLogController SHALL replace `[Authorize]` with permission-based policies: GET query endpoints (GetAuditLog, GetAuditLogEntry) require "AuditLog.Read", the export endpoint (ExportAuditLog) requires "AuditLog.Export".
 6. THE PagePermissionsController (evolving to Permission_Controller) SHALL require "Permissions.Manage" for admin mutation and query endpoints (GetAllPermissions, UpdateRolePermissions) and SHALL require only the `[Authorize]` attribute (any authenticated user) for the "my-permissions" query endpoint.
 7. IF the current user does not hold any role that grants the required permission, THEN THE Permission_Authorization_Handler SHALL fail the authorization requirement, resulting in a 403 Forbidden HTTP response.
 8. THE Permission_Authorization_Handler SHALL cache the resolved permission set for the current user within the scope of a single HTTP request so that multiple permission checks within the same request do not trigger repeated database queries.
 9. IF the current user is not authenticated (no identity or no roles can be resolved), THEN THE Permission_Authorization_Handler SHALL fail the authorization requirement, resulting in a 401 Unauthorized HTTP response before permission evaluation occurs.
+10. THE EmailTemplateController SHALL replace `[Authorize]` with permission-based policies: GET endpoints (GetAll, GetById) and the Preview POST endpoint require "EmailTemplates.Read", the PUT endpoint (Update) requires "EmailTemplates.Update". THE EmailTemplateController SHALL NOT define create or delete endpoints, so no "EmailTemplates.Create" or "EmailTemplates.Delete" permission is required or seeded.
 
 ### Requirement 5: Permission Loading and Caching (API Side)
 
@@ -100,12 +101,12 @@ Evolve the AspireWebAppTemplate authorization system from its current transition
 
 1. THE Permission_Context SHALL load the current user's effective permissions (the set of Permission_Key strings) on circuit initialization and provide synchronous access for navigation filtering and page authorization.
 2. WHEN the current user has at least one permission belonging to a module (e.g., having "Users.Read" belongs to the Users module), THE navigation filtering logic SHALL show the corresponding admin page for that module.
-3. THE system SHALL define a mapping from admin page paths to their required module: "/admin/user-management" maps to the Users module, "/admin/role-management" maps to the Roles module, "/admin/audit-log" maps to the AuditLog module, "/admin/permission-management" maps to the Permissions module, "/admin/announcements" maps to the Announcements module.
+3. THE system SHALL define a mapping from admin page paths to their required module: "/admin/user-management" maps to the Users module, "/admin/role-management" maps to the Roles module, "/admin/audit-log" maps to the AuditLog module, "/admin/permission-management" maps to the Permissions module, "/admin/announcements" maps to the Announcements module, "/admin/email-templates" maps to the EmailTemplates module.
 4. WHILE the Admin role is assigned to the user, THE navigation SHALL display all admin pages regardless of explicit permission assignments.
 5. THE Permission_Context SHALL replace the existing PagePermissionContext as the authority for navigation visibility decisions.
 6. THE existing PagePermissionHandler for Blazor page authorization SHALL use the same page-to-module mapping defined in criterion 3 to determine which module a requested page belongs to, and SHALL grant access when the user holds at least one permission in that module.
 7. IF the Permission_Context fails to load permissions from the API (network error or non-success response), THEN THE Permission_Context SHALL treat the cache as empty, log a warning, mark initialization as complete, and deny access to all admin pages until the next circuit initialization.
-8. IF a page route is not present in the admin page-to-module mapping (e.g., "/announcements", "/account/settings"), THEN THE PagePermissionHandler SHALL grant access without requiring module permissions, preserving existing System_Page and general authenticated-page behavior.
+8. IF a page route is not present in the admin page-to-module mapping (e.g., "/announcements", "/account/settings"), THEN THE PagePermissionHandler SHALL grant access without requiring module permissions, preserving existing System_Page and general authenticated-page behavior. NOTE: Every admin page MUST have a mapping entry in criterion 3 — for example, "/admin/email-templates" maps to the EmailTemplates module. Omitting an admin page from the mapping would cause criterion 8 to grant access to every authenticated user, a security regression versus the current admin-only page-permission whitelist.
 
 ### Requirement 7: Permission Context (Per-Circuit Caching)
 
@@ -137,6 +138,7 @@ Evolve the AspireWebAppTemplate authorization system from its current transition
 7. IF an administrator attempts to modify permissions for the Admin role, THEN THE Permission_Service SHALL reject the request with a 400 Bad Request response indicating that Admin permissions are immutable.
 8. IF an administrator attempts to modify permissions for a system role that is not the Admin role, THEN THE Permission_Service SHALL allow the modification (non-Admin system roles can have custom permission sets).
 9. THE Permission_Controller SHALL expose a GET endpoint to retrieve the permission-to-page mapping (returning a list of entries each containing a page path and the module that governs its visibility), accessible to all authenticated users, so that the Web project can determine page visibility from permissions.
+10. THE new permission-feature request and response contracts SHALL NOT collide with the existing PagePermissions contracts during the coexistence phase. The existing `page-access-permissions` feature already defines `UpdateRolePermissionsRequest` (with a `PagePaths` property) and `RolePermissionsDto` in Features/PagePermissions/Contracts; the new contracts SHALL either use distinct, permission-specific type names or live in a separate feature namespace so that both authorization systems compile side by side while the legacy system is retained.
 
 ### Requirement 9: Permission Management Page (Admin UI)
 
@@ -148,7 +150,7 @@ Evolve the AspireWebAppTemplate authorization system from its current transition
 2. THE Permission_Management_Page SHALL display a matrix with roles as columns (ordered by role Position ascending) and permissions grouped by module as rows. THE Permission_Management_Page SHALL use the PageContent loading wrapper during initial data fetch.
 3. WHEN an administrator toggles a permission checkbox for a non-Admin role, THE Permission_Management_Page SHALL immediately call the PUT endpoint with the complete set of granted Permission_Keys for that role (full replacement strategy, auto-save per toggle).
 4. THE Permission_Management_Page SHALL display all permissions as checked and disabled for the Admin role (communicating implicit full access). THE checkboxes for the Admin role SHALL NOT trigger any API calls.
-5. THE Permission_Management_Page SHALL display permissions grouped by module with section headers (Users, Roles, Audit Log, Permissions, Announcements).
+5. THE Permission_Management_Page SHALL display permissions grouped by module with section headers (Users, Roles, Audit Log, Permissions, Announcements, Email Templates).
 6. WHILE a save operation is in progress for a role, THE Permission_Management_Page SHALL disable all checkboxes for that role to prevent concurrent modifications.
 7. WHEN a save operation succeeds, THE Permission_Management_Page SHALL display a success Snackbar notification.
 8. IF a save operation fails, THEN THE Permission_Management_Page SHALL revert the toggled checkbox to its previous state and display the error message in an error Snackbar.
@@ -162,7 +164,7 @@ Evolve the AspireWebAppTemplate authorization system from its current transition
 #### Acceptance Criteria
 
 1. THE migration SHALL create the Permission_Entity and Role_Permission_Entity tables in the same database migration that preserves the existing PagePermission table unmodified, so that both systems coexist without data loss.
-2. THE seed process SHALL map existing PagePermission records to equivalent permission grants using the following correspondence: a role with page access to "/admin/user-management" receives Users.Read permission, "/admin/role-management" receives Roles.Read permission, "/admin/audit-log" receives AuditLog.Read permission, "/admin/page-permissions" receives Permissions.Manage permission. Roles that hold the "Admin" role SHALL receive all defined permissions regardless of their PagePermission records.
+2. THE seed process SHALL map existing PagePermission records to equivalent permission grants using the following correspondence: a role with page access to "/admin/user-management" receives Users.Read permission, "/admin/role-management" receives Roles.Read permission, "/admin/audit-log" receives AuditLog.Read permission, "/admin/email-templates" receives EmailTemplates.Read permission, "/admin/page-permissions" receives Permissions.Manage permission. Roles that hold the "Admin" role SHALL receive all defined permissions regardless of their PagePermission records. NOTE: this mapping reads the LEGACY PagePermission records, which still use the original page paths (including "/admin/page-permissions" and "/admin/email-templates"). The seed/migration SHALL read these legacy records BEFORE and independently of the nav item/route rename described in criterion 5, so that renaming the "Page Permissions" nav item to "admin/permission-management" does not alter or break the legacy-path lookup used by this mapping.
 3. THE PagePermission table and its data SHALL be retained as read-only reference during the migration phase, while the PagePermissionHandler and PagePermissionContext SHALL be replaced by Permission_Authorization_Handler and Permission_Context as the sole runtime authorization mechanism.
 4. THE DefaultNavigationProvider SHALL retain its existing structure — the `AuthorizedOnly = true` flag continues to indicate that permission checking is required for that nav item.
 5. THE existing "Page Permissions" nav item SHALL be renamed to "Permission Management" and its href updated from "admin/page-permissions" to "admin/permission-management".

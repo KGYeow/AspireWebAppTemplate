@@ -33,10 +33,16 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     public DbSet<AuditLogEntry> AuditLogEntries { get; set; } = null!;
 
     /// <summary>
-    /// Gets or sets the page permissions table, storing role-to-page access grants
-    /// for the database-driven authorization system.
+    /// Gets or sets the permissions table, storing permission definitions in
+    /// <c>Module.Action</c> format for the resource-based authorization system.
     /// </summary>
-    public DbSet<PagePermission> PagePermissions { get; set; } = null!;
+    public DbSet<Permission> Permissions { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the role permissions table, storing the join records that grant
+    /// permissions to roles for the resource-based authorization system.
+    /// </summary>
+    public DbSet<RolePermission> RolePermissions { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the notifications table, containing in-app notification records
